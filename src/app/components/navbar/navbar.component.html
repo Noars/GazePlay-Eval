@@ -1,0 +1,28 @@
+<nav class="navbar fixed-top bg-body-tertiary shadow-sm py-3 px-3">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center w-100">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fw-medium fs-5 d-none d-md-inline">Menu</span>
+        <button
+          class="btn btn-outline-secondary navbar-button"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#menu"
+          aria-controls="menu"
+        >
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+      <div class="position-absolute start-50 translate-middle-x">
+        <span class="mx-auto fw-bold fs-2">GazePlay Eval</span>
+      </div>
+      <div>
+        <button class="btn btn-outline-secondary navbar-button" (click)="changeTheme()">
+          {{ getTheme() }}
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<app-menu></app-menu>
