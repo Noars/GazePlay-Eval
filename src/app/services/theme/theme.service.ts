@@ -36,6 +36,6 @@ export class ThemeService {
   }
 
   private applyThemeToBody(theme: 'light' | 'dark') {
-    document.body.setAttribute('data-bs-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
   }
 }

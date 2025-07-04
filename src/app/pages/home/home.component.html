@@ -1,8 +1,9 @@
 <div class="d-flex align-items-center justify-content-center min-vh-100 bg-light-subtle p-3">
   <div class="card shadow-lg w-100" style="max-width: 600px;">
-    <div class="card-body">
+    <div class="card-header">
       <h1 class="card-title text-center">Création d'une évaluation pour GazePlay</h1>
-      <br>
+    </div>
+    <div class="card-body">
       <div class="card-text">
         <p>Bienvenue sur notre site de création d'évaluation !</p>
         <p>Les évaluations sont utilisables et jouables sur notre application GazePlay-Eval</p>
@@ -15,7 +16,7 @@
           <li>Les sons (on peut enregistrer sa voix)</li>
         </ul>
       </div>
-      <button href="#" class="btn btn-secondary w-100 w-100">Commencer</button>
+      <button href="#" class="btn btn-secondary w-100 w-100" (click)="goToInfoEval()">Commencer</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,22 @@
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light-subtle p-3">
+  <div class="card shadow-lg w-100" style="max-width: 600px;">
+    <div class="card-header">
+      <h2 class="card-title text-center">Information Évaluation</h2>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label for="evalName" class="form-label">Nom de l'évaluation</label>
+        <input type="text" class="form-control" id="evalName" [(ngModel)]="evaluationName">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Type de résultat</label>
+        <select class="form-select" [(ngModel)]="resultType">
+          <option value="csv_xlsx">CSV & XLSX</option>
+          <option value="csv">CSV</option>
+          <option value="xlsx">XLSX</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary w-100" (click)="nextStep()">Suivant</button>
+    </div>
+  </div>
+</div>

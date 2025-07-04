@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {ThemeService} from '../../services/theme/theme.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -9,9 +9,10 @@ import {ThemeService} from '../../services/theme/theme.service';
 })
 export class HomeComponent {
 
-  constructor(public themeService: ThemeService) {
+  constructor(private router: Router) {
   }
-  changeTheme(){
-    this.themeService.toggleTheme();
+
+  goToInfoEval() {
+    this.router.navigate(['/info-eval']);
   }
 }
