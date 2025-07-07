@@ -1,6 +1,8 @@
+export type FormatType = 'Csv' | 'Xsl' | 'Csv&Xlsx';
+
 export interface saveModel {
   nomEval: string;
-  format: 'Csv' | 'Xsl' | 'Csv & xlsx';
+  format: FormatType;
   createdAt: string;
   version: number;
 }

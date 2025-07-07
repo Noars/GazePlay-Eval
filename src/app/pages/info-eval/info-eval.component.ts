@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
+import {SaveService} from '../../services/save/save.service';
+import {FormatType} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-info-eval',
@@ -10,11 +12,12 @@ import {CommonModule} from '@angular/common';
 })
 export class InfoEvalComponent {
   evaluationName: string = '';
-  resultType: string = 'csv_xlsx';
+  resultType: FormatType = 'Csv&Xlsx' ;
+
+  constructor(private saveService: SaveService) {
+  }
 
   nextStep() {
-    // Tu peux gérer ici la sauvegarde temporaire ou passer à l'étape suivante
-    console.log('Nom:', this.evaluationName);
-    console.log('Type de résultat:', this.resultType);
+    this.saveService.saveDataAuto(this.evaluationName, this.resultType);
   }
 }

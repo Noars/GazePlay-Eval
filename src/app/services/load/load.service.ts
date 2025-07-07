@@ -7,7 +7,6 @@ import {SAVE_SLOT_LIST} from '../../shared/saveConfig';
 })
 export class LoadService {
 
-
   getSlot(slotIndex: 0 | 1 | 2 | 3): saveModel | null {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
     const raw = localStorage.getItem(slotKey);

@@ -1,11 +1,22 @@
 import { Injectable } from '@angular/core';
-import {saveModel} from '../../shared/saveModel';
+import {FormatType, saveModel} from '../../shared/saveModel';
 import {SAVE_SLOT_LIST} from '../../shared/saveConfig';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SaveService {
+
+  dataAuto: Omit<saveModel, 'createdAt' | 'version'>;
+
+  saveDataAuto(nomEval: string, format: FormatType){
+    this.dataAuto = {
+      nomEval: nomEval,
+      format: format,
+    };
+
+    this.saveToSlot(0, this.dataAuto);
+  }
 
   saveToSlot(slotIndex: 0 | 1 | 2 | 3, data: Omit<saveModel, 'createdAt' | 'version'>): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
