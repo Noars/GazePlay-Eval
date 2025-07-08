@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {ThemeService} from '../../services/theme/theme.service';
 import {MenuComponent} from '../menu/menu.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,8 @@ import {MenuComponent} from '../menu/menu.component';
 })
 export class NavbarComponent {
 
-  constructor(private themeService: ThemeService ) {
+  constructor(private router: Router,
+              private themeService: ThemeService) {
   }
 
   changeTheme(){
@@ -19,5 +21,9 @@ export class NavbarComponent {
 
   getTheme(){
     return this.themeService.getTheme() === 'dark' ? '☀️' : '🌙';
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/home']);
   }
 }
