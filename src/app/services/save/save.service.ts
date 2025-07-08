@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
-import {FormatType, saveModel} from '../../shared/saveModel';
-import {SAVE_SLOT_LIST} from '../../shared/saveConfig';
+import {FormatTypeModel, saveModel} from '../../shared/saveModel';
+import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/saveConfig';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SaveService {
 
-  dataAuto: Omit<saveModel, 'createdAt' | 'version'>;
+  dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
+    nomEval: 'GazePlay-Eval',
+    format: 'Csv&Xlsx'
+  };
 
-  saveDataAuto(nomEval: string, format: FormatType){
+  saveDataAuto(nomEval: string, format: FormatTypeModel){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
@@ -18,7 +21,7 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveToSlot(slotIndex: 0 | 1 | 2 | 3, data: Omit<saveModel, 'createdAt' | 'version'>): void {
+  saveToSlot(slotIndex: FormatTypeConfig, data: Omit<saveModel, 'createdAt' | 'version'>): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
     const saveData: saveModel = {
       ...data,
@@ -28,7 +31,7 @@ export class SaveService {
     localStorage.setItem(slotKey, JSON.stringify(saveData));
   }
 
-  clearSlot(slotIndex: 0 | 1 | 2 | 3): void {
+  clearSlot(slotIndex: FormatTypeConfig): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
     localStorage.removeItem(slotKey);
   }

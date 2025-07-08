@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {SaveService} from '../../services/save/save.service';
-import {FormatType} from '../../shared/saveModel';
+import {FormatTypeModel} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-info-eval',
@@ -12,7 +12,7 @@ import {FormatType} from '../../shared/saveModel';
 })
 export class InfoEvalComponent {
   evaluationName: string = '';
-  resultType: FormatType = 'Csv&Xlsx' ;
+  resultType: FormatTypeModel = 'Csv&Xlsx' ;
 
   constructor(private saveService: SaveService) {
   }

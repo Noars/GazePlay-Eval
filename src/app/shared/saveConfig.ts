@@ -1,3 +1,6 @@
+export const MaxSlots = 3;
+export type FormatTypeConfig = 0 | 1 | 2 | 3;
+
 export const SAVE_SLOT_KEYS = {
   auto: 'saveAuto',
   slot1: 'save1',
