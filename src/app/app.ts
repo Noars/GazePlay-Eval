@@ -4,6 +4,7 @@ import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
+import {Tooltip} from 'bootstrap';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +12,10 @@ import {ProgressBarComponent} from './components/progress-bar/progress-bar.compo
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App{
   protected title = 'GazePlay-Eval';
 
-  steps = ['Informations', 'Questions', 'Scores', 'Validation', 'Téléchargement'];
+  steps = ['Informations Eval', 'Informations Patient', 'Définition Eval', 'Téléchargement Eval'];
   currentStepIndex = -1;
 
   constructor(private router: Router) {
@@ -25,17 +26,24 @@ export class App {
 
       if (url.includes('/info-eval')) {
         this.currentStepIndex = 0;
-      } else if (url.includes('/questions')) {
+      } else if (url.includes('/info-patient')) {
         this.currentStepIndex = 1;
       } else if (url.includes('/scores')) {
         this.currentStepIndex = 2;
       } else if (url.includes('/validation')) {
         this.currentStepIndex = 3;
-      } else if (url.includes('/telechargement')) {
-        this.currentStepIndex = 4;
       } else {
         this.currentStepIndex = -1;
       }
+
+      setTimeout(() => this.initTooltips(), 0);
+    });
+  }
+
+  private initTooltips(): void {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new Tooltip(tooltipTriggerEl);
     });
   }
 }

@@ -1,0 +1,19 @@
+[cdkDrag] {
+  cursor: grab;
+}
+[cdkDrag]:active {
+  cursor: grabbing;
+}
+
+.btn-danger {
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+.large-tooltip {
+  width: 1000px;
+}

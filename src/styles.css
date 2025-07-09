@@ -1,1 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
+
+.large-tooltip {
+  --bs-tooltip-max-width: 300px !important;
+}
+
+.btn-primary {
+  background-color: #1e3a8a !important;
+  border-color: #1e3a8a !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
