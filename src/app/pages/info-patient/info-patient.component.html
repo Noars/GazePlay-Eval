@@ -7,16 +7,9 @@
       <div class="alert alert-info text-center">
         Aucune information n'est gardé de notre côté !
         <i class="bi bi-info-circle ms-1"
-           tabindex="0"
-           data-bs-toggle="tooltip"
-           data-bs-placement="right"
-           data-bs-custom-class="large-tooltip"
-           data-bs-html="true"
-           title="Ces informations sont stockées en local sur l’ordinateur que vous utilisez.<br>
-                  <br>
-                  Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous ensuite.<br>
-                  <br>
-                  Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez.">
+           [matTooltip]="tooltipText"
+           matTooltipClass="custom-tooltip-class"
+           matTooltipPosition="right">
         </i>
       </div>
       <div cdkDropList (cdkDropListDropped)="drop($event)" class="d-flex flex-column gap-3">

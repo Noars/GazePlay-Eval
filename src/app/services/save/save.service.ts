@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {FormatTypeModel, saveModel} from '../../shared/saveModel';
+import {FormatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
 import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/saveConfig';
 
 @Injectable({
@@ -12,12 +12,16 @@ export class SaveService {
     format: 'Csv&Xlsx'
   };
 
+  newSaveDataAuto(){
+    this.dataAuto = saveModelDefault;
+    this.saveToSlot(0, this.dataAuto);
+  }
+
   saveDataAuto(nomEval: string, format: FormatTypeModel){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
     };
-
     this.saveToSlot(0, this.dataAuto);
   }
 

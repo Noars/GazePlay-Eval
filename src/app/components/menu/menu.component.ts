@@ -8,7 +8,4 @@ import { Component } from '@angular/core';
 })
 export class MenuComponent {
 
-  test(event: Event){
-    event.preventDefault();
-  }
 }

@@ -1,7 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
-.large-tooltip {
-  --bs-tooltip-max-width: 300px !important;
+.custom-tooltip-class {
+  background-color: #444 !important;
+  color: white;
+  white-space: pre-line !important;
+  padding: 8px 12px;
+  border-radius: 4px;
 }
 
 .btn-primary {

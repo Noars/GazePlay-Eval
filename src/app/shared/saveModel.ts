@@ -6,3 +6,10 @@ export interface saveModel {
   createdAt: string;
   version: number;
 }
+
+export const saveModelDefault: saveModel = {
+  nomEval: '',
+  format: 'Csv&Xlsx',
+  createdAt: new Date().toISOString(),
+  version: 1,
+}

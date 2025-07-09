@@ -8,10 +8,9 @@
         <label for="evalName" class="form-label">
           Comment souhaitez-vous appeler votre évaluation ?
           <i class="bi bi-info-circle ms-1"
-             tabindex="0"
-             data-bs-toggle="tooltip"
-             data-bs-placement="right"
-             data-bs-title="Ce nom apparaîtra dans le nom des fichiers de résultats et dans Gazeplay pour choisir l’évaluation si vous en avez en avez plusieurs">
+             [matTooltip]="tooltipText"
+             matTooltipClass="custom-tooltip-class"
+             matTooltipPosition="right">
           </i>
         </label>
         <input type="text" class="form-control" id="evalName" placeholder="Défaut : GazePlayEval" [(ngModel)]="evaluationName">

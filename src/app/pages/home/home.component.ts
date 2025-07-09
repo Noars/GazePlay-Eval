@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
+import {SaveService} from '../../services/save/save.service';
 
 @Component({
   selector: 'app-home',
@@ -9,10 +10,12 @@ import {Router} from '@angular/router';
 })
 export class HomeComponent {
 
-  constructor(private router: Router) {
+  constructor(private router: Router,
+              private saveService: SaveService) {
   }
 
   goToInfoEval() {
+    this.saveService.newSaveDataAuto();
     this.router.navigate(['/info-eval']);
   }
 }

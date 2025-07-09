@@ -3,16 +3,20 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {Router} from '@angular/router';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-info-patient',
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, MatTooltip],
   templateUrl: './info-patient.component.html',
   styleUrl: './info-patient.component.css'
 })
 export class InfoPatientComponent {
 
   fields: string[] = [];
+  tooltipText: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
+    'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous ensuite.\n \n' +
+    'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez.';
 
   constructor(private router: Router) {
   }

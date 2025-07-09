@@ -4,7 +4,6 @@ import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
-import {Tooltip} from 'bootstrap';
 
 @Component({
   selector: 'app-root',
@@ -35,15 +34,6 @@ export class App{
       } else {
         this.currentStepIndex = -1;
       }
-
-      setTimeout(() => this.initTooltips(), 0);
-    });
-  }
-
-  private initTooltips(): void {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipTriggerList.forEach((tooltipTriggerEl) => {
-      new Tooltip(tooltipTriggerEl);
     });
   }
 }
