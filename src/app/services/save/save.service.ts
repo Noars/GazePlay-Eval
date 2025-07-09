@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {FormatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
-import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/saveConfig';
+import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/ddbConfig';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +8,9 @@ import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/saveConfig';
 export class SaveService {
 
   dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
-    nomEval: 'GazePlay-Eval',
-    format: 'Csv&Xlsx'
+    nomEval: '',
+    format: 'Csv&Xlsx',
+    infoPatient: []
   };
 
   newSaveDataAuto(){
@@ -17,10 +18,11 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveDataAuto(nomEval: string, format: FormatTypeModel){
+  saveDataAuto(nomEval: string, format: FormatTypeModel, infoPatient: string[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
+      infoPatient: infoPatient,
     };
     this.saveToSlot(0, this.dataAuto);
   }
