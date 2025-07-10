@@ -1,13 +1,27 @@
 <div class="progress-bar-container pt-4">
-  <div class="d-flex justify-content-center align-items-center gap-3 my-3">
-    @for (step of steps; track step; let i = $index) {
-      <div class="step-item text-center">
-        <div class="circle" [ngClass]="{ 'active': i === currentStepIndex }">{{ i + 1 }}</div>
-        <div class="step-label">{{ step }}</div>
-      </div>
-      @if (i < steps.length - 1) {
-        <div class="line"></div>
+  <div class="d-flex justify-content-center my-4">
+    <div class="progress-steps d-flex align-items-center justify-content-between w-100" style="max-width: 800px;">
+      @for (step of steps; track step; let i = $index) {
+        <div class="d-flex flex-column align-items-center flex-shrink-0 position-relative">
+          <div
+            class="circle"
+            [ngClass]="{ 'active': i === currentStepIndex, 'completed': i < currentStepIndex }">
+            {{ i + 1 }}
+          </div>
+          <div class="step-label mt-2 text-center">{{ step }}</div>
+        </div>
+
+        @if (i < steps.length - 1) {
+          <div
+            class="flex-grow-1 mx-2 position-relative"
+            style="height: 4px;">
+            <div
+              class="line w-100 position-absolute top-50 start-0 translate-middle-y"
+              [ngClass]="{ 'completed': i < currentStepIndex - 1 || i === currentStepIndex - 1 }">
+            </div>
+          </div>
+        }
       }
-    }
+    </div>
   </div>
 </div>

@@ -1,32 +1,38 @@
-.step-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .circle {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: #ccc;
-  color: #fff;
+  background-color: #6c757d;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  z-index: 1;
 }
 
 .circle.active {
   background-color: #1e3a8a;
 }
 
-.line {
-  width: 40px;
-  height: 2px;
-  background-color: #ccc;
+.circle.completed {
+  background-color: #198754;
 }
 
 .step-label {
-  font-size: 0.8rem;
-  margin-top: 5px;
+  font-size: 0.85rem;
+  max-width: 80px;
+  text-align: center;
+  color: var(--bs-body-color);
+}
+
+.line {
+  height: 4px;
+  background-color: #6c757d;
+  border-radius: 2px;
+  transition: background-color 0.3s;
+}
+
+.line.completed {
+  background-color: #198754;
 }
