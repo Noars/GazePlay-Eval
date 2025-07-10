@@ -15,7 +15,7 @@ import {SaveService} from '../../services/save/save.service';
 export class InfoPatientComponent implements OnInit{
 
   fields: string[] = [];
-  tooltipText: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
+  tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
     'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous ensuite.\n \n' +
     'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez.';
 

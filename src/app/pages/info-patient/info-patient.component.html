@@ -7,10 +7,13 @@
       <div class="alert alert-info text-center">
         Aucune information n'est gardé de notre côté !
         <i class="bi bi-info-circle ms-1"
-           [matTooltip]="tooltipText"
+           [matTooltip]="tooltipTextData"
            matTooltipClass="custom-tooltip-class"
            matTooltipPosition="right">
         </i>
+      </div>
+      <div class="alert alert-info text-center">
+        Vous pouvez aussi réogarniser vos champs si dessous via du Drag & Drop !
       </div>
       <div cdkDropList (cdkDropListDropped)="drop($event)" class="d-flex flex-column gap-3">
         @for (field of fields; let i = $index; track i){
