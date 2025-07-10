@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-create-eval',
-  imports: [],
+  imports: [CommonModule, NgOptimizedImage],
   templateUrl: './create-eval.component.html',
   styleUrl: './create-eval.component.css'
 })
