@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DragDropModule} from '@angular/cdk/drag-drop';
@@ -12,7 +12,7 @@ import {SaveService} from '../../services/save/save.service';
   templateUrl: './info-patient.component.html',
   styleUrl: './info-patient.component.css'
 })
-export class InfoPatientComponent {
+export class InfoPatientComponent implements OnInit{
 
   fields: string[] = [];
   tooltipText: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
@@ -21,6 +21,14 @@ export class InfoPatientComponent {
 
   constructor(private router: Router,
               private saveService: SaveService) {
+  }
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(){
+    this.fields = this.saveService.dataAuto.infoPatient;
   }
 
   addField() {
@@ -41,5 +49,10 @@ export class InfoPatientComponent {
   backToInfoEval() {
     this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.fields);
     this.router.navigate(['/info-eval']);
+  }
+
+  goToCreateEval() {
+    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.fields);
+    this.router.navigate(['/create-eval']);
   }
 }

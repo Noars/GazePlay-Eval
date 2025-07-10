@@ -27,7 +27,7 @@ export class App{
         this.currentStepIndex = 0;
       } else if (url.includes('/info-patient')) {
         this.currentStepIndex = 1;
-      } else if (url.includes('/scores')) {
+      } else if (url.includes('/create-eval')) {
         this.currentStepIndex = 2;
       } else if (url.includes('/validation')) {
         this.currentStepIndex = 3;
