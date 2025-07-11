@@ -1,0 +1,105 @@
+<div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
+  <div class="card shadow-lg w-100" style="max-width: 600px;">
+    <div class="card-header text-center">
+      <h3 class="mb-0">Paramètres globaux évaluation manuelle</h3>
+    </div>
+    <div class="card-body">
+      <div class="d-flex justify-content-center align-items-center gap-4">
+        <label class="fw-semibold mb-0">
+          Voulez‑vous faire des paramètres globaux ?
+        </label>
+        <div class="form-check mb-0">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="globalYes"
+            (change)="selectGlobalParams(true)"
+            [checked]="useGlobalParams === true"
+          />
+          <label class="form-check-label" for="globalYes">Oui</label>
+        </div>
+        <div class="form-check mb-0">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="globalNo"
+            (change)="selectGlobalParams(false)"
+            [checked]="useGlobalParams === false"
+          />
+          <label class="form-check-label" for="globalNo">Non</label>
+        </div>
+      </div>
+      @if (useGlobalParams) {
+        <div class="accordion mt-4" id="globalParamsAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTrans">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#collapseTrans"
+                      aria-expanded="false"
+                      aria-controls="collapseTrans">
+                Écrans de transition
+              </button>
+            </h2>
+            <div id="collapseTrans" class="accordion-collapse collapse"
+                 aria-labelledby="headingTrans"
+                 data-bs-parent="#globalParamsAccordion">
+              <div class="accordion-body">
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Quel type de transition ?</label>
+                  <select
+                    class="form-select"
+                    [(ngModel)]="selectedTransition">
+                    @for (option of transitionTypes; let idx = $index; track idx) {
+                      <option [value]="option">{{ option }}</option>
+                    }
+                  </select>
+                </div>
+                @if (selectedTransition === 'Écran noir') {
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold">Méthode de passage à l’écran suivant</label>
+                    <select
+                      class="form-select"
+                      [(ngModel)]="selectedMethod">
+                      @for (method of navigationMethods; let idx = $index; track idx) {
+                        <option [value]="method">{{ method }}</option>
+                      }
+                    </select>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingStim">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#collapseStim"
+                      aria-expanded="false"
+                      aria-controls="collapseStim">
+                Écrans de stimuli
+              </button>
+            </h2>
+            <div id="collapseStim" class="accordion-collapse collapse"
+                 aria-labelledby="headingStim"
+                 data-bs-parent="#globalParamsAccordion">
+              <div class="accordion-body">
+                <!-- Place ici les réglages de stimuli -->
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      <div class="d-flex justify-content-center align-items-start mt-4">
+        <button class="btn btn-primary" (click)="startCreateEvalManual()">
+          Commencer la création manuelle de l'évaluation
+        </button>
+      </div>
+      <div class="d-flex justify-content-between mt-4">
+        <button class="btn btn-primary" (click)="backToEvalChoice()">
+          ← Retour
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

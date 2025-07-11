@@ -14,7 +14,7 @@ import {ProgressBarComponent} from './components/progress-bar/progress-bar.compo
 export class App{
   protected title = 'GazePlay-Eval';
 
-  steps = ['Informations Eval', 'Informations Patient', 'Définition Eval', 'Téléchargement Eval'];
+  steps = ['Informations Evaluation', 'Informations Patient', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
   currentStepIndex = -1;
 
   constructor(private router: Router) {
@@ -27,10 +27,12 @@ export class App{
         this.currentStepIndex = 0;
       } else if (url.includes('/info-patient')) {
         this.currentStepIndex = 1;
-      } else if (url.includes('/create-eval')) {
+      } else if (url.includes('/setup-eval')) {
         this.currentStepIndex = 2;
-      } else if (url.includes('/validation')) {
+      } else if (url.includes('/create-eval')) {
         this.currentStepIndex = 3;
+      } else if (url.includes('/download-eval')) {
+        this.currentStepIndex = 4;
       } else {
         this.currentStepIndex = -1;
       }

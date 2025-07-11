@@ -53,6 +53,6 @@ export class InfoPatientComponent implements OnInit{
 
   goToCreateEval() {
     this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.fields);
-    this.router.navigate(['/create-eval']);
+    this.router.navigate(['/setup-eval']);
   }
 }
