@@ -14,7 +14,7 @@
             class="form-check-input"
             id="globalYes"
             (change)="selectGlobalParams(true)"
-            [checked]="useGlobalParams === true"
+            [checked]="useGlobalParams"
           />
           <label class="form-check-label" for="globalYes">Oui</label>
         </div>
@@ -24,7 +24,7 @@
             class="form-check-input"
             id="globalNo"
             (change)="selectGlobalParams(false)"
-            [checked]="useGlobalParams === false"
+            [checked]="!useGlobalParams"
           />
           <label class="form-check-label" for="globalNo">Non</label>
         </div>
@@ -47,13 +47,20 @@
               <div class="accordion-body">
                 <div class="mb-4">
                   <label class="form-label fw-semibold">Quel type de transition ?</label>
-                  <select
-                    class="form-select"
-                    [(ngModel)]="selectedTransition">
-                    @for (option of transitionTypes; let idx = $index; track idx) {
-                      <option [value]="option">{{ option }}</option>
-                    }
-                  </select>
+                  <div class="input-group mx-auto mb-3" style="max-width: 350px;">
+                    <select class="form-select" [(ngModel)]="selectedTransition">
+                      @for (option of transitionTypes; let idx = $index; track idx) {
+                        <option [value]="option">{{ option }}</option>
+                      }
+                    </select>
+                    <span
+                      class="input-group-text bg-primary-subtle border-start-0"
+                      [matTooltip]="getInfoTransition()"
+                      matTooltipClass="custom-tooltip-class"
+                      matTooltipPosition="right">
+                      <i class="bi bi-info-circle"></i>
+                    </span>
+                  </div>
                 </div>
                 @if (selectedTransition === 'Écran noir') {
                   <div class="mb-4">

@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormsModule} from "@angular/forms";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-eval-automatic',
@@ -14,8 +15,11 @@ export class EvalAutomaticComponent {
   @Input() selectedMode: 'manuel' | 'auto' | null = null;
   @Output() selectedModeChange = new EventEmitter<null>();
 
-  startCreateEvalAuto(){
+  constructor(private router: Router,) {
+  }
 
+  startCreateEvalAuto(){
+    this.router.navigate(['/create-eval']);
   }
 
   backToEvalChoice(){
