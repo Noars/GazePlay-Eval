@@ -16,17 +16,19 @@ export class EvalManualComponent{
   @Output() selectedModeChange = new EventEmitter<null>();
 
   useGlobalParams: boolean = false;
+
+  /* ----- Ecran transition -----*/
   transitionTypes: string[] = ['Écran noir', 'Écran de fixation', 'Écran d’attente', 'Écran de pause'];
   transitionInfos: string[] = ['1', '2', '3', '4'];
   selectedTransition = this.transitionTypes[0];
   navigationMethods: string[] = ['Clique souris / clavier', 'Temps'];
   selectedMethod = this.navigationMethods[0];
 
-  constructor(private router: Router,) {
-  }
+  /* ----- Ecran stimuli -----*/
+  // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimulis, 6-Disable stimulis, 7-Random position stimuli
+  screenStimuliInfos: string[] = ['1', '1', 'false', '10', '1', '1', 'false', 'false'];
 
-  selectGlobalParams(choice: boolean) {
-    this.useGlobalParams = choice;
+  constructor(private router: Router,) {
   }
 
   getInfoTransition(): string {
@@ -35,10 +37,12 @@ export class EvalManualComponent{
   }
 
   startCreateEvalManual(){
-    this.router.navigate(['/create-eval']);
+    //this.router.navigate(['/create-eval']);
   }
 
   backToEvalChoice(){
     this.selectedModeChange.emit(null);
   }
+
+  protected readonly Number = Number;
 }

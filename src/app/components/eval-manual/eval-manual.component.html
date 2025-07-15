@@ -13,7 +13,7 @@
             type="checkbox"
             class="form-check-input"
             id="globalYes"
-            (change)="selectGlobalParams(true)"
+            (change)="useGlobalParams = true"
             [checked]="useGlobalParams"
           />
           <label class="form-check-label" for="globalYes">Oui</label>
@@ -23,7 +23,7 @@
             type="checkbox"
             class="form-check-input"
             id="globalNo"
-            (change)="selectGlobalParams(false)"
+            (change)="useGlobalParams = false"
             [checked]="!useGlobalParams"
           />
           <label class="form-check-label" for="globalNo">Non</label>
@@ -91,7 +91,160 @@
                  aria-labelledby="headingStim"
                  data-bs-parent="#globalParamsAccordion">
               <div class="accordion-body">
-                <!-- Place ici les réglages de stimuli -->
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Taille de la grille ?</label>
+                  <div class="row g-3 align-items-center">
+                    <div class="col-4">
+                      <label for="nbRows" class="col-form-label">Nombre de lignes</label>
+                    </div>
+                    <div class="col-4">
+                      <input type="number" id="nbRows" class="form-control" min="1" step="1" aria-describedby="nbRowsInfo" [(ngModel)]="screenStimuliInfos[0]">
+                    </div>
+                    <div class="col-4">
+                      <span id="nbRowsInfo" class="form-text fw-semibold">
+                        Minimum 1 !
+                      </span>
+                    </div>
+                  </div>
+                  <div class="row g-3 align-items-center">
+                    <div class="col-4">
+                      <label for="nbCols" class="col-form-label">Nombre de colonnes</label>
+                    </div>
+                    <div class="col-4">
+                      <input type="number" id="nbCols" class="form-control" min="1" step="1" aria-describedby="nbColsInfo" [(ngModel)]="screenStimuliInfos[1]">
+                    </div>
+                    <div class="col-4">
+                      <span id="nbColsInfo" class="form-text fw-semibold">
+                        Minimum 1 !
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Temps maximum par écran ?</label>
+                  <div class="d-flex justify-content-center align-items-center gap-4">
+                    <label class="col-form-label">
+                      Mettre un temps maximum par écran ?
+                    </label>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="timeScreenYes"
+                        (change)="screenStimuliInfos[2] = 'true'"
+                        [checked]="screenStimuliInfos[2] === 'true'"
+                      />
+                      <label class="form-check-label" for="timeScreenYes">Oui</label>
+                    </div>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="timeScreenNo"
+                        (change)="screenStimuliInfos[2] = 'false'"
+                        [checked]="screenStimuliInfos[2] === 'false'"
+                      />
+                      <label class="form-check-label" for="timeScreenNo">Non</label>
+                    </div>
+                  </div>
+                  @if (screenStimuliInfos[2] === 'true') {
+                    <div class="row g-3 align-items-center justify-content-center">
+                      <div class="col-auto">
+                        <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="screenStimuliInfos[3]">
+                      </div>
+                      <div class="col-auto">
+                      <span id="nbFixationLengthInfo" class="form-text fw-semibold">
+                        La durée est en secondes !
+                      </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <br>
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Durée de fixation pour validation ?</label>
+                  <div class="row g-3 align-items-center justify-content-center">
+                    <div class="col-auto">
+                      <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="screenStimuliInfos[4]">
+                    </div>
+                    <div class="col-auto">
+                      <span id="nbFixationLengthInfo" class="form-text fw-semibold">
+                        La durée est en secondes !
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Nombre de stimulis a valider pour passage a l'écran suivant ?</label>
+                  <div class="row g-3 align-items-center justify-content-center">
+                    <div class="col-auto">
+                      <input type="number" id="nbStimuli" class="form-control" min="1" [max]="Number(screenStimuliInfos[0]) * Number(screenStimuliInfos[1])" step="1" aria-describedby="nbStimuliInfo" [(ngModel)]="screenStimuliInfos[5]">
+                    </div>
+                    <div class="col-auto">
+                      <span id="nbStimuliInfo" class="form-text fw-semibold">
+                        Maximum nombre de lignes * nombre de colonnes ({{Number(screenStimuliInfos[0]) * Number(screenStimuliInfos[1])}}) !
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Qu’est-ce qu’il se passe si le stimulis est validé ?</label>
+                  <div class="d-flex justify-content-center align-items-center gap-4">
+                    <label class="col-form-label">Désactivation de celui-ci ?</label>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="disableStimuliYes"
+                        (change)="screenStimuliInfos[6] = 'true'"
+                        [checked]="screenStimuliInfos[6] === 'true'"
+                      />
+                      <label class="form-check-label" for="disableStimuliYes">Oui</label>
+                    </div>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="disableStimuliNo"
+                        (change)="screenStimuliInfos[6] = 'false'"
+                        [checked]="screenStimuliInfos[6] === 'false'"
+                      />
+                      <label class="form-check-label" for="disableStimuliNo">Non</label>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Emplacement stimulis ?</label>
+                  <div class="d-flex justify-content-center align-items-center gap-4">
+                    <label class="col-form-label">
+                      Placer les stimulis aléatoirement ?
+                    </label>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="randomStimulisYes"
+                        (change)="screenStimuliInfos[7] = 'true'"
+                        [checked]="screenStimuliInfos[7] === 'true'"
+                      />
+                      <label class="form-check-label" for="randomStimulisYes">Oui</label>
+                    </div>
+                    <div class="form-check mb-0">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="randomStimulisNo"
+                        (change)="screenStimuliInfos[7] = 'false'"
+                        [checked]="screenStimuliInfos[7] === 'false'"
+                      />
+                      <label class="form-check-label" for="randomStimulisNo">Non</label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
