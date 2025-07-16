@@ -10,7 +10,8 @@ export class SaveService {
   dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
     nomEval: '',
     format: 'Csv&Xlsx',
-    infoPatient: []
+    infoParticipant: [],
+    globalParamsStimuli: []
   };
 
   newSaveDataAuto(){
@@ -18,11 +19,12 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveDataAuto(nomEval: string, format: FormatTypeModel, infoPatient: string[]){
+  saveDataAuto(nomEval: string, format: FormatTypeModel, infoParticipant: string[], globalParamsStimuli: string[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
-      infoPatient: infoPatient,
+      infoParticipant: infoParticipant,
+      globalParamsStimuli: globalParamsStimuli
     };
     this.saveToSlot(0, this.dataAuto);
   }

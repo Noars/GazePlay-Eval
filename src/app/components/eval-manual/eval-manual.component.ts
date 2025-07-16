@@ -1,8 +1,10 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
+import {SaveService} from '../../services/save/save.service';
+import {evalModeModel, saveModelDefault} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-eval-manual',
@@ -10,9 +12,9 @@ import {MatTooltip} from '@angular/material/tooltip';
   templateUrl: './eval-manual.component.html',
   styleUrl: './eval-manual.component.css'
 })
-export class EvalManualComponent{
+export class EvalManualComponent implements OnInit{
 
-  @Input() selectedMode: 'manuel' | 'auto' | null = null;
+  @Input() selectedMode: evalModeModel = null;
   @Output() selectedModeChange = new EventEmitter<null>();
 
   useGlobalParams: boolean = false;
@@ -25,10 +27,19 @@ export class EvalManualComponent{
   selectedMethod = this.navigationMethods[0];
 
   /* ----- Ecran stimuli -----*/
-  // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimulis, 6-Disable stimulis, 7-Random position stimuli
-  screenStimuliInfos: string[] = ['1', '1', 'false', '10', '1', '1', 'false', 'false'];
+  // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimuli, 6-Disable stimuli, 7-Random position stimuli
+  screenStimuliInfos: string[] = saveModelDefault.globalParamsStimuli;
 
-  constructor(private router: Router,) {
+  constructor(private router: Router,
+              private saveService: SaveService,) {
+  }
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(){
+    this.screenStimuliInfos = this.saveService.dataAuto.globalParamsStimuli;
   }
 
   getInfoTransition(): string {

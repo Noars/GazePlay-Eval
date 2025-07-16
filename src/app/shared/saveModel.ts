@@ -1,9 +1,11 @@
 export type FormatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
+export type evalModeModel = 'manuel' | 'auto' | null;
 
 export interface saveModel {
   nomEval: string;
   format: FormatTypeModel;
-  infoPatient: string[];
+  infoParticipant: string[];
+  globalParamsStimuli: string[];
   createdAt: string;
   version: number;
 }
@@ -11,7 +13,8 @@ export interface saveModel {
 export const saveModelDefault: saveModel = {
   nomEval: '',
   format: 'Csv&Xlsx',
-  infoPatient: [],
+  infoParticipant: [],
+  globalParamsStimuli: ['1', '1', 'false', '10', '1', '1', 'false', 'false'],
   createdAt: new Date().toISOString(),
   version: 1,
 }

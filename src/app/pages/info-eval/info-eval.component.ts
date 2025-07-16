@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {SaveService} from '../../services/save/save.service';
-import {FormatTypeModel} from '../../shared/saveModel';
+import {FormatTypeModel, saveModelDefault} from '../../shared/saveModel';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
 
@@ -13,8 +13,8 @@ import {MatTooltip} from '@angular/material/tooltip';
   styleUrl: './info-eval.component.css'
 })
 export class InfoEvalComponent implements OnInit{
-  evaluationName: string = '';
-  resultType: FormatTypeModel = 'Csv&Xlsx' ;
+  evaluationName: string = saveModelDefault.nomEval;
+  resultType: FormatTypeModel = saveModelDefault.format;
   tooltipText: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats et dans Gazeplay pour choisir l’évaluation si vous en avez en avez plusieurs';
 
   constructor(private router: Router,private saveService: SaveService) {
@@ -29,8 +29,8 @@ export class InfoEvalComponent implements OnInit{
     this.resultType = this.saveService.dataAuto.format;
   }
 
-  goToInfoPatient() {
-    this.saveService.saveDataAuto(this.evaluationName, this.resultType, this.saveService.dataAuto.infoPatient);
-    this.router.navigate(['/info-patient']);
+  goToInfoParticipant() {
+    this.saveService.saveDataAuto(this.evaluationName, this.resultType, this.saveService.dataAuto.infoParticipant, this.saveService.dataAuto.globalParamsStimuli);
+    this.router.navigate(['/info-participant']);
   }
 }

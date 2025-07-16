@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {EvalManualComponent} from '../../components/eval-manual/eval-manual.component';
 import {EvalAutomaticComponent} from '../../components/eval-automatic/eval-automatic.component';
+import {evalModeModel} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-setup-eval',
@@ -11,12 +12,12 @@ import {EvalAutomaticComponent} from '../../components/eval-automatic/eval-autom
   styleUrl: './setup-eval.component.css'
 })
 export class SetupEvalComponent {
-  selectedMode: 'manuel' | 'auto' | null = null;
+  selectedMode: evalModeModel = null;
 
   constructor(private router: Router) {
   }
 
-  selectMode(mode: 'manuel' | 'auto' | null) {
+  selectMode(mode: evalModeModel) {
     this.selectedMode = mode;
   }
 
@@ -24,7 +25,7 @@ export class SetupEvalComponent {
     this.selectedMode = mode;
   }
 
-  backToInfoPatient() {
-    this.router.navigate(['/info-patient']);
+  backToInfoParticipant() {
+    this.router.navigate(['/info-participant']);
   }
 }

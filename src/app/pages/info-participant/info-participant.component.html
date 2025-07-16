@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
   <div class="card shadow-lg w-100" style="max-width: 600px;">
     <div class="card-header text-center">
-      <h2>Informations Patient</h2>
+      <h2>Informations Participant</h2>
     </div>
     <div class="card-body">
       <div class="alert alert-info text-center">
@@ -16,7 +16,7 @@
         Vous pouvez aussi réogarniser vos champs si dessous via du Drag & Drop !
       </div>
       <div cdkDropList (cdkDropListDropped)="drop($event)" class="d-flex flex-column gap-3">
-        @for (field of fields; let i = $index; track i){
+        @for (field of infoParticipantList; let i = $index; track i){
           <div cdkDrag>
             <div class="input-group">
               <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
@@ -26,7 +26,7 @@
                 type="text"
                 class="form-control"
                 placeholder="Titre du champ"
-                [(ngModel)]="fields[i]"
+                [(ngModel)]="infoParticipantList[i]"
               />
               <button
                 type="button"

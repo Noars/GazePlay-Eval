@@ -177,7 +177,7 @@
                 </div>
                 <br>
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Nombre de stimulis a valider pour passage a l'écran suivant ?</label>
+                  <label class="form-label fw-semibold">Nombre de stimuli a valider pour passage a l'écran suivant ?</label>
                   <div class="row g-3 align-items-center justify-content-center">
                     <div class="col-auto">
                       <input type="number" id="nbStimuli" class="form-control" min="1" [max]="Number(screenStimuliInfos[0]) * Number(screenStimuliInfos[1])" step="1" aria-describedby="nbStimuliInfo" [(ngModel)]="screenStimuliInfos[5]">
@@ -191,7 +191,7 @@
                 </div>
                 <br>
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Qu’est-ce qu’il se passe si le stimulis est validé ?</label>
+                  <label class="form-label fw-semibold">Qu’est-ce qu’il se passe si le stimuli est validé ?</label>
                   <div class="d-flex justify-content-center align-items-center gap-4">
                     <label class="col-form-label">Désactivation de celui-ci ?</label>
                     <div class="form-check mb-0">
@@ -218,30 +218,30 @@
                 </div>
                 <br>
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Emplacement stimulis ?</label>
+                  <label class="form-label fw-semibold">Emplacement stimuli ?</label>
                   <div class="d-flex justify-content-center align-items-center gap-4">
                     <label class="col-form-label">
-                      Placer les stimulis aléatoirement ?
+                      Placer les stimuli aléatoirement ?
                     </label>
                     <div class="form-check mb-0">
                       <input
                         type="checkbox"
                         class="form-check-input"
-                        id="randomStimulisYes"
+                        id="randomStimuliYes"
                         (change)="screenStimuliInfos[7] = 'true'"
                         [checked]="screenStimuliInfos[7] === 'true'"
                       />
-                      <label class="form-check-label" for="randomStimulisYes">Oui</label>
+                      <label class="form-check-label" for="randomStimuliYes">Oui</label>
                     </div>
                     <div class="form-check mb-0">
                       <input
                         type="checkbox"
                         class="form-check-input"
-                        id="randomStimulisNo"
+                        id="randomStimuliNo"
                         (change)="screenStimuliInfos[7] = 'false'"
                         [checked]="screenStimuliInfos[7] === 'false'"
                       />
-                      <label class="form-check-label" for="randomStimulisNo">Non</label>
+                      <label class="form-check-label" for="randomStimuliNo">Non</label>
                     </div>
                   </div>
                 </div>

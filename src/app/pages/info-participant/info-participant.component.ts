@@ -5,16 +5,17 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SaveService} from '../../services/save/save.service';
+import {saveModelDefault} from '../../shared/saveModel';
 
 @Component({
-  selector: 'app-info-patient',
+  selector: 'app-info-participant',
   imports: [CommonModule, FormsModule, DragDropModule, MatTooltip],
-  templateUrl: './info-patient.component.html',
-  styleUrl: './info-patient.component.css'
+  templateUrl: './info-participant.component.html',
+  styleUrl: './info-participant.component.css'
 })
-export class InfoPatientComponent implements OnInit{
+export class InfoParticipantComponent implements OnInit{
 
-  fields: string[] = [];
+  infoParticipantList: string[] = saveModelDefault.infoParticipant;
   tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
     'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous ensuite.\n \n' +
     'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez.';
@@ -28,31 +29,31 @@ export class InfoPatientComponent implements OnInit{
   }
 
   loadData(){
-    this.fields = this.saveService.dataAuto.infoPatient;
+    this.infoParticipantList = this.saveService.dataAuto.infoParticipant;
   }
 
   addField() {
-    this.fields.push('');
+    this.infoParticipantList.push('');
   }
 
   removeField(index: number) {
-    this.fields.splice(index, 1);
+    this.infoParticipantList.splice(index, 1);
   }
 
   drop(event: any) {
     const previousIndex = event.previousIndex;
     const currentIndex = event.currentIndex;
-    const field = this.fields.splice(previousIndex, 1)[0];
-    this.fields.splice(currentIndex, 0, field);
+    const field = this.infoParticipantList.splice(previousIndex, 1)[0];
+    this.infoParticipantList.splice(currentIndex, 0, field);
   }
 
   backToInfoEval() {
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.fields);
+    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.infoParticipantList, this.saveService.dataAuto.globalParamsStimuli);
     this.router.navigate(['/info-eval']);
   }
 
   goToCreateEval() {
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.fields);
+    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.infoParticipantList, this.saveService.dataAuto.globalParamsStimuli);
     this.router.navigate(['/setup-eval']);
   }
 }

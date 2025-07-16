@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
 import {HomeComponent} from './pages/home/home.component';
 import {InfoEvalComponent} from './pages/info-eval/info-eval.component';
-import {InfoPatientComponent} from './pages/info-patient/info-patient.component';
+import {InfoParticipantComponent} from './pages/info-participant/info-participant.component';
 import {SetupEvalComponent} from './pages/setup-eval/setup-eval.component';
 import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
 
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'info-eval', component: InfoEvalComponent},
-  {path: 'info-patient', component: InfoPatientComponent},
+  {path: 'info-participant', component: InfoParticipantComponent},
   {path: 'setup-eval', component: SetupEvalComponent},
   {path: 'create-eval', component: CreateEvalComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full',}
