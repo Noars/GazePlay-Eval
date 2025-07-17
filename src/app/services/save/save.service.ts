@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import {FormatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
-import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/ddbConfig';
+import {formatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
+import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveDataAuto(nomEval: string, format: FormatTypeModel, infoParticipant: string[], globalParamsStimuli: string[]){
+  saveDataAuto(nomEval: string, format: formatTypeModel, infoParticipant: string[], globalParamsStimuli: string[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,

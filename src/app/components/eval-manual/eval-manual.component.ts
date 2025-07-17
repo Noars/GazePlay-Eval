@@ -3,7 +3,8 @@ import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
-import {evalModeModel, saveModelDefault} from '../../shared/saveModel';
+import {saveModelDefault} from '../../shared/saveModel';
+import {evalModeModel} from '../../shared/screenModel';
 
 @Component({
   selector: 'app-eval-manual',

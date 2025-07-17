@@ -4,29 +4,75 @@
       <h2>Création Évaluation</h2>
     </div>
     <div class="card-body">
-      <div class="container-fluid">
-        <div class="row g-3">
-          <aside class="col-4">
-            <div class="card h-100">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-bold">Écrans</span>
-                <button class="btn btn-sm btn-outline-primary">+ Ajouter</button>
+      <div class="container mt-4">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card shadow-lg">
+              <div class="card-header bg-secondary text-white">
+                📋 Liste des écrans
               </div>
-              <div id="screenList" class="list-group list-group-flush">
-                <div class="list-group-item screen-item d-flex align-items-center gap-2">
-                  <span cdkDragHandle class="bi bi-grip-vertical text-muted"></span>
-                  <span class="badge rounded-pill bg-secondary"></span>
-                  <span class="flex-grow-1"></span>
-                  <i class="bi bi-x-lg text-danger"></i>
+              <div cdkDropList (cdkDropListDropped)="drop($event)">
+                @for (screen of screens; let i = $index; track i) {
+                  <div cdkDrag>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                          [class.active]="screen === selectedScreen"
+                          (click)="selectScreen(screen)"
+                          (dblclick)="changeNameScreen(true, screen)"
+                          (mouseleave)="changeNameScreen(false, screen)"
+                          style="cursor: pointer;">
+                          <span cdkDragHandle>
+                            &#x2630;
+                          </span>
+                          @if (isEditNameScreen && screen === selectedScreen){
+                            <input type="text"
+                                   [(ngModel)]="screen.name"
+                                   (keydown.enter)="changeNameScreen(false, screen)"
+                                   (blur)="changeNameScreen(false, screen)"
+                                   class="form-control form-control-sm"
+                                   style="max-width: 150px;" />
+                          } @else {
+                            <span>{{ screen.name }}</span>
+                          }
+                          <button class="btn btn-sm btn-danger" (click)="removeScreen(screen)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                      </li>
+                    </ul>
+                  </div>
+                }
+              </div>
+              <div class="text-center">
+                <button class="btn btn-success px-4 mt-1 mb-1" (click)="addScreen()">
+                  <i class="bi bi-plus-circle me-1"></i> Ajouter un écran
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card shadow-lg">
+              <div class="card-header bg-secondary text-white">
+                ✏️ Édition de l’écran
+              </div>
+              @if (selectedScreen != null){
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="typeSelect" class="form-label">Type d’écran :</label>
+                    <select id="typeSelect" class="form-select">
+                      <option value="black">Écran noir</option>
+                      <option value="consigne">Écran de consigne</option>
+                      <option value="stimuli">Écran de stimuli</option>
+                      <option value="fin">Écran de fin</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              } @else {
+                <div class="card-body text-muted">
+                  Aucun écran sélectionné.
+                </div>
+              }
             </div>
-          </aside>
-          <section class="col-8">
-            <div class="h-100 d-flex align-items-center justify-content-center text-secondary">
-              <p>Sélectionnez un écran pour l’éditer</p>
-            </div>
-          </section>
+          </div>
         </div>
       </div>
       <div class="d-flex justify-content-between mt-4">

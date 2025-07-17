@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {saveModel} from '../../shared/saveModel';
-import {FormatTypeConfig, MaxSlots, SAVE_SLOT_LIST} from '../../shared/ddbConfig';
+import {FormatTypeConfig, MaxSlots, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
 
 @Injectable({
   providedIn: 'root'

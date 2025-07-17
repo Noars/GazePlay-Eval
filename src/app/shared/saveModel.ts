@@ -1,9 +1,8 @@
-export type FormatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
-export type evalModeModel = 'manuel' | 'auto' | null;
+export type formatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
 
 export interface saveModel {
   nomEval: string;
-  format: FormatTypeModel;
+  format: formatTypeModel;
   infoParticipant: string[];
   globalParamsStimuli: string[];
   createdAt: string;

@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {EvalManualComponent} from '../../components/eval-manual/eval-manual.component';
 import {EvalAutomaticComponent} from '../../components/eval-automatic/eval-automatic.component';
-import {evalModeModel} from '../../shared/saveModel';
+import {evalModeModel} from '../../shared/screenModel';
 
 @Component({
   selector: 'app-setup-eval',
