@@ -15,7 +15,7 @@ export class CreateEvalComponent {
   screens: ScreenModel[] = [];
   selectedScreen: ScreenModel | null = null;
   idScreen = 1;
-  isEditNameScreen = false;
+  editNameScreenDisable = true;
 
   constructor(private router: Router,) {
   }
@@ -33,9 +33,9 @@ export class CreateEvalComponent {
     this.selectedScreen = screen;
   }
 
-  changeNameScreen(value: boolean, screen: ScreenModel) {
-    if(this.selectedScreen === screen){
-      this.isEditNameScreen = value;
+  editNameScreen(screen: ScreenModel, value: boolean) {
+    if (this.selectedScreen === screen) {
+      this.editNameScreenDisable = value;
     }
   }
 

@@ -13,33 +13,39 @@
               </div>
               <div cdkDropList (cdkDropListDropped)="drop($event)">
                 @for (screen of screens; let i = $index; track i) {
-                  <div cdkDrag>
-                    <ul class="list-group list-group-flush">
-                      <li class="list-group-item d-flex justify-content-between align-items-center"
-                          [class.active]="screen === selectedScreen"
-                          (click)="selectScreen(screen)"
-                          (dblclick)="changeNameScreen(true, screen)"
-                          (mouseleave)="changeNameScreen(false, screen)"
-                          style="cursor: pointer;">
-                          <span cdkDragHandle>
-                            &#x2630;
-                          </span>
-                          @if (isEditNameScreen && screen === selectedScreen){
-                            <input type="text"
-                                   [(ngModel)]="screen.name"
-                                   (keydown.enter)="changeNameScreen(false, screen)"
-                                   (blur)="changeNameScreen(false, screen)"
-                                   class="form-control form-control-sm"
-                                   style="max-width: 150px;" />
-                          } @else {
-                            <span>{{ screen.name }}</span>
-                          }
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        [class.active]="screen === selectedScreen"
+                        (click)="selectScreen(screen)"
+                        (mouseleave)="editNameScreen(screen, true)"
+                        style="cursor: pointer;"
+                    >
+                      <div cdkDrag>
+                        <div class="input-group">
+                            <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
+                              &#x2630;
+                            </span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            style="cursor: pointer;"
+                            [class.editName]="!editNameScreenDisable && screen === selectedScreen"
+                            placeholder="Titre de l'écran"
+                            [(ngModel)]="screen.name"
+                            [readonly]="editNameScreenDisable"
+                            (drop)="$event.preventDefault(); $event.stopPropagation();"
+                            (dragover)="$event.preventDefault(); $event.stopPropagation();"
+                          />
+                          <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable)">
+                            <i class="bi bi-pen"></i>
+                          </button>
                           <button class="btn btn-sm btn-danger" (click)="removeScreen(screen)">
                             <i class="bi bi-trash"></i>
                           </button>
-                      </li>
-                    </ul>
-                  </div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
                 }
               </div>
               <div class="text-center">
@@ -54,7 +60,7 @@
               <div class="card-header bg-secondary text-white">
                 ✏️ Édition de l’écran
               </div>
-              @if (selectedScreen != null){
+              @if (selectedScreen != null) {
                 <div class="card-body">
                   <div class="mb-3">
                     <label for="typeSelect" class="form-label">Type d’écran :</label>

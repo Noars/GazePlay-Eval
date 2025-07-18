@@ -1,0 +1,9 @@
+.list-group-item.active {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.editName {
+  background-color: green;
+  cursor: text !important;
+}
