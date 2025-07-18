@@ -4,11 +4,11 @@
       @for (step of steps; track step; let i = $index) {
         <div class="d-flex flex-column align-items-center flex-shrink-0 position-relative">
           <div
-            class="circle"
+            class="circle fw-semibold"
             [ngClass]="{ 'active': i === currentStepIndex, 'completed': i < currentStepIndex }">
             {{ i + 1 }}
           </div>
-          <div class="step-label mt-2 text-center">{{ step }}</div>
+          <div class="step-label mt-2 text-center fw-semibold">{{ step }}</div>
         </div>
 
         @if (i < steps.length - 1) {
