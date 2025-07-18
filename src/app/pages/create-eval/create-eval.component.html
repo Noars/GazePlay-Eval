@@ -62,13 +62,13 @@
               </div>
               @if (selectedScreen !== null) {
                 <div class="card-body">
-                  <div class="mb-3">
-                    <label for="typeSelect" class="form-label">Type d’écran :</label>
-                    <select id="typeSelect" class="form-select">
-                      <option value="black">Écran noir</option>
-                      <option value="consigne">Écran de consigne</option>
-                      <option value="stimuli">Écran de stimuli</option>
-                      <option value="fin">Écran de fin</option>
+                  <div class="mb-3 d-flex align-items-center justify-content-center">
+                    <label for="typeSelect" class="form-label me-3 mb-0 fw-semibold">Type d’écran :</label>
+                    <select id="typeSelect" class="form-select w-auto" [(ngModel)]="selectedScreen.type" (ngModelChange)="changeTypeScreen($event.target.value)">
+                      <option [value]="blackScreenConstModel">Écran noir</option>
+                      <option [value]="instructionScreenConstModel">Écran de consigne</option>
+                      <option [value]="stimuliScreenConstModel" ]>Écran de stimuli</option>
+                      <option [value]="endScreenConstModel">Écran de fin</option>
                     </select>
                   </div>
                 </div>

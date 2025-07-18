@@ -1,4 +1,4 @@
-import {ScreenModel} from './screenModel';
+import {screenTypeModel} from './screenModel';
 
 export type formatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
 
@@ -7,7 +7,7 @@ export interface saveModel {
   format: formatTypeModel;
   infoParticipant: string[];
   globalParamsStimuli: string[];
-  listScreens: ScreenModel[];
+  listScreens: screenTypeModel[];
   createdAt: string;
   version: number;
 }
