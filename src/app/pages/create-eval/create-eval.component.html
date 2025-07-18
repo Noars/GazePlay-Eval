@@ -8,16 +8,16 @@
         <div class="row">
           <div class="col-md-4">
             <div class="card shadow-lg">
-              <div class="card-header bg-secondary text-white">
+              <div class="card-header bg-secondary text-white fw-semibold">
                 📋 Liste des écrans
               </div>
               <div cdkDropList (cdkDropListDropped)="drop($event)">
-                @for (screen of screens; let i = $index; track i) {
+                @for (screen of listScreens; let i = $index; track i) {
                   <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                         [class.active]="screen === selectedScreen"
-                        (click)="selectScreen(screen)"
-                        (mouseleave)="editNameScreen(screen, true)"
+                        (click)="selectScreen(screen); $event.preventDefault(); $event.stopPropagation();"
+                        (mouseleave)="exitInputScreen(); $event.preventDefault(); $event.stopPropagation();"
                         style="cursor: pointer;"
                     >
                       <div cdkDrag>
@@ -39,7 +39,7 @@
                           <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable)">
                             <i class="bi bi-pen"></i>
                           </button>
-                          <button class="btn btn-sm btn-danger" (click)="removeScreen(screen)">
+                          <button class="btn btn-sm btn-danger" (click)="removeScreen(screen); $event.preventDefault(); $event.stopPropagation();">
                             <i class="bi bi-trash"></i>
                           </button>
                         </div>
@@ -57,10 +57,10 @@
           </div>
           <div class="col-md-8">
             <div class="card shadow-lg">
-              <div class="card-header bg-secondary text-white">
+              <div class="card-header bg-secondary text-white fw-semibold">
                 ✏️ Édition de l’écran
               </div>
-              @if (selectedScreen != null) {
+              @if (selectedScreen !== null) {
                 <div class="card-body">
                   <div class="mb-3">
                     <label for="typeSelect" class="form-label">Type d’écran :</label>
@@ -73,7 +73,7 @@
                   </div>
                 </div>
               } @else {
-                <div class="card-body text-muted">
+                <div class="card-body text-muted fw-semibold text-center">
                   Aucun écran sélectionné.
                 </div>
               }

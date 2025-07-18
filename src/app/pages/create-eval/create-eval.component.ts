@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {ScreenModel} from '../../shared/screenModel';
 import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
+import {SaveService} from '../../services/save/save.service';
 
 @Component({
   selector: 'app-create-eval',
@@ -10,14 +11,31 @@ import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
   templateUrl: './create-eval.component.html',
   styleUrl: './create-eval.component.css'
 })
-export class CreateEvalComponent {
+export class CreateEvalComponent implements OnInit{
 
-  screens: ScreenModel[] = [];
+  listScreens: ScreenModel[] = [];
   selectedScreen: ScreenModel | null = null;
   idScreen = 1;
   editNameScreenDisable = true;
 
-  constructor(private router: Router,) {
+  constructor(private router: Router, private saveService: SaveService) {
+  }
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  savaData(){
+    this.saveService.saveDataAuto(
+      this.saveService.dataAuto.nomEval,
+      this.saveService.dataAuto.format,
+      this.saveService.dataAuto.infoParticipant,
+      this.saveService.dataAuto.globalParamsStimuli,
+      this.listScreens);
+  }
+
+  loadData(){
+    this.listScreens = this.saveService.dataAuto.listScreens;
   }
 
   addScreen() {
@@ -25,7 +43,7 @@ export class CreateEvalComponent {
       name: 'Ecran ' + this.idScreen++,
       type: 'black',
     };
-    this.screens.push(newScreen);
+    this.listScreens.push(newScreen);
     this.selectScreen(newScreen);
   }
 
@@ -34,26 +52,32 @@ export class CreateEvalComponent {
   }
 
   editNameScreen(screen: ScreenModel, value: boolean) {
+    this.selectedScreen = screen;
     if (this.selectedScreen === screen) {
       this.editNameScreenDisable = value;
     }
   }
 
+  exitInputScreen() {
+    this.editNameScreenDisable = true;
+  }
+
   removeScreen(screen: ScreenModel) {
-    this.screens = this.screens.filter(s => s !== screen);
     if (this.selectedScreen === screen) {
       this.selectedScreen = null;
     }
+    this.listScreens = this.listScreens.filter(s => s !== screen);
   }
 
   drop(event: any) {
     const previousIndex = event.previousIndex;
     const currentIndex = event.currentIndex;
-    const field = this.screens.splice(previousIndex, 1)[0];
-    this.screens.splice(currentIndex, 0, field);
+    const field = this.listScreens.splice(previousIndex, 1)[0];
+    this.listScreens.splice(currentIndex, 0, field);
   }
 
   backToSetupEval() {
+    this.savaData();
     this.router.navigate(['/setup-eval']);
   }
 

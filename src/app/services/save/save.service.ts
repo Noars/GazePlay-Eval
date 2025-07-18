@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {formatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
 import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
+import {ScreenModel} from '../../shared/screenModel';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ export class SaveService {
     nomEval: '',
     format: 'Csv&Xlsx',
     infoParticipant: [],
-    globalParamsStimuli: []
+    globalParamsStimuli: [],
+    listScreens: []
   };
 
   newSaveDataAuto(){
@@ -19,12 +21,13 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveDataAuto(nomEval: string, format: formatTypeModel, infoParticipant: string[], globalParamsStimuli: string[]){
+  saveDataAuto(nomEval: string, format: formatTypeModel, infoParticipant: string[], globalParamsStimuli: string[], listScreens: ScreenModel[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
       infoParticipant: infoParticipant,
-      globalParamsStimuli: globalParamsStimuli
+      globalParamsStimuli: globalParamsStimuli,
+      listScreens: listScreens
     };
     this.saveToSlot(0, this.dataAuto);
   }

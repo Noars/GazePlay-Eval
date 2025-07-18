@@ -24,13 +24,22 @@ export class InfoEvalComponent implements OnInit{
     this.loadData()
   }
 
+  saveData(){
+    this.saveService.saveDataAuto(
+      this.evaluationName,
+      this.resultType,
+      this.saveService.dataAuto.infoParticipant,
+      this.saveService.dataAuto.globalParamsStimuli,
+      this.saveService.dataAuto.listScreens);
+  }
+
   loadData(){
     this.evaluationName = this.saveService.dataAuto.nomEval;
     this.resultType = this.saveService.dataAuto.format;
   }
 
   goToInfoParticipant() {
-    this.saveService.saveDataAuto(this.evaluationName, this.resultType, this.saveService.dataAuto.infoParticipant, this.saveService.dataAuto.globalParamsStimuli);
+    this.saveData();
     this.router.navigate(['/info-participant']);
   }
 }

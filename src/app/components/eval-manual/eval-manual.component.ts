@@ -28,17 +28,27 @@ export class EvalManualComponent implements OnInit{
     this.loadData();
   }
 
+  saveData(){
+    this.saveService.saveDataAuto(
+      this.saveService.dataAuto.nomEval,
+      this.saveService.dataAuto.format,
+      this.saveService.dataAuto.infoParticipant,
+      this.globalStimuliInfos,
+      this.saveService.dataAuto.listScreens);
+
+  }
+
   loadData(){
     this.globalStimuliInfos = this.saveService.dataAuto.globalParamsStimuli;
   }
 
   startCreateEvalManual(){
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.saveService.dataAuto.infoParticipant, this.globalStimuliInfos);
+    this.saveData();
     this.router.navigate(['/create-eval']);
   }
 
   backToEvalChoice(){
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.saveService.dataAuto.infoParticipant, this.globalStimuliInfos);
+    this.saveData();
     this.selectedModeChange.emit(null);
   }
 

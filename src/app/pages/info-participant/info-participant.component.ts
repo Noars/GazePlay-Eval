@@ -28,6 +28,15 @@ export class InfoParticipantComponent implements OnInit{
     this.loadData();
   }
 
+  saveData(){
+    this.saveService.saveDataAuto(
+      this.saveService.dataAuto.nomEval,
+      this.saveService.dataAuto.format,
+      this.infoParticipantList,
+      this.saveService.dataAuto.globalParamsStimuli,
+      this.saveService.dataAuto.listScreens);
+  }
+
   loadData(){
     this.infoParticipantList = this.saveService.dataAuto.infoParticipant;
   }
@@ -48,12 +57,12 @@ export class InfoParticipantComponent implements OnInit{
   }
 
   backToInfoEval() {
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.infoParticipantList, this.saveService.dataAuto.globalParamsStimuli);
+    this.saveData();
     this.router.navigate(['/info-eval']);
   }
 
   goToCreateEval() {
-    this.saveService.saveDataAuto(this.saveService.dataAuto.nomEval, this.saveService.dataAuto.format, this.infoParticipantList, this.saveService.dataAuto.globalParamsStimuli);
+    this.saveData();
     this.router.navigate(['/setup-eval']);
   }
 }

@@ -1,3 +1,5 @@
+import {ScreenModel} from './screenModel';
+
 export type formatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
 
 export interface saveModel {
@@ -5,6 +7,7 @@ export interface saveModel {
   format: formatTypeModel;
   infoParticipant: string[];
   globalParamsStimuli: string[];
+  listScreens: ScreenModel[];
   createdAt: string;
   version: number;
 }
@@ -14,6 +17,7 @@ export const saveModelDefault: saveModel = {
   format: 'Csv&Xlsx',
   infoParticipant: [],
   globalParamsStimuli: ['1', '1', 'false', '10', '1', '1', 'false', 'false'],
+  listScreens: [],
   createdAt: new Date().toISOString(),
   version: 1,
 }
