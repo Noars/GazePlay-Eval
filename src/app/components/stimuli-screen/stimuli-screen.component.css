@@ -1,0 +1,3 @@
+.zoom-100 { transform: scale(1); transform-origin: top left; }
+.zoom-75 { transform: scale(0.75); transform-origin: top left; }
+.zoom-50 { transform: scale(0.5); transform-origin: top left; }

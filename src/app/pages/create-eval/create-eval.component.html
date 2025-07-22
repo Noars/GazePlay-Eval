@@ -22,9 +22,9 @@
                     >
                       <div cdkDrag>
                         <div class="input-group">
-                            <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
-                              &#x2630;
-                            </span>
+                          <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
+                            &#x2630;
+                          </span>
                           <input
                             type="text"
                             class="form-control"
@@ -50,7 +50,7 @@
               </div>
               <div class="text-center">
                 <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="addScreen()">
-                  <i class="bi bi-plus-circle me-1"></i> Ajouter un écran
+                  <i class="bi bi-plus-circle me-1"></i> Créer un nouvel écran
                 </button>
               </div>
             </div>
@@ -58,23 +58,17 @@
           <div class="col-md-8">
             <div class="card shadow-lg">
               <div class="card-header bg-secondary text-white fw-semibold">
-                ✏️ Édition de l’écran
+                ✏️ Prévisualisation de l’écran -> {{getNameCurrentScreen()}}
               </div>
               @if (selectedScreen !== null) {
-                <div class="card-body">
-                  <div class="mb-3 d-flex align-items-center justify-content-center">
-                    <label for="typeSelect" class="form-label me-3 mb-0 fw-semibold">Type d’écran :</label>
-                    <select id="typeSelect" class="form-select w-auto" [(ngModel)]="selectedScreen.type" (ngModelChange)="changeTypeScreen($event.target.value)">
-                      <option [value]="blackScreenConstModel">Écran noir</option>
-                      <option [value]="instructionScreenConstModel">Écran de consigne</option>
-                      <option [value]="stimuliScreenConstModel" ]>Écran de stimuli</option>
-                      <option [value]="endScreenConstModel">Écran de fin</option>
-                    </select>
-                  </div>
+                <div class="text-center">
+                  <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold">
+                    Modification de l'écran
+                  </button>
                 </div>
               } @else {
                 <div class="card-body text-muted fw-semibold text-center">
-                  Aucun écran sélectionné.
+                  Aucun écran sélectionné !
                 </div>
               }
             </div>

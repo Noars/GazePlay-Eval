@@ -1,0 +1,53 @@
+<div class="container py-4">
+  <!-- Choix lignes / colonnes -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Nombre de lignes</label>
+      <input type="number" class="form-control" [(ngModel)]="nbLignes" min="1" max="20">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Nombre de colonnes</label>
+      <input type="number" class="form-control" [(ngModel)]="nbColonnes" min="1" max="20">
+    </div>
+  </div>
+
+  <!-- Grille dynamique -->
+  <div class="border rounded overflow-auto" style="max-height: 600px;">
+    <div [class]="zoomClass">
+      <div class="d-flex flex-column">
+        @for (row of grid; let i = $index; track i){
+          <div class="d-flex">
+            @for (cell of row; let j = $index; track j){
+              <div class="border bg-body-secondary m-1 d-flex align-items-center justify-content-center text-center"
+                   style="width: 80px; height: 80px;" (click)="onCellClick(cell)">
+                {{ cell.label }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal d'édition -->
+@if (selectedCell){
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <p>Contenu de la cellule à modifier ici (image, texte, etc.)</p>
+          <input type="text" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

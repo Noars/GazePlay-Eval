@@ -6,7 +6,7 @@ export interface saveModel {
   nomEval: string;
   format: formatTypeModel;
   infoParticipant: string[];
-  globalParamsStimuli: string[];
+  globalParamsStimuli: string[]; // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimuli, 6-Disable stimuli, 7-Random position stimuli
   listScreens: screenTypeModel[];
   createdAt: string;
   version: number;
