@@ -1,10 +1,9 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
-import {evalModeModel} from '../../shared/screenModel';
 
 @Component({
   selector: 'app-eval-manual',
@@ -14,7 +13,6 @@ import {evalModeModel} from '../../shared/screenModel';
 })
 export class EvalManualComponent implements OnInit{
 
-  @Input() selectedMode: evalModeModel = null;
   @Output() selectedModeChange = new EventEmitter<null>();
 
   // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimuli, 6-Disable stimuli, 7-Random position stimuli

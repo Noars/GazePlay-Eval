@@ -1,30 +1,36 @@
 <div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 600px;">
+  <div class="card shadow-lg w-100" style="max-width: 700px;">
     <div class="card-header">
-      <h2 class="card-title text-center">Informations Évaluation</h2>
+      <h2 class="card-title text-center">Informations évaluation</h2>
     </div>
     <div class="card-body" style="text-align: -webkit-center;">
-      <div class="mb-3">
-        <label for="evalName" class="form-label fw-semibold">
-          Comment souhaitez-vous appeler votre évaluation ?
-          <i class="bi bi-info-circle ms-1"
-             [matTooltip]="tooltipText"
-             matTooltipClass="custom-tooltip-class"
-             matTooltipPosition="right">
-          </i>
-        </label>
-        <div class="col-4">
-          <input type="text" class="form-control" id="evalName" placeholder="Défaut : GazePlayEval" [(ngModel)]="evaluationName">
+      <div class="card shadow-lg col-11">
+        <div class="card-header bg-secondary text-white fw-semibold">
+          Nom évaluation & format
         </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?</label>
-        <div class="col-4">
-          <select class="form-select" [(ngModel)]="resultType">
-            <option value="Csv&Xlsx">CSV & XLSX</option>
-            <option value="Csv">CSV</option>
-            <option value="Xlsx">XLSX</option>
-          </select>
+        <div class="mb-3 mt-3">
+          <label for="evalName" class="form-label fw-semibold">
+            Comment souhaitez-vous appeler votre évaluation ?
+            <i class="bi bi-info-circle ms-1"
+               [matTooltip]="tooltipText"
+               matTooltipClass="custom-tooltip-class"
+               matTooltipPosition="right">
+            </i>
+          </label>
+          <div class="col-4">
+            <input type="text" class="form-control" id="evalName" placeholder="Défaut: GazePlayEval"
+                   [(ngModel)]="evaluationName">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?</label>
+          <div class="col-4">
+            <select class="form-select" [(ngModel)]="resultType">
+              <option value="Csv&Xlsx">CSV & XLSX</option>
+              <option value="Csv">CSV</option>
+              <option value="Xlsx">XLSX</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="d-flex justify-content-center mt-4">

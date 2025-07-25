@@ -1,6 +1,6 @@
 @if (selectedMode == null){
   <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-    <div class="card shadow-lg w-100" style="max-width: 600px;">
+    <div class="card shadow-lg w-100" style="max-width: 700px;">
       <div class="card-header text-center">
         <h2 class="mb-0">Choisir son mode de création</h2>
       </div>
@@ -26,7 +26,7 @@
   </div>
 } @else if (selectedMode == 'manuel') {
   <div class="text-light mt-5 text-center">
-    <app-eval-manual [selectedMode]="selectedMode" (selectedModeChange)="onSelectedModeChange($event)"></app-eval-manual>
+    <app-eval-manual (selectedModeChange)="onSelectedModeChange($event)"></app-eval-manual>
   </div>
 } @else if (selectedMode == 'auto'){
   <div class="d-flex flex-column flex-md-row justify-content-center gap-4 w-100">

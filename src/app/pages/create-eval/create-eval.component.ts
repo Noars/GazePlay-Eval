@@ -4,19 +4,21 @@ import {Router} from '@angular/router';
 import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {SaveService} from '../../services/save/save.service';
 import {blackScreenModel, blackScreenConstModel, screenTypeModel} from '../../shared/screenModel';
+import {ModifyScreenComponent} from '../../components/modify-screen/modify-screen.component';
 
 @Component({
   selector: 'app-create-eval',
-  imports: [ReactiveFormsModule, FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [ReactiveFormsModule, FormsModule, CdkDropList, CdkDrag, CdkDragHandle, ModifyScreenComponent],
   templateUrl: './create-eval.component.html',
   styleUrl: './create-eval.component.css'
 })
 export class CreateEvalComponent implements OnInit{
 
+  isModifyScreen: boolean = false;
   listScreens: screenTypeModel[] = [];
   selectedScreen: screenTypeModel | null = null;
-  idScreen = 1;
-  editNameScreenDisable = true;
+  idScreen: number = 1;
+  editNameScreenDisable: boolean = true;
 
   constructor(private router: Router, private saveService: SaveService) {
   }
@@ -71,6 +73,14 @@ export class CreateEvalComponent implements OnInit{
 
   getNameCurrentScreen() {
     return this.selectedScreen?.name ?? '';
+  }
+
+  modifyScreen(){
+    this.isModifyScreen = true;
+  }
+
+  onModifyScreenChange(event: boolean){
+    this.isModifyScreen = event;
   }
 
   drop(event: any) {

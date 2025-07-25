@@ -1,88 +1,97 @@
 <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
   <div class="card shadow-lg w-100" style="max-width: 1200px;">
-    <div class="card-header text-center fw-semibold">
-      <h2>Création Évaluation</h2>
-    </div>
-    <div class="card-body">
-      <div class="container mt-4">
-        <div class="row">
-          <div class="col-md-4">
-            <div class="card shadow-lg">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                📋 Liste des écrans
-              </div>
-              <div cdkDropList (cdkDropListDropped)="drop($event)">
-                @for (screen of listScreens; let i = $index; track i) {
-                  <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        [class.active]="screen === selectedScreen"
-                        (click)="selectScreen(screen); $event.preventDefault(); $event.stopPropagation();"
-                        (mouseleave)="exitInputScreen(); $event.preventDefault(); $event.stopPropagation();"
-                        style="cursor: pointer;"
-                    >
-                      <div cdkDrag>
-                        <div class="input-group">
+    @if (isModifyScreen){
+      <div class="card-header text-center fw-semibold">
+        <h2>Modification écran évaluation</h2>
+      </div>
+      <div class="card-body">
+        <app-modify-screen (selectedScreenChange)="onModifyScreenChange($event)"></app-modify-screen>
+      </div>
+    } @else {
+      <div class="card-header text-center fw-semibold">
+        <h2>Création écran évaluation</h2>
+      </div>
+      <div class="card-body">
+        <div class="container mt-4">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="card shadow-lg">
+                <div class="card-header bg-secondary text-white fw-semibold">
+                  Liste des écrans
+                </div>
+                <div cdkDropList (cdkDropListDropped)="drop($event)">
+                  @for (screen of listScreens; let i = $index; track i) {
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                          [class.active]="screen === selectedScreen"
+                          (click)="selectScreen(screen); $event.preventDefault(); $event.stopPropagation();"
+                          (mouseleave)="exitInputScreen(); $event.preventDefault(); $event.stopPropagation();"
+                          style="cursor: pointer;"
+                      >
+                        <div cdkDrag>
+                          <div class="input-group">
                           <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
                             &#x2630;
                           </span>
-                          <input
-                            type="text"
-                            class="form-control"
-                            style="cursor: pointer;"
-                            [class.editName]="!editNameScreenDisable && screen === selectedScreen"
-                            placeholder="Titre de l'écran"
-                            [(ngModel)]="screen.name"
-                            [readonly]="editNameScreenDisable"
-                            (drop)="$event.preventDefault(); $event.stopPropagation();"
-                            (dragover)="$event.preventDefault(); $event.stopPropagation();"
-                          />
-                          <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable)">
-                            <i class="bi bi-pen"></i>
-                          </button>
-                          <button class="btn btn-sm btn-danger" (click)="removeScreen(screen); $event.preventDefault(); $event.stopPropagation();">
-                            <i class="bi bi-trash"></i>
-                          </button>
+                            <input
+                              type="text"
+                              class="form-control"
+                              style="cursor: pointer;"
+                              [class.editName]="!editNameScreenDisable && screen === selectedScreen"
+                              placeholder="Titre de l'écran"
+                              [(ngModel)]="screen.name"
+                              [readonly]="editNameScreenDisable"
+                              (drop)="$event.preventDefault(); $event.stopPropagation();"
+                              (dragover)="$event.preventDefault(); $event.stopPropagation();"
+                            />
+                            <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable)">
+                              <i class="bi bi-pen"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" (click)="removeScreen(screen); $event.preventDefault(); $event.stopPropagation();">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  </ul>
-                }
-              </div>
-              <div class="text-center">
-                <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="addScreen()">
-                  <i class="bi bi-plus-circle me-1"></i> Créer un nouvel écran
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-8">
-            <div class="card shadow-lg">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                ✏️ Prévisualisation de l’écran -> {{getNameCurrentScreen()}}
-              </div>
-              @if (selectedScreen !== null) {
+                      </li>
+                    </ul>
+                  }
+                </div>
                 <div class="text-center">
-                  <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold">
-                    Modification de l'écran
+                  <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="addScreen()">
+                    <i class="bi bi-plus-circle me-1"></i> Créer un nouvel écran
                   </button>
                 </div>
-              } @else {
-                <div class="card-body text-muted fw-semibold text-center">
-                  Aucun écran sélectionné !
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="card shadow-lg">
+                <div class="card-header bg-secondary text-white fw-semibold">
+                  Prévisualisation de l’écran -> {{getNameCurrentScreen()}}
                 </div>
-              }
+                @if (selectedScreen !== null) {
+                  <div class="text-center">
+                    <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="modifyScreen()">
+                      Modification de l'écran
+                    </button>
+                  </div>
+                } @else {
+                  <div class="card-body text-muted fw-semibold text-center">
+                    Aucun écran sélectionné !
+                  </div>
+                }
+              </div>
             </div>
           </div>
         </div>
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-primary fw-semibold" (click)="backToSetupEval()">
+            ← Précédent
+          </button>
+          <button class="btn btn-primary fw-semibold" (click)="goToDownloadEval()">
+            Suivant →
+          </button>
+        </div>
       </div>
-      <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="backToSetupEval()">
-          ← Précédent
-        </button>
-        <button class="btn btn-primary fw-semibold" (click)="goToDownloadEval()">
-          Suivant →
-        </button>
-      </div>
-    </div>
+    }
   </div>
 </div>

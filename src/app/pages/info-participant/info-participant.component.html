@@ -1,10 +1,10 @@
 <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 600px;">
+  <div class="card shadow-lg w-100" style="max-width: 700px;">
     <div class="card-header text-center">
-      <h2>Informations Participant</h2>
+      <h2 class="card-title text-center">Informations participant</h2>
     </div>
-    <div class="card-body">
-      <div class="alert alert-info text-center fw-semibold">
+    <div class="card-body" style="text-align: -webkit-center;">
+      <div class="alert alert-info text-center fw-semibold col-11">
         Aucune information n'est gardé de notre côté !
         <i class="bi bi-info-circle ms-1"
            [matTooltip]="tooltipTextData"
@@ -12,44 +12,50 @@
            matTooltipPosition="right">
         </i>
       </div>
-      <div class="alert alert-info text-center fw-semibold">
+      <div class="alert alert-info text-center fw-semibold col-11">
         Vous pouvez réogarniser vos champs si dessous via du Drag and Drop !
       </div>
-      <div cdkDropList (cdkDropListDropped)="drop($event)" class="d-flex flex-column gap-3">
-        @for (field of infoParticipantList; let i = $index; track i){
-          <div cdkDrag>
-            <div class="input-group">
+      <div class="card shadow-lg col-11">
+        <div class="card-header bg-secondary text-white fw-semibold">
+          Liste informations
+        </div>
+        <div class="mb-3 mt-3">
+          <div (cdkDropListDropped)="drop($event)" cdkDropList class="d-flex flex-column gap-2 col-7">
+            @for (field of infoParticipantList; let i = $index; track i){
+              <div cdkDrag>
+                <div class="input-group">
               <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
                 &#x2630;
               </span>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Titre du champ"
-                [(ngModel)]="infoParticipantList[i]"
-              />
-              <button
-                type="button"
-                class="btn btn-danger"
-                (click)="removeField(i)"
-              >
-                &minus;
-              </button>
-            </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Titre du champ"
+                    [(ngModel)]="infoParticipantList[i]"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    (click)="removeField(i)"
+                  >
+                    &minus;
+                  </button>
+                </div>
+              </div>
+            }
           </div>
-        }
-      </div>
-
-      <div class="text-center mt-4">
-        <button class="btn btn-secondary px-4 fw-semibold" (click)="addField()">
-          <i class="bi bi-plus-circle me-2"></i>Ajouter un champ
-        </button>
+          <div class="text-center mt-4">
+            <button (click)="addField()" class="btn btn-secondary px-4 fw-semibold">
+              <i class="bi bi-plus-circle me-2"></i>Ajouter un champ
+            </button>
+          </div>
+        </div>
       </div>
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="backToInfoEval()">
+        <button (click)="backToInfoEval()" class="btn btn-primary fw-semibold">
           ← Précédent
         </button>
-        <button class="btn btn-primary fw-semibold" (click)="goToCreateEval()">
+        <button (click)="goToCreateEval()" class="btn btn-primary fw-semibold">
           Suivant →
         </button>
       </div>
