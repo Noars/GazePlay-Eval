@@ -75,10 +75,6 @@ export class CreateEvalComponent implements OnInit{
     return this.selectedScreen?.name ?? '';
   }
 
-  modifyScreen(){
-    this.isModifyScreen = true;
-  }
-
   onModifyScreenChange(event: boolean){
     this.isModifyScreen = event;
   }
