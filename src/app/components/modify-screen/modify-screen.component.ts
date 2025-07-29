@@ -1,4 +1,13 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {
   blackScreenConstModel,
   blackScreenModel,
@@ -21,10 +30,37 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './modify-screen.component.html',
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent {
+export class ModifyScreenComponent implements AfterViewInit{
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<boolean>();
+
+  ajoutCroix: string = ''; // "oui" ou "non"
+  tempsFixation: number | null = null;
+
+  arrowOffset: number = 0;
+  @ViewChild('labelQ1') labelQuestion1!: ElementRef;
+
+  ngAfterViewInit() {
+    this.updateArrowPosition();
+  }
+
+  updateArrowPosition() {
+    if (this.labelQuestion1) {
+      const rect = this.labelQuestion1.nativeElement.getBoundingClientRect();
+      // Calculer la position pour centrer la flèche sous le label
+      this.arrowOffset = rect.left + rect.width / 2 - this.getCardLeftOffset();
+    }
+  }
+
+  getCardLeftOffset(): number {
+    // Trouver la position left du conteneur card pour un calcul relatif
+    const card = this.labelQuestion1.nativeElement.closest('.card');
+    if (card) {
+      return card.getBoundingClientRect().left;
+    }
+    return 0;
+  }
 
   changeTypeScreen(type: string) {
     switch (type){

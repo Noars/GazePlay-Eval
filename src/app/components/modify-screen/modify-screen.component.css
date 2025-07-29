@@ -1,0 +1,56 @@
+.arrow-container {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+.arrow {
+  position: relative;
+  width: 60px;
+  height: 40px;
+}
+
+.arrow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 20px;
+  background-color: #1e3a8a;
+}
+
+.arrow::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #1e3a8a;
+}
+
+.arrow::after::before {
+  content: '';
+}
+.arrow > span {
+  position: absolute;
+  top: 16px;
+  left: 38px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid #1e3a8a;
+}
+
+.custom-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-dash {
+  margin-right: 8px;
+  font-weight: bold;
+}

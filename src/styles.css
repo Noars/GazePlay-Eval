@@ -1,5 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 
+body {
+  min-width: 1280px;
+  min-height: 768px;
+}
+
 .custom-tooltip-class {
   background-color: #444 !important;
   color: white;
