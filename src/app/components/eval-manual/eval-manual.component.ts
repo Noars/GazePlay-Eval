@@ -15,8 +15,8 @@ export class EvalManualComponent implements OnInit{
 
   @Output() selectedModeChange = new EventEmitter<null>();
 
-  // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimuli, 6-Disable stimuli, 7-Random position stimuli
-  globalStimuliInfos: string[] = saveModelDefault.globalParamsStimuli;
+  globalBlackScreenInfos: any[] = saveModelDefault.globalParamsBlackScreen;
+  globalStimuliScreenInfos: string[] = saveModelDefault.globalParamsStimuliScreen;
 
   constructor(private router: Router,
               private saveService: SaveService,) {
@@ -31,13 +31,31 @@ export class EvalManualComponent implements OnInit{
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
       this.saveService.dataAuto.infoParticipant,
-      this.globalStimuliInfos,
+      this.globalBlackScreenInfos,
+      this.globalStimuliScreenInfos,
       this.saveService.dataAuto.listScreens);
 
   }
 
   loadData(){
-    this.globalStimuliInfos = this.saveService.dataAuto.globalParamsStimuli;
+    this.globalStimuliScreenInfos = this.saveService.dataAuto.globalParamsStimuliScreen;
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.globalBlackScreenInfos[3] = file;
+      console.log('Image stockée :', this.globalBlackScreenInfos[3]);
+    }
+  }
+
+  getNameImage(){
+    if (this.globalBlackScreenInfos[3] === ''){
+      return "Aucun fichier sélectionner !"
+    }else {
+      return this.globalBlackScreenInfos[3].name;
+    }
   }
 
   startCreateEvalManual(){

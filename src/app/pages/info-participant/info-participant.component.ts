@@ -33,7 +33,8 @@ export class InfoParticipantComponent implements OnInit{
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
       this.infoParticipantList,
-      this.saveService.dataAuto.globalParamsStimuli,
+      this.saveService.dataAuto.globalParamsBlackScreen,
+      this.saveService.dataAuto.globalParamsStimuliScreen,
       this.saveService.dataAuto.listScreens);
   }
 

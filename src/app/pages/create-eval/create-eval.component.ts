@@ -32,7 +32,8 @@ export class CreateEvalComponent implements OnInit{
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
       this.saveService.dataAuto.infoParticipant,
-      this.saveService.dataAuto.globalParamsStimuli,
+      this.saveService.dataAuto.globalParamsBlackScreen,
+      this.saveService.dataAuto.globalParamsStimuliScreen,
       this.listScreens);
   }
 

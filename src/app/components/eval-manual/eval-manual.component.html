@@ -1,23 +1,104 @@
 <div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
-  <div class="card shadow-lg w-100" style="max-width: 700px;">
+  <div class="card shadow-lg w-100" style="max-width: 800px;">
     <div class="card-header text-center">
       <h3 class="mb-0 fw-semibold">Paramètres globaux évaluation manuelle</h3>
     </div>
     <div class="card-body">
-      <div class="accordion mt-4" id="globalParamsAccordion">
+      <div class="accordion mt-4" id="globalParams">
         <div class="accordion-item">
-          <h2 class="accordion-header" id="headingStimuli">
-            <button class="accordion-button collapsed fw-semibold" type="button"
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed fw-semibold text-center" type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#collapseStimuli"
+                    data-bs-target="#collapseBlackScreen"
                     aria-expanded="false"
-                    aria-controls="collapseStimuli">
-              Écrans de stimuli
+                    aria-controls="collapseBlackScreen">
+              Écrans noir globaux
             </button>
           </h2>
-          <div id="collapseStimuli" class="accordion-collapse collapse"
-               aria-labelledby="headingStimuli"
-               data-bs-parent="#globalParamsAccordion">
+          <div id="collapseBlackScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+            <div class="accordion-body">
+              <div class="mb-2">
+                <div class="mt-2 px-3">
+                  <ul class="custom-list">
+                    <li>
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="list-dash">-</span>
+                        <label class="form-label me-3 mb-0">Mettre un temps avant passage a l'écran suivant ?</label>
+                        <div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="globalBlackScreenInfos[0] = true" [checked]="globalBlackScreenInfos[0]">
+                            <label class="form-check-label" for="timeNextScreenY">Oui</label>
+                          </div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="globalBlackScreenInfos[0] = false" [checked]="!globalBlackScreenInfos[0]">
+                            <label class="form-check-label" for="timeNextScreenN">Non</label>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    @if (globalBlackScreenInfos[0]) {
+                      <div class="arrow-container mt-2">
+                        <div class="arrow">
+                          <span></span>
+                        </div>
+                        <div class="d-flex align-items-center ms-3">
+                          <label class="form-label me-5">Combien de temps ?</label>
+                          <div class="input-group w-auto">
+                            <input type="number" class="form-control" min="1" [(ngModel)]="globalBlackScreenInfos[1]">
+                            <span class="input-group-text">secondes</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    <li class="mt-4">
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="list-dash">-</span>
+                        <label class="form-label me-3 mb-0">Ajouter une image ?</label>
+                        <div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="checkbox" name="addImg" id="addImgY" (change)="globalBlackScreenInfos[2] = true" [checked]="globalBlackScreenInfos[2]">
+                            <label class="form-check-label" for="addImgY">Oui</label>
+                          </div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="checkbox" name="addImg" id="addImgN" (change)="globalBlackScreenInfos[2] = false" [checked]="!globalBlackScreenInfos[2]">
+                            <label class="form-check-label" for="addImgN">Non</label>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    @if (globalBlackScreenInfos[2]) {
+                      <div class="arrow-container mt-2">
+                        <div class="arrow">
+                          <span></span>
+                        </div>
+                        <div class="d-flex">
+                          <label class="form-label">Image :</label>
+                          <div class="d-flex">
+                            <input type="text" class="form-control me-2" [value]="getNameImage()" readonly>
+                            <button class="btn btn-primary" (click)="fileInput.click()">Parcourir</button>
+                            <input #fileInput type="file" class="d-none" accept="image/*" (change)="onImageSelected($event)">
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed fw-semibold" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseStimuliScreen"
+                    aria-expanded="false"
+                    aria-controls="collapseStimuliScreen">
+              Écrans de stimuli globaux
+            </button>
+          </h2>
+          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
             <div class="accordion-body">
               <div class="mb-4">
                 <label class="form-label fw-semibold">Taille de la grille ?</label>
@@ -27,7 +108,7 @@
                   </div>
                   <div class="col-4">
                     <input type="number" id="nbRows" class="form-control" min="1" step="1" aria-describedby="nbRowsInfo"
-                           [(ngModel)]="globalStimuliInfos[0]">
+                           [(ngModel)]="globalStimuliScreenInfos[0]">
                   </div>
                   <div class="col-4">
                       <span id="nbRowsInfo" class="form-text fw-semibold">
@@ -41,7 +122,7 @@
                   </div>
                   <div class="col-4">
                     <input type="number" id="nbCols" class="form-control" min="1" step="1" aria-describedby="nbColsInfo"
-                           [(ngModel)]="globalStimuliInfos[1]">
+                           [(ngModel)]="globalStimuliScreenInfos[1]">
                   </div>
                   <div class="col-4">
                       <span id="nbColsInfo" class="form-text fw-semibold">
@@ -62,8 +143,8 @@
                       type="checkbox"
                       class="form-check-input"
                       id="timeScreenYes"
-                      (change)="globalStimuliInfos[2] = 'true'"
-                      [checked]="globalStimuliInfos[2] === 'true'"
+                      (change)="globalStimuliScreenInfos[2] = 'true'"
+                      [checked]="globalStimuliScreenInfos[2] === 'true'"
                     />
                     <label class="form-check-label" for="timeScreenYes">Oui</label>
                   </div>
@@ -72,17 +153,17 @@
                       type="checkbox"
                       class="form-check-input"
                       id="timeScreenNo"
-                      (change)="globalStimuliInfos[2] = 'false'"
-                      [checked]="globalStimuliInfos[2] === 'false'"
+                      (change)="globalStimuliScreenInfos[2] = 'false'"
+                      [checked]="globalStimuliScreenInfos[2] === 'false'"
                     />
                     <label class="form-check-label" for="timeScreenNo">Non</label>
                   </div>
                 </div>
-                @if (globalStimuliInfos[2] === 'true') {
+                @if (globalStimuliScreenInfos[2] === 'true') {
                   <div class="row g-3 align-items-center justify-content-center">
                     <div class="col-auto">
                       <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1"
-                             aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliInfos[3]">
+                             aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
                     </div>
                     <div class="col-auto">
                       <span id="nbFixationLengthInfo" class="form-text fw-semibold">
@@ -98,7 +179,7 @@
                 <div class="row g-3 align-items-center justify-content-center">
                   <div class="col-auto">
                     <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1"
-                           aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliInfos[4]">
+                           aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
                   </div>
                   <div class="col-auto">
                       <span id="nbFixationLengthInfo" class="form-text fw-semibold">
@@ -114,12 +195,12 @@
                 <div class="row g-3 align-items-center justify-content-center">
                   <div class="col-auto">
                     <input type="number" id="nbStimuli" class="form-control" min="1"
-                           [max]="Number(globalStimuliInfos[0]) * Number(globalStimuliInfos[1])" step="1"
-                           aria-describedby="nbStimuliInfo" [(ngModel)]="globalStimuliInfos[5]">
+                           [max]="Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1])" step="1"
+                           aria-describedby="nbStimuliInfo" [(ngModel)]="globalStimuliScreenInfos[5]">
                   </div>
                   <div class="col-auto">
                       <span id="nbStimuliInfo" class="form-text fw-semibold">
-                        Maximum nombre de lignes * nombre de colonnes ({{ Number(globalStimuliInfos[0]) * Number(globalStimuliInfos[1]) }}
+                        Maximum nombre de lignes * nombre de colonnes ({{ Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1]) }}
                         ) !
                       </span>
                   </div>
@@ -135,8 +216,8 @@
                       type="checkbox"
                       class="form-check-input"
                       id="disableStimuliYes"
-                      (change)="globalStimuliInfos[6] = 'true'"
-                      [checked]="globalStimuliInfos[6] === 'true'"
+                      (change)="globalStimuliScreenInfos[6] = 'true'"
+                      [checked]="globalStimuliScreenInfos[6] === 'true'"
                     />
                     <label class="form-check-label" for="disableStimuliYes">Oui</label>
                   </div>
@@ -145,8 +226,8 @@
                       type="checkbox"
                       class="form-check-input"
                       id="disableStimuliNo"
-                      (change)="globalStimuliInfos[6] = 'false'"
-                      [checked]="globalStimuliInfos[6] === 'false'"
+                      (change)="globalStimuliScreenInfos[6] = 'false'"
+                      [checked]="globalStimuliScreenInfos[6] === 'false'"
                     />
                     <label class="form-check-label" for="disableStimuliNo">Non</label>
                   </div>
@@ -164,8 +245,8 @@
                       type="checkbox"
                       class="form-check-input"
                       id="randomStimuliYes"
-                      (change)="globalStimuliInfos[7] = 'true'"
-                      [checked]="globalStimuliInfos[7] === 'true'"
+                      (change)="globalStimuliScreenInfos[7] = 'true'"
+                      [checked]="globalStimuliScreenInfos[7] === 'true'"
                     />
                     <label class="form-check-label" for="randomStimuliYes">Oui</label>
                   </div>
@@ -174,8 +255,8 @@
                       type="checkbox"
                       class="form-check-input"
                       id="randomStimuliNo"
-                      (change)="globalStimuliInfos[7] = 'false'"
-                      [checked]="globalStimuliInfos[7] === 'false'"
+                      (change)="globalStimuliScreenInfos[7] = 'false'"
+                      [checked]="globalStimuliScreenInfos[7] === 'false'"
                     />
                     <label class="form-check-label" for="randomStimuliNo">Non</label>
                   </div>
