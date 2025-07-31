@@ -1,24 +1,24 @@
 export type evalModeModel = 'manuel' | 'auto' | null;
-export type screenTypeModel = blackScreenModel | instructionScreenModel | endScreenModel | stimuliScreenModel;
+export type screenTypeModel = transitionScreenModel | instructionScreenModel | endScreenModel | stimuliScreenModel;
 
-export type blackScreenTypeModel = 'black';
+export type transitionScreenTypeModel = 'transition';
 export type instructionScreenTypeModel = 'instruction';
 export type endScreenTypeModel = 'end';
 export type stimuliScreenTypeModel = 'stimuli';
 
-export const blackScreenConstModel = 'black';
+export const transitionScreenConstModel = 'transition';
 export const instructionScreenConstModel = 'instruction';
 export const endScreenConstModel = 'end';
 export const stimuliScreenConstModel = 'stimuli';
 
-export interface blackScreenModel {
+export interface transitionScreenModel {
   name: string;
-  type: blackScreenTypeModel;
+  type: transitionScreenTypeModel;
 }
 
-export const defaultBlackScreenModel: blackScreenModel = {
+export const defaultTransitionScreenModel: transitionScreenModel = {
   name: '',
-  type: blackScreenConstModel
+  type: transitionScreenConstModel
 }
 
 export interface instructionScreenModel {

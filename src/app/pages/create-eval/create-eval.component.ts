@@ -3,7 +3,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {SaveService} from '../../services/save/save.service';
-import {blackScreenModel, blackScreenConstModel, screenTypeModel} from '../../shared/screenModel';
+import {transitionScreenModel, transitionScreenConstModel, screenTypeModel} from '../../shared/screenModel';
 import {ModifyScreenComponent} from '../../components/modify-screen/modify-screen.component';
 
 @Component({
@@ -32,7 +32,8 @@ export class CreateEvalComponent implements OnInit{
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
       this.saveService.dataAuto.infoParticipant,
-      this.saveService.dataAuto.globalParamsBlackScreen,
+      this.saveService.dataAuto.globalParamsTransitionScreen,
+      this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
       this.listScreens);
   }
@@ -42,9 +43,9 @@ export class CreateEvalComponent implements OnInit{
   }
 
   addScreen() {
-    const newScreen: blackScreenModel = {
+    const newScreen: transitionScreenModel = {
       name: 'Ecran ' + this.idScreen++,
-      type: blackScreenConstModel,
+      type: transitionScreenConstModel,
     };
     this.listScreens.push(newScreen);
     this.selectScreen(newScreen);

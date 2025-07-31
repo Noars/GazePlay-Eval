@@ -12,7 +12,8 @@ export class SaveService {
     nomEval: '',
     format: 'Csv&Xlsx',
     infoParticipant: [],
-    globalParamsBlackScreen: [],
+    globalParamsTransitionScreen: [],
+    globalParamsInstructionScreen: [],
     globalParamsStimuliScreen: [],
     listScreens: []
   };
@@ -22,12 +23,19 @@ export class SaveService {
     this.saveToSlot(0, this.dataAuto);
   }
 
-  saveDataAuto(nomEval: string, format: formatTypeModel, infoParticipant: string[], globalParamsBlackScreen: string[], globalParamsStimuliScreen: string[], listScreens: screenTypeModel[]){
+  saveDataAuto(nomEval: string,
+               format: formatTypeModel,
+               infoParticipant: string[],
+               globalParamsTransitionScreen: any[],
+               globalParamsInstructionScreen: any[],
+               globalParamsStimuliScreen: string[],
+               listScreens: screenTypeModel[]){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
       infoParticipant: infoParticipant,
-      globalParamsBlackScreen: globalParamsBlackScreen,
+      globalParamsTransitionScreen: globalParamsTransitionScreen,
+      globalParamsInstructionScreen: globalParamsInstructionScreen,
       globalParamsStimuliScreen: globalParamsStimuliScreen,
       listScreens: listScreens
     };

@@ -29,7 +29,8 @@ export class InfoEvalComponent implements OnInit{
       this.evaluationName,
       this.resultType,
       this.saveService.dataAuto.infoParticipant,
-      this.saveService.dataAuto.globalParamsBlackScreen,
+      this.saveService.dataAuto.globalParamsTransitionScreen,
+      this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
       this.saveService.dataAuto.listScreens);
   }

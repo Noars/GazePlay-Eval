@@ -1,0 +1,93 @@
+<div class="accordion-body">
+  <div class="mb-2">
+    <div class="mt-2 px-3">
+      <ul class="custom-list">
+        <li>
+          <div class="d-flex align-items-center mb-2">
+            <span class="list-dash">-</span>
+            <label class="form-label me-3">Mettre un temps avant passage a l'écran suivant ?</label>
+            <div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="globalTransitionScreenInfos[0] = true" [checked]="globalTransitionScreenInfos[0]">
+                <label class="form-check-label" for="timeNextScreenY">Oui</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="globalTransitionScreenInfos[0] = false" [checked]="!globalTransitionScreenInfos[0]">
+                <label class="form-check-label" for="timeNextScreenN">Non</label>
+              </div>
+            </div>
+          </div>
+        </li>
+        @if (globalTransitionScreenInfos[0]) {
+          <div class="arrow-container mt-2">
+            <div class="arrow">
+              <span></span>
+            </div>
+            <div class="d-flex align-items-center mb-2">
+              <label class="form-label me-3">Combien de temps ?</label>
+              <div class="input-group w-auto">
+                <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[1]">
+                <span class="input-group-text">secondes</span>
+              </div>
+            </div>
+          </div>
+        }
+        <li class="mt-4">
+          <div class="d-flex align-items-center mb-2">
+            <span class="list-dash">-</span>
+            <label class="form-label me-3">Mettre une croix de fixation ?</label>
+            <div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenY" (change)="globalTransitionScreenInfos[2] = true" [checked]="globalTransitionScreenInfos[2]">
+                <label class="form-check-label" for="fixationCrossScreenY">Oui</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenN" (change)="globalTransitionScreenInfos[2] = false" [checked]="!globalTransitionScreenInfos[2]">
+                <label class="form-check-label" for="fixationCrossScreenN">Non</label>
+              </div>
+            </div>
+          </div>
+        </li>
+        @if (globalTransitionScreenInfos[2]) {
+          <div class="arrow-container mt-2">
+            <div class="arrow">
+              <span></span>
+            </div>
+            <ul class="custom-list">
+              <li>
+                <div class="d-flex align-items-center mt-2">
+                  <span class="list-dash">-</span>
+                  <label class="form-label me-3">Mettre un temps de fixation ?</label>
+                  <div>
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenY" (change)="globalTransitionScreenInfos[3] = true" [checked]="globalTransitionScreenInfos[3]">
+                      <label class="form-check-label" for="fixationTimeScreenY">Oui</label>
+                    </div>
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenN" (change)="globalTransitionScreenInfos[3] = false" [checked]="!globalTransitionScreenInfos[3]">
+                      <label class="form-check-label" for="fixationTimeScreenN">Non</label>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              @if (globalTransitionScreenInfos[3]) {
+                <div class="arrow-container mt-2">
+                  <div class="arrow">
+                    <span></span>
+                  </div>
+                  <div class="d-flex align-items-center mb-2">
+                    <label class="form-label me-3">Combien de temps ?</label>
+                    <div class="input-group w-auto">
+                      <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[4]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </ul>
+          </div>
+        }
+      </ul>
+    </div>
+  </div>
+</div>

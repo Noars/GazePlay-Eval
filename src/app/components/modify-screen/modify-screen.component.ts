@@ -3,15 +3,14 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   Output,
   ViewChild
 } from '@angular/core';
 import {
-  blackScreenConstModel,
-  blackScreenModel,
-  defaultBlackScreenModel, defaultEndScreenModel,
+  transitionScreenConstModel,
+  transitionScreenModel,
+  defaultTransitionScreenModel, defaultEndScreenModel,
   defaultInstructionScreenModel,
   defaultStimuliScreenModel, endScreenConstModel, endScreenModel,
   instructionScreenConstModel,
@@ -64,10 +63,10 @@ export class ModifyScreenComponent implements AfterViewInit{
 
   changeTypeScreen(type: string) {
     switch (type){
-      case blackScreenConstModel :
-        const newBlackScreen: blackScreenModel = defaultBlackScreenModel;
-        newBlackScreen.name = this.screenToModify.name
-        this.screenToModify = newBlackScreen;
+      case transitionScreenConstModel :
+        const newTransitionScreen: transitionScreenModel = defaultTransitionScreenModel;
+        newTransitionScreen.name = this.screenToModify.name
+        this.screenToModify = newTransitionScreen;
         break;
 
       case instructionScreenConstModel :
@@ -97,8 +96,8 @@ export class ModifyScreenComponent implements AfterViewInit{
     this.selectedScreenChange.emit(false);
   }
 
-  protected readonly blackScreenConstModel = blackScreenConstModel;
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
   protected readonly endScreenConstModel = endScreenConstModel;
+  protected readonly transitionScreenConstModel = transitionScreenConstModel;
 }

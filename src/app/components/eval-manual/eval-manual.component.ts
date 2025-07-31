@@ -4,10 +4,12 @@ import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
+import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
+import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
   templateUrl: './eval-manual.component.html',
   styleUrl: './eval-manual.component.css'
 })
@@ -15,7 +17,8 @@ export class EvalManualComponent implements OnInit{
 
   @Output() selectedModeChange = new EventEmitter<null>();
 
-  globalBlackScreenInfos: any[] = saveModelDefault.globalParamsBlackScreen;
+  globalTransitionScreenInfos: any[] = saveModelDefault.globalParamsTransitionScreen;
+  globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
   globalStimuliScreenInfos: string[] = saveModelDefault.globalParamsStimuliScreen;
 
   constructor(private router: Router,
@@ -31,7 +34,8 @@ export class EvalManualComponent implements OnInit{
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
       this.saveService.dataAuto.infoParticipant,
-      this.globalBlackScreenInfos,
+      this.globalTransitionScreenInfos,
+      this.globalInstructionScreenInfos,
       this.globalStimuliScreenInfos,
       this.saveService.dataAuto.listScreens);
 
@@ -39,23 +43,6 @@ export class EvalManualComponent implements OnInit{
 
   loadData(){
     this.globalStimuliScreenInfos = this.saveService.dataAuto.globalParamsStimuliScreen;
-  }
-
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.globalBlackScreenInfos[3] = file;
-      console.log('Image stockée :', this.globalBlackScreenInfos[3]);
-    }
-  }
-
-  getNameImage(){
-    if (this.globalBlackScreenInfos[3] === ''){
-      return "Aucun fichier sélectionner !"
-    }else {
-      return this.globalBlackScreenInfos[3].name;
-    }
   }
 
   startCreateEvalManual(){

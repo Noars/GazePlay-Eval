@@ -24,6 +24,11 @@ body {
   border-color: #1d4ed8 !important;
 }
 
+.form-check-input:checked {
+  background-color: #1e3a8a !important;
+  border-color: #1e3a8a !important;
+}
+
 .arrow-container {
   display: flex;
   align-items: flex-start;
