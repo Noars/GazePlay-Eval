@@ -14,19 +14,28 @@ export class GlobalInstructionScreenComponent {
 
   @Input() globalInstructionScreenInfos: any[] = [];
 
-  onImageSelected(event: Event): void {
+  onTypeChange(){
+    this.globalInstructionScreenInfos[4] = '';
+  }
+
+  onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      this.globalInstructionScreenInfos[3] = file;
+      this.globalInstructionScreenInfos[4] = file;
     }
   }
 
-  getNameImage(){
-    if (this.globalInstructionScreenInfos[3] === ''){
+  getFileName(){
+    if (this.globalInstructionScreenInfos[4] === ''){
       return "Aucun fichier sélectionner !"
     }else {
-      return this.globalInstructionScreenInfos[3].name;
+      return this.globalInstructionScreenInfos[4].name;
     }
+  }
+
+  onGetText(event: Event){
+    const input = event.target as HTMLInputElement;
+    this.globalInstructionScreenInfos[4] = input.value;
   }
 }

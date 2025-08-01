@@ -8,7 +8,7 @@
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold text-center" type="button"
+            <button class="accordion-button collapsed fw-semibold" type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseTransitionScreen"
                     aria-expanded="false"
@@ -23,7 +23,7 @@
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold text-center" type="button"
+            <button class="accordion-button collapsed fw-semibold" type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseInstructionScreen"
                     aria-expanded="false"
@@ -35,6 +35,21 @@
             <app-global-instruction-screen [globalInstructionScreenInfos]="globalInstructionScreenInfos"></app-global-instruction-screen>
           </div>
         </div>
+
+        <!--<div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed fw-semibold" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseStimuliScreen"
+                    aria-expanded="false"
+                    aria-controls="collapseStimuliScreen">
+              Écrans stimuli globaux
+            </button>
+          </h2>
+          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+            <app-global-stimuli-screen [globalStimuliScreenInfos]="globalStimuliScreenInfos"></app-global-stimuli-screen>
+          </div>
+        </div>-->
 
         <div class="accordion-item">
           <h2 class="accordion-header">
@@ -213,15 +228,16 @@
             </div>
           </div>
         </div>
+
       </div>
       <div class="d-flex justify-content-center align-items-start mt-4">
-        <button class="btn btn-primary" (click)="startCreateEvalManual()">
+        <button class="btn btn-primary fw-semibold" (click)="startCreateEvalManual()">
           Commencer la création manuelle de l'évaluation
           <i class="bi bi-play-fill"></i>
         </button>
       </div>
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-primary" (click)="backToEvalChoice()">
+        <button class="btn btn-primary fw-semibold" (click)="backToEvalChoice()">
           ← Retour
         </button>
       </div>

@@ -10,7 +10,7 @@
             <label for="typeSelect" class="form-label me-3 mb-0 fw-semibold">Type d’écran :</label>
             <select id="typeSelect" class="form-select w-auto" [(ngModel)]="screenToModify.type" (ngModelChange)="changeTypeScreen($event.target.value)">
               <option [value]="transitionScreenConstModel">Écran de transition</option>
-              <option [value]="instructionScreenConstModel">Écran de consigne</option>
+              <option [value]="instructionScreenConstModel">Écran d'instruction</option>
               <option [value]="stimuliScreenConstModel">Écran de stimuli</option>
               <option [value]="endScreenConstModel">Écran de fin</option>
             </select>
