@@ -1,44 +1,39 @@
 export type evalModeModel = 'manuel' | 'auto' | null;
-export type screenTypeModel = transitionScreenModel | instructionScreenModel | endScreenModel | stimuliScreenModel;
+export type screenTypeModel = transitionScreenModel | instructionScreenModel | stimuliScreenModel;
 
 export type transitionScreenTypeModel = 'transition';
 export type instructionScreenTypeModel = 'instruction';
-export type endScreenTypeModel = 'end';
 export type stimuliScreenTypeModel = 'stimuli';
 
 export const transitionScreenConstModel = 'transition';
 export const instructionScreenConstModel = 'instruction';
-export const endScreenConstModel = 'end';
 export const stimuliScreenConstModel = 'stimuli';
+
+export const transitionScreenConstValue = [false, '1', false, false, '1'];
+export const instructionScreenConstValue = [false, '1', false, 'Image', '', false, '1'];
 
 export interface transitionScreenModel {
   name: string;
   type: transitionScreenTypeModel;
+  values: any[];
 }
 
 export const defaultTransitionScreenModel: transitionScreenModel = {
   name: '',
-  type: transitionScreenConstModel
+  type: transitionScreenConstModel,
+  values: transitionScreenConstValue
 }
 
 export interface instructionScreenModel {
   name: string;
   type: instructionScreenTypeModel;
+  values: any[];
 }
 
 export const defaultInstructionScreenModel: instructionScreenModel = {
   name: '',
-  type: instructionScreenConstModel
-}
-
-export interface endScreenModel {
-  name: string;
-  type: endScreenTypeModel;
-}
-
-export const defaultEndScreenModel: endScreenModel = {
-  name: '',
-  type: endScreenConstModel
+  type: instructionScreenConstModel,
+  values: instructionScreenConstValue,
 }
 
 export interface stimuliScreenModel {

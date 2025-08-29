@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -10,9 +9,9 @@ import {
 import {
   transitionScreenConstModel,
   transitionScreenModel,
-  defaultTransitionScreenModel, defaultEndScreenModel,
+  defaultTransitionScreenModel,
   defaultInstructionScreenModel,
-  defaultStimuliScreenModel, endScreenConstModel, endScreenModel,
+  defaultStimuliScreenModel,
   instructionScreenConstModel,
   instructionScreenModel,
   screenTypeModel,
@@ -20,6 +19,8 @@ import {
   stimuliScreenModel
 } from '../../shared/screenModel';
 import {FormsModule} from '@angular/forms';
+import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
+import {SaveService} from '../../services/save/save.service';
 
 @Component({
   selector: 'app-modify-screen',
@@ -29,62 +30,32 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './modify-screen.component.html',
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent implements AfterViewInit{
+export class ModifyScreenComponent{
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<boolean>();
 
-  ajoutCroix: string = ''; // "oui" ou "non"
-  tempsFixation: number | null = null;
-
-  arrowOffset: number = 0;
-  @ViewChild('labelQ1') labelQuestion1!: ElementRef;
-
-  ngAfterViewInit() {
-    this.updateArrowPosition();
-  }
-
-  updateArrowPosition() {
-    if (this.labelQuestion1) {
-      const rect = this.labelQuestion1.nativeElement.getBoundingClientRect();
-      // Calculer la position pour centrer la flèche sous le label
-      this.arrowOffset = rect.left + rect.width / 2 - this.getCardLeftOffset();
-    }
-  }
-
-  getCardLeftOffset(): number {
-    // Trouver la position left du conteneur card pour un calcul relatif
-    const card = this.labelQuestion1.nativeElement.closest('.card');
-    if (card) {
-      return card.getBoundingClientRect().left;
-    }
-    return 0;
+  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
 
   changeTypeScreen(type: string) {
     switch (type){
       case transitionScreenConstModel :
-        const newTransitionScreen: transitionScreenModel = defaultTransitionScreenModel;
-        newTransitionScreen.name = this.screenToModify.name
+        let newTransitionScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
+        newTransitionScreen = this.updateScreenService.updateTransitionScreen(newTransitionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsTransitionScreen);
         this.screenToModify = newTransitionScreen;
         break;
 
       case instructionScreenConstModel :
-        const newInstructionScreen: instructionScreenModel = defaultInstructionScreenModel;
-        newInstructionScreen.name = this.screenToModify.name;
+        let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
+        newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
         break;
 
       case stimuliScreenConstModel :
-        const newStimuliScreen: stimuliScreenModel = defaultStimuliScreenModel;
+        const newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
         newStimuliScreen.name = this.screenToModify.name;
         this.screenToModify = newStimuliScreen;
-        break;
-
-      case endScreenConstModel :
-        const newEndScreen: endScreenModel = defaultEndScreenModel;
-        newEndScreen.name = this.screenToModify.name;
-        this.screenToModify = newEndScreen;
         break;
 
       default :
@@ -98,6 +69,5 @@ export class ModifyScreenComponent implements AfterViewInit{
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
-  protected readonly endScreenConstModel = endScreenConstModel;
   protected readonly transitionScreenConstModel = transitionScreenConstModel;
 }

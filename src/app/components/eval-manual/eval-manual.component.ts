@@ -48,6 +48,8 @@ export class EvalManualComponent implements OnInit{
 
   startCreateEvalManual(){
     this.saveData();
+    console.log("Transition value -> " + this.saveService.dataAuto.globalParamsTransitionScreen);
+    console.log("Instruction value -> " + this.saveService.dataAuto.globalParamsInstructionScreen);
     this.router.navigate(['/create-eval']);
   }
 

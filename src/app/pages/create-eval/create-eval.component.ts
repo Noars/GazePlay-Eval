@@ -3,8 +3,13 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {SaveService} from '../../services/save/save.service';
-import {transitionScreenModel, transitionScreenConstModel, screenTypeModel} from '../../shared/screenModel';
+import {
+  transitionScreenModel,
+  screenTypeModel,
+  defaultTransitionScreenModel,
+} from '../../shared/screenModel';
 import {ModifyScreenComponent} from '../../components/modify-screen/modify-screen.component';
+import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 
 @Component({
   selector: 'app-create-eval',
@@ -20,7 +25,7 @@ export class CreateEvalComponent implements OnInit{
   idScreen: number = 1;
   editNameScreenDisable: boolean = true;
 
-  constructor(private router: Router, private saveService: SaveService) {
+  constructor(private router: Router, private saveService: SaveService, private updateScreenService: UpdateScreensService) {
   }
 
   ngOnInit(): void {
@@ -43,10 +48,8 @@ export class CreateEvalComponent implements OnInit{
   }
 
   addScreen() {
-    const newScreen: transitionScreenModel = {
-      name: 'Ecran ' + this.idScreen++,
-      type: transitionScreenConstModel,
-    };
+    let newScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
+    newScreen = this.updateScreenService.updateTransitionScreen(newScreen, 'Ecran ' + this.idScreen++, this.saveService.dataAuto.globalParamsTransitionScreen);
     this.listScreens.push(newScreen);
     this.selectScreen(newScreen);
   }
@@ -78,6 +81,7 @@ export class CreateEvalComponent implements OnInit{
   }
 
   onModifyScreenChange(event: boolean){
+    this.savaData();
     this.isModifyScreen = event;
   }
 
