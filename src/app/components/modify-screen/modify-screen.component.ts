@@ -1,10 +1,8 @@
 import {
   Component,
-  ElementRef,
   EventEmitter,
   Input,
   Output,
-  ViewChild
 } from '@angular/core';
 import {
   transitionScreenConstModel,
@@ -33,7 +31,7 @@ import {SaveService} from '../../services/save/save.service';
 export class ModifyScreenComponent{
 
   @Input() screenToModify!: screenTypeModel;
-  @Output() selectedScreenChange = new EventEmitter<boolean>();
+  @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
 
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
@@ -64,7 +62,8 @@ export class ModifyScreenComponent{
   }
 
   backToScreenList(){
-    this.selectedScreenChange.emit(false);
+
+    this.selectedScreenChange.emit({screen: this.screenToModify, flag: true});
   }
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;

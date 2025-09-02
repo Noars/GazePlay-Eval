@@ -24,7 +24,7 @@
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item d-flex justify-content-between align-items-center"
                           [class.active]="screen === selectedScreen"
-                          (click)="selectScreen(screen); $event.preventDefault(); $event.stopPropagation();"
+                          (click)="selectScreen(screen, i); $event.preventDefault(); $event.stopPropagation();"
                           (mouseleave)="exitInputScreen(); $event.preventDefault(); $event.stopPropagation();"
                           style="cursor: pointer;"
                       >

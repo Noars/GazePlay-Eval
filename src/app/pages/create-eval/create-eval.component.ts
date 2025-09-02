@@ -22,6 +22,7 @@ export class CreateEvalComponent implements OnInit{
   isModifyScreen: boolean = false;
   listScreens: screenTypeModel[] = [];
   selectedScreen: screenTypeModel | null = null;
+  indexSelectedScreen: number = -1;
   idScreen: number = 1;
   editNameScreenDisable: boolean = true;
 
@@ -50,12 +51,13 @@ export class CreateEvalComponent implements OnInit{
   addScreen() {
     let newScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
     newScreen = this.updateScreenService.updateTransitionScreen(newScreen, 'Ecran ' + this.idScreen++, this.saveService.dataAuto.globalParamsTransitionScreen);
+    this.selectedScreen = newScreen;
     this.listScreens.push(newScreen);
-    this.selectScreen(newScreen);
   }
 
-  selectScreen(screen: screenTypeModel) {
+  selectScreen(screen: screenTypeModel, index: number) {
     this.selectedScreen = screen;
+    this.indexSelectedScreen = index;
   }
 
   editNameScreen(screen: screenTypeModel, value: boolean) {
@@ -80,9 +82,11 @@ export class CreateEvalComponent implements OnInit{
     return this.selectedScreen?.name ?? '';
   }
 
-  onModifyScreenChange(event: boolean){
+  onModifyScreenChange(event: { screen: screenTypeModel, flag: boolean }){
     this.savaData();
-    this.isModifyScreen = event;
+    this.selectedScreen = event.screen;
+    this.listScreens[this.indexSelectedScreen] = event.screen;
+    this.isModifyScreen = event.flag;
   }
 
   drop(event: any) {
@@ -90,6 +94,7 @@ export class CreateEvalComponent implements OnInit{
     const currentIndex = event.currentIndex;
     const field = this.listScreens.splice(previousIndex, 1)[0];
     this.listScreens.splice(currentIndex, 0, field);
+    this.indexSelectedScreen = currentIndex;
   }
 
   backToSetupEval() {
