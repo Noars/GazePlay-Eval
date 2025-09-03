@@ -53,6 +53,7 @@ export class CreateEvalComponent implements OnInit{
     newScreen = this.updateScreenService.updateTransitionScreen(newScreen, 'Ecran ' + this.idScreen++, this.saveService.dataAuto.globalParamsTransitionScreen);
     this.selectedScreen = newScreen;
     this.listScreens.push(newScreen);
+    this.indexSelectedScreen = this.listScreens.length - 1;
   }
 
   selectScreen(screen: screenTypeModel, index: number) {

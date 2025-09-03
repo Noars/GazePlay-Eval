@@ -1,7 +1,7 @@
 import {
   Component,
   EventEmitter,
-  Input,
+  Input, OnInit,
   Output,
 } from '@angular/core';
 import {
@@ -28,12 +28,19 @@ import {SaveService} from '../../services/save/save.service';
   templateUrl: './modify-screen.component.html',
   styleUrl: './modify-screen.component.css'
 })
-export class ModifyScreenComponent{
+export class ModifyScreenComponent implements OnInit{
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
 
+  haveFile: boolean = false;
+  file: any = "";
+
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
+  }
+
+  ngOnInit(): void {
+    this.haveFile = this.checkFileExist();
   }
 
   changeTypeScreen(type: string) {
@@ -61,9 +68,28 @@ export class ModifyScreenComponent{
     }
   }
 
-  backToScreenList(){
+  getFile(event: Event){
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0 && this.screenToModify.type === instructionScreenConstModel ) {
+      this.screenToModify.values[4] = input.files[0];
+      this.haveFile = true;
+      this.file =  URL.createObjectURL(input.files[0]);
+    }else {
+      this.haveFile = false;
+    }
+  }
 
-    this.selectedScreenChange.emit({screen: this.screenToModify, flag: true});
+  checkFileExist(){
+    if (this.screenToModify.type === instructionScreenConstModel && this.screenToModify.values[4] !== ''){
+      this.file = URL.createObjectURL(this.screenToModify.values[4]);
+      return true;
+    }else {
+      return false;
+    }
+  }
+
+  backToScreenList(){
+    this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
   }
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;

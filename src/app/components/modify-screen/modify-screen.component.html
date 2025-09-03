@@ -167,17 +167,65 @@
                       <div class="arrow">
                         <span></span>
                       </div>
-                      <div class="d-flex align-items-center mb-2">
-                        <label class="form-label me-3 fw-semibold">Quel type d'élément voulez-vous choisir ?</label>
-                        <div>
-                          <select class="form-select" [(ngModel)]="screenToModify.values[3]">
-                            <option value="Image">Image</option>
-                            <option value="Video">Vidéo</option>
-                            <option value="Texte">Texte</option>
-                            <option value="Son">Son</option>
-                          </select>
-                        </div>
-                      </div>
+                      <ul class="custom-list">
+                        <li>
+                          <div class="d-flex align-items-center mb-2">
+                            <span class="list-dash">-</span>
+                            <label class="form-label me-3 fw-semibold">Quel type d'élément voulez-vous choisir ?</label>
+                            <div>
+                              <select class="form-select" [(ngModel)]="screenToModify.values[3]">
+                                <option value="Image">Image</option>
+                                <option value="Video">Vidéo</option>
+                                <option value="Texte">Texte</option>
+                                <option value="Son">Son</option>
+                              </select>
+                            </div>
+                          </div>
+                        </li>
+                        @if (screenToModify.values[3] === 'Image') {
+                          <div class="arrow-container mt-2">
+                            <div class="arrow">
+                              <span></span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                              <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
+                              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal"
+                                      [disabled]="!haveFile">
+                                <i class="bi bi-eye"></i>
+                              </button>
+                            </div>
+                          </div>
+                        } @else if (screenToModify.values[3] === 'Video') {
+                          <div class="arrow-container mt-2">
+                            <div class="arrow">
+                              <span></span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                              <label for="imageFile" class="form-label">Vidéo à afficher</label>
+                              <input class="form-control" type="file" id="imageFile" accept="video/*" (change)="getFile($event)">
+                            </div>
+                          </div>
+                        } @else if (screenToModify.values[3] === 'Texte') {
+                          <div class="arrow-container mt-2">
+                            <div class="arrow">
+                              <span></span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                            </div>
+                          </div>
+                        } @else if (screenToModify.values[3] === 'Son') {
+                          <div class="arrow-container mt-2">
+                            <div class="arrow">
+                              <span></span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                              <label for="imageFile" class="form-label">Son à jouer</label>
+                              <input class="form-control" type="file" id="imageFile" accept="audio/*" (change)="getFile($event)">
+                            </div>
+                          </div>
+                        }
+                      </ul>
                     </div>
                   }
                   <li class="mt-4">
@@ -225,4 +273,19 @@
   <button class="btn btn-primary" (click)="backToScreenList()">
     ← Sauvegarder et Retour
   </button>
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-white" id="filePreviewLabel">Aperçu de l'image</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        <img [src]="file" alt="Preview" class="img-fluid rounded shadow">
+      </div>
+    </div>
+  </div>
 </div>
