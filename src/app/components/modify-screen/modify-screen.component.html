@@ -173,7 +173,7 @@
                             <span class="list-dash">-</span>
                             <label class="form-label me-3 fw-semibold">Quel type d'élément voulez-vous choisir ?</label>
                             <div>
-                              <select class="form-select" [(ngModel)]="screenToModify.values[3]">
+                              <select class="form-select" [(ngModel)]="screenToModify.values[3]" (ngModelChange)="changeTypeFile($event)">
                                 <option value="Image">Image</option>
                                 <option value="Video">Vidéo</option>
                                 <option value="Texte">Texte</option>
@@ -182,46 +182,56 @@
                             </div>
                           </div>
                         </li>
-                        @if (screenToModify.values[3] === 'Image') {
+                        @if (typeFile === 'Image') {
                           <div class="arrow-container mt-2">
                             <div class="arrow">
                               <span></span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
+                            <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
                               <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getFile($event)">
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal"
-                                      [disabled]="!haveFile">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
                                 <i class="bi bi-eye"></i>
                               </button>
                             </div>
                           </div>
-                        } @else if (screenToModify.values[3] === 'Video') {
+                        } @else if (typeFile === 'Video') {
                           <div class="arrow-container mt-2">
                             <div class="arrow">
                               <span></span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                              <label for="imageFile" class="form-label">Vidéo à afficher</label>
-                              <input class="form-control" type="file" id="imageFile" accept="video/*" (change)="getFile($event)">
+                            <div class="d-flex align-items-center mb-2 gap-2">
+                              <label for="videoFile" class="form-label flex-grow-1 me-2">Vidéo à afficher</label>
+                              <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
+                                <i class="bi bi-eye"></i>
+                              </button>
                             </div>
                           </div>
-                        } @else if (screenToModify.values[3] === 'Texte') {
+                        } @else if (typeFile === 'Texte') {
                           <div class="arrow-container mt-2">
                             <div class="arrow">
                               <span></span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
+                            <div class="d-flex align-items-center mb-2 gap-2">
+                              <label class="form-label flex-grow-1 me-2">Texte à afficher</label>
+                              <textarea class="form-control w-auto" rows="1" style="resize: none;" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
+                              <button class="btn btn-primary d-flex align-items-center" (click)="playText()" [disabled]="textToRead == ''">
+                                <i class="bi bi-play-fill"></i>
+                              </button>
                             </div>
                           </div>
-                        } @else if (screenToModify.values[3] === 'Son') {
+                        } @else if (typeFile === 'Son') {
                           <div class="arrow-container mt-2">
                             <div class="arrow">
                               <span></span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                              <label for="imageFile" class="form-label">Son à jouer</label>
-                              <input class="form-control" type="file" id="imageFile" accept="audio/*" (change)="getFile($event)">
+                            <div class="d-flex align-items-center mb-2 gap-2">
+                              <label for="soundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
+                              <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
+                                <i class="bi bi-eye"></i>
+                              </button>
                             </div>
                           </div>
                         }
@@ -280,11 +290,19 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content bg-dark">
       <div class="modal-header border-0">
-        <h5 class="modal-title text-white" id="filePreviewLabel">Aperçu de l'image</h5>
+        <h5 class="modal-title text-white" id="filePreviewLabel">Aperçu du fichier donné</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body d-flex justify-content-center">
-        <img [src]="file" alt="Preview" class="img-fluid rounded shadow">
+        @if (typeFile === 'Image') {
+          <img [src]="file" alt="Preview" class="img-fluid rounded shadow">
+        } @else if (typeFile === 'Video') {
+          <video [src]="file" controls class="img-fluid rounded shadow"></video>
+        } @else if (typeFile === 'Son') {
+          <audio controls>
+            <source [src]="file" type="audio/mpeg">
+          </audio>
+        }
       </div>
     </div>
   </div>

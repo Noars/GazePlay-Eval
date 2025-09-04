@@ -33,8 +33,10 @@ export class ModifyScreenComponent implements OnInit{
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
 
+  typeFile: string = "";
   haveFile: boolean = false;
   file: any = "";
+  textToRead: string = '';
 
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
@@ -55,6 +57,7 @@ export class ModifyScreenComponent implements OnInit{
         let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
         newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
+        this.haveFile = this.checkFileExist();
         break;
 
       case stimuliScreenConstModel :
@@ -65,6 +68,16 @@ export class ModifyScreenComponent implements OnInit{
 
       default :
         break;
+    }
+  }
+
+  changeTypeFile(type: string){
+    if (this.screenToModify.type === instructionScreenConstModel){
+      this.screenToModify.values[3] = type;
+      this.screenToModify.values[4] = "";
+      this.typeFile = type;
+      this.haveFile = false;
+      this.file = "";
     }
   }
 
@@ -80,12 +93,38 @@ export class ModifyScreenComponent implements OnInit{
   }
 
   checkFileExist(){
-    if (this.screenToModify.type === instructionScreenConstModel && this.screenToModify.values[4] !== ''){
-      this.file = URL.createObjectURL(this.screenToModify.values[4]);
-      return true;
-    }else {
+    if (this.screenToModify.type === instructionScreenConstModel){
+      this.typeFile = this.screenToModify.values[3];
+      if (this.typeFile === 'Texte'){
+        this.textToRead = this.screenToModify.values[4];
+        return false;
+      }else {
+        if (this.screenToModify.values[4] !== ''){
+          this.file = URL.createObjectURL(this.screenToModify.values[4]);
+          return true;
+        }else {
+          return false;
+        }
+      }
+    } else {
       return false;
     }
+  }
+
+  getText(event: string){
+    if (this.screenToModify.type === instructionScreenConstModel){
+      this.textToRead = event;
+      this.screenToModify.values[4] = event;
+    }
+  }
+
+  playText() {
+    if (!this.textToRead.trim()) return;
+
+    const utterance = new SpeechSynthesisUtterance(this.textToRead);
+    utterance.lang = 'fr-FR'; // 👈 met la voix en français
+    window.speechSynthesis.cancel(); // stoppe toute lecture en cours
+    window.speechSynthesis.speak(utterance);
   }
 
   backToScreenList(){
