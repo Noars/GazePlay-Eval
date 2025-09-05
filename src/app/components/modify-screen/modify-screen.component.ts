@@ -122,8 +122,8 @@ export class ModifyScreenComponent implements OnInit{
     if (!this.textToRead.trim()) return;
 
     const utterance = new SpeechSynthesisUtterance(this.textToRead);
-    utterance.lang = 'fr-FR'; // 👈 met la voix en français
-    window.speechSynthesis.cancel(); // stoppe toute lecture en cours
+    utterance.lang = 'fr-FR';
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }
 
