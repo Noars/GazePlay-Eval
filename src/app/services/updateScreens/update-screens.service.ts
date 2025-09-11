@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {instructionScreenModel, transitionScreenModel} from '../../shared/screenModel';
+import {instructionScreenModel, stimuliScreenModel, transitionScreenModel} from '../../shared/screenModel';
 
 @Injectable({
   providedIn: 'root'
@@ -27,5 +27,10 @@ export class UpdateScreensService {
     screen.values[6] = value[5];
 
     return screen;
+  }
+
+  updateStimuliScreen(screen: stimuliScreenModel, name: string, value: any){
+    screen.name = name;
+
   }
 }

@@ -279,6 +279,92 @@
               <div class="mt-4 px-3 mb-4 m-auto">
                 <ul class="custom-list">
                   <li>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="test[0]">
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="test[1]">
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSY" (change)="test[2] = true" [checked]="test[2]">
+                          <label class="form-check-label fw-semibold" for="timeNextScreenSY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSN" (change)="test[2] = false" [checked]="!test[2]">
+                          <label class="form-check-label fw-semibold" for="timeNextScreenSN">Non</label>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  @if (test[2]) {
+                    <div class="arrow-container mt-2">
+                      <div class="arrow">
+                        <span></span>
+                      </div>
+                      <div class="d-flex align-items-center mb-2">
+                        <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
+                        <div class="input-group w-auto">
+                          <input type="number" class="form-control" min="1" [(ngModel)]="test[3]">
+                          <span class="input-group-text fw-semibold">secondes</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  <li class="mt-4">
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Temps de fixation ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="test[4]">
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de stimuli ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="test[5]">
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Désactiver les stimuli après sélection ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliY" (change)="test[6] = true" [checked]="test[6]">
+                          <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliN" (change)="test[6] = false" [checked]="!test[7]">
+                          <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Ordre des stimuli aléatoire ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliY" (change)="test[7] = true" [checked]="test[7]">
+                          <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliN" (change)="test[7] = false" [checked]="!test[7]">
+                          <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
+                        </div>
+                      </div>
+                    </div>
                   </li>
                 </ul>
               </div>

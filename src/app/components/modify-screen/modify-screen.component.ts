@@ -38,6 +38,8 @@ export class ModifyScreenComponent implements OnInit{
   file: any = "";
   textToRead: string = '';
 
+  test: any[] = ['1', '1', false, '10', '1', '1', false, false];
+
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
 
