@@ -11,7 +11,7 @@ export const stimuliScreenConstModel = 'stimuli';
 
 export const transitionScreenConstValue = [false, '1', false, false, '1'];
 export const instructionScreenConstValue = [false, '1', false, 'Image', '', false, '1'];
-export const stimuliScreenConstValue = ['1', '1', false, '10', '1', '1', false, false];
+export const stimuliScreenConstValue = ['1', '1', '1', '1', false, '10', false, 'Hide', []];
 
 export interface transitionScreenModel {
   name: string;

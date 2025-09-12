@@ -19,11 +19,13 @@ import {
 import {FormsModule} from '@angular/forms';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 import {SaveService} from '../../services/save/save.service';
+import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
 
 @Component({
   selector: 'app-modify-screen',
   imports: [
-    FormsModule
+    FormsModule,
+    GlobalTransitionScreenComponent
   ],
   templateUrl: './modify-screen.component.html',
   styleUrl: './modify-screen.component.css'
@@ -38,7 +40,7 @@ export class ModifyScreenComponent implements OnInit{
   file: any = "";
   textToRead: string = '';
 
-  test: any[] = ['1', '1', false, '10', '1', '1', false, false];
+  test: any[] = ['1', '1', false, '10', '1', '1', false, false, []];
 
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
@@ -129,6 +131,21 @@ export class ModifyScreenComponent implements OnInit{
     window.speechSynthesis.speak(utterance);
   }
 
+  addStimuli(){
+    this.screenToModify.values[8].push(["",""]);
+  }
+
+  deleteStimuli(index: number){
+    this.screenToModify.values[8].splice(index, 1);
+  }
+
+  getStimuliFiles(event: Event, index: number){
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.screenToModify.values[8][index][1] = input.files[0];
+    }
+  }
+
   backToScreenList(){
     this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
   }
@@ -136,4 +153,5 @@ export class ModifyScreenComponent implements OnInit{
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
   protected readonly transitionScreenConstModel = transitionScreenConstModel;
+  protected readonly Number = Number;
 }
