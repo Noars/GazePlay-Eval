@@ -278,7 +278,7 @@
               </div>
               <div class="card-body">
                 <div class="d-flex gap-4 align-items-center">
-                  <div class="flex-grow-0" style="width: 60%;">
+                  <div class="flex-grow-0" style="width: 50%;">
                     <ul class="custom-list">
                       <li>
 
@@ -286,7 +286,7 @@
                           <span class="list-dash">-</span>
                           <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
                           <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[0]">
+                            <input type="number" class="form-control" min="1" max="10" [(ngModel)]="screenToModify.values[0]">
                           </div>
                         </div>
 
@@ -294,7 +294,7 @@
                           <span class="list-dash">-</span>
                           <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
                           <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]">
+                            <input type="number" class="form-control" min="1" max="10" [(ngModel)]="screenToModify.values[1]">
                           </div>
                         </div>
 
@@ -310,13 +310,13 @@
                           <span class="list-dash">-</span>
                           <label class="form-label me-3 fw-semibold">Temps de fixation ?</label>
                           <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[3]">
+                            <input type="number" class="form-control" min="1" max="9999" [(ngModel)]="screenToModify.values[3]">
                           </div>
                         </div>
 
                         <div class="d-flex align-items-center mb-2">
                           <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Mettre un temps avant passage à l'écran suivant ?</label>
+                          <label class="form-label me-3 fw-semibold">Mettre un temps pour passage à l'écran suivant ?</label>
                           <div>
                             <div class="form-check form-check-inline mb-0">
                               <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSY" (change)="screenToModify.values[4] = true" [checked]="screenToModify.values[4]">
@@ -375,7 +375,7 @@
                     </ul>
                   </div>
 
-                  <div class="flex-grow-0" style="width: 40%;">
+                  <div class="flex-grow-0" style="width: 50%;">
                     <div class="accordion" id="stimuli">
                       @for (stimuli of screenToModify.values[8]; let i = $index; track i) {
                         <div class="accordion-item">
@@ -389,21 +389,27 @@
                             </button>
                           </h2>
                           <div [id]="'collapse' + i" class="accordion-collapse collapse" data-bs-parent="#stimuli">
-                            <div class="d-flex align-items-center mb-2">
-                              <span class="list-dash">-</span>
-                              <label class="form-label me-3 fw-semibold">Position de l'image</label>
-                              <div class="input-group w-auto">
-                                <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[8][i][0]">
-                              </div>
+                            <div class="mt-4 px-3 mb-4 m-auto">
+                              <ul class="custom-list">
+                                <li>
+                                  <div class="d-flex align-items-center mb-2">
+                                    <span class="list-dash">-</span>
+                                    <label class="form-label me-3 fw-semibold">Position de l'image</label>
+                                    <div class="input-group w-auto">
+                                      <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[8][i][0]">
+                                    </div>
+                                  </div>
+                                  <div class="d-flex align-items-center mb-2 gap-2">
+                                    <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
+                                    <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getStimuliFiles($event, i)">
+                                  </div>
+                                  <button class="btn btn-sm btn-danger" (click)="deleteStimuli(i)">
+                                    <i class="bi bi-trash"></i>
+                                    Supprimer le stimuli
+                                  </button>
+                                </li>
+                              </ul>
                             </div>
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                              <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-                              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getStimuliFiles($event, i)">
-                            </div>
-                            <button class="btn btn-sm btn-danger" (click)="deleteStimuli(i)">
-                              <i class="bi bi-trash"></i>
-                              Supprimer le stimuli
-                            </button>
                           </div>
                         </div>
                       }
@@ -414,7 +420,6 @@
                 </div>
               </div>
             </div>
-
           }
         </div>
       </div>
