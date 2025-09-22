@@ -86,7 +86,8 @@ export class ModifyScreenComponent implements OnInit{
   getFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0 && this.screenToModify.type === instructionScreenConstModel ) {
-      this.screenToModify.values[4] = input.files[0];
+      this.screenToModify.values[4] = input.files[0].name;
+      this.screenToModify.values[5] = input.files[0];
       this.haveFile = true;
       this.file =  URL.createObjectURL(input.files[0]);
     }else {
@@ -130,7 +131,7 @@ export class ModifyScreenComponent implements OnInit{
   }
 
   addStimuli(){
-    this.screenToModify.values[8].push(["",""]);
+    this.screenToModify.values[8].push(["","",""]);
   }
 
   deleteStimuli(index: number){
@@ -140,7 +141,8 @@ export class ModifyScreenComponent implements OnInit{
   getStimuliFiles(event: Event, index: number){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.screenToModify.values[8][index][1] = input.files[0];
+      this.screenToModify.values[8][index][1] = input.files[0].name;
+      this.screenToModify.values[8][index][2] = input.files[0];
     }
   }
 

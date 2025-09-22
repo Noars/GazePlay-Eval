@@ -244,11 +244,11 @@
                       <label class="form-label me-3 fw-semibold">Ajouter un bouton pour lancer l'évaluation ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonY" (change)="screenToModify.values[5] = true" [checked]="screenToModify.values[5]">
+                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="addStartButtonY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonN" (change)="screenToModify.values[5] = false" [checked]="!screenToModify.values[5]">
+                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="addStartButtonN">Non</label>
                         </div>
                       </div>
@@ -262,7 +262,7 @@
                       <div class="d-flex align-items-center mb-2">
                         <label class="form-label me-3 fw-semibold">Combien de temps de fixation?</label>
                         <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[6]">
+                          <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[7]">
                           <span class="input-group-text fw-semibold">secondes</span>
                         </div>
                       </div>

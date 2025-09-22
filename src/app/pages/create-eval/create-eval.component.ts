@@ -104,6 +104,6 @@ export class CreateEvalComponent implements OnInit{
   }
 
   goToDownloadEval() {
-    //this.router.navigate(['/download-eval']);
+    this.router.navigate(['/download-eval']);
   }
 }
