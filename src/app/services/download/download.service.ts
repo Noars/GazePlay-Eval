@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import {SaveService} from '../save/save.service';
+import {transitionScreenConstKey} from '../../shared/screenModel';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +13,19 @@ export class DownloadService {
     const zip = new JSZip();
 
     const evalData = saveService.dataAuto.listScreens;
+    console.log("Value = ");
     console.log(evalData);
     let jsonData: any[] = [];
 
     for (let i = 0; i < evalData.length; i++) {
       switch (evalData[i].type) {
         case "transition":
-          jsonData.push(evalData[i].values);
+          const values = evalData[i].values;
+          const result = transitionScreenConstKey.reduce((acc, key, idx) => {
+            acc[key] = values[idx];
+            return acc;
+          }, {} as Record<string, any>);
+          jsonData.push(result);
           break;
 
         case "instruction":

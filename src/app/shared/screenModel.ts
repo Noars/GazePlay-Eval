@@ -10,6 +10,13 @@ export const instructionScreenConstModel = 'instruction';
 export const stimuliScreenConstModel = 'stimuli';
 
 export const transitionScreenConstValue = [false, '1', false, false, '1'];
+export const transitionScreenConstKey = [
+  "Mettre un temps avant le passage à l'écran suivant",
+  "Combien pour le passe à l'écran suivant",
+  "Mettre une croix de fixation",
+  "Mettre un temps de fixation",
+  "Combien de temps de fixation"];
+
 export const instructionScreenConstValue = [false, '1', false, 'Image', '', '', false, '1'];
 export const stimuliScreenConstValue = ['1', '1', '1', '1', false, '10', false, 'Hide', []];
 
