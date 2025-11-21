@@ -45,7 +45,7 @@
                       <div class="d-flex align-items-center mb-2">
                         <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
                         <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]">
+                          <input type="number" class="form-control" min="-1" [(ngModel)]="screenToModify.values[1]">
                           <span class="input-group-text fw-semibold">secondes</span>
                         </div>
                       </div>
@@ -97,7 +97,7 @@
                             <div class="d-flex align-items-center mb-2">
                               <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
                               <div class="input-group w-auto">
-                                <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[4]">
+                                <input type="number" class="form-control" min="-1" [(ngModel)]="screenToModify.values[4]">
                                 <span class="input-group-text fw-semibold">secondes</span>
                               </div>
                             </div>
@@ -119,7 +119,7 @@
                   <li>
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
+                      <label class="form-label me-3 fw-semibold">Mettre un temps avant passage à l'écran suivant ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
                           <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="screenToModify.values[0] = true" [checked]="screenToModify.values[0]">
@@ -254,7 +254,7 @@
                       </div>
                     </div>
                   </li>
-                  @if (screenToModify.values[5]) {
+                  @if (screenToModify.values[6]) {
                     <div class="arrow-container mt-2">
                       <div class="arrow">
                         <span></span>

@@ -18,7 +18,7 @@ export const saveModelDefault: saveModel = {
   nomEval: '',
   format: 'Csv&Xlsx',
   infoParticipant: [],
-  globalParamsTransitionScreen: [false, '1', false, false, '1'],
+  globalParamsTransitionScreen: [false, -1, false, false, -1],
   globalParamsInstructionScreen: [false, '1', false, 'Image', false, '1'],
   globalParamsStimuliScreen: ['1', '1', 'false', '10', '1', '1', 'false', 'false'],
   listScreens: [],
