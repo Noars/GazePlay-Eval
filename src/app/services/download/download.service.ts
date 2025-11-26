@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 import {SaveService} from '../save/save.service';
 import {instructionScreenConstKey, transitionScreenConstKey} from '../../shared/screenModel';
 
@@ -33,9 +33,9 @@ export class DownloadService {
           break;
 
         case "instruction":
-          if (evalData[i].values[3] === "text") {
+          if (evalData[i].values[3] === "Texte") {
             const instructionTextValues = [...evalData[i].values];
-            instructionTextValues[i].values.splice(5, 1);
+            instructionTextValues.splice(5, 1);
             const instructionTxtResult = instructionScreenConstKey.reduce((acc, key, idx) => {
               acc[key] = instructionTextValues[idx];
               return acc;
@@ -47,13 +47,12 @@ export class DownloadService {
             jsonData.push(instructionTxtData);
           } else {
             let instructionValues = [...evalData[i].values];
-            switch (instructionValues[i].values[3]) {
-              case "image":
-                const imgUrl = evalData[i].values[5];
-                const imgResponse = await fetch(imgUrl);
-                const imgBlob = await imgResponse.blob();
-                zip.file('images/' + evalData[i].values[5], imgBlob);
-                instructionValues[i].values.splice(5, 1);
+            switch (instructionValues[3]) {
+              case "Image":
+                const imgFile = instructionValues[5];
+                const imgArrayBuffer = await imgFile.arrayBuffer();
+                zip.file('images/' + imgFile.name, imgArrayBuffer);
+                instructionValues.splice(5, 1);
                 const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
@@ -65,12 +64,11 @@ export class DownloadService {
                 jsonData.push(instructionImgData);
                 break;
 
-              case "video":
-                const videoUrl = evalData[i].values[5];
-                const videoResponse = await fetch(videoUrl);
-                const videoBlob = await videoResponse.blob();
-                zip.file('videos/' + evalData[i].values[5], videoBlob);
-                instructionValues[i].values.splice(5, 1);
+              case "Video":
+                const videoFile = instructionValues[5];
+                const videoArrayBuffer = await videoFile.arrayBuffer();
+                zip.file('videos/' + videoFile.name, videoArrayBuffer);
+                instructionValues.splice(5, 1);
                 const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
@@ -82,12 +80,11 @@ export class DownloadService {
                 jsonData.push(instructionVideoData);
                 break;
 
-              case "audio":
-                const audioUrl = evalData[i].values[5];
-                const audioResponse = await fetch(audioUrl);
-                const audioBlob = await audioResponse.blob();
-                zip.file('audio/' + evalData[i].values[5], audioBlob);
-                instructionValues[i].values.splice(5, 1);
+              case "Son":
+                const audioFile = instructionValues[5];
+                const audioArrayBuffer = await audioFile.arrayBuffer();
+                zip.file('audio/' + audioFile.name, audioArrayBuffer);
+                instructionValues.splice(5, 1);
                 const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;

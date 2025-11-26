@@ -9,7 +9,7 @@ export const transitionScreenConstModel = 'transition';
 export const instructionScreenConstModel = 'instruction';
 export const stimuliScreenConstModel = 'stimuli';
 
-export const transitionScreenConstValue = [false, -1, false, false, -1];
+export const transitionScreenConstValue = [false, 0, false, false, 0];
 export const transitionScreenConstKey = [
   "Mettre un temps avant passage à l'écran suivant",
   "Combien de temps",
@@ -23,7 +23,7 @@ export const instructionScreenConstKey = [
   "Combien de temps",
   "Ajouter un media",
   "Type de media",
-  "Nom de l'image",
+  "Nom du fichier",
   "Mettre une croix de fixation",
   "Combien de temps de fixation"
 ]
