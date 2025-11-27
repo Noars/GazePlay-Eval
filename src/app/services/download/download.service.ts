@@ -2,7 +2,11 @@ import {Injectable} from '@angular/core';
 import JSZip from 'jszip';
 import {saveAs} from 'file-saver';
 import {SaveService} from '../save/save.service';
-import {instructionScreenConstKey, transitionScreenConstKey} from '../../shared/screenModel';
+import {
+  instructionScreenConstKey,
+  instructionScreenConstModel, stimuliScreenConstModel,
+  transitionScreenConstKey, transitionScreenConstModel
+} from '../../shared/screenModel';
 
 @Injectable({
   providedIn: 'root'
@@ -19,20 +23,20 @@ export class DownloadService {
 
     for (let i = 0; i < evalData.length; i++) {
       switch (evalData[i].type) {
-        case "transition":
+        case transitionScreenConstModel:
           const transitionValues = [...evalData[i].values];
           const transitionResult = transitionScreenConstKey.reduce((acc, key, idx) => {
             acc[key] = transitionValues[idx];
             return acc;
           }, {} as Record<string, any>);
           const transitionData = {
-            Type: "Transition",
+            Type: transitionScreenConstModel,
             ...transitionResult,
           }
           jsonData.push(transitionData);
           break;
 
-        case "instruction":
+        case instructionScreenConstModel:
           if (evalData[i].values[3] === "Texte") {
             const instructionTextValues = [...evalData[i].values];
             instructionTextValues.splice(5, 1);
@@ -41,7 +45,7 @@ export class DownloadService {
               return acc;
             }, {} as Record<string, any>);
             const instructionTxtData = {
-              Type: "Transition",
+              Type: instructionScreenConstModel,
               ...instructionTxtResult,
             }
             jsonData.push(instructionTxtData);
@@ -51,14 +55,14 @@ export class DownloadService {
               case "Image":
                 const imgFile = instructionValues[5];
                 const imgArrayBuffer = await imgFile.arrayBuffer();
-                zip.file('images/' + imgFile.name, imgArrayBuffer);
+                zip.file('images/' + instructionValues[4], imgArrayBuffer);
                 instructionValues.splice(5, 1);
                 const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
                 }, {} as Record<string, any>);
                 const instructionImgData = {
-                  Type: "Transition",
+                  Type: instructionScreenConstModel,
                   ...instructionImgResult,
                 }
                 jsonData.push(instructionImgData);
@@ -67,14 +71,14 @@ export class DownloadService {
               case "Video":
                 const videoFile = instructionValues[5];
                 const videoArrayBuffer = await videoFile.arrayBuffer();
-                zip.file('videos/' + videoFile.name, videoArrayBuffer);
+                zip.file('videos/' + instructionValues[4], videoArrayBuffer);
                 instructionValues.splice(5, 1);
                 const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
                 }, {} as Record<string, any>);
                 const instructionVideoData = {
-                  Type: "Transition",
+                  Type: instructionScreenConstModel,
                   ...instructionVideoResult,
                 }
                 jsonData.push(instructionVideoData);
@@ -83,14 +87,14 @@ export class DownloadService {
               case "Son":
                 const audioFile = instructionValues[5];
                 const audioArrayBuffer = await audioFile.arrayBuffer();
-                zip.file('audio/' + audioFile.name, audioArrayBuffer);
+                zip.file('audio/' + instructionValues[4], audioArrayBuffer);
                 instructionValues.splice(5, 1);
                 const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
                 }, {} as Record<string, any>);
                 const instructionAudioData = {
-                  Type: "Transition",
+                  Type: instructionScreenConstModel,
                   ...instructionAudioResult,
                 }
                 jsonData.push(instructionAudioData);
@@ -102,7 +106,7 @@ export class DownloadService {
           }
           break;
 
-        case "stimuli":
+        case stimuliScreenConstModel:
           break;
       }
     }

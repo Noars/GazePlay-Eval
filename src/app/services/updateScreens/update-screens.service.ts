@@ -23,8 +23,8 @@ export class UpdateScreensService {
     screen.values[1] = value[1];
     screen.values[2] = value[2];
     screen.values[3] = value[3];
-    screen.values[5] = value[4];
-    screen.values[6] = value[5];
+    screen.values[6] = value[4];
+    screen.values[7] = value[5];
 
     return screen;
   }
