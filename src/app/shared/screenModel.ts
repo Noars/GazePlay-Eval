@@ -17,7 +17,7 @@ export const transitionScreenConstKey = [
   "Mettre un temps de fixation",
   "Combien de temps de fixation"];
 
-export const instructionScreenConstValue = [false, '1', false, 'Image', '', '', false, '1'];
+export const instructionScreenConstValue = [false, 1, false, 'Image', '', '', false, 1];
 export const instructionScreenConstKey = [
   "Mettre un temps avant passage à l'écran suivant",
   "Combien de temps",
@@ -28,7 +28,7 @@ export const instructionScreenConstKey = [
   "Combien de temps de fixation"
 ]
 
-export const stimuliScreenConstValue = ['1', '1', '1', '1', false, '10', false, 'Hide', []];
+export const stimuliScreenConstValue = [1, 1, 1, 1, false, 10, false, 'Hide', []];
 
 export interface transitionScreenModel {
   name: string;

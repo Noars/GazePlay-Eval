@@ -57,11 +57,7 @@ export class ModifyScreenComponent implements OnInit{
 
       case instructionScreenConstModel :
         let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
-        console.log(newInstructionScreen);
         newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
-        console.log(newInstructionScreen);
-        console.log(this.screenToModify.name);
-        console.log(this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
         this.haveFile = this.checkFileExist();
         break;
