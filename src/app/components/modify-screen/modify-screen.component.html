@@ -279,156 +279,108 @@
               <div class="mt-4 px-3 mb-4 m-auto">
                 <ul class="custom-list">
                   <li>
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[0]">
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[1]">
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Mettre un temps pour passage à l'écran suivant ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSY" (change)="screenToModify.values[2] = true" [checked]="screenToModify.values[2]">
+                          <label class="form-check-label fw-semibold" for="timeNextScreenSY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSN" (change)="screenToModify.values[2] = false" [checked]="!screenToModify.values[2]">
+                          <label class="form-check-label fw-semibold" for="timeNextScreenSN">Non</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    @if (screenToModify.values[2]) {
+                      <div class="arrow-container mt-2">
+                        <div class="arrow"><span></span></div>
+                        <div class="d-flex align-items-center mb-2">
+                          <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
+                          <div class="input-group w-auto">
+                            <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[3]">
+                            <span class="input-group-text fw-semibold">secondes</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Temps de fixation ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" max="9999" [(ngModel)]="screenToModify.values[4]">
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Combien de stimuli ?</label>
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[5]">
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Ordre des stimuli aléatoire ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
+                          <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
+                          <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Désactiver les stimuli après sélection ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliY" (change)="screenToModify.values[7] = true" [checked]="screenToModify.values[7]">
+                          <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliN" (change)="screenToModify.values[7] = false" [checked]="!screenToModify.values[7]">
+                          <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
+                        </div>
+                      </div>
+                    </div>
                   </li>
-                </ul>
-              </div>
-            </div>
-            <div class="card shadow-lg mb-3">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                Informations écran stimuli
-              </div>
-              <div class="card-body">
-                <div class="d-flex gap-4 align-items-center">
-                  <div class="flex-grow-0" style="width: 50%;">
-                    <ul class="custom-list">
-                      <li>
 
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" max="10" [(ngModel)]="screenToModify.values[0]">
-                          </div>
-                        </div>
-
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" max="10" [(ngModel)]="screenToModify.values[1]">
-                          </div>
-                        </div>
-
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Combien de stimuli ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[2]">
-                          </div>
-                        </div>
-
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Temps de fixation ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" max="9999" [(ngModel)]="screenToModify.values[3]">
-                          </div>
-                        </div>
-
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Mettre un temps pour passage à l'écran suivant ?</label>
-                          <div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSY" (change)="screenToModify.values[4] = true" [checked]="screenToModify.values[4]">
-                              <label class="form-check-label fw-semibold" for="timeNextScreenSY">Oui</label>
-                            </div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSN" (change)="screenToModify.values[4] = false" [checked]="!screenToModify.values[4]">
-                              <label class="form-check-label fw-semibold" for="timeNextScreenSN">Non</label>
-                            </div>
-                          </div>
-                        </div>
-
-                        @if (screenToModify.values[4]) {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow"><span></span></div>
-                            <div class="d-flex align-items-center mb-2">
-                              <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                              <div class="input-group w-auto">
-                                <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[5]">
-                                <span class="input-group-text fw-semibold">secondes</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Ordre des stimuli aléatoire ?</label>
-                          <div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
-                              <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
-                            </div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
-                              <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!--<div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Désactiver les stimuli après sélection ?</label>
-                          <div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
-                              <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
-                            </div>
-                            <div class="form-check form-check-inline mb-0">
-                              <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
-                              <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
-                            </div>
-                          </div>
-                        </div>-->
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div class="flex-grow-0" style="width: 50%;">
-                    <div class="accordion" id="stimuli">
-                      @for (stimuli of screenToModify.values[8]; let i = $index; track i) {
-                        <div class="accordion-item">
-                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button"
-                                    data-bs-toggle="collapse"
-                                    [attr.data-bs-target]="'#collapse' + i"
-                                    aria-expanded="false"
-                                    [attr.aria-controls]="'collapse' + i">
-                              Stimuli {{ i+1 }}
-                            </button>
-                          </h2>
-                          <div [id]="'collapse' + i" class="accordion-collapse collapse" data-bs-parent="#stimuli">
-                            <div class="mt-4 px-3 mb-4 m-auto">
-                              <ul class="custom-list">
-                                <li>
-                                  <div class="d-flex align-items-center mb-2">
-                                    <span class="list-dash">-</span>
-                                    <label class="form-label me-3 fw-semibold">Position de l'image</label>
-                                    <div class="input-group w-auto">
-                                      <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[8][i][0]">
-                                    </div>
-                                  </div>
-                                  <div class="d-flex align-items-center mb-2 gap-2">
-                                    <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-                                    <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getStimuliFiles($event, i)">
-                                  </div>
-                                  <button class="btn btn-sm btn-danger" (click)="deleteStimuli(i)">
-                                    <i class="bi bi-trash"></i>
-                                    Supprimer le stimuli
-                                  </button>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
+                  <div class="wrapper">
+                    <div class="grid-container" [style.gridTemplateColumns]="'repeat(' + cols + ', 80px)'" [style.gridTemplateRows]="'repeat(' + rows + ', 80px)'">
+                      @for (n of totalCells; track n; let i = $index) {
+                        <div class="cell" (click)="openPopup(n)">
+                          {{ n }}
                         </div>
                       }
                     </div>
-                    <button class="btn btn-secondary mt-2" (click)="addStimuli()" [disabled]="screenToModify.values[8].length >= (screenToModify.values[0] * screenToModify.values[1])">Ajouter un stimuli</button>
                   </div>
 
-                </div>
+                </ul>
               </div>
             </div>
           }

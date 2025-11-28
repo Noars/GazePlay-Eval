@@ -19,13 +19,13 @@ import {
 import {FormsModule} from '@angular/forms';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 import {SaveService} from '../../services/save/save.service';
-import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
+import {PopupStimuliComponent} from '../popup-stimuli/popup-stimuli.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-modify-screen',
   imports: [
     FormsModule,
-    GlobalTransitionScreenComponent
   ],
   templateUrl: './modify-screen.component.html',
   styleUrl: './modify-screen.component.css'
@@ -40,7 +40,7 @@ export class ModifyScreenComponent implements OnInit{
   file: any = "";
   textToRead: string = '';
 
-  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
+  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService, private dialog: MatDialog) {
   }
 
   ngOnInit(): void {
@@ -63,8 +63,8 @@ export class ModifyScreenComponent implements OnInit{
         break;
 
       case stimuliScreenConstModel :
-        const newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
-        newStimuliScreen.name = this.screenToModify.name;
+        let newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
+        newStimuliScreen = this.updateScreenService.updateStimuliScreen(newStimuliScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsStimuliScreen);
         this.screenToModify = newStimuliScreen;
         break;
 
@@ -144,6 +144,20 @@ export class ModifyScreenComponent implements OnInit{
       this.screenToModify.values[8][index][1] = input.files[0].name;
       this.screenToModify.values[8][index][2] = input.files[0];
     }
+  }
+
+  rows = 10;
+  cols = 10;
+
+  get totalCells(): number[] {
+    return Array.from({ length: this.rows * this.cols }, (_, i) => i + 1);
+  }
+
+  openPopup(cellNumber: number) {
+    this.dialog.open(PopupStimuliComponent, {
+      data: { cell: cellNumber },
+      width: '300px'
+    });
   }
 
   backToScreenList(){

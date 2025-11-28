@@ -26,9 +26,13 @@ export const instructionScreenConstKey = [
   "Nom du fichier",
   "Mettre une croix de fixation",
   "Combien de temps de fixation"
-]
+];
 
-export const stimuliScreenConstValue = [1, 1, 1, 1, false, 10, false, 'Hide', []];
+export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, []];
+export const stimuliScreenConstKey = [
+  "Nombre de lignes",
+  "Nombre de colonnes",
+];
 
 export interface transitionScreenModel {
   name: string;
