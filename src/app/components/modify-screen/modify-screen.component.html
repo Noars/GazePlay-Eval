@@ -371,7 +371,7 @@
                   </li>
 
                   <div class="wrapper">
-                    <div class="grid-container" [style.gridTemplateColumns]="'repeat(' + cols + ', 80px)'" [style.gridTemplateRows]="'repeat(' + rows + ', 80px)'">
+                    <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                       @for (n of totalCells; track n; let i = $index) {
                         <div class="cell" (click)="openPopup(n)">
                           {{ n }}

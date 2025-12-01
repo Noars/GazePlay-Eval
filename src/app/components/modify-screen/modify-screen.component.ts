@@ -146,17 +146,14 @@ export class ModifyScreenComponent implements OnInit{
     }
   }
 
-  rows = 10;
-  cols = 10;
-
   get totalCells(): number[] {
-    return Array.from({ length: this.rows * this.cols }, (_, i) => i + 1);
+    return Array.from({ length: this.screenToModify.values[0] * this.screenToModify.values[1] }, (_, i) => i + 1);
   }
 
   openPopup(cellNumber: number) {
     this.dialog.open(PopupStimuliComponent, {
       data: { cell: cellNumber },
-      width: '300px'
+      width: '500px'
     });
   }
 
