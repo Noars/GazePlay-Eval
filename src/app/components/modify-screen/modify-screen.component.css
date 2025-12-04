@@ -19,7 +19,7 @@
 .cell {
   width: 80px;
   aspect-ratio: 1/1;
-  background: #0d6efd;
+  background: #1e3a8a;
   color: white;
   display: flex;
   justify-content: center;
@@ -29,5 +29,5 @@
 }
 
 .cell:hover {
-  background: #374151;
+  background: #1d4ed8;
 }

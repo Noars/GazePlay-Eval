@@ -130,30 +130,19 @@ export class ModifyScreenComponent implements OnInit{
     window.speechSynthesis.speak(utterance);
   }
 
-  addStimuli(){
-    this.screenToModify.values[8].push(["","",""]);
-  }
-
-  deleteStimuli(index: number){
-    this.screenToModify.values[8].splice(index, 1);
-  }
-
-  getStimuliFiles(event: Event, index: number){
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.screenToModify.values[8][index][1] = input.files[0].name;
-      this.screenToModify.values[8][index][2] = input.files[0];
-    }
-  }
-
   get totalCells(): number[] {
     return Array.from({ length: this.screenToModify.values[0] * this.screenToModify.values[1] }, (_, i) => i + 1);
   }
 
   openPopup(cellNumber: number) {
+    const listScreen = this.screenToModify.values[8];
     this.dialog.open(PopupStimuliComponent, {
-      data: { cell: cellNumber },
-      width: '500px'
+      data: {
+        cell: cellNumber,
+        screen: listScreen
+      },
+      panelClass: 'popup-stimuli',
+      disableClose: true
     });
   }
 

@@ -28,7 +28,12 @@ export const instructionScreenConstKey = [
   "Combien de temps de fixation"
 ];
 
-export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, []];
+export interface stimuliScreenValues {
+  imageName?: string;
+  imageFile?: File;
+}
+export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {};
+export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, stimuliScreenDico];
 export const stimuliScreenConstKey = [
   "Nombre de lignes",
   "Nombre de colonnes",

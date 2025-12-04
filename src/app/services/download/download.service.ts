@@ -54,8 +54,10 @@ export class DownloadService {
             switch (instructionValues[3]) {
               case "Image":
                 const imgFile = instructionValues[5];
-                const imgArrayBuffer = await imgFile.arrayBuffer();
-                zip.file('images/' + instructionValues[4], imgArrayBuffer);
+                if (imgFile !== ''){
+                  const imgArrayBuffer = await imgFile.arrayBuffer();
+                  zip.file('images/' + instructionValues[4], imgArrayBuffer);
+                }
                 instructionValues.splice(5, 1);
                 const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
@@ -71,8 +73,10 @@ export class DownloadService {
               case "Video":
                 const videoFile = instructionValues[5];
                 const videoArrayBuffer = await videoFile.arrayBuffer();
-                zip.file('videos/' + instructionValues[4], videoArrayBuffer);
-                instructionValues.splice(5, 1);
+                if (videoArrayBuffer !== ''){
+                  zip.file('videos/' + instructionValues[4], videoArrayBuffer);
+                  instructionValues.splice(5, 1);
+                }
                 const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;
@@ -87,8 +91,10 @@ export class DownloadService {
               case "Son":
                 const audioFile = instructionValues[5];
                 const audioArrayBuffer = await audioFile.arrayBuffer();
-                zip.file('audio/' + instructionValues[4], audioArrayBuffer);
-                instructionValues.splice(5, 1);
+                if (audioArrayBuffer !== ''){
+                  zip.file('audio/' + instructionValues[4], audioArrayBuffer);
+                  instructionValues.splice(5, 1);
+                }
                 const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
                   acc[key] = instructionValues[idx];
                   return acc;

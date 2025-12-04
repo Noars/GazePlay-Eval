@@ -333,7 +333,7 @@
 
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Combien de stimuli ?</label>
+                      <label class="form-label me-3 fw-semibold">Combien de stimuli à choisir ?</label>
                       <div class="input-group w-auto">
                         <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[5]">
                       </div>
@@ -373,8 +373,8 @@
                   <div class="wrapper">
                     <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                       @for (n of totalCells; track n; let i = $index) {
-                        <div class="cell" (click)="openPopup(n)">
-                          {{ n }}
+                        <div class="cell" (click)="openPopup(i)">
+                          {{ i + 1 }}
                         </div>
                       }
                     </div>
