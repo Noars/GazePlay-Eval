@@ -4,7 +4,7 @@ import {saveAs} from 'file-saver';
 import {SaveService} from '../save/save.service';
 import {
   instructionScreenConstKey,
-  instructionScreenConstModel, stimuliScreenConstModel,
+  instructionScreenConstModel, screenTypeModel, stimuliScreenConstKey, stimuliScreenConstModel,
   transitionScreenConstKey, transitionScreenConstModel
 } from '../../shared/screenModel';
 
@@ -17,93 +17,32 @@ export class DownloadService {
     const zip = new JSZip();
 
     const evalData = saveService.dataAuto.listScreens;
-    console.log("Value = ");
-    console.log(evalData);
     let jsonData: any[] = [];
 
     for (let i = 0; i < evalData.length; i++) {
       switch (evalData[i].type) {
+
         case transitionScreenConstModel:
-          const transitionValues = [...evalData[i].values];
-          const transitionResult = transitionScreenConstKey.reduce((acc, key, idx) => {
-            acc[key] = transitionValues[idx];
-            return acc;
-          }, {} as Record<string, any>);
-          const transitionData = {
-            Type: transitionScreenConstModel,
-            ...transitionResult,
-          }
-          jsonData.push(transitionData);
+          this.generateTransitionScreenZip(evalData[i], jsonData);
           break;
 
         case instructionScreenConstModel:
           if (evalData[i].values[3] === "Texte") {
-            const instructionTextValues = [...evalData[i].values];
-            instructionTextValues.splice(5, 1);
-            const instructionTxtResult = instructionScreenConstKey.reduce((acc, key, idx) => {
-              acc[key] = instructionTextValues[idx];
-              return acc;
-            }, {} as Record<string, any>);
-            const instructionTxtData = {
-              Type: instructionScreenConstModel,
-              ...instructionTxtResult,
-            }
-            jsonData.push(instructionTxtData);
+            this.generateInstructionScreenZipText(evalData[i], jsonData);
           } else {
-            let instructionValues = [...evalData[i].values];
+            let instructionValues = structuredClone(evalData[i].values);
             switch (instructionValues[3]) {
+
               case "Image":
-                const imgFile = instructionValues[5];
-                if (imgFile !== ''){
-                  const imgArrayBuffer = await imgFile.arrayBuffer();
-                  zip.file('images/' + instructionValues[4], imgArrayBuffer);
-                }
-                instructionValues.splice(5, 1);
-                const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
-                  acc[key] = instructionValues[idx];
-                  return acc;
-                }, {} as Record<string, any>);
-                const instructionImgData = {
-                  Type: instructionScreenConstModel,
-                  ...instructionImgResult,
-                }
-                jsonData.push(instructionImgData);
+                await this.generateInstructionScreenZipImg(instructionValues, jsonData, zip);
                 break;
 
               case "Video":
-                const videoFile = instructionValues[5];
-                const videoArrayBuffer = await videoFile.arrayBuffer();
-                if (videoArrayBuffer !== ''){
-                  zip.file('videos/' + instructionValues[4], videoArrayBuffer);
-                  instructionValues.splice(5, 1);
-                }
-                const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
-                  acc[key] = instructionValues[idx];
-                  return acc;
-                }, {} as Record<string, any>);
-                const instructionVideoData = {
-                  Type: instructionScreenConstModel,
-                  ...instructionVideoResult,
-                }
-                jsonData.push(instructionVideoData);
+                await this.generateInstructionScreenZipVideo(instructionValues, jsonData, zip);
                 break;
 
               case "Son":
-                const audioFile = instructionValues[5];
-                const audioArrayBuffer = await audioFile.arrayBuffer();
-                if (audioArrayBuffer !== ''){
-                  zip.file('audio/' + instructionValues[4], audioArrayBuffer);
-                  instructionValues.splice(5, 1);
-                }
-                const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
-                  acc[key] = instructionValues[idx];
-                  return acc;
-                }, {} as Record<string, any>);
-                const instructionAudioData = {
-                  Type: instructionScreenConstModel,
-                  ...instructionAudioResult,
-                }
-                jsonData.push(instructionAudioData);
+                await this.generateInstructionScreenZipSound(instructionValues, jsonData, zip);
                 break;
 
               default:
@@ -113,14 +52,125 @@ export class DownloadService {
           break;
 
         case stimuliScreenConstModel:
+          await this.generateStimuliScreenZip(evalData[i], jsonData, zip);
+          break;
+
+        default:
           break;
       }
     }
 
     zip.file('evalData.json', JSON.stringify(jsonData, null, 2));
 
-    zip.generateAsync({ type: 'blob' }).then(content => {
+    zip.generateAsync({type: 'blob'}).then(content => {
       saveAs(content, 'gazeplayEval.zip');
     });
+  }
+
+  generateTransitionScreenZip(evalData: screenTypeModel, jsonData: any[]){
+    const transitionValues = structuredClone(evalData.values);
+    const transitionResult = transitionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = transitionValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const transitionData = {
+      Type: transitionScreenConstModel,
+      ...transitionResult,
+    }
+    jsonData.push(transitionData);
+  }
+
+  generateInstructionScreenZipText(evalData: screenTypeModel, jsonData: any[]){
+    const instructionTextValues = structuredClone(evalData.values);
+    instructionTextValues.splice(5, 1);
+    const instructionTxtResult = instructionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = instructionTextValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const instructionTxtData = {
+      Type: instructionScreenConstModel,
+      ...instructionTxtResult,
+    }
+    jsonData.push(instructionTxtData);
+  }
+
+  async generateInstructionScreenZipImg(instructionValues: any[], jsonData: any[], zip: JSZip){
+    const imgFile: File = instructionValues[5];
+    if (imgFile) {
+      const imgArrayBuffer = await imgFile.arrayBuffer();
+      zip.file('images/' + instructionValues[4], imgArrayBuffer);
+    }
+    instructionValues.splice(5, 1);
+    const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = instructionValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const instructionImgData = {
+      Type: instructionScreenConstModel,
+      ...instructionImgResult,
+    }
+    jsonData.push(instructionImgData);
+  }
+
+  async generateInstructionScreenZipVideo(instructionValues: any[], jsonData: any[], zip: JSZip){
+    const videoFile: File = instructionValues[5];
+    if (videoFile) {
+      const videoArrayBuffer = await videoFile.arrayBuffer();
+      zip.file('videos/' + instructionValues[4], videoArrayBuffer);
+      instructionValues.splice(5, 1);
+    }
+    const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = instructionValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const instructionVideoData = {
+      Type: instructionScreenConstModel,
+      ...instructionVideoResult,
+    }
+    jsonData.push(instructionVideoData);
+  }
+
+  async generateInstructionScreenZipSound(instructionValues: any[], jsonData: any[], zip: JSZip){
+    const audioFile: File = instructionValues[5];
+    if (audioFile) {
+      const audioArrayBuffer = await audioFile.arrayBuffer();
+      zip.file('audio/' + instructionValues[4], audioArrayBuffer);
+      instructionValues.splice(5, 1);
+    }
+    const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = instructionValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const instructionAudioData = {
+      Type: instructionScreenConstModel,
+      ...instructionAudioResult,
+    }
+    jsonData.push(instructionAudioData);
+  }
+
+  async generateStimuliScreenZip(evalData: screenTypeModel, jsonData: any[], zip: JSZip){
+    const stimuliValues = structuredClone(evalData.values);
+    const stimuliList = stimuliValues[8];
+
+    for (const key in stimuliList) {
+      const entry = stimuliList[key];
+      const entryNameFile: string = entry.imageName;
+      const entryFile: File = entry.imageFile;
+      if (entryFile) {
+        const arrayStimuliBuffer = await entryFile.arrayBuffer();
+        zip.file('images/' + entryNameFile, arrayStimuliBuffer);
+        delete entry.imageFile;
+      }
+    }
+
+    const stimuliResult = stimuliScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = stimuliValues[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    const stimuliData = {
+      Type: stimuliScreenConstModel,
+      ...stimuliResult,
+    }
+    jsonData.push(stimuliData);
   }
 }

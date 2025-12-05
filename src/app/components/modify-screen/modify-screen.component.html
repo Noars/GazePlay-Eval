@@ -283,7 +283,7 @@
                       <span class="list-dash">-</span>
                       <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[0]">
+                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[0]" (change)="numberCellChanged()">
                       </div>
                     </div>
 
@@ -291,7 +291,7 @@
                       <span class="list-dash">-</span>
                       <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[1]">
+                        <input type="number" class="form-control" min="1" max="8" [(ngModel)]="screenToModify.values[1]" (change)="numberCellChanged()">
                       </div>
                     </div>
 
@@ -333,7 +333,7 @@
 
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Combien de stimuli à choisir ?</label>
+                      <label class="form-label me-3 fw-semibold">Combien de stimuli à sélectionner ?</label>
                       <div class="input-group w-auto">
                         <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[5]">
                       </div>
@@ -341,7 +341,7 @@
 
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Ordre des stimuli aléatoire ?</label>
+                      <label class="form-label me-3 fw-semibold">Position des stimuli aléatoire ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
                           <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
@@ -356,7 +356,7 @@
 
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Désactiver les stimuli après sélection ?</label>
+                      <label class="form-label me-3 fw-semibold">Cacher les stimuli après sélection ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
                           <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliY" (change)="screenToModify.values[7] = true" [checked]="screenToModify.values[7]">

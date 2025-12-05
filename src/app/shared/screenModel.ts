@@ -37,6 +37,13 @@ export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, sti
 export const stimuliScreenConstKey = [
   "Nombre de lignes",
   "Nombre de colonnes",
+  "Mettre un temps avant passage à l'écran suivant",
+  "Combien de temps",
+  "Combien de temps de fixation",
+  "Combien de stimuli à sélectionner",
+  "Position stimuli aléatoire",
+  "Caché stimuli après selection",
+  "Liste des stimuli"
 ];
 
 export interface transitionScreenModel {
