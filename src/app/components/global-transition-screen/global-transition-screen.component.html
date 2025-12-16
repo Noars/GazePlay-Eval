@@ -8,11 +8,11 @@
             <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
             <div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="globalTransitionScreenInfos[0] = true" [checked]="globalTransitionScreenInfos[0]">
+                <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[0]">
                 <label class="form-check-label fw-semibold" for="timeNextScreenY">Oui</label>
               </div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="globalTransitionScreenInfos[0] = false" [checked]="!globalTransitionScreenInfos[0]">
+                <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[0]">
                 <label class="form-check-label fw-semibold" for="timeNextScreenN">Non</label>
               </div>
             </div>
@@ -38,11 +38,11 @@
             <label class="form-label me-3 fw-semibold">Mettre une croix de fixation ?</label>
             <div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenY" (change)="globalTransitionScreenInfos[2] = true" [checked]="globalTransitionScreenInfos[2]">
+                <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[2]">
                 <label class="form-check-label fw-semibold" for="fixationCrossScreenY">Oui</label>
               </div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenN" (change)="globalTransitionScreenInfos[2] = false" [checked]="!globalTransitionScreenInfos[2]">
+                <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[2]">
                 <label class="form-check-label fw-semibold" for="fixationCrossScreenN">Non</label>
               </div>
             </div>
@@ -60,11 +60,11 @@
                   <label class="form-label me-3 fw-semibold">Mettre un temps de fixation ?</label>
                   <div>
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenY" (change)="globalTransitionScreenInfos[3] = true" [checked]="globalTransitionScreenInfos[3]">
+                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[3]">
                       <label class="form-check-label fw-semibold" for="fixationTimeScreenY">Oui</label>
                     </div>
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenN" (change)="globalTransitionScreenInfos[3] = false" [checked]="!globalTransitionScreenInfos[3]">
+                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[3]">
                       <label class="form-check-label fw-semibold" for="fixationTimeScreenN">Non</label>
                     </div>
                   </div>

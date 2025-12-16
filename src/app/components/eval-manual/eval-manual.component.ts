@@ -10,7 +10,7 @@ import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stim
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent, GlobalStimuliScreenComponent],
+  imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
   templateUrl: './eval-manual.component.html',
   styleUrl: './eval-manual.component.css'
 })
@@ -20,7 +20,7 @@ export class EvalManualComponent implements OnInit{
 
   globalTransitionScreenInfos: any[] = saveModelDefault.globalParamsTransitionScreen;
   globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
-  globalStimuliScreenInfos: string[] = saveModelDefault.globalParamsStimuliScreen;
+  globalStimuliScreenInfos: any[] = saveModelDefault.globalParamsStimuliScreen;
 
   constructor(private router: Router,
               private saveService: SaveService,) {

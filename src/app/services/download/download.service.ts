@@ -162,7 +162,6 @@ export class DownloadService {
         delete entry.imageFile;
       }
     }
-
     const stimuliResult = stimuliScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = stimuliValues[idx];
       return acc;

@@ -27,11 +27,11 @@
                       <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="screenToModify.values[0] = true" [checked]="screenToModify.values[0]">
+                          <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenY" [value]="true" [ngModel]="screenToModify.values[0]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="screenToModify.values[0] = false" [checked]="!screenToModify.values[0]">
+                          <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenN" [value]="false" [ngModel]="screenToModify.values[0]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenN">Non</label>
                         </div>
                       </div>
@@ -57,11 +57,11 @@
                       <label class="form-label me-3 fw-semibold">Mettre une croix de fixation ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenY" (change)="screenToModify.values[2] = true" [checked]="screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="fixationCrossScreenY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="fixationCrossScreen" id="fixationCrossScreenN" (change)="screenToModify.values[2] = false" [checked]="!screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="fixationCrossScreenN">Non</label>
                         </div>
                       </div>
@@ -79,11 +79,11 @@
                             <label class="form-label me-3 fw-semibold">Mettre un temps de fixation ?</label>
                             <div>
                               <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenY" (change)="screenToModify.values[3] = true" [checked]="screenToModify.values[3]">
+                                <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [ngModel]="screenToModify.values[3]">
                                 <label class="form-check-label fw-semibold" for="fixationTimeScreenY">Oui</label>
                               </div>
                               <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input" type="checkbox" name="fixationTimeScreen" id="fixationTimeScreenN" (change)="screenToModify.values[3] = false" [checked]="!screenToModify.values[3]">
+                                <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [ngModel]="screenToModify.values[3]">
                                 <label class="form-check-label fw-semibold" for="fixationTimeScreenN">Non</label>
                               </div>
                             </div>
@@ -122,11 +122,11 @@
                       <label class="form-label me-3 fw-semibold">Mettre un temps avant passage à l'écran suivant ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="screenToModify.values[0] = true" [checked]="screenToModify.values[0]">
+                          <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenY" [value]="true" [ngModel]="screenToModify.values[0]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="screenToModify.values[0] = false" [checked]="!screenToModify.values[0]">
+                          <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenN" [value]="false" [ngModel]="screenToModify.values[0]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenN">Non</label>
                         </div>
                       </div>
@@ -152,11 +152,11 @@
                       <label class="form-label me-3 fw-semibold">Ajouter un/une Image, Vidéo, Texte ou Son ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addFile" id="addFileY" (change)="screenToModify.values[2] = true" [checked]="screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="addFileY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addFile" id="addFileN" (change)="screenToModify.values[2] = false" [checked]="!screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="addFile" id="addFileN" [value]="false" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="addFileN">Non</label>
                         </div>
                       </div>
@@ -244,11 +244,11 @@
                       <label class="form-label me-3 fw-semibold">Ajouter un bouton pour lancer l'évaluation ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonY" [value]="true" [ngModel]="screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="addStartButtonY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonN" [value]="false" [ngModel]="screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="addStartButtonN">Non</label>
                         </div>
                       </div>
@@ -300,11 +300,11 @@
                       <label class="form-label me-3 fw-semibold">Mettre un temps pour passage à l'écran suivant ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSY" (change)="screenToModify.values[2] = true" [checked]="screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSY" [value]="true" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenSY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="timeNextScreenS" id="timeNextScreenSN" (change)="screenToModify.values[2] = false" [checked]="!screenToModify.values[2]">
+                          <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSN" [value]="false" [ngModel]="screenToModify.values[2]">
                           <label class="form-check-label fw-semibold" for="timeNextScreenSN">Non</label>
                         </div>
                       </div>
@@ -344,11 +344,11 @@
                       <label class="form-label me-3 fw-semibold">Position des stimuli aléatoire ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliY" (change)="screenToModify.values[6] = true" [checked]="screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [ngModel]="screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="randomStimuli" id="randomStimuliN" (change)="screenToModify.values[6] = false" [checked]="!screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [ngModel]="screenToModify.values[6]">
                           <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
                         </div>
                       </div>
@@ -359,11 +359,11 @@
                       <label class="form-label me-3 fw-semibold">Cacher les stimuli après sélection ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliY" (change)="screenToModify.values[7] = true" [checked]="screenToModify.values[7]">
+                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [ngModel]="screenToModify.values[7]">
                           <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="checkbox" name="disableStimuli" id="disableStimuliN" (change)="screenToModify.values[7] = false" [checked]="!screenToModify.values[7]">
+                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [ngModel]="screenToModify.values[7]">
                           <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
                         </div>
                       </div>

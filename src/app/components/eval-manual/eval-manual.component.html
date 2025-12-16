@@ -103,26 +103,24 @@
                   </label>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="timeScreenYes"
-                      (change)="globalStimuliScreenInfos[2] = 'true'"
-                      [checked]="globalStimuliScreenInfos[2] === 'true'"
+                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[2]"
                     />
                     <label class="form-check-label" for="timeScreenYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="timeScreenNo"
-                      (change)="globalStimuliScreenInfos[2] = 'false'"
-                      [checked]="globalStimuliScreenInfos[2] === 'false'"
+                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[2]"
                     />
                     <label class="form-check-label" for="timeScreenNo">Non</label>
                   </div>
                 </div>
-                @if (globalStimuliScreenInfos[2] === 'true') {
+                @if (globalStimuliScreenInfos[2]) {
                   <div class="row g-3 align-items-center justify-content-center">
                     <div class="col-auto">
                       <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1"
@@ -176,21 +174,19 @@
                   <label class="col-form-label">Désactivation de celui-ci ?</label>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="disableStimuliYes"
-                      (change)="globalStimuliScreenInfos[6] = 'true'"
-                      [checked]="globalStimuliScreenInfos[6] === 'true'"
+                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]"
                     />
                     <label class="form-check-label" for="disableStimuliYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="disableStimuliNo"
-                      (change)="globalStimuliScreenInfos[6] = 'false'"
-                      [checked]="globalStimuliScreenInfos[6] === 'false'"
+                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]"
                     />
                     <label class="form-check-label" for="disableStimuliNo">Non</label>
                   </div>
@@ -205,21 +201,19 @@
                   </label>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="randomStimuliYes"
-                      (change)="globalStimuliScreenInfos[7] = 'true'"
-                      [checked]="globalStimuliScreenInfos[7] === 'true'"
+                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[7]"
                     />
                     <label class="form-check-label" for="randomStimuliYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
                     <input
-                      type="checkbox"
+                      type="radio"
                       class="form-check-input"
                       id="randomStimuliNo"
-                      (change)="globalStimuliScreenInfos[7] = 'false'"
-                      [checked]="globalStimuliScreenInfos[7] === 'false'"
+                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[7]"
                     />
                     <label class="form-check-label" for="randomStimuliNo">Non</label>
                   </div>

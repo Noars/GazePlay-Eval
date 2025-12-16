@@ -8,11 +8,11 @@
             <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
             <div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenY" (change)="globalInstructionScreenInfos[0] = true" [checked]="globalInstructionScreenInfos[0]">
+                <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenY" [value]="true" [(ngModel)]="globalInstructionScreenInfos[0]">
                 <label class="form-check-label fw-semibold" for="timeNextScreenY">Oui</label>
               </div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="timeNextScreen" id="timeNextScreenN" (change)="globalInstructionScreenInfos[0] = false" [checked]="!globalInstructionScreenInfos[0]">
+                <input class="form-check-input" type="radio" name="timeNextScreen" id="timeNextScreenN" [value]="false" [(ngModel)]="globalInstructionScreenInfos[0]">
                 <label class="form-check-label fw-semibold" for="timeNextScreenN">Non</label>
               </div>
             </div>
@@ -38,11 +38,11 @@
             <label class="form-label me-3 fw-semibold">Ajouter un/une Image, Vidéo, Texte ou Son ?</label>
             <div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="addFile" id="addFileY" (change)="globalInstructionScreenInfos[2] = true" [checked]="globalInstructionScreenInfos[2]">
+                <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="globalInstructionScreenInfos[2]">
                 <label class="form-check-label fw-semibold" for="addFileY">Oui</label>
               </div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="addFile" id="addFileN" (change)="globalInstructionScreenInfos[2] = false" [checked]="!globalInstructionScreenInfos[2]">
+                <input class="form-check-input" type="radio" name="addFile" id="addFileN" [value]="false" [(ngModel)]="globalInstructionScreenInfos[2]">
                 <label class="form-check-label fw-semibold" for="addFileN">Non</label>
               </div>
             </div>
@@ -72,11 +72,11 @@
             <label class="form-label me-3 fw-semibold">Ajouter un bouton pour lancer l'évaluation ?</label>
             <div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonY" (change)="globalInstructionScreenInfos[4] = true" [checked]="globalInstructionScreenInfos[4]">
+                <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonY" [value]="true" [(ngModel)]="globalInstructionScreenInfos[4]">
                 <label class="form-check-label fw-semibold" for="addStartButtonY">Oui</label>
               </div>
               <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="checkbox" name="addStartButton" id="addStartButtonN" (change)="globalInstructionScreenInfos[4] = false" [checked]="!globalInstructionScreenInfos[4]">
+                <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonN" [value]="false" [(ngModel)]="globalInstructionScreenInfos[4]">
                 <label class="form-check-label fw-semibold" for="addStartButtonN">Non</label>
               </div>
             </div>

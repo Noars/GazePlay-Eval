@@ -10,7 +10,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
   templateUrl: './global-transition-screen.component.html',
   styleUrl: './global-transition-screen.component.css'
 })
-export class GlobalTransitionScreenComponent {
+export class GlobalTransitionScreenComponent{
 
   @Input() globalTransitionScreenInfos: any[] = [];
 }
