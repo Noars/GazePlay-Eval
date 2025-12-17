@@ -34,6 +34,7 @@
                             &#x2630;
                           </span>
                             <input
+                              #listScreenInputText
                               type="text"
                               class="form-control"
                               style="cursor: pointer;"
@@ -44,7 +45,7 @@
                               (drop)="$event.preventDefault(); $event.stopPropagation();"
                               (dragover)="$event.preventDefault(); $event.stopPropagation();"
                             />
-                            <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable)">
+                            <button class="btn btn-sm btn-secondary" (click)="editNameScreen(screen, !editNameScreenDisable, i)">
                               <i class="bi bi-pen"></i>
                             </button>
                             <button class="btn btn-sm btn-danger" (click)="removeScreen(screen); $event.preventDefault(); $event.stopPropagation();">

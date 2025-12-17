@@ -16,9 +16,10 @@ import {saveModelDefault} from '../../shared/saveModel';
 export class InfoParticipantComponent implements OnInit{
 
   infoParticipantList: string[] = saveModelDefault.infoParticipant;
-  tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez.\n \n' +
-    'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous ensuite.\n \n' +
-    'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez.';
+  tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez\n \n' +
+    'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous par la suite\n \n' +
+    'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez';
+  tooltipDragDrop: string = 'Faites glisser un item en sélectionnant les trois barres horizontales à sa gauche, et déplacez-le jusqu’à l’endroit où vous le souhaitez avant de relâcher le clic de la souris';
 
   constructor(private router: Router,
               private saveService: SaveService) {

@@ -1,10 +1,16 @@
 <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 700px;">
+  <div class="card shadow-lg w-100" style="max-width: 800px;">
     <div class="card-header text-center">
       <h2 class="card-title text-center">Informations participant</h2>
     </div>
     <div class="card-body" style="text-align: -webkit-center;">
       <div class="alert alert-info text-center fw-semibold col-11">
+        Lorsque vous évaluerez quelqu’un sous Gazeplay-Learning, vous souhaiterez pouvoir renseigner certaines informations à son propos <br>
+        Ici, vous pouvez définir les champs que vous pourrez compléter lors de l’évaluation <br>
+        Par exemple : nom, prénom, âge, adresse, etc ... <br>
+        À vous de choisir ce qui vous servira <br>
+        Attention : veillez à ajouter un champ pour y renseigner chaque type d’information <br>
+        <br>
         Aucune information n'est gardé de notre côté !
         <i class="bi bi-info-circle ms-1"
            [matTooltip]="tooltipTextData"
@@ -13,7 +19,12 @@
         </i>
       </div>
       <div class="alert alert-info text-center fw-semibold col-11">
-        Vous pouvez réogarniser vos champs si dessous via du Drag and Drop !
+        Vous pouvez réogarniser vos champs ci-dessous via du Drag and Drop !
+        <i class="bi bi-info-circle ms-1"
+           [matTooltip]="tooltipDragDrop"
+           matTooltipClass="custom-tooltip-class"
+           matTooltipPosition="right">
+        </i>
       </div>
       <div class="card shadow-lg col-11">
         <div class="card-header bg-secondary text-white fw-semibold">

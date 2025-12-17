@@ -12,7 +12,7 @@
           <label for="evalName" class="form-label fw-semibold">
             Comment souhaitez-vous appeler votre évaluation ?
             <i class="bi bi-info-circle ms-1"
-               [matTooltip]="tooltipText"
+               [matTooltip]="tooltipEvalName"
                matTooltipClass="custom-tooltip-class"
                matTooltipPosition="right">
             </i>
@@ -23,7 +23,14 @@
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label fw-semibold">Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?</label>
+          <label class="form-label fw-semibold">
+            Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?
+            <i class="bi bi-info-circle ms-1"
+               [matTooltip]="tooltipEvalType"
+               matTooltipClass="custom-tooltip-class"
+               matTooltipPosition="right">
+            </i>
+          </label>
           <div class="col-4">
             <select class="form-select" [(ngModel)]="resultType">
               <option value="Csv&Xlsx">CSV & XLSX</option>

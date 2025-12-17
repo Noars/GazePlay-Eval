@@ -7,3 +7,8 @@
   background-color: green;
   cursor: text !important;
 }
+
+input:focus {
+  outline: none;
+  box-shadow: none;
+}

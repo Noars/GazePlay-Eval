@@ -1,9 +1,14 @@
 <div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
   <div class="card shadow-lg w-100" style="max-width: 800px;">
     <div class="card-header text-center">
-      <h3 class="mb-0 fw-semibold">Paramètres globaux évaluation manuelle</h3>
+      <h3 class="mb-0 fw-semibold">Personnalisation des paramètres globaux des écrans</h3>
     </div>
     <div class="card-body">
+      <div class="alert alert-info text-center fw-semibold">
+        Lors de cette étape, vous serez amené.e.s à créer des écrans qui se succéderont : écrans d’instructions, écrans de stimuli et écrans de transition <br>
+        Sur cette page, nous vous proposons de renseignez les caractéristiques globales de chacun de ces types d’écrans, afin que vous ne soyez pas obligé.e.s de les entrer manuellement à chaque nouvelle création d’écrans <br>
+        Vous pourrez toutefois procéder à des modifications par la suite !
+      </div>
       <div class="accordion mt-4" id="globalParams">
 
         <div class="accordion-item">
@@ -13,7 +18,7 @@
                     data-bs-target="#collapseTransitionScreen"
                     aria-expanded="false"
                     aria-controls="collapseTransitionScreen">
-              Écrans transition globaux
+              Paramètres globaux des écrans de transition
             </button>
           </h2>
           <div id="collapseTransitionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
@@ -28,7 +33,7 @@
                     data-bs-target="#collapseInstructionScreen"
                     aria-expanded="false"
                     aria-controls="collapseInstructionScreen">
-              Écrans instruction globaux
+              Paramètres globaux des écrans d’instruction
             </button>
           </h2>
           <div id="collapseInstructionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
@@ -58,7 +63,7 @@
                     data-bs-target="#collapseStimuliScreen"
                     aria-expanded="false"
                     aria-controls="collapseStimuliScreen">
-              Écrans de stimuli globaux
+              Paramètres globaux des écrans de stimuli
             </button>
           </h2>
           <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">

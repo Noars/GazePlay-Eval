@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
@@ -18,6 +18,8 @@ import {UpdateScreensService} from '../../services/updateScreens/update-screens.
   styleUrl: './create-eval.component.css'
 })
 export class CreateEvalComponent implements OnInit{
+
+  @ViewChildren('listScreenInputText') inputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   isModifyScreen: boolean = false;
   listScreens: screenTypeModel[] = [];
@@ -61,10 +63,14 @@ export class CreateEvalComponent implements OnInit{
     this.indexSelectedScreen = index;
   }
 
-  editNameScreen(screen: screenTypeModel, value: boolean) {
+  editNameScreen(screen: screenTypeModel, value: boolean, index: number) {
     this.selectedScreen = screen;
     if (this.selectedScreen === screen) {
       this.editNameScreenDisable = value;
+      setTimeout(() => {
+        this.inputs.toArray()[index].nativeElement.focus();
+        this.inputs.toArray()[index].nativeElement.select();
+      }, 0);
     }
   }
 

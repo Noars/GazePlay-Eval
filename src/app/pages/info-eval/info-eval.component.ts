@@ -15,7 +15,8 @@ import {MatTooltip} from '@angular/material/tooltip';
 export class InfoEvalComponent implements OnInit{
   evaluationName: string = saveModelDefault.nomEval;
   resultType: formatTypeModel = saveModelDefault.format;
-  tooltipText: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats et dans Gazeplay pour choisir l’évaluation si vous en avez en avez plusieurs';
+  tooltipEvalName: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats, ainsi que dans Gazeplay afin que vous puissiez sélectionner cette évaluation parmi celles que vous aurez déjà créées';
+  tooltipEvalType: string = 'Les résultats enregistrés en XLSX et CSV seront lisibles dans un tableur';
 
   constructor(private router: Router,private saveService: SaveService) {
   }
