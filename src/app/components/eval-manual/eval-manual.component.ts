@@ -43,13 +43,13 @@ export class EvalManualComponent implements OnInit{
   }
 
   loadData(){
+    this.globalTransitionScreenInfos = this.saveService.dataAuto.globalParamsTransitionScreen;
+    this.globalInstructionScreenInfos = this.saveService.dataAuto.globalParamsInstructionScreen;
     this.globalStimuliScreenInfos = this.saveService.dataAuto.globalParamsStimuliScreen;
   }
 
   startCreateEvalManual(){
     this.saveData();
-    console.log("Transition value -> " + this.saveService.dataAuto.globalParamsTransitionScreen);
-    console.log("Instruction value -> " + this.saveService.dataAuto.globalParamsInstructionScreen);
     this.router.navigate(['/create-eval']);
   }
 
