@@ -19,9 +19,15 @@
         <div class="mb-3 mt-3">
 
           <div class="text-center mt-4">
-            <button (click)="addField()" class="btn btn-secondary px-4 fw-semibold">
+            <button (click)="capturerHeure()" class="btn btn-secondary px-4 fw-semibold">
               Afficher la date
             </button>
+            @if (heureAffichee) {
+              <div>L'heure au clic était : <strong>{{ heureAffichee }}</strong></div>
+            }
+
+
+
           </div>
         </div>
       </div>

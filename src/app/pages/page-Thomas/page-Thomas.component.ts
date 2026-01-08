@@ -14,6 +14,7 @@ import {saveModelDefault} from '../../shared/saveModel';
   styleUrl: './page-Thomas.component.css'
 })
 export class PageThomas implements OnInit{
+  heureAffichee: string | null = null;
 
   infoParticipantList: string[] = saveModelDefault.infoParticipant;
   tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez\n \n' +
@@ -44,13 +45,16 @@ export class PageThomas implements OnInit{
     this.infoParticipantList = this.saveService.dataAuto.infoParticipant;
   }
 
+  capturerHeure() {
+    const maintenant = new Date();
 
+    this.heureAffichee = maintenant.toLocaleTimeString() + " le " + maintenant.toLocaleDateString();
 
-
+  }
 
   backToInfoEval() {
     this.saveData();
-    this.router.navigate(['/page-Thomas']);
+    this.router.navigate(['/info-eval']);
   }
 
   goToCreateEval() {
