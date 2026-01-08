@@ -9,10 +9,10 @@ import {MatTooltip} from '@angular/material/tooltip';
 @Component({
   selector: 'app-info-eval',
   imports: [CommonModule, FormsModule, MatTooltip],
-  templateUrl: './info-eval.component.html',
-  styleUrl: './info-eval.component.css'
+  templateUrl: './page-Thomas.html',
+  styleUrl: './page-Thomas.component.css'
 })
-export class InfoEvalComponent implements OnInit{
+export class PageThomas implements OnInit{
   evaluationName: string = saveModelDefault.nomEval;
   resultType: formatTypeModel = saveModelDefault.format;
   tooltipEvalName: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats, ainsi que dans Gazeplay afin que vous puissiez sélectionner cette évaluation parmi celles que vous aurez déjà créées';
@@ -41,8 +41,13 @@ export class InfoEvalComponent implements OnInit{
     this.resultType = this.saveService.dataAuto.format;
   }
 
+  backToInfoEval() {
+    this.saveData();
+    this.router.navigate(['/info-eval']);
+  }
+
   goToInfoParticipant() {
     this.saveData();
-    this.router.navigate(['/page-Thomas']);
+    this.router.navigate(['/info-participant']);
   }
 }
