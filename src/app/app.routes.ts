@@ -5,13 +5,13 @@ import {InfoParticipantComponent} from './pages/info-participant/info-participan
 import {SetupEvalComponent} from './pages/setup-eval/setup-eval.component';
 import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
 import {DownloadEvalComponent} from './pages/download-eval/download-eval.component';
-import {PageThomas} from './pages/page-Thomas/page-Thomas.component';
+import {PageThomasComponent} from './pages/page-Thomas/page-Thomas.component';
 
 
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'info-eval', component: InfoEvalComponent},
-  {path: 'page-Thomas', component: PageThomas},
+  {path: 'page-Thomas', component: PageThomasComponent},
   {path: 'info-participant', component: InfoParticipantComponent},
   {path: 'setup-eval', component: SetupEvalComponent},
   {path: 'create-eval', component: CreateEvalComponent},

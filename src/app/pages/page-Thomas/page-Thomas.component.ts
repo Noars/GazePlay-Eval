@@ -13,7 +13,7 @@ import {saveModelDefault} from '../../shared/saveModel';
   templateUrl: './page-Thomas.component.html',
   styleUrl: './page-Thomas.component.css'
 })
-export class PageThomas implements OnInit{
+export class PageThomasComponent implements OnInit{
   heureAffichee: string | null = null;
 
 
