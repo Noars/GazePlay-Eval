@@ -1,35 +1,39 @@
 import {Component, OnInit} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {SaveService} from '../../services/save/save.service';
-import {formatTypeModel, saveModelDefault} from '../../shared/saveModel';
+import {FormsModule} from '@angular/forms';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
+import {SaveService} from '../../services/save/save.service';
+import {saveModelDefault} from '../../shared/saveModel';
 
 @Component({
-  selector: 'app-info-eval',
-  imports: [CommonModule, FormsModule, MatTooltip],
-  templateUrl: './page-Thomas.html',
+  selector: 'app-info-participant',
+  imports: [CommonModule, FormsModule, DragDropModule, MatTooltip],
+  templateUrl: './page-Thomas.component.html',
   styleUrl: './page-Thomas.component.css'
 })
 export class PageThomas implements OnInit{
-  evaluationName: string = saveModelDefault.nomEval;
-  resultType: formatTypeModel = saveModelDefault.format;
-  tooltipEvalName: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats, ainsi que dans Gazeplay afin que vous puissiez sélectionner cette évaluation parmi celles que vous aurez déjà créées';
-  tooltipEvalType: string = 'Les résultats enregistrés en XLSX et CSV seront lisibles dans un tableur';
 
-  constructor(private router: Router,private saveService: SaveService) {
+  infoParticipantList: string[] = saveModelDefault.infoParticipant;
+  tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez\n \n' +
+    'Aucune information n’est stockée de notre côté : nous n’avons pas accès à ces informations sauf si vous partagez les fichiers avec nous par la suite\n \n' +
+    'Il est important de vous assurer de la conformité RGPD des données que vous stockez et partagez';
+  tooltipDragDrop: string = 'Faites glisser un item en sélectionnant les trois barres horizontales à sa gauche, et déplacez-le jusqu’à l’endroit où vous le souhaitez avant de relâcher le clic de la souris';
+
+  constructor(private router: Router,
+              private saveService: SaveService) {
   }
 
   ngOnInit(): void {
-    this.loadData()
+    this.loadData();
   }
 
   saveData(){
     this.saveService.saveDataAuto(
-      this.evaluationName,
-      this.resultType,
-      this.saveService.dataAuto.infoParticipant,
+      this.saveService.dataAuto.nomEval,
+      this.saveService.dataAuto.format,
+      this.infoParticipantList,
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
@@ -37,16 +41,19 @@ export class PageThomas implements OnInit{
   }
 
   loadData(){
-    this.evaluationName = this.saveService.dataAuto.nomEval;
-    this.resultType = this.saveService.dataAuto.format;
+    this.infoParticipantList = this.saveService.dataAuto.infoParticipant;
   }
+
+
+
+
 
   backToInfoEval() {
     this.saveData();
-    this.router.navigate(['/info-eval']);
+    this.router.navigate(['/page-Thomas']);
   }
 
-  goToInfoParticipant() {
+  goToCreateEval() {
     this.saveData();
     this.router.navigate(['/info-participant']);
   }

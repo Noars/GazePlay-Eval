@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PageThomas } from './page-Thomas.component';
 import { Router } from '@angular/router';
 import { SaveService } from '../../services/save/save.service';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTooltip } from '@angular/material/tooltip';
-import { formatTypeModel } from '../../shared/saveModel';
 
-describe('InfoEvalComponent', () => {
+describe('InfoParticipantComponent', () => {
   let component: PageThomas;
   let fixture: ComponentFixture<PageThomas>;
   let routerSpy: jasmine.SpyObj<Router>;
@@ -18,8 +18,8 @@ describe('InfoEvalComponent', () => {
     saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto'], {
       dataAuto: {
         nomEval: 'EvalTest',
-        format: 'Csv&Xlsx' as formatTypeModel,
-        infoParticipant: [],
+        format: 'Csv&Xlsx',
+        infoParticipant: ['Nom', 'Âge'],
         globalParamsTransitionScreen: [],
         globalParamsInstructionScreen: [],
         globalParamsStimuliScreen: [],
@@ -28,7 +28,7 @@ describe('InfoEvalComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [CommonModule, FormsModule, MatTooltip, PageThomas],
+      imports: [CommonModule, FormsModule, DragDropModule, MatTooltip, PageThomas],
       providers: [
         { provide: Router, useValue: routerSpy },
         { provide: SaveService, useValue: saveServiceSpy }
@@ -46,20 +46,17 @@ describe('InfoEvalComponent', () => {
 
   it('devrait charger les données depuis SaveService au démarrage', () => {
     component.ngOnInit();
-    expect(component.evaluationName).toBe('EvalTest');
-    expect(component.resultType).toBe('Csv&Xlsx');
+    expect(component.infoParticipantList).toEqual(['Nom', 'Âge']);
   });
 
-  it('devrait appeler saveDataAuto lors de saveData()', () => {
-    component.evaluationName = 'NouvelleEval';
-    component.resultType = 'Csv' as formatTypeModel;
-
+  it('devrait appeler saveDataAuto avec les bonnes valeurs', () => {
+    component.infoParticipantList = ['Nom', 'Âge', 'Sexe'];
     component.saveData();
 
     expect(saveServiceSpy.saveDataAuto).toHaveBeenCalledWith(
-      'NouvelleEval',
-      'Csv',
-      [],
+      'EvalTest',
+      'Csv&Xlsx',
+      ['Nom', 'Âge', 'Sexe'],
       [],
       [],
       [],
@@ -67,21 +64,36 @@ describe('InfoEvalComponent', () => {
     );
   });
 
-  it('devrait sauvegarder et naviguer vers /info-participant quand goToInfoParticipant() est appelé', () => {
-    spyOn(component, 'saveData').and.callThrough();
-
-    component.goToInfoParticipant();
-
-    expect(component.saveData).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-participant']);
+  it('devrait ajouter un champ vide avec addField()', () => {
+    const initialLength = component.infoParticipantList.length;
+    component.addField();
+    expect(component.infoParticipantList.length).toBe(initialLength + 1);
+    expect(component.infoParticipantList.at(-1)).toBe('');
   });
 
-  it('devrait réagir correctement au clic sur le bouton "Suivant"', () => {
-    spyOn(component, 'goToInfoParticipant');
-    const button = fixture.nativeElement.querySelector('button');
-    button.click();
-    fixture.detectChanges();
+  it('devrait supprimer le bon champ avec removeField()', () => {
+    component.infoParticipantList = ['Nom', 'Âge', 'Sexe'];
+    component.removeField(1);
+    expect(component.infoParticipantList).toEqual(['Nom', 'Sexe']);
+  });
 
-    expect(component.goToInfoParticipant).toHaveBeenCalled();
+  it('devrait réorganiser les champs après un drop()', () => {
+    component.infoParticipantList = ['Nom', 'Âge', 'Sexe'];
+    component.drop({ previousIndex: 0, currentIndex: 2 });
+    expect(component.infoParticipantList).toEqual(['Âge', 'Sexe', 'Nom']);
+  });
+
+  it('devrait sauvegarder et naviguer vers /info-eval avec backToInfoEval()', () => {
+    spyOn(component, 'saveData').and.callThrough();
+    component.backToInfoEval();
+    expect(component.saveData).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
+  });
+
+  it('devrait sauvegarder et naviguer vers /setup-eval avec goToCreateEval()', () => {
+    spyOn(component, 'saveData').and.callThrough();
+    component.goToCreateEval();
+    expect(component.saveData).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/setup-eval']);
   });
 });
