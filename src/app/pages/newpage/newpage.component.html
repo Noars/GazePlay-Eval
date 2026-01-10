@@ -12,10 +12,17 @@
         <div class="mb-3 mt-3">
 
           <div class="text-center mt-4">
-            <button  class="btn btn-primary px-4 fw-semibold">
+            <button (click)="getDateEtHeure()" class="btn btn-primary px-4 fw-semibold">
               Date et Heure
             </button>
           </div>
+
+          @if (dateHeure) { <!-- Si le bouton "Date et Heure" a été cliqué-->
+            <div class="mt-3 p-2 bg-dark-subtle border rounded">
+              <p class="mb-0">Jour et heure actuelle (format Français) : <strong><i>{{ dateHeure }}</i></strong></p>
+            </div>
+          }
+
         </div>
       </div>
 

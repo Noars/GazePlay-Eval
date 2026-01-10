@@ -6,6 +6,7 @@ import {formatTypeModel, saveModelDefault} from '../../shared/saveModel';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
 
+
 @Component({
   selector: 'app-newpage-eval',
   imports: [CommonModule, FormsModule, MatTooltip],
@@ -17,6 +18,8 @@ export class NewpageComponent implements OnInit{
   resultType: formatTypeModel = saveModelDefault.format;
   tooltipEvalName: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats, ainsi que dans Gazeplay afin que vous puissiez sélectionner cette évaluation parmi celles que vous aurez déjà créées';
   tooltipEvalType: string = 'Les résultats enregistrés en XLSX et CSV seront lisibles dans un tableur';
+
+  dateHeure: string = ''; // String pour l'affichage de la date et de l'heure
 
   constructor(private router: Router,private saveService: SaveService) {
   }
@@ -49,5 +52,15 @@ export class NewpageComponent implements OnInit{
   goToInfoParticipant() {
     this.saveData();
     this.router.navigate(['/info-participant']);
+  }
+
+  /**
+   * Récupère et renvoie la date actuelle ainsi que l'heure (en formant Français)
+   */
+  getDateEtHeure() {
+    const now = new Date();
+
+    // Format JJ/MM/AAAA HH:MM:SS
+    this.dateHeure = now.toLocaleString('fr-FR');
   }
 }
