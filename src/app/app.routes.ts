@@ -5,10 +5,12 @@ import {InfoParticipantComponent} from './pages/info-participant/info-participan
 import {SetupEvalComponent} from './pages/setup-eval/setup-eval.component';
 import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
 import {DownloadEvalComponent} from './pages/download-eval/download-eval.component';
+import {PageIntermediaireComponent} from './pages/page-intermediaire/page-intermediaire.component';
 
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'info-eval', component: InfoEvalComponent},
+  { path: 'page-intermediaire', component: PageIntermediaireComponent},
   {path: 'info-participant', component: InfoParticipantComponent},
   {path: 'setup-eval', component: SetupEvalComponent},
   {path: 'create-eval', component: CreateEvalComponent},

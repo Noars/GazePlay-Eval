@@ -25,14 +25,16 @@ export class App implements OnInit{
 
       if (url.includes('/info-eval')) {
         this.currentStepIndex = 0;
-      } else if (url.includes('/info-participant')) {
+      } else if (url.includes('/page-intermediaire')) {
         this.currentStepIndex = 1;
-      } else if (url.includes('/setup-eval')) {
+        } else if (url.includes('/info-participant')) {
         this.currentStepIndex = 2;
-      } else if (url.includes('/create-eval')) {
+      } else if (url.includes('/setup-eval')) {
         this.currentStepIndex = 3;
-      } else if (url.includes('/download-eval')) {
+      } else if (url.includes('/create-eval')) {
         this.currentStepIndex = 4;
+      } else if (url.includes('/download-eval')) {
+        this.currentStepIndex = 5;
       } else {
         this.currentStepIndex = -1;
       }
