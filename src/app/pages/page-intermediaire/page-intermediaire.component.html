@@ -1,0 +1,21 @@
+<div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
+  <div class="card shadow-lg w-100" style="max-width: 700px;">
+    <div class="card-header">
+      <h2 class="card-title text-center">Page intermédiaire</h2>
+    </div>
+    <div class="card-body" style="text-align: -webkit-center;">
+      <div class="card shadow-lg col-11">
+        <button class="btn btn-primary fw-semibold" (click)="goToInfoParticipant()">Afficher date et heure</button>
+
+      </div>
+      <div class="d-flex justify-content-between mt-4">
+        <button (click)="BackToInfoEval()" class="btn btn-primary fw-semibold">
+          ← Précédent
+        </button>
+        <button (click)="goToInfoParticipant()" class="btn btn-primary fw-semibold">
+          Suivant →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
