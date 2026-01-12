@@ -41,7 +41,7 @@ export class InfoEvalComponent implements OnInit{
     this.resultType = this.saveService.dataAuto.format;
   }
 
-  goToInfoPageIntermediaire() {
+  goToPageIntermediaire() {
     this.saveData();
     // changement pour redirigier vers la page intermediaire
     this.router.navigate(['/page-intermediaire']);
