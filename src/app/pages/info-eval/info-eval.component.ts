@@ -45,4 +45,5 @@ export class InfoEvalComponent implements OnInit{
     this.saveData();
     this.router.navigate(['/info-participant']);
   }
+
 }
