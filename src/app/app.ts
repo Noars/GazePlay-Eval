@@ -13,8 +13,8 @@ import {ProgressBarComponent} from './components/progress-bar/progress-bar.compo
 })
 export class App implements OnInit{
   protected title = 'GazePlay-Eval';
-
-  steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
+// ajout de la page intermédiaire à la barre de progression
+  steps = ['Informations Evaluation', 'Page Intermédiaire', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
   currentStepIndex = -1;
 
   constructor(private router: Router) {
@@ -27,7 +27,7 @@ export class App implements OnInit{
         this.currentStepIndex = 0;
       } else if (url.includes('/page-intermediaire')) {
         this.currentStepIndex = 1;
-        } else if (url.includes('/info-participant')) {
+        } else if (url.includes('/info-participant')) { // ajout de la page intermediaire, ce qui décale les autres pages
         this.currentStepIndex = 2;
       } else if (url.includes('/setup-eval')) {
         this.currentStepIndex = 3;
