@@ -83,9 +83,9 @@ describe('InfoParticipantComponent', () => {
     expect(component.infoParticipantList).toEqual(['Âge', 'Sexe', 'Nom']);
   });
 
-  it('devrait sauvegarder et naviguer vers /info-eval avec backToInfoEval()', () => {
+  it('devrait sauvegarder et naviguer vers /page-intermediaire avec backToPageIntermediaire()', () => {
     spyOn(component, 'saveData').and.callThrough();
-    component.backToInfoEval();
+    component.backToPageIntermediaire();
     expect(component.saveData).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
   });

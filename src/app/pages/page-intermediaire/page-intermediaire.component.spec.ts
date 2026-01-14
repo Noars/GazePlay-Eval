@@ -1,15 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { InfoEvalComponent } from './info-eval.component';
-import { Router } from '@angular/router';
-import { SaveService } from '../../services/save/save.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
-import { formatTypeModel } from '../../shared/saveModel';
+import {InfoEvalComponent} from '../info-eval/info-eval.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
+import {SaveService} from '../../services/save/save.service';
+import {formatTypeModel} from '../../shared/saveModel';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MatTooltip} from '@angular/material/tooltip';
+import {PageIntermediaireComponent} from './page-intermediaire.component';
 
-describe('InfoEvalComponent', () => {
-  let component: InfoEvalComponent;
-  let fixture: ComponentFixture<InfoEvalComponent>;
+describe('PageIntermediaireComponent', () => {
+  let component: PageIntermediaireComponent;
+  let fixture: ComponentFixture<PageIntermediaireComponent>;
   let routerSpy: jasmine.SpyObj<Router>;
   let saveServiceSpy: jasmine.SpyObj<SaveService>;
 
@@ -35,7 +36,7 @@ describe('InfoEvalComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(InfoEvalComponent);
+    fixture = TestBed.createComponent(PageIntermediaireComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -67,21 +68,36 @@ describe('InfoEvalComponent', () => {
     );
   });
 
-  it('devrait sauvegarder et naviguer vers /page-intermediaire quand goToPageIntermediaire() est appelé', () => {
+  it('devrait sauvegarder et naviguer vers /info-participant quand goToPageIntermediaire() est appelé', () => {
     spyOn(component, 'saveData').and.callThrough();
 
-    component.goToPageIntermediaire();
+    component.goToInfoParticipant();
 
     expect(component.saveData).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-participant']);
   });
 
   it('devrait réagir correctement au clic sur le bouton "Suivant"', () => {
-    spyOn(component, 'goToPageIntermediaire');
+    spyOn(component, 'goToInfoParticipant');
     const button = fixture.nativeElement.querySelector('button');
     button.click();
     fixture.detectChanges();
 
-    expect(component.goToPageIntermediaire).toHaveBeenCalled();
+    expect(component.goToInfoParticipant).toHaveBeenCalled();
   });
+
+  it('devrait sauvegarder et naviguer vers /page-intermediaire avec backToPageIntermediaire()', () => {
+    spyOn(component, 'saveData').and.callThrough();
+    component.backToInfoEval();
+    expect(component.saveData).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
+  });
+  it('devrait réagir correctement au clic sur le bouton "Précédent"', () => {
+    spyOn(component, 'backToInfoEval');
+    const button = fixture.nativeElement.querySelector('button');
+    button.click();
+    fixture.detectChanges();
+    expect(component.backToInfoEval).toHaveBeenCalled();
+  });
+
 });
