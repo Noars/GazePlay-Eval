@@ -34,15 +34,15 @@ export class DownloadService {
             switch (instructionValues[3]) {
 
               case "Image":
-                await this.generateInstructionScreenZipImg(instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipImg(saveService, instructionValues, jsonData, zip);
                 break;
 
               case "Video":
-                await this.generateInstructionScreenZipVideo(instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipVideo(saveService, instructionValues, jsonData, zip);
                 break;
 
               case "Son":
-                await this.generateInstructionScreenZipSound(instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipSound(saveService, instructionValues, jsonData, zip);
                 break;
 
               default:
@@ -52,7 +52,7 @@ export class DownloadService {
           break;
 
         case stimuliScreenConstModel:
-          await this.generateStimuliScreenZip(evalData[i], jsonData, zip);
+          await this.generateStimuliScreenZip(saveService, evalData[i], jsonData, zip);
           break;
 
         default:
@@ -60,10 +60,10 @@ export class DownloadService {
       }
     }
 
-    zip.file('evalData.json', JSON.stringify(jsonData, null, 2));
+    zip.file(saveService.getEvalName() + '/evalData.json', JSON.stringify(jsonData, null, 2));
 
     zip.generateAsync({type: 'blob'}).then(content => {
-      saveAs(content, 'gazeplayEval.zip');
+      saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
     });
   }
 
@@ -94,11 +94,11 @@ export class DownloadService {
     jsonData.push(instructionTxtData);
   }
 
-  async generateInstructionScreenZipImg(instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipImg(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
     const imgFile: File = instructionValues[5];
     if (imgFile) {
       const imgArrayBuffer = await imgFile.arrayBuffer();
-      zip.file('images/' + instructionValues[4], imgArrayBuffer);
+      zip.file(saveService.getEvalName() + '/images/' + instructionValues[4], imgArrayBuffer);
     }
     instructionValues.splice(5, 1);
     const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
@@ -112,11 +112,11 @@ export class DownloadService {
     jsonData.push(instructionImgData);
   }
 
-  async generateInstructionScreenZipVideo(instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipVideo(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
     const videoFile: File = instructionValues[5];
     if (videoFile) {
       const videoArrayBuffer = await videoFile.arrayBuffer();
-      zip.file('videos/' + instructionValues[4], videoArrayBuffer);
+      zip.file(saveService.getEvalName() + '/videos/' + instructionValues[4], videoArrayBuffer);
       instructionValues.splice(5, 1);
     }
     const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
@@ -130,11 +130,11 @@ export class DownloadService {
     jsonData.push(instructionVideoData);
   }
 
-  async generateInstructionScreenZipSound(instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipSound(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
     const audioFile: File = instructionValues[5];
     if (audioFile) {
       const audioArrayBuffer = await audioFile.arrayBuffer();
-      zip.file('audio/' + instructionValues[4], audioArrayBuffer);
+      zip.file(saveService.getEvalName() + '/audio/' + instructionValues[4], audioArrayBuffer);
       instructionValues.splice(5, 1);
     }
     const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
@@ -148,7 +148,7 @@ export class DownloadService {
     jsonData.push(instructionAudioData);
   }
 
-  async generateStimuliScreenZip(evalData: screenTypeModel, jsonData: any[], zip: JSZip){
+  async generateStimuliScreenZip(saveService: SaveService, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
     const stimuliValues = structuredClone(evalData.values);
     const stimuliList = stimuliValues[8];
 
@@ -158,7 +158,7 @@ export class DownloadService {
       const entryFile: File = entry.imageFile;
       if (entryFile) {
         const arrayStimuliBuffer = await entryFile.arrayBuffer();
-        zip.file('images/' + entryNameFile, arrayStimuliBuffer);
+        zip.file(saveService.getEvalName() + '/images/' + entryNameFile, arrayStimuliBuffer);
         delete entry.imageFile;
       }
     }

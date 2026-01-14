@@ -8,6 +8,8 @@ import {screenTypeModel} from '../../shared/screenModel';
 })
 export class SaveService {
 
+  defaultEvalName: string = "GazePlayEvalDefaultName";
+
   dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
     nomEval: '',
     format: 'Csv&Xlsx',
@@ -55,5 +57,13 @@ export class SaveService {
   clearSlot(slotIndex: FormatTypeConfig): void {
     const slotKey = SAVE_SLOT_LIST[slotIndex];
     localStorage.removeItem(slotKey);
+  }
+
+  getEvalName(){
+    if(this.dataAuto.nomEval != ''){
+      return this.dataAuto.nomEval;
+    }else {
+      return this.defaultEvalName;
+    }
   }
 }
