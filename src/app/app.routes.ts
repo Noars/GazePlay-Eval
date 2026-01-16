@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {HomeComponent} from './pages/home/home.component';
 import {InfoEvalComponent} from './pages/info-eval/info-eval.component';
+import {DateDisplayComponent} from './pages/date-display/date-display.component'
 import {InfoParticipantComponent} from './pages/info-participant/info-participant.component';
 import {SetupEvalComponent} from './pages/setup-eval/setup-eval.component';
 import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
@@ -9,6 +10,7 @@ import {DownloadEvalComponent} from './pages/download-eval/download-eval.compone
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
   {path: 'info-eval', component: InfoEvalComponent},
+  {path: 'date-display', component: DateDisplayComponent},
   {path: 'info-participant', component: InfoParticipantComponent},
   {path: 'setup-eval', component: SetupEvalComponent},
   {path: 'create-eval', component: CreateEvalComponent},
