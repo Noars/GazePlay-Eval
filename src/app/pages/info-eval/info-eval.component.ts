@@ -41,8 +41,8 @@ export class InfoEvalComponent implements OnInit{
     this.resultType = this.saveService.dataAuto.format;
   }
 
-  goToInfoParticipant() {
+  goToNewPage() {
     this.saveData();
-    this.router.navigate(['/info-participant']);
+    this.router.navigate(['/new-page']); // Redirection du bouton vers la nouvelle page
   }
 }
