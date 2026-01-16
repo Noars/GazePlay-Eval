@@ -4,8 +4,12 @@ import {saveAs} from 'file-saver';
 import {SaveService} from '../save/save.service';
 import {
   instructionScreenConstKey,
-  instructionScreenConstModel, screenTypeModel, stimuliScreenConstKey, stimuliScreenConstModel,
-  transitionScreenConstKey, transitionScreenConstModel
+  instructionScreenConstModel,
+  screenTypeModel,
+  stimuliScreenConstKey,
+  stimuliScreenConstModel,
+  transitionScreenConstKey,
+  transitionScreenConstModel
 } from '../../shared/screenModel';
 
 @Injectable({
@@ -61,10 +65,19 @@ export class DownloadService {
     }
 
     zip.file(saveService.getEvalName() + '/evalData.json', JSON.stringify(jsonData, null, 2));
+    zip.file(saveService.getEvalName() + '/evalInfo.json', JSON.stringify(this.getInfoEval(saveService), null, 2));
 
     zip.generateAsync({type: 'blob'}).then(content => {
       saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
     });
+  }
+
+  getInfoEval(saveService: SaveService){
+    return {
+      "Nom de l'évaluation": saveService.getEvalName(),
+      "Format choisi": saveService.dataAuto.format,
+      "Informations participant": saveService.dataAuto.infoParticipant
+    };
   }
 
   generateTransitionScreenZip(evalData: screenTypeModel, jsonData: any[]){
@@ -150,7 +163,7 @@ export class DownloadService {
 
   async generateStimuliScreenZip(saveService: SaveService, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
     const stimuliValues = structuredClone(evalData.values);
-    const stimuliList = stimuliValues[8];
+    const stimuliList = stimuliValues[11];
 
     for (const key in stimuliList) {
       const entry = stimuliList[key];
@@ -162,6 +175,14 @@ export class DownloadService {
         delete entry.imageFile;
       }
     }
+
+    const audioFile: File = stimuliValues[10];
+    if (audioFile) {
+      const audioArrayBuffer = await audioFile.arrayBuffer();
+      zip.file(saveService.getEvalName() + '/audio/' + stimuliValues[9], audioArrayBuffer);
+      stimuliValues.splice(10, 1);
+    }
+
     const stimuliResult = stimuliScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = stimuliValues[idx];
       return acc;

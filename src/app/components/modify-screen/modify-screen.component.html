@@ -189,8 +189,8 @@
                             </div>
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-                              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getFile($event)">
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
+                              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
                             </div>
@@ -202,8 +202,8 @@
                             </div>
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="videoFile" class="form-label flex-grow-1 me-2">Vidéo à afficher</label>
-                              <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getFile($event)">
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
+                              <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
                             </div>
@@ -228,8 +228,8 @@
                             </div>
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="soundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
-                              <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getFile($event)">
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveFile">
+                              <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
                             </div>
@@ -368,6 +368,36 @@
                         </div>
                       </div>
                     </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                      <span class="list-dash">-</span>
+                      <label class="form-label me-3 fw-semibold">Jouer un son ?</label>
+                      <div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
+                          <label class="form-check-label fw-semibold" for="playSoundStimuliY">Oui</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
+                          <label class="form-check-label fw-semibold" for="playSoundStimuliN">Non</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    @if (screenToModify.values[8]) {
+                      <div class="arrow-container mt-2">
+                        <div class="arrow">
+                          <span></span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2 gap-2">
+                          <label for="stimuliSoundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
+                          <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
+                          <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
                   </li>
 
                   <div class="wrapper">
@@ -404,14 +434,19 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body d-flex justify-content-center">
+        <p>{{nameFile}}</p>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
         @if (typeFile === 'Image') {
-          <img [src]="file" alt="Preview" class="img-fluid rounded shadow">
+          <img [src]="instructionFile" alt="Preview" class="img-fluid rounded shadow">
         } @else if (typeFile === 'Video') {
-          <video [src]="file" controls class="img-fluid rounded shadow"></video>
+          <video [src]="instructionFile" controls class="img-fluid rounded shadow"></video>
         } @else if (typeFile === 'Son') {
-          <audio controls>
-            <source [src]="file" type="audio/mpeg">
-          </audio>
+            @if (actualTypeScreen === 'instruction') {
+              <audio controls [src]="instructionFile"></audio>
+            } @else if (actualTypeScreen === 'stimuli'){
+              <audio controls [src]="stimuliFile"></audio>
+            }
         }
       </div>
     </div>

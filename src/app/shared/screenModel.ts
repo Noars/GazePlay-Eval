@@ -24,7 +24,7 @@ export const instructionScreenConstKey = [
   "Ajouter un media",
   "Type de media",
   "Nom du fichier",
-  "Mettre une croix de fixation",
+  "Mettre un temps de fixation",
   "Combien de temps de fixation"
 ];
 
@@ -33,7 +33,7 @@ export interface stimuliScreenValues {
   imageFile?: File;
 }
 export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {};
-export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, stimuliScreenDico];
+export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, false, '', '', stimuliScreenDico];
 export const stimuliScreenConstKey = [
   "Nombre de lignes",
   "Nombre de colonnes",
@@ -43,6 +43,8 @@ export const stimuliScreenConstKey = [
   "Combien de stimuli à sélectionner",
   "Position stimuli aléatoire",
   "Caché stimuli après selection",
+  "Mettre un son",
+  "Nom du fichier",
   "Liste des stimuli"
 ];
 

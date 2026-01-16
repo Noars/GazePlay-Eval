@@ -35,19 +35,26 @@ export class ModifyScreenComponent implements OnInit{
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
 
+  actualTypeScreen: string = "";
   typeFile: string = "";
-  haveFile: boolean = false;
-  file: any = "";
+  nameFile: string = "";
+  haveInstructionFile: boolean = false;
+  haveStimuliSoundFile: boolean = false;
+  instructionFile: any = "";
+  stimuliFile: any = "";
   textToRead: string = '';
 
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService, private dialog: MatDialog) {
   }
 
   ngOnInit(): void {
-    this.haveFile = this.checkFileExist();
+    this.actualTypeScreen = this.screenToModify.type;
+    this.haveInstructionFile = this.checkInstructionFileExist();
+    this.haveStimuliSoundFile = this.checkStimuliSoundFileExist();
   }
 
   changeTypeScreen(type: string) {
+    this.actualTypeScreen = type;
     switch (type){
       case transitionScreenConstModel :
         let newTransitionScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
@@ -59,13 +66,14 @@ export class ModifyScreenComponent implements OnInit{
         let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
         newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
-        this.haveFile = this.checkFileExist();
+        this.haveInstructionFile = this.checkInstructionFileExist();
         break;
 
       case stimuliScreenConstModel :
         let newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
         newStimuliScreen = this.updateScreenService.updateStimuliScreen(newStimuliScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsStimuliScreen);
         this.screenToModify = newStimuliScreen;
+        this.haveStimuliSoundFile = this.checkStimuliSoundFileExist();
         break;
 
       default :
@@ -78,24 +86,39 @@ export class ModifyScreenComponent implements OnInit{
       this.screenToModify.values[3] = type;
       this.screenToModify.values[4] = "";
       this.typeFile = type;
-      this.haveFile = false;
-      this.file = "";
+      this.haveInstructionFile = false;
+      this.instructionFile = "";
     }
   }
 
-  getFile(event: Event){
+  getInstructionFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0 && this.screenToModify.type === instructionScreenConstModel ) {
       this.screenToModify.values[4] = input.files[0].name;
       this.screenToModify.values[5] = input.files[0];
-      this.haveFile = true;
-      this.file =  URL.createObjectURL(input.files[0]);
+      this.haveInstructionFile = true;
+      this.nameFile = input.files[0].name;
+      this.instructionFile =  URL.createObjectURL(input.files[0]);
     }else {
-      this.haveFile = false;
+      this.haveInstructionFile = false;
     }
   }
 
-  checkFileExist(){
+  getStimuliSoundFile(event: Event){
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0 && this.screenToModify.type === stimuliScreenConstModel ) {
+      this.screenToModify.values[9] = input.files[0].name;
+      this.screenToModify.values[10] = input.files[0];
+      this.haveStimuliSoundFile = true;
+      this.nameFile = input.files[0].name;
+      this.stimuliFile =  URL.createObjectURL(input.files[0]);
+      this.typeFile = "Son";
+    }else {
+      this.haveStimuliSoundFile = false;
+    }
+  }
+
+  checkInstructionFileExist(){
     if (this.screenToModify.type === instructionScreenConstModel){
       this.typeFile = this.screenToModify.values[3];
       if (this.typeFile === 'Texte'){
@@ -103,13 +126,29 @@ export class ModifyScreenComponent implements OnInit{
         return false;
       }else {
         if (this.screenToModify.values[4] !== ''){
-          this.file = URL.createObjectURL(this.screenToModify.values[5]);
+          this.nameFile = this.screenToModify.values[4];
+          this.instructionFile = URL.createObjectURL(this.screenToModify.values[5]);
           return true;
         }else {
           return false;
         }
       }
     } else {
+      return false;
+    }
+  }
+
+  checkStimuliSoundFileExist(){
+    if (this.screenToModify.type === stimuliScreenConstModel){
+      this.typeFile = "Son";
+      if (this.screenToModify.values[9] !== ''){
+        this.nameFile = this.screenToModify.values[9];
+        this.stimuliFile = URL.createObjectURL(this.screenToModify.values[10]);
+        return true;
+      }else {
+        return false;
+      }
+    }else {
       return false;
     }
   }
@@ -147,7 +186,7 @@ export class ModifyScreenComponent implements OnInit{
   }
 
   openPopup(cellNumber: number) {
-    const listScreen = this.screenToModify.values[8];
+    const listScreen = this.screenToModify.values[11];
     this.dialog.open(PopupStimuliComponent, {
       data: {
         cell: cellNumber,
