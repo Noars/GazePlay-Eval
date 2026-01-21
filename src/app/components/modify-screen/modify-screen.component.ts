@@ -175,14 +175,12 @@ export class ModifyScreenComponent implements OnInit{
 
   numberCellChanged(){
     let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
-    const listScreen = this.screenToModify.values[8];
-    console.log(listScreen);
+    const listScreen = this.screenToModify.values[11];
     for (const keyNumber in listScreen){
       if (Number(keyNumber) >= numberCells){
         delete listScreen[keyNumber];
       }
     }
-    console.log(listScreen);
   }
 
   openPopup(cellNumber: number) {

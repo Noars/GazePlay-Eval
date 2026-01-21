@@ -180,8 +180,8 @@ export class DownloadService {
     if (audioFile) {
       const audioArrayBuffer = await audioFile.arrayBuffer();
       zip.file(saveService.getEvalName() + '/audio/' + stimuliValues[9], audioArrayBuffer);
-      stimuliValues.splice(10, 1);
     }
+    stimuliValues.splice(10, 1);
 
     const stimuliResult = stimuliScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = stimuliValues[idx];
