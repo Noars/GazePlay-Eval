@@ -1,0 +1,29 @@
+<div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
+  <div class="card shadow-lg w-100" style="max-width: 700px;">
+    <div class="card-header text-center fw-semibold">
+        <h2>Date et heure</h2>
+      </div>
+      <div class="card-body text-center">
+        <p>Cliquez ci-dessous pour afficher la date et l'heure actuelle :</p>
+
+        <button class="btn btn-success px-4 mt-1 mb-1 fw-semibold" (click)="showDate()">
+          <i class="bi bi-plus-circle me-1"></i> Afficher la date
+        </button>
+
+        @if (currentDate) { 
+          <div class="alert alert-success fs-5">
+            {{ currentDate | date:'medium' }}
+          </div>
+        }
+
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-primary fw-semibold" (click)="backToInfoEval()">
+            ← Précédent
+          </button>
+          <button class="btn btn-primary fw-semibold" (click)="goToInfoParticipant()">
+            Suivant →
+          </button>
+        </div>
+      </div>
+  </div>
+</div>

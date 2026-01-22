@@ -59,9 +59,9 @@ export class InfoParticipantComponent implements OnInit{
     this.infoParticipantList.splice(currentIndex, 0, field);
   }
 
-  backToInfoEval() {
+  backToDateDisplay() {
     this.saveData();
-    this.router.navigate(['/info-eval']);
+    this.router.navigate(['/date-display']);
   }
 
   goToCreateEval() {
