@@ -9,19 +9,33 @@
           <div class="mb-4 d-flex align-items-center justify-content-center">
             <div class="d-flex align-items-center mb-2 gap-2">
               <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getFile($event)">
+              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getImageFile($event)">
             </div>
           </div>
           @if (previewImage != ""){
             <div class="mb-4 d-flex align-items-center justify-content-center">
               <div class="d-flex align-items-center mb-2 gap-2">
-                <label for="imageFile" class="form-label flex-grow-1 me-2">Preview</label>
-                <img src="{{ previewImage }}" width="300px" height="300px" alt="Preview" class="w-auto">
+                <label for="imagePreview" class="form-label flex-grow-1 me-2">Preview</label>
+                <img [src]="previewImage" width="300px" height="300px" alt="Preview" class="w-auto">
+              </div>
+            </div>
+          }
+          <div class="mb-4 d-flex align-items-center justify-content-center">
+            <div class="d-flex align-items-center mb-2 gap-2">
+              <label for="soundFile" class="form-label flex-grow-1 me-2">Son à écouter</label>
+              <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getSoundFile($event)">
+            </div>
+          </div>
+          @if (previewSound != ""){
+            <div class="mb-4 d-flex align-items-center justify-content-center">
+              <div class="d-flex align-items-center mb-2 gap-2">
+                <label for="soundPreview" class="form-label flex-grow-1 me-2">Preview</label>
+                <audio controls [src]="previewSound"></audio>
               </div>
             </div>
           }
           <button class="btn btn-danger mt-3 fw-semibold" (click)="deleteCell()">
-            Supprimer cette case
+            Supprimer les elements
           </button>
         </div>
         <div class="d-flex justify-content-between mt-4">

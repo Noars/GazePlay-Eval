@@ -1,6 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {stimuliScreenValues} from '../../shared/screenModel';
+import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-popup-stimuli',
@@ -11,6 +12,7 @@ import {stimuliScreenValues} from '../../shared/screenModel';
 export class PopupStimuliComponent {
 
   previewImage: any = "";
+  previewSound: any = "";
 
   constructor(
     public dialogRef: MatDialogRef<PopupStimuliComponent>,
@@ -21,10 +23,27 @@ export class PopupStimuliComponent {
   checkCell() {
     const cellData = this.data.screen[this.data.cell];
 
-    if (cellData && cellData.imageFile) {
-      this.previewImage = URL.createObjectURL(cellData.imageFile);
-    } else {
+    if (cellData){
+      if (cellData.imageFile) {
+        this.previewImage = URL.createObjectURL(cellData.imageFile);
+      }else {
+        this.previewImage = '';
+      }
+      if (cellData.soundFile){
+        this.previewSound = URL.createObjectURL(cellData.soundFile);
+      }else {
+        this.previewSound = '';
+      }
+    }else {
       this.previewImage = '';
+      this.previewSound = '';
+
+      this.data.screen[this.data.cell] = {
+        imageName: "",
+        imageFile: undefined,
+        soundName: "",
+        soundFile: undefined
+      }
     }
   }
 
@@ -33,14 +52,21 @@ export class PopupStimuliComponent {
     this.dialogRef.close();
   }
 
-  getFile(event: Event){
+  getImageFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0){
-      this.data.screen[this.data.cell] = {
-        imageName: input.files[0].name,
-        imageFile: input.files[0]
-      }
+      this.data.screen[this.data.cell].imageName = input.files[0].name;
+      this.data.screen[this.data.cell].imageFile = input.files[0];
       this.previewImage =  URL.createObjectURL(input.files[0]);
+    }
+  }
+
+  getSoundFile(event: Event){
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0){
+      this.data.screen[this.data.cell].soundName = input.files[0].name;
+      this.data.screen[this.data.cell].soundFile = input.files[0];
+      this.previewSound =  URL.createObjectURL(input.files[0]);
     }
   }
 

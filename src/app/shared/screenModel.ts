@@ -31,6 +31,8 @@ export const instructionScreenConstKey = [
 export interface stimuliScreenValues {
   imageName?: string;
   imageFile?: File;
+  soundName?: string;
+  soundFile?: File;
 }
 export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {};
 export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, false, '', '', stimuliScreenDico];

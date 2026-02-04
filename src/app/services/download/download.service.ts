@@ -167,13 +167,22 @@ export class DownloadService {
 
     for (const key in stimuliList) {
       const entry = stimuliList[key];
-      const entryNameFile: string = entry.imageName;
-      const entryFile: File = entry.imageFile;
-      if (entryFile) {
-        const arrayStimuliBuffer = await entryFile.arrayBuffer();
-        zip.file(saveService.getEvalName() + '/images/' + entryNameFile, arrayStimuliBuffer);
-        delete entry.imageFile;
+      const entryNameImageFile: string = entry.imageName;
+      const entryImageFile: File = entry.imageFile;
+      const entryNameSoundFile: string = entry.soundName;
+      const entrySoundFile: File = entry.soundFile;
+
+      if (entryImageFile) {
+        const arrayImageFileBuffer = await entryImageFile.arrayBuffer();
+        zip.file(saveService.getEvalName() + '/images/' + entryNameImageFile, arrayImageFileBuffer);
       }
+      if (entrySoundFile) {
+        const arraySoundFileBuffer = await entrySoundFile.arrayBuffer();
+        zip.file(saveService.getEvalName() + '/audio/' + entryNameSoundFile, arraySoundFileBuffer);
+      }
+
+      delete entry.imageFile;
+      delete entry.soundFile;
     }
 
     const audioFile: File = stimuliValues[10];
