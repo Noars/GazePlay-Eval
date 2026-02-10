@@ -8,6 +8,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     FormsModule
   ],
   templateUrl: './global-instruction-screen.component.html',
+  standalone: true,
   styleUrl: './global-instruction-screen.component.css'
 })
 export class GlobalInstructionScreenComponent {

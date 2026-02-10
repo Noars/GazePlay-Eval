@@ -15,6 +15,7 @@ import {UpdateScreensService} from '../../services/updateScreens/update-screens.
   selector: 'app-create-eval',
   imports: [ReactiveFormsModule, FormsModule, CdkDropList, CdkDrag, CdkDragHandle, ModifyScreenComponent],
   templateUrl: './create-eval.component.html',
+  standalone: true,
   styleUrl: './create-eval.component.css'
 })
 export class CreateEvalComponent implements OnInit{
@@ -35,7 +36,7 @@ export class CreateEvalComponent implements OnInit{
     this.loadData();
   }
 
-  savaData(){
+  saveData(){
     this.saveService.saveDataAuto(
       this.saveService.dataAuto.nomEval,
       this.saveService.dataAuto.format,
@@ -90,7 +91,7 @@ export class CreateEvalComponent implements OnInit{
   }
 
   onModifyScreenChange(event: { screen: screenTypeModel, flag: boolean }){
-    this.savaData();
+    this.saveData();
     this.selectedScreen = event.screen;
     this.listScreens[this.indexSelectedScreen] = event.screen;
     this.isModifyScreen = event.flag;
@@ -105,11 +106,12 @@ export class CreateEvalComponent implements OnInit{
   }
 
   backToSetupEval() {
-    this.savaData();
+    this.saveData();
     this.router.navigate(['/setup-eval']);
   }
 
   goToDownloadEval() {
+    this.saveData()
     this.router.navigate(['/download-eval']);
   }
 }

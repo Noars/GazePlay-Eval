@@ -34,7 +34,15 @@ export interface stimuliScreenValues {
   soundName?: string;
   soundFile?: File;
 }
-export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {};
+export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {
+  0:
+    {
+      imageName: "",
+      imageFile: undefined,
+      soundName: "",
+      soundFile: undefined
+    }
+};
 export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, false, '', '', stimuliScreenDico];
 export const stimuliScreenConstKey = [
   "Nombre de lignes",

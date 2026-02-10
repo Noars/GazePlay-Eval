@@ -403,8 +403,12 @@
                   <div class="wrapper">
                     <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                       @for (n of totalCells; track n; let i = $index) {
-                        <div class="cell" (click)="openPopup(i)">
-                          {{ i + 1 }}
+                        <div [id]="i" class="cell" style="background-color: #1e3a8a;" (click)="openPopup(i)">
+                          @if (screenToModify.values[11][i].imageName != ""){
+                            <span>Test</span>
+                          } @else {
+                            <span>{{ i + 1 }}</span>
+                          }
                         </div>
                       }
                     </div>

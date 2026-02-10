@@ -10,6 +10,7 @@ import {MatTooltip} from '@angular/material/tooltip';
   selector: 'app-info-eval',
   imports: [CommonModule, FormsModule, MatTooltip],
   templateUrl: './info-eval.component.html',
+  standalone: true,
   styleUrl: './info-eval.component.css'
 })
 export class InfoEvalComponent implements OnInit{

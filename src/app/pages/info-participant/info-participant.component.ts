@@ -11,6 +11,7 @@ import {saveModelDefault} from '../../shared/saveModel';
   selector: 'app-info-participant',
   imports: [CommonModule, FormsModule, DragDropModule, MatTooltip],
   templateUrl: './info-participant.component.html',
+  standalone: true,
   styleUrl: './info-participant.component.css'
 })
 export class InfoParticipantComponent implements OnInit{

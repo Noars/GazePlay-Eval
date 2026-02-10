@@ -28,6 +28,7 @@ import {MatDialog} from '@angular/material/dialog';
     FormsModule,
   ],
   templateUrl: './modify-screen.component.html',
+  standalone: true,
   styleUrl: './modify-screen.component.css'
 })
 export class ModifyScreenComponent implements OnInit{
@@ -176,22 +177,38 @@ export class ModifyScreenComponent implements OnInit{
   numberCellChanged(){
     let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
     const listScreen = this.screenToModify.values[11];
-    for (const keyNumber in listScreen){
-      if (Number(keyNumber) >= numberCells){
-        delete listScreen[keyNumber];
+    const numberKey = Object.keys(listScreen).length;
+    if (numberKey < numberCells){
+      for (let i = numberKey; i < numberCells; i++){
+        listScreen[i] = {
+          imageName: "",
+          imageFile: undefined,
+          soundName: "",
+          soundFile: undefined
+        }
+      }
+    }else {
+      for (const keyNumber in listScreen){
+        if (Number(keyNumber) >= numberCells){
+          delete listScreen[keyNumber];
+        }
       }
     }
   }
 
   openPopup(cellNumber: number) {
     const listScreen = this.screenToModify.values[11];
-    this.dialog.open(PopupStimuliComponent, {
+    const dialogRef = this.dialog.open(PopupStimuliComponent, {
       data: {
         cell: cellNumber,
         screen: listScreen
       },
       panelClass: 'popup-stimuli',
       disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Résultat du popup :', result);
     });
   }
 

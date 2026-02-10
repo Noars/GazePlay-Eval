@@ -4,10 +4,11 @@ import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-eval-automatic',
-    imports: [
-        FormsModule
-    ],
+  imports: [
+    FormsModule
+  ],
   templateUrl: './eval-automatic.component.html',
+  standalone: true,
   styleUrl: './eval-automatic.component.css'
 })
 export class EvalAutomaticComponent {

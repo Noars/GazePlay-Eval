@@ -7,6 +7,7 @@ import {NgOptimizedImage} from '@angular/common';
   selector: 'app-popup-stimuli',
   imports: [],
   templateUrl: './popup-stimuli.component.html',
+  standalone: true,
   styleUrl: './popup-stimuli.component.css'
 })
 export class PopupStimuliComponent {
@@ -23,27 +24,16 @@ export class PopupStimuliComponent {
   checkCell() {
     const cellData = this.data.screen[this.data.cell];
 
-    if (cellData){
-      if (cellData.imageFile) {
-        this.previewImage = URL.createObjectURL(cellData.imageFile);
-      }else {
-        this.previewImage = '';
-      }
-      if (cellData.soundFile){
-        this.previewSound = URL.createObjectURL(cellData.soundFile);
-      }else {
-        this.previewSound = '';
-      }
+    if (cellData.imageFile) {
+      this.previewImage = URL.createObjectURL(cellData.imageFile);
     }else {
       this.previewImage = '';
-      this.previewSound = '';
+    }
 
-      this.data.screen[this.data.cell] = {
-        imageName: "",
-        imageFile: undefined,
-        soundName: "",
-        soundFile: undefined
-      }
+    if (cellData.soundFile){
+      this.previewSound = URL.createObjectURL(cellData.soundFile);
+    }else {
+      this.previewSound = '';
     }
   }
 

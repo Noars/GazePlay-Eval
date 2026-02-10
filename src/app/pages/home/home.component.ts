@@ -6,6 +6,7 @@ import {SaveService} from '../../services/save/save.service';
   selector: 'app-home',
   imports: [],
   templateUrl: './home.component.html',
+  standalone: true,
   styleUrl: './home.component.css'
 })
 export class HomeComponent {

@@ -7,8 +7,9 @@ import {evalModeModel} from '../../shared/screenModel';
 
 @Component({
   selector: 'app-setup-eval',
-    imports: [CommonModule, NgOptimizedImage, EvalManualComponent, EvalAutomaticComponent],
+  imports: [CommonModule, NgOptimizedImage, EvalManualComponent, EvalAutomaticComponent],
   templateUrl: './setup-eval.component.html',
+  standalone: true,
   styleUrl: './setup-eval.component.css'
 })
 export class SetupEvalComponent {

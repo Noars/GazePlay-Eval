@@ -8,6 +8,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     FormsModule
   ],
   templateUrl: './global-transition-screen.component.html',
+  standalone: true,
   styleUrl: './global-transition-screen.component.css'
 })
 export class GlobalTransitionScreenComponent{

@@ -7,6 +7,7 @@ import {Router} from '@angular/router';
   selector: 'app-download-eval',
   imports: [],
   templateUrl: './download-eval.component.html',
+  standalone: true,
   styleUrl: './download-eval.component.css'
 })
 export class DownloadEvalComponent {

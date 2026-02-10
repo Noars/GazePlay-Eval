@@ -12,6 +12,7 @@ import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stim
   selector: 'app-eval-manual',
   imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
   templateUrl: './eval-manual.component.html',
+  standalone: true,
   styleUrl: './eval-manual.component.css'
 })
 export class EvalManualComponent implements OnInit{

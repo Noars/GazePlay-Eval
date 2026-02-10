@@ -5,6 +5,7 @@ import {CommonModule} from '@angular/common';
   selector: 'app-progress-bar',
   imports: [CommonModule],
   templateUrl: './progress-bar.component.html',
+  standalone: true,
   styleUrl: './progress-bar.component.css'
 })
 export class ProgressBarComponent {
