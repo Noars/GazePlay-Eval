@@ -1,11 +1,14 @@
 import {Component, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {stimuliScreenValues} from '../../shared/screenModel';
-import {NgOptimizedImage} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-popup-stimuli',
-  imports: [],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule
+  ],
   templateUrl: './popup-stimuli.component.html',
   standalone: true,
   styleUrl: './popup-stimuli.component.css'
@@ -38,7 +41,13 @@ export class PopupStimuliComponent {
   }
 
   deleteCell(){
-    delete this.data.screen[this.data.cell];
+    this.data.screen[this.data.cell] = {
+      imageName: "",
+      imageFile: undefined,
+      soundName: "",
+      soundFile: undefined,
+      goodAnswer: false,
+    }
     this.dialogRef.close();
   }
 

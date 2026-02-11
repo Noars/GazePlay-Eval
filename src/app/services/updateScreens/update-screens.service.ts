@@ -36,9 +36,9 @@ export class UpdateScreensService {
     screenS.values[2] = value[2];
     screenS.values[3] = value[3];
     screenS.values[4] = value[4];
-    screenS.values[5] = value[5];
-    screenS.values[6] = value[6];
-    screenS.values[7] = value[7];
+    screenS.values[6] = value[5];
+    screenS.values[7] = value[6];
+    screenS.values[8] = value[7];
 
     return screenS;
   }

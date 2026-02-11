@@ -31,3 +31,10 @@
 .cell:hover {
   background: #1d4ed8;
 }
+
+.cell-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}

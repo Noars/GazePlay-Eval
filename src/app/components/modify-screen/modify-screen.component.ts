@@ -108,8 +108,8 @@ export class ModifyScreenComponent implements OnInit{
   getStimuliSoundFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0 && this.screenToModify.type === stimuliScreenConstModel ) {
-      this.screenToModify.values[9] = input.files[0].name;
-      this.screenToModify.values[10] = input.files[0];
+      this.screenToModify.values[10] = input.files[0].name;
+      this.screenToModify.values[11] = input.files[0];
       this.haveStimuliSoundFile = true;
       this.nameFile = input.files[0].name;
       this.stimuliFile =  URL.createObjectURL(input.files[0]);
@@ -142,9 +142,9 @@ export class ModifyScreenComponent implements OnInit{
   checkStimuliSoundFileExist(){
     if (this.screenToModify.type === stimuliScreenConstModel){
       this.typeFile = "Son";
-      if (this.screenToModify.values[9] !== ''){
-        this.nameFile = this.screenToModify.values[9];
-        this.stimuliFile = URL.createObjectURL(this.screenToModify.values[10]);
+      if (this.screenToModify.values[10] !== ''){
+        this.nameFile = this.screenToModify.values[10];
+        this.stimuliFile = URL.createObjectURL(this.screenToModify.values[11]);
         return true;
       }else {
         return false;
@@ -176,7 +176,7 @@ export class ModifyScreenComponent implements OnInit{
 
   numberCellChanged(){
     let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
-    const listScreen = this.screenToModify.values[11];
+    const listScreen = this.screenToModify.values[12];
     const numberKey = Object.keys(listScreen).length;
     if (numberKey < numberCells){
       for (let i = numberKey; i < numberCells; i++){
@@ -184,7 +184,8 @@ export class ModifyScreenComponent implements OnInit{
           imageName: "",
           imageFile: undefined,
           soundName: "",
-          soundFile: undefined
+          soundFile: undefined,
+          goodAnswer: false,
         }
       }
     }else {
@@ -197,18 +198,14 @@ export class ModifyScreenComponent implements OnInit{
   }
 
   openPopup(cellNumber: number) {
-    const listScreen = this.screenToModify.values[11];
-    const dialogRef = this.dialog.open(PopupStimuliComponent, {
+    const listScreen = this.screenToModify.values[12];
+    this.dialog.open(PopupStimuliComponent, {
       data: {
         cell: cellNumber,
         screen: listScreen
       },
       panelClass: 'popup-stimuli',
       disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('Résultat du popup :', result);
     });
   }
 

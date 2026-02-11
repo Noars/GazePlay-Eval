@@ -33,6 +33,7 @@ export interface stimuliScreenValues {
   imageFile?: File;
   soundName?: string;
   soundFile?: File;
+  goodAnswer?: Boolean;
 }
 export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {
   0:
@@ -40,17 +41,19 @@ export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {
       imageName: "",
       imageFile: undefined,
       soundName: "",
-      soundFile: undefined
+      soundFile: undefined,
+      goodAnswer: false
     }
 };
-export const stimuliScreenConstValue = [1, 1, false, 10, 1, 1, false, false, false, '', '', stimuliScreenDico];
+export const stimuliScreenConstValue = [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', '', stimuliScreenDico];
 export const stimuliScreenConstKey = [
   "Nombre de lignes",
   "Nombre de colonnes",
   "Mettre un temps avant passage à l'écran suivant",
   "Combien de temps",
   "Combien de temps de fixation",
-  "Combien de stimuli à sélectionner",
+  "Choix de sélection",
+  "Combien à sélectionner",
   "Position stimuli aléatoire",
   "Caché stimuli après selection",
   "Mettre un son",

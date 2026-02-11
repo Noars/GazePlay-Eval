@@ -331,24 +331,40 @@
                       </div>
                     </div>
 
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Combien de stimuli à sélectionner ?</label>
-                      <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[5]">
+                    <ul class="custom-list">
+                      <li>
+                        <div class="d-flex align-items-center mb-2">
+                          <span class="list-dash">-</span>
+                          <label class="form-label me-3 fw-semibold">Quel choix de sélection ?</label>
+                          <div>
+                            <select class="form-select" [(ngModel)]="screenToModify.values[5]">
+                              <option value="Tout">Tout</option>
+                              <option value="BonneReponse">Uniquement les bonnes réponse</option>
+                            </select>
+                          </div>
+                        </div>
+                      </li>
+                      <div class="d-flex align-items-center mb-2">
+                        <div class="arrow">
+                          <span></span>
+                        </div>
+                        <label class="form-label me-3 fw-semibold">Combien à sélectionner ?</label>
+                        <div class="input-group w-auto">
+                          <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
+                        </div>
                       </div>
-                    </div>
+                    </ul>
 
                     <div class="d-flex align-items-center mb-2">
                       <span class="list-dash">-</span>
                       <label class="form-label me-3 fw-semibold">Position des stimuli aléatoire ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
                           <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[6]">
+                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
                           <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
                         </div>
                       </div>
@@ -359,11 +375,11 @@
                       <label class="form-label me-3 fw-semibold">Cacher les stimuli après sélection ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
+                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
                           <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
+                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
                           <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
                         </div>
                       </div>
@@ -374,17 +390,17 @@
                       <label class="form-label me-3 fw-semibold">Jouer un son ?</label>
                       <div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
+                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">
                           <label class="form-check-label fw-semibold" for="playSoundStimuliY">Oui</label>
                         </div>
                         <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
+                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliN" [value]="false" [(ngModel)]="screenToModify.values[9]">
                           <label class="form-check-label fw-semibold" for="playSoundStimuliN">Non</label>
                         </div>
                       </div>
                     </div>
 
-                    @if (screenToModify.values[8]) {
+                    @if (screenToModify.values[9]) {
                       <div class="arrow-container mt-2">
                         <div class="arrow">
                           <span></span>
@@ -403,11 +419,18 @@
                   <div class="wrapper">
                     <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                       @for (n of totalCells; track n; let i = $index) {
-                        <div [id]="i" class="cell" style="background-color: #1e3a8a;" (click)="openPopup(i)">
-                          @if (screenToModify.values[11][i].imageName != ""){
-                            <span>Test</span>
-                          } @else {
-                            <span>{{ i + 1 }}</span>
+                        <div [id]="i" class="cell" [style.background-color]="(screenToModify.values[12][i].imageName !== ''
+                                                                           || screenToModify.values[12][i].soundName !== '')
+                                                                            ? '#16a34a': '#1e3a8a'"
+                             (click)="openPopup(i)">
+                          @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
+                            <span class="cell-text">{{ i + 1 }}</span>
+                          }
+                          @if (screenToModify.values[12][i].imageName !== ""){
+                            <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
+                          }
+                          @if (screenToModify.values[12][i].soundName !== ""){
+                            <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
                           }
                         </div>
                       }
