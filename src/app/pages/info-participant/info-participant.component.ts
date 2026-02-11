@@ -60,9 +60,9 @@ export class InfoParticipantComponent implements OnInit{
     this.infoParticipantList.splice(currentIndex, 0, field);
   }
 
-  backToInfoEval() {
+  backToPageIntermediaire() {
     this.saveData();
-    this.router.navigate(['/info-eval']);
+    this.router.navigate(['/page-intermediaire']);
   }
 
   goToCreateEval() {
