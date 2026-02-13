@@ -163,7 +163,7 @@ export class DownloadService {
 
   async generateStimuliScreenZip(saveService: SaveService, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
     const stimuliValues = structuredClone(evalData.values);
-    const stimuliList = stimuliValues[11];
+    const stimuliList = stimuliValues[12];
 
     for (const key in stimuliList) {
       const entry = stimuliList[key];
@@ -185,12 +185,12 @@ export class DownloadService {
       delete entry.soundFile;
     }
 
-    const audioFile: File = stimuliValues[10];
+    const audioFile: File = stimuliValues[11];
     if (audioFile) {
       const audioArrayBuffer = await audioFile.arrayBuffer();
-      zip.file(saveService.getEvalName() + '/audio/' + stimuliValues[9], audioArrayBuffer);
+      zip.file(saveService.getEvalName() + '/audio/' + stimuliValues[10], audioArrayBuffer);
     }
-    stimuliValues.splice(10, 1);
+    stimuliValues.splice(11, 1);
 
     const stimuliResult = stimuliScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = stimuliValues[idx];
