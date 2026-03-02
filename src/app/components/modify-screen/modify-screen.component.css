@@ -21,11 +21,11 @@
   aspect-ratio: 1/1;
   color: white;
   display: flex;
-  justify-content: center;
   align-items: center;
   flex-direction: column;
   border-radius: 8px;
   cursor: pointer;
+  background: #1e3a8a;
 }
 
 .cell:hover {
@@ -37,4 +37,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+}
+
+.icon {
+  align-self: end;
+  font-size: larger;
+}
+
+.valid {
+  color: lawngreen !important;
+}
+
+.invalid {
+  color: #d41159 !important;
 }

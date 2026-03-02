@@ -21,7 +21,7 @@ export class SaveService {
   };
 
   newSaveDataAuto(){
-    this.dataAuto = saveModelDefault;
+    this.dataAuto = structuredClone(saveModelDefault);
     this.saveToSlot(0, this.dataAuto);
   }
 

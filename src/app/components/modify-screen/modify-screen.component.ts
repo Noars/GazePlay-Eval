@@ -75,6 +75,7 @@ export class ModifyScreenComponent implements OnInit{
         newStimuliScreen = this.updateScreenService.updateStimuliScreen(newStimuliScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsStimuliScreen);
         this.screenToModify = newStimuliScreen;
         this.haveStimuliSoundFile = this.checkStimuliSoundFileExist();
+        this.checkStimuliCells();
         break;
 
       default :
@@ -174,7 +175,7 @@ export class ModifyScreenComponent implements OnInit{
     return Array.from({ length: this.screenToModify.values[0] * this.screenToModify.values[1] }, (_, i) => i + 1);
   }
 
-  numberCellChanged(){
+  checkStimuliCells(){
     let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
     const listScreen = this.screenToModify.values[12];
     const numberKey = Object.keys(listScreen).length;

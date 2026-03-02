@@ -283,7 +283,7 @@
                       <span class="list-dash">-</span>
                       <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[0]" (change)="numberCellChanged()">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[0]" (change)="checkStimuliCells()">
                       </div>
                     </div>
 
@@ -291,7 +291,7 @@
                       <span class="list-dash">-</span>
                       <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]" (change)="numberCellChanged()">
+                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]" (change)="checkStimuliCells()">
                       </div>
                     </div>
 
@@ -335,12 +335,9 @@
                       <li>
                         <div class="d-flex align-items-center mb-2">
                           <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Quel choix de sélection ?</label>
-                          <div>
-                            <select class="form-select" [(ngModel)]="screenToModify.values[5]">
-                              <option value="Tout">Tout</option>
-                              <option value="BonneReponse">Uniquement les bonnes réponse</option>
-                            </select>
+                          <label class="form-label me-3 fw-semibold">Combien de stimuli sélectionner ?</label>
+                          <div class="input-group w-auto">
+                            <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
                           </div>
                         </div>
                       </li>
@@ -348,9 +345,16 @@
                         <div class="arrow">
                           <span></span>
                         </div>
-                        <label class="form-label me-3 fw-semibold">Combien à sélectionner ?</label>
-                        <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
+                        <label class="form-label me-3 fw-semibold">Pour quel choix de sélection ?</label>
+                        <div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
+                            <label class="form-check-label fw-semibold" for="choiceSelectionY">Tout</label>
+                          </div>
+                          <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionN" value="BonneReponse" [(ngModel)]="screenToModify.values[5]">
+                            <label class="form-check-label fw-semibold" for="choiceSelectionN">Uniquement les bonnes réponse</label>
+                          </div>
                         </div>
                       </div>
                     </ul>
@@ -419,17 +423,21 @@
                   <div class="wrapper">
                     <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                       @for (n of totalCells; track n; let i = $index) {
-                        <div [id]="i" class="cell" [style.background-color]="(screenToModify.values[12][i].imageName !== ''
-                                                                           || screenToModify.values[12][i].soundName !== '')
-                                                                            ? '#16a34a': '#1e3a8a'"
-                             (click)="openPopup(i)">
+                        <div [id]="i" class="cell" (click)="openPopup(i)">
+
+                          @if (screenToModify.values[12][i].goodAnswer === true) {
+                            <span class="cell-text icon valid">✓</span>
+                          } @else {
+                            <span class="cell-text icon invalid">✕</span>
+                          }
+
                           @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
                             <span class="cell-text">{{ i + 1 }}</span>
                           }
                           @if (screenToModify.values[12][i].imageName !== ""){
                             <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
                           }
-                          @if (screenToModify.values[12][i].soundName !== ""){
+                          @if (screenToModify.values[12][i].soundName !== "") {
                             <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
                           }
                         </div>
