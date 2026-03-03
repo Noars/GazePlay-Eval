@@ -42,6 +42,7 @@
 .icon {
   align-self: end;
   font-size: larger;
+  margin-right: 5px;
 }
 
 .valid {
