@@ -44,6 +44,8 @@ export class ModifyScreenComponent implements OnInit{
   instructionFile: any = "";
   stimuliFile: any = "";
   textToRead: string = '';
+  fileDuration: number = 0;
+  showWarningMessage: boolean = false;
 
   constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService, private dialog: MatDialog) {
   }
@@ -101,6 +103,7 @@ export class ModifyScreenComponent implements OnInit{
       this.haveInstructionFile = true;
       this.nameFile = input.files[0].name;
       this.instructionFile =  URL.createObjectURL(input.files[0]);
+      this.getFileDuration(input.files[0]);
     }else {
       this.haveInstructionFile = false;
     }
@@ -130,6 +133,7 @@ export class ModifyScreenComponent implements OnInit{
         if (this.screenToModify.values[4] !== ''){
           this.nameFile = this.screenToModify.values[4];
           this.instructionFile = URL.createObjectURL(this.screenToModify.values[5]);
+          this.getFileDuration(this.screenToModify.values[5]);
           return true;
         }else {
           return false;
@@ -152,6 +156,24 @@ export class ModifyScreenComponent implements OnInit{
       }
     }else {
       return false;
+    }
+  }
+
+  getFileDuration(fileUser: File){
+    if (this.typeFile === 'Video' || this.typeFile === 'Son'){
+     const file = fileUser;
+
+      const media = document.createElement(file.type.startsWith('audio') ? 'audio' : 'video');
+      media.src = URL.createObjectURL(file);
+
+      media.preload = 'metadata';
+
+      media.onloadedmetadata = () => {
+        this.fileDuration = media.duration;
+        console.log('Durée :', this.fileDuration);
+
+        URL.revokeObjectURL(media.src);
+      };
     }
   }
 
@@ -210,8 +232,28 @@ export class ModifyScreenComponent implements OnInit{
     });
   }
 
+  checkFileDurationAndTimeScreen(){
+    console.log(this.fileDuration, this.screenToModify.values[1])
+    if (this.fileDuration > this.screenToModify.values[1]){
+      if (this.showWarningMessage){
+        this.showWarningMessage = false;
+        this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
+      }else {
+        this.showWarningMessage = true;
+      }
+    }else {
+      this.showWarningMessage = false;
+      this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
+    }
+  }
+
   backToScreenList(){
-    this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
+    if (this.screenToModify.type === instructionScreenConstModel && (this.typeFile === 'Video' || this.typeFile === 'Son')){
+      console.log("check file duration")
+      this.checkFileDurationAndTimeScreen();
+    }else {
+      this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
+    }
   }
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;

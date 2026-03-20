@@ -454,7 +454,17 @@
     </div>
   </div>
 </div>
-<div class="d-flex justify-content-between mt-4">
+@if (showWarningMessage){
+  <div class="alert alert-warning alert-instruction mt-4" role="alert">
+    <p class="mb-1">
+      ⚠️ La durée de votre fichier dépasse le temps avant passage à l'écran suivant !
+    </p>
+    <p class="mb-0">
+      Êtes-vous sûr de vouloir continuer ? (ré-appuyer sur le bouton Sauvegarder et Retour)
+    </p>
+  </div>
+}
+<div class="d-flex justify-content-between">
   <button class="btn btn-primary" (click)="backToScreenList()">
     ← Sauvegarder et Retour
   </button>
