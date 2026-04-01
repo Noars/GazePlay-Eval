@@ -19,13 +19,14 @@ import {
 import {FormsModule} from '@angular/forms';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 import {SaveService} from '../../services/save/save.service';
-import {PopupStimuliComponent} from '../popup-stimuli/popup-stimuli.component';
-import {MatDialog} from '@angular/material/dialog';
+import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component';
+import {Offcanvas} from 'bootstrap';
 
 @Component({
   selector: 'app-modify-screen',
   imports: [
     FormsModule,
+    ConfigStimuliComponent,
   ],
   templateUrl: './modify-screen.component.html',
   standalone: true,
@@ -47,7 +48,13 @@ export class ModifyScreenComponent implements OnInit{
   fileDuration: number = 0;
   showWarningMessage: boolean = false;
 
-  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService, private dialog: MatDialog) {
+  dataStimuli!: {
+    cell: number,
+    screen: any
+  }
+  stimuliOffcanvasReady: boolean = false;
+
+  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
   }
 
   ngOnInit(): void {
@@ -220,16 +227,22 @@ export class ModifyScreenComponent implements OnInit{
     }
   }
 
-  openPopup(cellNumber: number) {
+  openStimuliData(cellNumber: number) {
     const listScreen = this.screenToModify.values[12];
-    this.dialog.open(PopupStimuliComponent, {
-      data: {
-        cell: cellNumber,
-        screen: listScreen
-      },
-      panelClass: 'popup-stimuli',
-      disableClose: true
+    this.dataStimuli = {cell: cellNumber, screen: listScreen};
+    this.stimuliOffcanvasReady = true;
+    setTimeout(() => {
+      this.openOffcanvasStimuli();
     });
+  }
+
+  openOffcanvasStimuli() {
+    const element = document.getElementById('configStimuli');
+
+    if (element) {
+      const instance = Offcanvas.getOrCreateInstance(element);
+      instance.show();
+    }
   }
 
   checkFileDurationAndTimeScreen(){

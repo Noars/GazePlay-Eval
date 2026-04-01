@@ -85,7 +85,3 @@ body {
   margin-right: 8px;
   font-weight: bold;
 }
-
-.popup-stimuli .mat-mdc-dialog-surface {
-  background-color: transparent !important;
-}

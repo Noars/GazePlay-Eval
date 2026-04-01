@@ -1,0 +1,8 @@
+.custom-offcanvas {
+  --bs-offcanvas-width: 600px;
+}
+
+.preview-image {
+  width: 500px;
+  height: 500px;
+}

@@ -1,27 +1,31 @@
-import {Component, Inject} from '@angular/core';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Component, ElementRef, Inject, Input, ViewChild} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {stimuliScreenValues} from '../../shared/screenModel';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
-  selector: 'app-popup-stimuli',
+  selector: 'app-config-stimuli',
   imports: [
     ReactiveFormsModule,
     FormsModule
   ],
-  templateUrl: './popup-stimuli.component.html',
-  standalone: true,
-  styleUrl: './popup-stimuli.component.css'
+  templateUrl: './config-stimuli.component.html',
+  styleUrl: './config-stimuli.component.css'
 })
-export class PopupStimuliComponent {
+export class ConfigStimuliComponent {
+
+  @Input() data!: {
+    cell: number,
+    screen: { [key:number]: stimuliScreenValues }
+  };
+
+  @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInputSound') fileInputSound!: ElementRef<HTMLInputElement>;
 
   previewImage: any = "";
   previewSound: any = "";
 
-  constructor(
-    public dialogRef: MatDialogRef<PopupStimuliComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { cell: number, screen: { [key:number]: stimuliScreenValues } }) {
-    this.checkCell()
+  ngOnChanges() {
+    this.checkCell();
   }
 
   checkCell() {
@@ -38,6 +42,11 @@ export class PopupStimuliComponent {
     }else {
       this.previewSound = '';
     }
+
+    if (this.fileInputImage && this.fileInputSound) {
+      this.fileInputImage.nativeElement.value = '';
+      this.fileInputSound.nativeElement.value = '';
+    }
   }
 
   deleteCell(){
@@ -48,7 +57,7 @@ export class PopupStimuliComponent {
       soundFile: undefined,
       goodAnswer: false,
     }
-    this.dialogRef.close();
+    this.checkCell();
   }
 
   getImageFile(event: Event){
@@ -67,9 +76,5 @@ export class PopupStimuliComponent {
       this.data.screen[this.data.cell].soundFile = input.files[0];
       this.previewSound =  URL.createObjectURL(input.files[0]);
     }
-  }
-
-  saveAndQuit(){
-    this.dialogRef.close();
   }
 }

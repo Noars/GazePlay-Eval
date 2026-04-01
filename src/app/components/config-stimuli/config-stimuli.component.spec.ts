@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PopupStimuliComponent } from './popup-stimuli.component';
+import { ConfigStimuliComponent } from './config-stimuli.component';
 
-describe('PopupStimuliComponent', () => {
-  let component: PopupStimuliComponent;
-  let fixture: ComponentFixture<PopupStimuliComponent>;
+describe('ConfigStimuliComponent', () => {
+  let component: ConfigStimuliComponent;
+  let fixture: ComponentFixture<ConfigStimuliComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PopupStimuliComponent]
+      imports: [ConfigStimuliComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PopupStimuliComponent);
+    fixture = TestBed.createComponent(ConfigStimuliComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
