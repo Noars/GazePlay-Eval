@@ -21,6 +21,7 @@ export class ConfigStimuliComponent {
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputSound') fileInputSound!: ElementRef<HTMLInputElement>;
 
+  isResizing = false;
   previewImage: any = "";
   previewSound: any = "";
 
@@ -77,4 +78,29 @@ export class ConfigStimuliComponent {
       this.previewSound =  URL.createObjectURL(input.files[0]);
     }
   }
+
+  startResize(event: MouseEvent){
+    this.isResizing = true;
+
+    document.addEventListener('mousemove', this.resize);
+    document.addEventListener('mouseup', this.stopResize);
+  }
+
+  resize(event: MouseEvent){
+    if (!this.isResizing) return;
+
+    const newWidth = event.clientX; // pour offcanvas gauche
+    const el = document.getElementById('configStimuli');
+
+    if (el) {
+      el.style.setProperty('--bs-offcanvas-width', `${newWidth}px`);
+    }
+  };
+
+  stopResize(){
+    this.isResizing = false;
+
+    document.removeEventListener('mousemove', this.resize);
+    document.removeEventListener('mouseup', this.stopResize);
+  };
 }

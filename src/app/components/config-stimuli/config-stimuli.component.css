@@ -2,6 +2,16 @@
   --bs-offcanvas-width: 600px;
 }
 
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+}
+
 .preview-image {
   width: 500px;
   height: 500px;
