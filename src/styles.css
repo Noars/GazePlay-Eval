@@ -85,3 +85,11 @@ body {
   margin-right: 8px;
   font-weight: bold;
 }
+
+.offcanvas {
+  z-index: 1045;
+}
+
+.cdk-overlay-container {
+  z-index: 2000;
+}

@@ -1,0 +1,20 @@
+<div class="crop-container">
+  <image-cropper
+    [imageBase64]="imageToCrop"
+    [maintainAspectRatio]="true"
+    [aspectRatio]="1"
+    [resizeToWidth]="500"
+    [cropperMinWidth]="500"
+    [cropperMinHeight]="500"
+    [cropperMaxWidth]="1000"
+    [cropperMaxHeight]="1000"
+    [imageQuality]="1"
+    format="png"
+    (imageCropped)="imageCropped($event)">
+  </image-cropper>
+
+  <div class="crop-buttons">
+    <button class="btn btn-success fw-semibold me-2" (click)="validateCrop()">Valider</button>
+    <button class="btn btn-danger fw-semibold" (click)="cancelCrop()">Annuler</button>
+  </div>
+</div>

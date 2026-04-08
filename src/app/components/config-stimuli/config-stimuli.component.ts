@@ -1,6 +1,8 @@
-import {Component, ElementRef, Inject, Input, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, Input, OnChanges, ViewChild} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {stimuliScreenValues} from '../../shared/screenModel';
+import {CropImageComponent} from '../crop-image/crop-image.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-config-stimuli',
@@ -9,9 +11,10 @@ import {stimuliScreenValues} from '../../shared/screenModel';
     FormsModule
   ],
   templateUrl: './config-stimuli.component.html',
+  standalone: true,
   styleUrl: './config-stimuli.component.css'
 })
-export class ConfigStimuliComponent {
+export class ConfigStimuliComponent implements OnChanges{
 
   @Input() data!: {
     cell: number,
@@ -24,6 +27,9 @@ export class ConfigStimuliComponent {
   isResizing = false;
   previewImage: any = "";
   previewSound: any = "";
+
+  constructor(private dialog: MatDialog){
+  }
 
   ngOnChanges() {
     this.checkCell();
@@ -77,6 +83,23 @@ export class ConfigStimuliComponent {
       this.data.screen[this.data.cell].soundFile = input.files[0];
       this.previewSound =  URL.createObjectURL(input.files[0]);
     }
+  }
+
+  cropImage(){
+    const dialogRef = this.dialog.open(CropImageComponent, {
+      data: {
+        image: this.data.screen[this.data.cell].imageFile
+      },
+      panelClass: 'crop-image',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((result: File | null) => {
+      if (result) {
+        this.data.screen[this.data.cell].imageFile = result;
+        this.previewImage =  URL.createObjectURL(result);
+      }
+    });
   }
 
   startResize(event: MouseEvent){
