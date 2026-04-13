@@ -44,6 +44,6 @@ export class InfoEvalComponent implements OnInit{
 
   goToInfoParticipant() {
     this.saveData();
-    this.router.navigate(['/info-participant']);
+    this.router.navigate(['/page-Thomas']);
   }
 }
