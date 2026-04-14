@@ -24,6 +24,7 @@ export class ConfigStimuliComponent implements OnChanges{
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputSound') fileInputSound!: ElementRef<HTMLInputElement>;
 
+  pageElement: HTMLElement | null = document.getElementById('configStimuli');
   isResizing = false;
   previewImage: any = "";
   previewSound: any = "";
@@ -109,10 +110,10 @@ export class ConfigStimuliComponent implements OnChanges{
     document.addEventListener('mouseup', this.stopResize);
   }
 
-  resize(event: MouseEvent){
+  resize = (event: MouseEvent) => {
     if (!this.isResizing) return;
 
-    const newWidth = event.clientX; // pour offcanvas gauche
+    const newWidth = event.clientX;
     const el = document.getElementById('configStimuli');
 
     if (el) {
@@ -120,7 +121,7 @@ export class ConfigStimuliComponent implements OnChanges{
     }
   };
 
-  stopResize(){
+  stopResize = () => {
     this.isResizing = false;
 
     document.removeEventListener('mousemove', this.resize);
