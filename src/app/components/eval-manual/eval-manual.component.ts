@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {CommonModule} from '@angular/common';
+
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
@@ -10,7 +10,7 @@ import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stim
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [CommonModule, FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
+  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
   templateUrl: './eval-manual.component.html',
   standalone: true,
   styleUrl: './eval-manual.component.css'
