@@ -6,7 +6,7 @@ import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
 import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
-import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
+// import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
 
 @Component({
   selector: 'app-eval-manual',
