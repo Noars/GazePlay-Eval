@@ -5,6 +5,7 @@ import {filter} from 'rxjs';
 
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
 import {FlashComponent} from './components/flash-message/flash.component';
+import {AutoSaveService} from './services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,7 @@ export class App implements OnInit{
   steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
   currentStepIndex = -1;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private autoSaveService:AutoSaveService) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(event => {
@@ -41,6 +42,7 @@ export class App implements OnInit{
   }
 
   ngOnInit(): void {
+    this.autoSaveService.init(); // pour la sauvegarde automatique
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isReload = nav?.type === 'reload';
 
