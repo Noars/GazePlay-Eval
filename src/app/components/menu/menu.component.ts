@@ -12,21 +12,16 @@ import { Router } from '@angular/router';
 })
 export class MenuComponent {
 
-  constructor(
-    private loadService: LoadService,
-    private router: Router
-  ) {}
+  constructor(private router: Router) {}
 
-  async onZipSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-
-    await this.loadService.loadZip(input.files[0]);
-
-    await this.router.navigate(['/create-eval']);
-  }
 
   goToSauvegarde() {
     this.router.navigate(['/sauvegarde']);
   }
+
+  goToLoadSave() {
+    this.router.navigate(['/load-save']);
+  }
+
+
 }
