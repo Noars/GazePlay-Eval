@@ -43,11 +43,20 @@ export class App implements OnInit{
 
   ngOnInit(): void {
     this.autoSaveService.init(); // pour la sauvegarde automatique
+
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isReload = nav?.type === 'reload';
 
     if (isReload && this.router.url !== '/home') {
       this.router.navigate(['/home']);
+      return ;
     }
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      filter(event => (event as NavigationEnd).urlAfterRedirects === '/home')
+    ).subscribe(() => {
+      this.autoSaveService.tryResume();
+    });
   }
 }
