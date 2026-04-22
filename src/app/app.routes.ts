@@ -5,6 +5,7 @@ import {InfoParticipantComponent} from './pages/info-participant/info-participan
 import {SetupEvalComponent} from './pages/setup-eval/setup-eval.component';
 import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
 import {DownloadEvalComponent} from './pages/download-eval/download-eval.component';
+import {SauvegardeComponent} from './pages/sauvegarde/sauvegarde.component';
 
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -13,5 +14,7 @@ export const routes: Routes = [
   {path: 'setup-eval', component: SetupEvalComponent},
   {path: 'create-eval', component: CreateEvalComponent},
   {path: 'download-eval', component: DownloadEvalComponent},
+  {path: 'sauvegarde', component: SauvegardeComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full',}
+
 ];

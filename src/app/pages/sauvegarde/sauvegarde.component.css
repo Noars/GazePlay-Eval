@@ -1,0 +1,81 @@
+/* sauvegarde.component.css */
+
+/* Carte slot */
+.slot-card {
+  height: 250px;
+  border-radius: 12px !important;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Slot vide */
+.slot-empty {
+  border: 2px dashed #cbd5e1 !important;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.slot-empty:hover {
+  opacity: 0.8;
+}
+
+.slot-empty-icon {
+  font-size: 2.5rem;
+  color: #94a3b8;
+}
+
+/* Slot rempli */
+.slot-filled {
+  border: 2px solid #1e3a8a !important;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.12) !important;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+
+.slot-filled:hover {
+  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.2) !important;
+  transform: translateY(-3px);
+}
+
+.slot-card-filled {
+  cursor: pointer;
+}
+
+.slot-filled-icon {
+  font-size: 2.5rem;
+  color: #1e3a8a;
+}
+
+/* Boutons slot */
+.slot-actions {
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.slot-actions .btn {
+  width: 48px;
+  height: 48px;
+  font-size: 1.1rem;
+}
+
+.slot-delete {
+  margin-top: 10px;
+}
+
+.slot-delete .btn {
+  padding: 10px 0;
+  font-size: 0.95rem;
+}
+
+/* Boutons du bas */
+.bottom-actions {
+  margin-top: 12px;
+  padding-top: 28px;
+  border-top: 1px solid var(--bs-border-color);
+  width: 100%;
+}
+
+.bottom-actions .btn {
+  padding: 12px 28px;
+  font-size: 1rem;
+}

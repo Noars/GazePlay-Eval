@@ -1,3 +1,4 @@
+<!-- menu.component.html -->
 <div
   class="offcanvas offcanvas-start"
   tabindex="-1"
@@ -9,29 +10,38 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
   </div>
   <div class="offcanvas-body px-3 d-flex flex-column gap-3">
+
     <a href="home" class="menu-link">
       <i class="bi bi-house-door-fill"></i>
       <span class="fw-semibold">Accueil</span>
     </a>
-    <a href="#" class="menu-link">
+
+    <a class="menu-link" (click)="goToSauvegarde(); $event.preventDefault()">
       <i class="bi bi-floppy-fill"></i>
       <span class="fw-semibold">Sauvegarder</span>
     </a>
-    <a href="#" class="menu-link">
+
+    <!-- Charger un zip -->
+    <a class="menu-link" style="cursor: pointer;" (click)="fileInput.click(); $event.preventDefault()">
       <i class="bi bi-folder-fill"></i>
       <span class="fw-semibold">Charger</span>
     </a>
+    <input #fileInput type="file" accept=".zip" hidden (change)="onZipSelected($event)">
+
     <a href="#" class="menu-link">
       <i class="bi bi-file-earmark-arrow-up-fill"></i>
       <span class="fw-semibold">Importer</span>
     </a>
+
     <a href="#" class="menu-link">
       <i class="bi bi-book-fill"></i>
       <span class="fw-semibold">Guide</span>
     </a>
+
     <a href="#" class="menu-link">
       <i class="bi bi-gear-fill"></i>
       <span class="fw-semibold">Options</span>
     </a>
+
   </div>
 </div>

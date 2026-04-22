@@ -19,4 +19,6 @@ export class HomeComponent {
     this.saveService.newSaveDataAuto();
     this.router.navigate(['/info-eval']);
   }
+
+
 }
