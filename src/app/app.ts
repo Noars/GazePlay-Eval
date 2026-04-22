@@ -4,10 +4,11 @@ import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
 
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
+import {FlashComponent} from './components/flash-message/flash.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
