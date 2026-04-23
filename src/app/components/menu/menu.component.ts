@@ -8,6 +8,7 @@ import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 
 @Component({
   selector: 'app-menu',
@@ -24,7 +25,8 @@ export class MenuComponent {
     private loadServiceZip: LoadZipService,
     private saveService: SaveService,
     private autoSaveService: AutoSaveService,
-    private loadService: LoadService
+    private loadService: LoadService,
+    private overwriteGuard: OverwriteGuardService
   ) {}
 
   goToSauvegarde() {
@@ -50,15 +52,15 @@ export class MenuComponent {
     dialogRef.afterClosed().subscribe(async result => {
       if (!result) return;
 
-      await this.loadServiceZip.loadZip(result.zipFile);
+      if (!await this.overwriteGuard.check(0)) return;
 
       if (result.mode === 'save') {
+        if (!await this.overwriteGuard.check(result.slotIndex as FormatTypeConfig)) return;
         await this.loadServiceZip.loadZipToSlot(result.zipFile, result.slotIndex as FormatTypeConfig);
-        console.log('Sauvegarde dans le slot :', result.slotIndex);
-        // this.saveService.saveToSlot(result.slotIndex, result.zipFile);
+      } else {
+        await this.loadServiceZip.loadZip(result.zipFile);
       }
 
-      // this.router.navigate(['/create-eval']);
       this.autoSaveService.tryResume();
     });
   }

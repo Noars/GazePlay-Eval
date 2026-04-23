@@ -11,6 +11,7 @@ import {
   transitionScreenConstKey,
   transitionScreenConstModel
 } from '../../shared/screenModel';
+import {saveModel} from '../../shared/saveModel';
 
 @Injectable({
   providedIn: 'root'
@@ -201,5 +202,74 @@ export class DownloadService {
       ...stimuliResult,
     }
     jsonData.push(stimuliData);
+  }
+
+  async generateSlotZip(saveData: saveModel): Promise<void> {
+    try {
+      console.log('[generateSlotZip] saveData:', saveData);
+      const zip = new JSZip();
+      const evalName = saveData.nomEval || 'GazePlayEvalDefaultName';
+      const jsonData: any[] = [];
+
+      for (const screen of saveData.listScreens) {
+        switch (screen.type) {
+          case transitionScreenConstModel:
+            this.generateTransitionScreenZip(screen, jsonData);
+            break;
+          case instructionScreenConstModel:
+            this.generateInstructionScreenZipSlot(screen, jsonData);
+            break;
+          case stimuliScreenConstModel:
+            this.generateStimuliScreenZipSlot(screen, jsonData);
+            break;
+        }
+      }
+
+      zip.file(evalName + '/evalData.json', JSON.stringify(jsonData, null, 2));
+      zip.file(evalName + '/evalInfo.json', JSON.stringify(this.getInfoEvalFromSlot(saveData), null, 2));
+
+      console.log('[generateSlotZip] generating zip for:', evalName);
+      const content = await zip.generateAsync({type: 'blob'});
+      console.log('[generateSlotZip] calling saveAs');
+      saveAs(content, evalName + '-gazeplayEval.zip');
+    } catch (err) {
+      console.error('[generateSlotZip] erreur:', err);
+    }
+  }
+
+  getInfoEvalFromSlot(saveData: saveModel) {
+    return {
+      "Nom de l'évaluation": saveData.nomEval,
+      "Format choisi": saveData.format,
+      "Informations participant": saveData.infoParticipant
+    };
+  }
+
+  generateInstructionScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
+    const values = structuredClone(evalData.values);
+    values.splice(5, 1);
+    const result = instructionScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = values[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    jsonData.push({Type: instructionScreenConstModel, ...result});
+  }
+
+  generateStimuliScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
+    const values = structuredClone(evalData.values);
+    const stimuliList = values[12];
+
+    for (const key in stimuliList) {
+      delete stimuliList[key].imageFile;
+      delete stimuliList[key].soundFile;
+    }
+
+    values.splice(11, 1);
+
+    const result = stimuliScreenConstKey.reduce((acc, key, idx) => {
+      acc[key] = values[idx];
+      return acc;
+    }, {} as Record<string, any>);
+    jsonData.push({Type: stimuliScreenConstModel, ...result});
   }
 }
