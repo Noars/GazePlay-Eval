@@ -87,6 +87,10 @@ export class LoadZipService {
     const globalStimuli     = this.parseGlobalStimuliParams(evalInfo['globalParamsStimuliScreen'])
                               ?? this.saveService.dataAuto.globalParamsStimuliScreen;
 
+    const step = this.saveService.dataAuto.step;
+
+
+
     this.saveService.saveDataAuto(
       evalInfo["Nom de l'évaluation"],
       evalInfo["Format choisi"],
@@ -94,7 +98,8 @@ export class LoadZipService {
       globalTransition,
       globalInstruction,
       globalStimuli,
-      listScreens
+      listScreens,
+      step
     );
   }
 
