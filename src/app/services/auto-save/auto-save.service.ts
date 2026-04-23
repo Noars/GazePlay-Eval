@@ -1,11 +1,11 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { Router, NavigationStart, Event } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { SaveService } from '../save/save.service';
-import { FlashService } from '../flash-message/flash.service';
-import { LoadService} from '../load/load.service';
-import { ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
+import {Injectable, OnDestroy} from '@angular/core';
+import {Event, NavigationStart, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
+import {filter} from 'rxjs/operators';
+import {SaveService} from '../save/save.service';
+import {FlashService} from '../flash-message/flash.service';
+import {LoadService} from '../load/load.service';
+import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
 
 @Injectable({ providedIn: 'root' })
 export class AutoSaveService implements OnDestroy {
@@ -39,8 +39,7 @@ export class AutoSaveService implements OnDestroy {
     if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas au début
 
     try {
-      const step = ROUTE_TO_STEP[pageActuelle] ?? -1;
-      this.saveService.dataAuto.step = step;
+      this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle] ?? -1;
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
       this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement', 2000);
     } catch (e) {
