@@ -1,0 +1,38 @@
+<div class="popup-container">
+
+  <div class="popup-header">
+    <i class="bi bi-shield-exclamation me-2"></i>
+    Sauvegarde en danger
+  </div>
+
+  <div class="popup-body">
+
+    <div class="popup-alert">
+      <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+      <span>
+        <strong>{{ data.save.nomEval || 'Sans nom' }}</strong>
+        ({{ data.slotLabel }}) va être écrasée par cette action.
+      </span>
+    </div>
+
+    <span class="save-date">
+      Dernière modification&nbsp;: {{ data.save.createdAt | date:'dd/MM/yyyy à HH:mm' }}
+    </span>
+
+    <button class="btn-download fw-semibold w-100" (click)="download()">
+      <i class="bi bi-download me-2"></i>
+      Télécharger avant d'écraser
+    </button>
+
+    <div class="d-flex justify-content-between gap-3">
+      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
+        Annuler
+      </button>
+      <button class="btn-overwrite fw-semibold flex-grow-1" (click)="overwrite()">
+        <i class="bi bi-arrow-right me-1"></i>
+        Écraser quand même
+      </button>
+    </div>
+
+  </div>
+</div>
