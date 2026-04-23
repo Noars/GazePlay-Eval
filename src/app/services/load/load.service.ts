@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import {saveModel} from '../../shared/saveModel';
-import {FormatTypeConfig, MaxSlots, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
+import { saveModel } from '../../shared/saveModel';
+import { FormatTypeConfig, MaxSlots, SAVE_SLOT_LIST } from '../../shared/dataBaseConfig';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class LoadService {
 
   getSlot(slotIndex: FormatTypeConfig): saveModel | null {
@@ -20,15 +18,11 @@ export class LoadService {
     }
   }
 
-  getAllSlots() {
-    let allSlots: [saveModel | null, saveModel | null, saveModel | null] = [null, null, null];
-    for (let i = 0; i < MaxSlots; i++){
-      const raw = localStorage.getItem(SAVE_SLOT_LIST[i])
-      if (!raw) {
-        allSlots[i] = null;
-      }else {
-        allSlots[i] = JSON.parse(raw) as saveModel;
-      }
+  getAllSlots(): [saveModel | null, saveModel | null, saveModel | null] {
+    const allSlots: [saveModel | null, saveModel | null, saveModel | null] = [null, null, null];
+    for (let i = 0; i < MaxSlots; i++) {
+      const raw = localStorage.getItem(SAVE_SLOT_LIST[i]);
+      allSlots[i] = raw ? JSON.parse(raw) as saveModel : null;
     }
     return allSlots;
   }

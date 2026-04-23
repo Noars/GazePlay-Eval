@@ -38,7 +38,8 @@ export class InfoParticipantComponent implements OnInit{
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
-      this.saveService.dataAuto.listScreens);
+      this.saveService.dataAuto.listScreens,
+      this.saveService.dataAuto.step);
   }
 
   loadData(){

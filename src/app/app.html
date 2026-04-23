@@ -1,9 +1,10 @@
-<main class="mt-5">
+  <main class="mt-5">
   <app-navbar></app-navbar>
   @if (currentStepIndex >= 0){
     <app-progress-bar [steps]="steps" [currentStepIndex]="currentStepIndex"></app-progress-bar>
   }
   <router-outlet></router-outlet>
+  <app-flash></app-flash>
 </main>
 <footer class="bg-body-tertiary text-center text-muted py-4 shadow-sm">
   <div class="container d-flex flex-column align-items-center">

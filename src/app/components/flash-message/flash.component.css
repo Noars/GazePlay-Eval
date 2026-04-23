@@ -1,0 +1,35 @@
+.flash-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  max-width: 400px;
+  word-wrap: break-word;
+}
+
+.btn-close:focus,
+.btn-close:active,
+.btn-close:focus-visible {
+  background-color: transparent !important;
+  border:none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.alert {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}

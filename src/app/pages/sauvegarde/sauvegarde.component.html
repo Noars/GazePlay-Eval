@@ -1,0 +1,110 @@
+<div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
+  <div class="card shadow-lg w-100" style="max-width: 1100px;">
+    <div class="card-header text-center py-4">
+      <h2 class="card-title text-center mb-0">Mes évaluations</h2>
+    </div>
+    <div class="card-body px-5 py-5" style="text-align: -webkit-center;">
+
+      <!-- Slots -->
+      <div class="row g-5 justify-content-center mb-2 w-100">
+
+        <!-- Slot 1 — Vide -->
+        <div class="col-md-4">
+          <div class="card shadow-lg slot-empty slot-card d-flex align-items-center justify-content-center">
+            <i class="bi bi-folder2 slot-empty-icon"></i>
+            <span class="fst-italic text-muted fs-5">Vide</span>
+          </div>
+          <div class="d-flex justify-content-center slot-actions">
+            <button class="btn btn-primary fw-semibold" disabled
+                    matTooltip="Modifier"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-pen"></i>
+            </button>
+            <button class="btn btn-primary fw-semibold" disabled
+                    matTooltip="Télécharger"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+          <div class="d-flex justify-content-center slot-delete">
+            <button class="btn btn-danger fw-semibold w-75" disabled>
+              <i class="bi bi-trash me-1"></i> Supprimer
+            </button>
+          </div>
+        </div>
+
+        <!-- Slot 2 — Rempli -->
+        <div class="col-md-4">
+          <div class="card shadow-lg slot-filled slot-card slot-card-filled d-flex align-items-center justify-content-center">
+            <i class="bi bi-folder2-open slot-filled-icon"></i>
+            <span class="fw-semibold fs-5">Slot 2</span>
+          </div>
+          <div class="d-flex justify-content-center slot-actions">
+            <button class="btn btn-primary fw-semibold"
+                    matTooltip="Modifier"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-pen"></i>
+            </button>
+            <button class="btn btn-primary fw-semibold"
+                    matTooltip="Télécharger"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+          <div class="d-flex justify-content-center slot-delete">
+            <button class="btn btn-danger fw-semibold w-75" (click)="openDeletePopup('Slot 2')">
+              <i class="bi bi-trash me-1"></i> Supprimer
+            </button>
+          </div>
+        </div>
+
+        <!-- Slot 3 — Vide -->
+        <div class="col-md-4">
+          <div class="card shadow-lg slot-empty slot-card d-flex align-items-center justify-content-center">
+            <i class="bi bi-folder2 slot-empty-icon"></i>
+            <span class="fst-italic text-muted fs-5">Vide</span>
+          </div>
+          <div class="d-flex justify-content-center slot-actions">
+            <button class="btn btn-primary fw-semibold" disabled
+                    matTooltip="Modifier"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-pen"></i>
+            </button>
+            <button class="btn btn-primary fw-semibold" disabled
+                    matTooltip="Télécharger"
+                    matTooltipClass="custom-tooltip-class"
+                    matTooltipPosition="above">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+          <div class="d-flex justify-content-center slot-delete">
+            <button class="btn btn-danger fw-semibold w-75" disabled>
+              <i class="bi bi-trash me-1"></i> Supprimer
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Boutons actions -->
+      <div class="d-flex align-items-start justify-content-center gap-4 flex-wrap bottom-actions">
+        <div class="d-flex flex-column align-items-center gap-3">
+          <div class="d-flex gap-3">
+            <button class="btn btn-success fw-semibold px-4">
+              <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
+            </button>
+          </div>
+          <button class="btn btn-primary fw-semibold px-4">
+            <i class="bi bi-floppy me-2"></i>Sauvegarder la dernière évaluation
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
