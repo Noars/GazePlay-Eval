@@ -1,11 +1,10 @@
-// menu.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Offcanvas } from 'bootstrap';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadZipService } from '../../services/load-zip/load-zip.service';
 import { LoadService} from '../../services/load/load.service';
 import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
-import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
@@ -17,23 +16,61 @@ import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-gu
   standalone: true,
   styleUrl: './menu.component.css'
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit, OnDestroy {
+
+  private offcanvasInstance!: Offcanvas;
 
   constructor(
     private router: Router,
     private dialog: MatDialog,
     private loadServiceZip: LoadZipService,
-    private saveService: SaveService,
     private autoSaveService: AutoSaveService,
     private loadService: LoadService,
     private overwriteGuard: OverwriteGuardService
   ) {}
 
+  ngOnInit(): void {
+    const offcanvasEl = document.getElementById('menu')!;
+
+
+    this.offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasEl, {
+      backdrop: true,
+      scroll: false
+    });
+
+    offcanvasEl.addEventListener('hide.bs.offcanvas', () => {
+      this.removeElement();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.offcanvasInstance?.dispose();
+  }
+
+  private closeMenu(): void {
+    const offcanvasEl = document.getElementById('menu');
+    if (!offcanvasEl) return;
+
+    const instance = Offcanvas.getInstance(offcanvasEl);
+    instance?.hide();
+
+    this.removeElement();
+  }
+
+  private removeElement(): void {
+    document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open', 'offcanvas-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+  }
+
   goToSauvegarde() {
+    this.closeMenu();
     this.router.navigate(['/sauvegarde']);
   }
 
   goToLoadSave() {
+    this.closeMenu();
     this.router.navigate(['/load-save']);
   }
 
