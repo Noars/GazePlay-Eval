@@ -9,6 +9,8 @@ import { saveModel } from '../../shared/saveModel';
 import { FormatTypeConfig } from '../../shared/dataBaseConfig';
 import { Router } from '@angular/router';
 import {DatePipe} from '@angular/common';
+import {DownloadService} from '../../services/download/download.service';
+import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 
 @Component({
   selector: 'app-sauvegarde',
@@ -26,7 +28,9 @@ export class SauvegardeComponent implements OnInit {
     private loadService: LoadService,
     private saveService: SaveService,
     private autoSaveService: AutoSaveService,
-    private router: Router
+    private router: Router,
+    private downloadService: DownloadService,
+    private overwriteGuard: OverwriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -41,10 +45,13 @@ export class SauvegardeComponent implements OnInit {
     this.selectedSlot = this.selectedSlot === index ? null : index; // toggle
   }
 
-  editSlot(index: FormatTypeConfig): void {
+  async editSlot(index: FormatTypeConfig): Promise<void> {
     const save = this.loadService.getSlot(index);
     if (!save) return;
 
+    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+
+    const step = save.step >= 0 ? save.step : 3;
     this.saveService.dataAuto = {
       nomEval: save.nomEval,
       format: save.format,
@@ -53,9 +60,16 @@ export class SauvegardeComponent implements OnInit {
       globalParamsInstructionScreen: save.globalParamsInstructionScreen,
       globalParamsStimuliScreen: save.globalParamsStimuliScreen,
       listScreens: save.listScreens,
-      step: save.step
+      step: step
     };
+    this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume();
+  }
+
+  downloadSlot(slot: { index: FormatTypeConfig; data: saveModel | null }): void {
+    console.log('[downloadSlot] slot:', slot);
+    if (!slot.data) return;
+    this.downloadService.generateSlotZip(slot.data);
   }
 
   openDeletePopup(slot: { index: FormatTypeConfig; data: saveModel | null }): void {
@@ -70,11 +84,14 @@ export class SauvegardeComponent implements OnInit {
         this.ngOnInit(); // rafraîchit les slots
         this.selectedSlot = null;
       }
-      if (result === 'download') { /* TODO: télécharger */ }
+      if (result === 'download' && slot.data) {
+        this.downloadService.generateSlotZip(slot.data);
+      }
     });
   }
 
-  newEval(): void {
+  async newEval(): Promise<void> {
+    if (!await this.overwriteGuard.check(0)) return;
     this.saveService.newSaveDataAuto();
     this.router.navigate(['/info-eval']);
   }

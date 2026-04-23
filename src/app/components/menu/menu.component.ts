@@ -7,6 +7,7 @@ import { LoadService} from '../../services/load/load.service';
 import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 
 @Component({
   selector: 'app-menu',
@@ -24,7 +25,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private loadServiceZip: LoadZipService,
     private autoSaveService: AutoSaveService,
-    private loadService: LoadService
+    private loadService: LoadService,
+    private overwriteGuard: OverwriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -87,11 +89,13 @@ export class MenuComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(async result => {
       if (!result) return;
 
-      await this.loadServiceZip.loadZip(result.zipFile);
+      if (!await this.overwriteGuard.check(0)) return;
 
       if (result.mode === 'save') {
+        if (!await this.overwriteGuard.check(result.slotIndex as FormatTypeConfig)) return;
         await this.loadServiceZip.loadZipToSlot(result.zipFile, result.slotIndex as FormatTypeConfig);
-        console.log('Sauvegarde dans le slot :', result.slotIndex);
+      } else {
+        await this.loadServiceZip.loadZip(result.zipFile);
       }
 
       this.autoSaveService.tryResume();

@@ -6,6 +6,7 @@ import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import { saveModel } from '../../shared/saveModel';
 import { CommonModule } from '@angular/common';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 
 @Component({
   selector: 'app-load-save',
@@ -22,7 +23,8 @@ export class LoadSaveComponent implements OnInit {
     private router: Router,
     private loadService: LoadService,
     private saveService: SaveService,
-    private autoSaveService: AutoSaveService
+    private autoSaveService: AutoSaveService,
+    private overwriteGuard: OverwriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -32,10 +34,13 @@ export class LoadSaveComponent implements OnInit {
     }));
   }
 
-  loadSlot(slotIndex: number): void {
+  async loadSlot(slotIndex: number): Promise<void> {
     const save = this.loadService.getSlot(slotIndex as FormatTypeConfig);
     if (!save) return;
 
+    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+
+    const step = save.step >= 0 ? save.step : 3;
     this.saveService.dataAuto = {
       nomEval: save.nomEval,
       format: save.format,
@@ -44,9 +49,9 @@ export class LoadSaveComponent implements OnInit {
       globalParamsInstructionScreen: save.globalParamsInstructionScreen,
       globalParamsStimuliScreen: save.globalParamsStimuliScreen,
       listScreens: save.listScreens,
-      step: save.step
+      step: step
     };
-
+    this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume();
   }
 
