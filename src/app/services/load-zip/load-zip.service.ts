@@ -8,6 +8,7 @@ import {
   stimuliScreenConstModel,
   screenTypeModel
 } from '../../shared/screenModel';
+import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 
 @Injectable({ providedIn: 'root' })
 export class LoadZipService {
@@ -282,5 +283,10 @@ export class LoadZipService {
     if (path.includes('/videos/')) return 'video/mp4';
     if (path.includes('/audio/'))  return 'audio/mpeg';
     return 'application/octet-stream';
+  }
+
+  async loadZipToSlot(zipFile: File, slotIndex: FormatTypeConfig): Promise<void> {
+    await this.loadZip(zipFile);
+    this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
   }
 }
