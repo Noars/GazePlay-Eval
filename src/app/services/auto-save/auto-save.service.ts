@@ -41,7 +41,7 @@ export class AutoSaveService implements OnDestroy {
     try {
       this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle] ?? -1;
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
-      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement', 2000);
+      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.', 2000);
     } catch (e) {
       this.flashService.show('warning', 'Vos modifications n\'ont pas pu être enregistrées');
     }

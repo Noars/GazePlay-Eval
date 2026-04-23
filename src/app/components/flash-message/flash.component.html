@@ -9,13 +9,16 @@
   <div class="flash-container">
     @for (flash of flashService.flashs(); track flash.id) {
 
-      <div class="alert alert-{{ mapType(flash.type) }} d-flex align-items-start justify-content-between shadow fw-semibold gap-2 mb-2"
+      <div class="alert alert-{{ mapType(flash.type) }}"
            [class.fade-out]="flash.fadingOut">
-        <div class="d-flex align-items-start gap-2">
-        <i class="bi {{ mapIcon(flash.type) }} mt-1"></i>
-        <span>{{ flash.message }}</span>
+
+        <div class="d-flex align-items-start gap-3">
+          <i class="bi {{ mapIcon(flash.type) }} alert-icon"></i>
+          <span>{{ flash.message }}</span>
         </div>
+
         <button class="btn-close" (click)="flashService.remove(flash.id)"></button>
+
       </div>
 
     }
