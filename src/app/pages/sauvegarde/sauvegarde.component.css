@@ -79,3 +79,13 @@
   padding: 12px 28px;
   font-size: 1rem;
 }
+.slot-card-selected {
+  border: 2px solid #1e3a8a !important;
+  background-color: #dbeafe !important;
+}
+
+.slot-delete-placeholder {
+  height: 38px; /* même hauteur que le bouton */
+}
+
+

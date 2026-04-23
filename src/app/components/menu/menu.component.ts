@@ -3,7 +3,11 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadZipService } from '../../services/load-zip/load-zip.service';
+import { LoadService} from '../../services/load/load.service';
 import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
+import { SaveService } from '../../services/save/save.service';
+import { AutoSaveService } from '../../services/auto-save/auto-save.service';
+import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 
 @Component({
   selector: 'app-menu',
@@ -17,7 +21,10 @@ export class MenuComponent {
   constructor(
     private router: Router,
     private dialog: MatDialog,
-    private loadService: LoadZipService
+    private loadServiceZip: LoadZipService,
+    private saveService: SaveService,
+    private autoSaveService: AutoSaveService,
+    private loadService: LoadService
   ) {}
 
   goToSauvegarde() {
@@ -32,9 +39,9 @@ export class MenuComponent {
     const dialogRef = this.dialog.open(PopupImportSaveComponent, {
       data: {
         slots: [
-          { index: 0, name: 'Slot 1', empty: true },
-          { index: 1, name: 'Slot 2', empty: false },
-          { index: 2, name: 'Slot 3', empty: true },
+          { index: 1, name: this.loadService.getSlot(1)?.nomEval, empty: this.loadService.getSlot(1) === null },
+          { index: 2, name: this.loadService.getSlot(2)?.nomEval, empty: this.loadService.getSlot(2) === null },
+          { index: 3, name: this.loadService.getSlot(3)?.nomEval, empty: this.loadService.getSlot(3) === null },
         ]
       },
       disableClose: true,
@@ -43,14 +50,16 @@ export class MenuComponent {
     dialogRef.afterClosed().subscribe(async result => {
       if (!result) return;
 
-      await this.loadService.loadZip(result.zipFile);
+      await this.loadServiceZip.loadZip(result.zipFile);
 
       if (result.mode === 'save') {
-        // TODO: persister dans le slot result.slotIndex
+        await this.loadServiceZip.loadZipToSlot(result.zipFile, result.slotIndex as FormatTypeConfig);
         console.log('Sauvegarde dans le slot :', result.slotIndex);
+        // this.saveService.saveToSlot(result.slotIndex, result.zipFile);
       }
 
-      this.router.navigate(['/create-eval']);
+      // this.router.navigate(['/create-eval']);
+      this.autoSaveService.tryResume();
     });
   }
 }

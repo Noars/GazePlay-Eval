@@ -1,4 +1,3 @@
-<!-- load-save.component.html -->
 <div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
   <div class="card shadow-lg w-100" style="max-width: 1100px;">
     <div class="card-header text-center py-4">
@@ -13,40 +12,36 @@
 
       <!-- Slots -->
       <div class="row g-5 justify-content-center w-100">
+        @for (slot of slots; track slot.index) {
+          <div class="col-md-4">
 
-        <!-- Slot 1 — Vide -->
-        <div class="col-md-4">
-          <div class="slot-card slot-empty d-flex align-items-center justify-content-center" disabled>
-            <i class="bi bi-folder2 slot-empty-icon"></i>
-            <span class="fst-italic text-muted fs-5">Vide</span>
+            @if (slot.data === null) {
+              <!-- Slot vide -->
+              <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
+                <i class="bi bi-folder2 slot-empty-icon"></i>
+                <span class="fst-italic text-muted fs-5">Vide</span>
+              </div>
+
+            } @else {
+              <!-- Slot rempli -->
+              <div class="slot-card slot-filled d-flex align-items-center justify-content-center"
+                   (click)="loadSlot(slot.index)">
+                <i class="bi bi-folder2-open slot-filled-icon"></i>
+                <span class="fw-bold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
+                <span class="slot-meta">Modifié le {{ formatDate(slot.data.createdAt) }}</span>
+                <div class="slot-hover-overlay">
+                  <i class="bi bi-play-fill me-2"></i>Charger
+                </div>
+              </div>
+            }
+
           </div>
-        </div>
-
-        <!-- Slot 2 — Rempli -->
-        <div class="col-md-4">
-          <div class="slot-card slot-filled d-flex align-items-center justify-content-center"
-               (click)="loadSlot(1)">
-            <i class="bi bi-folder2-open slot-filled-icon"></i>
-            <span class="fw-bold fs-5">Slot 2</span>
-            <span class="slot-meta">Modifié le 22/04/2026</span>
-            <div class="slot-hover-overlay">
-              <i class="bi bi-play-fill me-2"></i>Charger
-            </div>
-          </div>
-        </div>
-
-        <!-- Slot 3 — Vide -->
-        <div class="col-md-4">
-          <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
-            <i class="bi bi-folder2 slot-empty-icon"></i>
-            <span class="fst-italic text-muted fs-5">Vide</span>
-          </div>
-        </div>
-
+        }
       </div>
 
       <!-- Bouton retour -->
-      <div class="d-flex justify-content-start w-100 mt-5 pt-3" style="border-top: 1px solid var(--bs-border-color);">
+      <div class="d-flex justify-content-start w-100 mt-5 pt-3"
+           style="border-top: 1px solid var(--bs-border-color);">
         <button class="btn btn-primary fw-semibold px-4" (click)="goBack()">
           <i class="bi bi-arrow-left me-2"></i>Retour
         </button>
