@@ -17,7 +17,8 @@ export class SaveService {
     globalParamsTransitionScreen: [],
     globalParamsInstructionScreen: [],
     globalParamsStimuliScreen: [],
-    listScreens: []
+    listScreens: [],
+    step: 0
   };
 
   newSaveDataAuto(){
@@ -31,7 +32,8 @@ export class SaveService {
                globalParamsTransitionScreen: any[],
                globalParamsInstructionScreen: any[],
                globalParamsStimuliScreen: string[],
-               listScreens: screenTypeModel[]){
+               listScreens: screenTypeModel[],
+               step: number){
     this.dataAuto = {
       nomEval: nomEval,
       format: format,
@@ -39,7 +41,8 @@ export class SaveService {
       globalParamsTransitionScreen: globalParamsTransitionScreen,
       globalParamsInstructionScreen: globalParamsInstructionScreen,
       globalParamsStimuliScreen: globalParamsStimuliScreen,
-      listScreens: listScreens
+      listScreens: listScreens,
+      step: step
     };
     this.saveToSlot(0, this.dataAuto);
   }

@@ -2,12 +2,14 @@ import {Component, OnInit} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
-import {CommonModule} from '@angular/common';
+
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
+import {FlashComponent} from './components/flash-message/flash.component';
+import {AutoSaveService} from './services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, NavbarComponent, ProgressBarComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -17,7 +19,7 @@ export class App implements OnInit{
   steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et avis'];
   currentStepIndex = -1;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private autoSaveService:AutoSaveService) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(event => {
@@ -40,11 +42,16 @@ export class App implements OnInit{
   }
 
   ngOnInit(): void {
+    this.autoSaveService.init(); // pour la sauvegarde automatique
+
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isReload = nav?.type === 'reload';
 
-    if (isReload && this.router.url !== '/home') {
-      this.router.navigate(['/home']);
+    if (isReload) {
+      this.router.navigate(['/home']).then(() => {
+        this.autoSaveService.tryResume();
+      });
+      return ;
     }
   }
 }

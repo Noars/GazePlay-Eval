@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {CommonModule} from '@angular/common';
+
 import {SaveService} from '../../services/save/save.service';
 import {formatTypeModel, saveModelDefault} from '../../shared/saveModel';
 import {Router} from '@angular/router';
@@ -8,7 +8,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-info-eval',
-  imports: [CommonModule, FormsModule, MatTooltip],
+  imports: [FormsModule, MatTooltip],
   templateUrl: './info-eval.component.html',
   standalone: true,
   styleUrl: './info-eval.component.css'
@@ -34,7 +34,8 @@ export class InfoEvalComponent implements OnInit{
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
-      this.saveService.dataAuto.listScreens);
+      this.saveService.dataAuto.listScreens,
+      this.saveService.dataAuto.step);
   }
 
   loadData(){
