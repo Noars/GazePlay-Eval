@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
+import { Router, NavigationStart, Event } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { SaveService } from '../save/save.service';
@@ -12,6 +12,7 @@ export class AutoSaveService implements OnDestroy {
 
   private subscription!: Subscription;
   private pagesExclues = ['home', ''];
+  private isResuming = false;
 
   constructor(
     private router: Router,
@@ -22,21 +23,26 @@ export class AutoSaveService implements OnDestroy {
 
   init(): void {
     this.subscription = this.router.events.pipe(
-      filter(event => event instanceof NavigationStart)
-    ).subscribe(() => {
-      this.autoSave();
+      filter((event: Event): event is NavigationStart => event instanceof NavigationStart)
+    ).subscribe((event: NavigationStart) => {
+      if (!this.isResuming) {
+        this.autoSave(event.url);
+      }
+
     });
   }
 
-  private autoSave(): void {
-    const pageActuelle = this.router.url.replace('/', '');
+  private autoSave(targetUrl: string): void {
+    // Nettoyer l'URL cible (enlever le premier '/' et les éventuels paramètres de requête)
+    const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
+
     if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas au début
 
     try {
-      const step = ROUTE_TO_STEP[pageActuelle] ?? 0;
+      const step = ROUTE_TO_STEP[pageActuelle] ?? -1;
       this.saveService.dataAuto.step = step;
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
-      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement');
+      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement', 2000);
     } catch (e) {
       this.flashService.show('warning', 'Vos modifications n\'ont pas pu être enregistrées');
     }
@@ -48,7 +54,7 @@ export class AutoSaveService implements OnDestroy {
 
   tryResume(): void {
     const save = this.loadService.getSlot(0);
-    if (!save || save.step === 0) return;
+    if (!save || save.step === -1) return;
 
     const route = STEP_TO_ROUTE[save.step];
     if (!route) return;
@@ -65,6 +71,9 @@ export class AutoSaveService implements OnDestroy {
       step: save.step
     };
 
-    this.router.navigate([route]);
+    this.isResuming = true;
+    this.router.navigate([route]).then(() => {
+      this.isResuming = false;
+    });
   }
 }
