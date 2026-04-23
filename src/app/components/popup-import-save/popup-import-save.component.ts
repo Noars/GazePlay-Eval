@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class PopupImportSaveComponent {
 
+  mode: 'consult' | 'save' | null = null;
   selectedSlot: number | null = null;
   zipFile: File | null = null;
   zipFileName: string = '';
@@ -30,7 +31,9 @@ export class PopupImportSaveComponent {
   }
 
   canConfirm(): boolean {
-    return this.zipFile !== null && this.selectedSlot !== null;
+    if (this.mode === null || this.zipFile === null) return false;
+    if (this.mode === 'save') return this.selectedSlot !== null;
+    return true;
   }
 
   cancel() {
@@ -41,7 +44,8 @@ export class PopupImportSaveComponent {
     if (!this.canConfirm()) return;
     this.dialogRef.close({
       zipFile: this.zipFile,
-      slotIndex: this.selectedSlot
+      slotIndex: this.selectedSlot,
+      mode: this.mode
     });
   }
 }

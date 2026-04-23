@@ -13,7 +13,39 @@
     <!-- Alerte info -->
     <div class="popup-alert-info">
       <i class="bi bi-info-circle-fill alert-icon-info"></i>
-      <span>Sélectionnez un fichier <strong>.zip</strong> exporté depuis GazePlayEval et choisissez un emplacement de sauvegarde.</span>
+      <span>Sélectionnez un fichier <strong>.zip</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
+    </div>
+
+    <!-- Choix du mode -->
+    <div class="section-block">
+      <label class="section-label">
+        <i class="bi bi-sliders me-2"></i>
+        Mode d'ouverture
+      </label>
+      <div class="mode-selector">
+        <div class="mode-option"
+             [class.mode-option-selected]="mode === 'consult'"
+             (click)="mode = 'consult'; selectedSlot = null">
+          <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-eye-fill"></i>
+            <div>
+              <div class="fw-semibold">Consultation</div>
+              <div class="mode-desc">Ouvrir sans sauvegarder</div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-option"
+             [class.mode-option-selected]="mode === 'save'"
+             (click)="mode = 'save'; selectedSlot = null">
+          <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-floppy-fill"></i>
+            <div>
+              <div class="fw-semibold">Sauvegarder</div>
+              <div class="mode-desc">Importer et sauvegarder dans un emplacement</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Sélection fichier zip -->
@@ -31,39 +63,40 @@
       </div>
     </div>
 
-    <!-- Sélection slot -->
-    <div class="section-block">
-      <label class="section-label">
-        <i class="bi bi-folder2 me-2"></i>
-        Emplacement de sauvegarde
-      </label>
-      <div class="slots-list">
-        @for (slot of data.slots; track slot.index) {
-          <div class="slot-option"
-               [class.slot-option-selected]="selectedSlot === slot.index"
-               [class.slot-option-filled]="!slot.empty"
-               (click)="selectedSlot = slot.index">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi" [class.bi-folder2]="slot.empty" [class.bi-folder2-open]="!slot.empty"></i>
-              <span class="fw-semibold">{{ slot.empty ? 'Emplacement vide' : slot.name }}</span>
+    <!-- Sélection slot (mode sauvegarder uniquement) -->
+    @if (mode === 'save') {
+      <div class="section-block">
+        <label class="section-label">
+          <i class="bi bi-folder2 me-2"></i>
+          Emplacement de sauvegarde
+        </label>
+        <div class="slots-list">
+          @for (slot of data.slots; track slot.index) {
+            <div class="slot-option"
+                 [class.slot-option-selected]="selectedSlot === slot.index"
+                 [class.slot-option-filled]="!slot.empty"
+                 (click)="selectedSlot = slot.index">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi" [class.bi-folder2]="slot.empty" [class.bi-folder2-open]="!slot.empty"></i>
+                <span class="fw-semibold">{{ slot.empty ? 'Emplacement vide' : slot.name }}</span>
+              </div>
+              @if (!slot.empty) {
+                <span class="slot-warning-badge">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                  Sera écrasé
+                </span>
+              }
             </div>
-            @if (!slot.empty) {
-              <span class="slot-warning-badge">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                Sera écrasé
-              </span>
-            }
-          </div>
-        }
+          }
+        </div>
       </div>
-    </div>
 
-    <!-- Avertissement si slot rempli sélectionné -->
-    @if (selectedSlot !== null && !data.slots[selectedSlot].empty) {
-      <div class="popup-alert-warning">
-        <i class="bi bi-exclamation-triangle-fill alert-icon-warning"></i>
-        <span>Attention, l'évaluation existante sera <strong>définitivement remplacée</strong>.</span>
-      </div>
+      @if (selectedSlot !== null && !data.slots[selectedSlot].empty) {
+        <div class="popup-alert-warning">
+          <i class="bi bi-exclamation-triangle-fill alert-icon-warning"></i>
+          <span>Attention, l'évaluation existante sera <strong>définitivement remplacée</strong>.</span>
+        </div>
+      }
     }
 
     <!-- Boutons -->
@@ -76,7 +109,7 @@
               [class.btn-confirm-disabled]="!canConfirm()"
               (click)="confirm()">
         <i class="bi bi-check-lg me-1"></i>
-        Importer
+        {{ mode === 'consult' ? 'Ouvrir' : 'Importer' }}
       </button>
     </div>
 
