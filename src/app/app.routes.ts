@@ -18,5 +18,4 @@ export const routes: Routes = [
   {path: 'sauvegarde', component: SauvegardeComponent},
   { path: 'load-save', component: LoadSaveComponent },
   {path: '', redirectTo: 'home', pathMatch: 'full',}
-
 ];
