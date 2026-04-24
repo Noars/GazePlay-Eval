@@ -10,9 +10,9 @@ import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
 @Injectable({ providedIn: 'root' })
 export class AutoSaveService implements OnDestroy {
 
-  private subscription!: Subscription;
-  private pagesExclues = ['','home', 'sauvegarde', 'load-save'];
-  private isResuming = false;
+  private subscription!: Subscription; // abonnement aux événements du routeur (changement de page)
+  private pagesExclues = ['','home', 'sauvegarde', 'load-save']; // pages non concernés par la sauvegarde auto
+  private isResuming = false; // si on est en train de restaurer une session
 
   constructor(
     private router: Router,
@@ -23,21 +23,32 @@ export class AutoSaveService implements OnDestroy {
 
   init(): void {
     this.subscription = this.router.events.pipe(
+      // Filtre pour ne garder que l'événement où l'utilisateur quitte une page
       filter((event: Event): event is NavigationStart => event instanceof NavigationStart)
     ).subscribe((event: NavigationStart) => {
-      if (!this.isResuming) {
+      //
+      if (!this.isResuming) { // Si on est déjà dans une session active
         this.autoSave(event.url);
       }
-
     });
   }
 
+  /**
+   * Sauvegarde automatiquement les changements de l'évaluation courante dans le LocalStorage.
+   *
+   * Enregistre également l'avancée de l'utilisateur dans l'évaluation pour pouvoir le rediriger
+   * au rechargement de la page.
+   *
+   * @param targetUrl l'url de la page actuelle.
+   */
   private autoSave(targetUrl: string): void {
-    // Nettoyer l'URL cible (enlever le premier '/' et les éventuels paramètres de requête)
+    // Nettoyage de l'URL (on enlève le 1er '/')
+    // Si jamais on a aussi des attributs dans l'URL, on ne garde que ce qu'il y a avant le '?'
     const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
 
-    if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas au début
+    if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas les pages exclues
 
+    // Sauvegarde auto de l'évaluation, avec message de succès ou d'avertissement
     try {
       this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle] ?? -1;
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
@@ -48,14 +59,20 @@ export class AutoSaveService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription?.unsubscribe(); // évite les fuites mémoire
+    this.subscription?.unsubscribe();
   }
 
+  /**
+   * Essaye de rediriger l'utilisateur vers la dernière page de modification de l'évaluation qu'il a consulté.
+   *
+   * Si le step n'est pas valide, la méthode ne fait rien.
+   */
   tryResume(): void {
+    // récupération du slot dynamique
     const save = this.loadService.getSlot(0);
     if (!save || save.step === -1) return;
 
-    const route = STEP_TO_ROUTE[save.step];
+    const route = STEP_TO_ROUTE[save.step]; // Si la route est invalide
     if (!route) return;
 
 
