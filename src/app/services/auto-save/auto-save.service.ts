@@ -11,7 +11,7 @@ import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
 export class AutoSaveService implements OnDestroy {
 
   private subscription!: Subscription;
-  private pagesExclues = ['home', ''];
+  private pagesExclues = ['','home', 'sauvegarde', 'load-save'];
   private isResuming = false;
 
   constructor(
