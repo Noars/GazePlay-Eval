@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
-
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
 import {FlashComponent} from './components/flash-message/flash.component';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
@@ -47,8 +46,11 @@ export class App implements OnInit{
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isReload = nav?.type === 'reload';
 
+    // Si on recharge le site, on redirige vers la page d'accueil
     if (isReload) {
       this.router.navigate(['/home']).then(() => {
+        // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
+        // S'il n'y en a pas, on reste sur la page d'accueil
         this.autoSaveService.tryResume();
       });
       return ;

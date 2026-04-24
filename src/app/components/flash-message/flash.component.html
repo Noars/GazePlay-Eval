@@ -1,8 +1,8 @@
-
-
-  <div class="flash-container">
+<div class="flash-container">
+    <!-- Boucle sur le signal des flashs-messages avec leur id (pour ne pas impacter tout les messages) -->
     @for (flash of flashService.flashs(); track flash.id) {
 
+      <!-- applique la classe selon le type du message -->
       <div class="alert alert-{{ mapType(flash.type) }}"
            [class.fade-out]="flash.fadingOut">
 
@@ -16,5 +16,5 @@
       </div>
 
     }
-  </div>
+</div>
 
