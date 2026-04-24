@@ -18,6 +18,7 @@ import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-gu
 })
 export class MenuComponent implements OnInit, OnDestroy {
 
+  // Stocke l'instance du menu latéral
   private offcanvasInstance!: Offcanvas;
 
   constructor(
@@ -29,24 +30,30 @@ export class MenuComponent implements OnInit, OnDestroy {
     private overwriteGuard: OverwriteGuardService
   ) {}
 
+  // Executé dans le component est créé
   ngOnInit(): void {
     const offcanvasEl = document.getElementById('menu')!;
 
-
+    // créé l'élement ou le récupère (donc pas de doublon)
     this.offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasEl, {
       backdrop: true,
       scroll: false
     });
 
+    // mise en écoute de l'événement du canvas dissimulé pour pouvoir le supprimer
     offcanvasEl.addEventListener('hide.bs.offcanvas', () => {
       this.removeElement();
     });
   }
 
+  // Executé quand le component est détruit
   ngOnDestroy(): void {
     this.offcanvasInstance?.dispose();
   }
 
+  /**
+   * Ferme le menu latéral et supprime le backdrop gris en fond.
+   */
   private closeMenu(): void {
     const offcanvasEl = document.getElementById('menu');
     if (!offcanvasEl) return;
@@ -57,6 +64,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.removeElement();
   }
 
+  /**
+   * Supprime le backdrop gris derrière le menu afin d'éviter qu'il reste si on clique ailleurs sur la page.
+   */
   private removeElement(): void {
     document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
     document.body.classList.remove('modal-open', 'offcanvas-open');
@@ -74,6 +84,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.router.navigate(['/load-save']);
   }
 
+  /**
+   * Ouvre la pop-up pour importer un fichier ZIP dans le site.
+   */
   openImportPopup() {
     const dialogRef = this.dialog.open(PopupImportSaveComponent, {
       data: {
@@ -83,13 +96,13 @@ export class MenuComponent implements OnInit, OnDestroy {
           { index: 3, name: this.loadService.getSlot(3)?.nomEval, empty: this.loadService.getSlot(3) === null },
         ]
       },
-      disableClose: true,
+      disableClose: true // empêche l'utilisateur de cliquer hors de la popup
     });
 
     dialogRef.afterClosed().subscribe(async result => {
-      if (!result) return;
+      if (!result) return; // annulation de l'import
 
-      if (!await this.overwriteGuard.check(0)) return;
+      if (!await this.overwriteGuard.check(0)) return; // Si l'import correspond à un slot
 
       if (result.mode === 'save') {
         if (!await this.overwriteGuard.check(result.slotIndex as FormatTypeConfig)) return;
@@ -98,7 +111,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         await this.loadServiceZip.loadZip(result.zipFile);
       }
 
-      this.autoSaveService.tryResume();
+      this.autoSaveService.tryResume(); // Enmène l'utilisateur au step enregistré
     });
   }
 }

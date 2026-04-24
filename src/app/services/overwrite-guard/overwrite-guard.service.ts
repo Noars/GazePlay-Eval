@@ -62,6 +62,11 @@ export class OverwriteGuardService {
     return result === 'overwrite';
   }
 
+  /**
+   * Cette fonction cherche et renvoie l'index du slot à partir du nom de l'évaluation.
+   * @param nomEval
+   * @returns l'index correspondant au nom de l'évaluation (1, 2 ou 3), ou null si rien n'a été trouvé.
+   */
   private findNamedSlotByEvalName(nomEval: string): FormatTypeConfig | null {
     for (const i of [1, 2, 3] as FormatTypeConfig[]) {
       const slot = this.loadService.getSlot(i);
