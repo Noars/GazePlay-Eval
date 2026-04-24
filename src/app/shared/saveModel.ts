@@ -1,6 +1,4 @@
 import {screenTypeModel} from './screenModel';
-
-
 export type formatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
 
 export interface saveModel {
@@ -12,7 +10,7 @@ export interface saveModel {
   globalParamsStimuliScreen: any[]; // 0-Nb rows, 1-Nb cols, 2-Add max time screen, 3-Max time screen, 4-Fixation length, 5-Nb stimuli, 6-Random position stimuli, 7-Disable stimuli
   listScreens: screenTypeModel[];
   createdAt: string;
-  step: number;
+  step: number; // avancée dans l'évaluation
   version: number;
 }
 
@@ -25,6 +23,6 @@ export const saveModelDefault: saveModel = {
   globalParamsStimuliScreen: [1, 1, false, 10, 1, 1, false, false],
   listScreens: [],
   createdAt: new Date().toISOString(),
-  step: 0,
+  step: 0, // initialement à 0
   version: 1,
 }
