@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import JSZip from 'jszip';
-import { IndexedDBService } from '../indexedDB/indexed-db.service';
 import { SaveService } from '../save/save.service';
 import {
   transitionScreenConstModel,
@@ -14,22 +13,27 @@ import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 export class LoadZipService {
 
   constructor(
-    private idbService: IndexedDBService,
     private saveService: SaveService
   ) {}
 
+  /**
+   * Importe un fichier ZIP d'évaluation en mémoire de travail (slot 0).
+   * Reconstruit les écrans depuis evalData.json et les métadonnées depuis evalInfo.json.
+   * Les fichiers médias (images, audio, vidéos) ne sont pas traités ici :
+   * leur chargement sera géré par un service dédié ultérieurement.
+   *
+   * @param zipFile Fichier ZIP exporté par l'application
+   */
   async loadZip(zipFile: File): Promise<void> {
-
-    await this.idbService.deleteAll();
 
     const zip = await JSZip.loadAsync(zipFile);
 
     let evalData: any[] = [];
     let evalInfo: any = {};
-    const filePromises: Promise<void>[] = [];
+    const filePromises: Promise<void>[] = []; // on collecte les promesses pour les attendre toutes ensemble
 
     zip.forEach((relativePath, zipEntry) => {
-      if (zipEntry.dir) return;
+      if (zipEntry.dir) return; // on ne traite pas les dossiers, seulement les fichiers
       // Ignorer les métadonnées macOS (ex: __MACOSX/.../._evalInfo.json)
       if (relativePath.startsWith('__MACOSX/') || relativePath.split('/').pop()?.startsWith('._')) return;
 
@@ -59,28 +63,16 @@ export class LoadZipService {
         return;
       }
 
-      filePromises.push(
-        zipEntry.async('blob').then(async blob => {
-          const type = this.getFileType(relativePath);
-          const mimeType = this.getMimeType(relativePath);
-          const fileName = relativePath.split('/').pop() ?? relativePath;
-          const file = new File([blob], fileName, { type: mimeType });
-
-          try {
-            await this.idbService.addFile(relativePath, file, type);
-          } catch {
-            await this.idbService.updateFile(relativePath, file, type);
-          }
-        })
-      );
+      // Les fichiers médias sont ignorés pour l'instant
     });
 
+    // On attend que l'extraction des fichiers JSON soit terminée avant de reconstruire les écrans
     await Promise.all(filePromises);
 
     const listScreens = this.rebuildScreens(evalData);
-    await this.rebuildFilesFromIDB(listScreens, evalInfo["Nom de l'évaluation"]);
 
-    // GlobalParams : présents dans evalInfo si nouveau format, sinon on garde les valeurs actuelles
+    // Les globalParams sont présents dans evalInfo si le ZIP a été exporté avec le nouveau format.
+    // Si absent (ancien format), on conserve les valeurs actuellement en mémoire.
     const globalTransition  = this.parseGlobalTransitionParams(evalInfo['globalParamsTransitionScreen'])
                               ?? this.saveService.dataAuto.globalParamsTransitionScreen;
     const globalInstruction = this.parseGlobalInstructionParams(evalInfo['globalParamsInstructionScreen'])
@@ -88,9 +80,9 @@ export class LoadZipService {
     const globalStimuli     = this.parseGlobalStimuliParams(evalInfo['globalParamsStimuliScreen'])
                               ?? this.saveService.dataAuto.globalParamsStimuliScreen;
 
+    // Le ZIP ne stocke pas l'étape de navigation : on conserve l'étape courante
+    // pour que tryResume() puisse rediriger vers la bonne page après l'import
     const step = this.saveService.dataAuto.step;
-
-
 
     this.saveService.saveDataAuto(
       evalInfo["Nom de l'évaluation"],
@@ -106,6 +98,11 @@ export class LoadZipService {
 
   // ─── GlobalParams parsers ───────────────────────────────────────────────────
 
+  /**
+   * Convertit l'objet globalParamsTransitionScreen du JSON en tableau ordonné
+   * attendu par le reste de l'application.
+   * Retourne null si l'objet est absent (ancien format de ZIP).
+   */
   private parseGlobalTransitionParams(gp: any): any[] | null {
     if (!gp) return null;
     return [
@@ -117,6 +114,10 @@ export class LoadZipService {
     ];
   }
 
+  /**
+   * Convertit l'objet globalParamsInstructionScreen du JSON en tableau ordonné.
+   * Retourne null si l'objet est absent (ancien format de ZIP).
+   */
   private parseGlobalInstructionParams(gp: any): any[] | null {
     if (!gp) return null;
     return [
@@ -129,6 +130,10 @@ export class LoadZipService {
     ];
   }
 
+  /**
+   * Convertit l'objet globalParamsStimuliScreen du JSON en tableau ordonné.
+   * Retourne null si l'objet est absent (ancien format de ZIP).
+   */
   private parseGlobalStimuliParams(gp: any): any[] | null {
     if (!gp) return null;
     return [
@@ -145,6 +150,14 @@ export class LoadZipService {
 
   // ─── Screens rebuild ────────────────────────────────────────────────────────
 
+  /**
+   * Reconstruit la liste des écrans à partir des données JSON de evalData.json.
+   * Les champs File (images, sons) restent à undefined : ils seront remplis
+   * par le service de chargement des médias lorsqu'il sera intégré.
+   *
+   * @param evalData Tableau d'objets écrans tel que parsé depuis evalData.json
+   * @returns Liste des écrans reconstituée au format interne de l'application
+   */
   private rebuildScreens(evalData: any[]): screenTypeModel[] {
     return evalData.map((item, index) => {
       switch (item['Type']) {
@@ -167,14 +180,14 @@ export class LoadZipService {
             name: item['name'] ?? 'Ecran ' + (index + 1),
             type: instructionScreenConstModel,
             values: [
-              item["Mettre un temps avant passage à l'écran suivant"],
-              item["Combien de temps"],
-              item["Ajouter un media"],
-              item["Type de media"],
-              item["Lien du fichier"] ?? item["Nom du fichier"],
-              undefined, // File — reconstruit par rebuildFilesFromIDB
-              item["Ajouter un bouton pour lancer evaluation"] ?? item["Mettre un temps de fixation"],
-              item["Combien de temps de fixation"]
+              item["Mettre un temps avant passage à l'écran suivant"], // [0]
+              item["Combien de temps"],                                 // [1]
+              item["Ajouter un media"],                                 // [2]
+              item["Type de media"],                                    // [3]
+              item["Lien du fichier"] ?? item["Nom du fichier"],        // [4] nom du fichier média
+              undefined,                                                // [5] File — à remplir par le service médias
+              item["Ajouter un bouton pour lancer evaluation"] ?? item["Mettre un temps de fixation"], // [6]
+              item["Combien de temps de fixation"]                      // [7]
             ]
           };
 
@@ -183,19 +196,19 @@ export class LoadZipService {
             name: item['name'] ?? 'Ecran ' + (index + 1),
             type: stimuliScreenConstModel,
             values: [
-              item["Nombre de lignes"],
-              item["Nombre de colonnes"],
-              item["Mettre un temps avant passage à l'écran suivant"],
-              item["Combien de temps"],
-              item["Combien de temps de fixation"],
-              item["Choix de sélection"],
-              item["Combien à sélectionner"],
-              item["Position stimuli aléatoire"],
-              item["Caché stimuli après selection"],
-              item["Mettre un son"],
-              item["Type du fichier"] ?? item["Nom du fichier"],
-              undefined, // File son global — reconstruit par rebuildFilesFromIDB
-              item["Liste des stimuli"]
+              item["Nombre de lignes"],                                  // [0]
+              item["Nombre de colonnes"],                                // [1]
+              item["Mettre un temps avant passage à l'écran suivant"],  // [2]
+              item["Combien de temps"],                                  // [3]
+              item["Combien de temps de fixation"],                      // [4]
+              item["Choix de sélection"],                                // [5]
+              item["Combien à sélectionner"],                            // [6]
+              item["Position stimuli aléatoire"],                        // [7]
+              item["Caché stimuli après selection"],                     // [8]
+              item["Mettre un son"],                                     // [9]
+              item["Type du fichier"] ?? item["Nom du fichier"],        // [10] nom du son global
+              undefined,                                                 // [11] File son global — à remplir par le service médias
+              item["Liste des stimuli"]                                  // [12] dico des stimuli individuels
             ]
           };
 
@@ -205,88 +218,15 @@ export class LoadZipService {
     });
   }
 
-  // ─── IDB files rebuild ──────────────────────────────────────────────────────
-
-  private async rebuildFilesFromIDB(listScreens: screenTypeModel[], evalName: string): Promise<void> {
-    for (const screen of listScreens) {
-
-      if (screen.type === instructionScreenConstModel) {
-        const fileRef: string = screen.values[4];
-        if (fileRef && fileRef !== '') {
-          const fileName = this.extractFileName(fileRef);
-          for (const folder of ['images', 'audio', 'videos']) {
-            try {
-              const evalFile = await this.idbService.getFile(`${evalName}/${folder}/${fileName}`);
-              screen.values[5] = evalFile.file;
-              break;
-            } catch { /* essaie le dossier suivant */ }
-          }
-        }
-      }
-
-      if (screen.type === stimuliScreenConstModel) {
-        const soundRef: string = screen.values[10];
-        if (soundRef && soundRef !== '') {
-          try {
-            const evalFile = await this.idbService.getFile(`${evalName}/audio/${this.extractFileName(soundRef)}`);
-            screen.values[11] = evalFile.file;
-          } catch {
-            console.warn('Son stimuli introuvable en IDB :', soundRef);
-          }
-        }
-
-        const stimuliList = screen.values[12];
-        for (const key in stimuliList) {
-          const cell = stimuliList[key];
-
-          // imageLink (nouveau) ou imageName (ancien)
-          const imageRef: string = cell.imageLink ?? cell.imageName ?? '';
-          if (imageRef !== '') {
-            try {
-              const evalFile = await this.idbService.getFile(`${evalName}/images/${this.extractFileName(imageRef)}`);
-              cell.imageFile = evalFile.file;
-            } catch {
-              console.warn('Image introuvable en IDB pour la case', key, ':', imageRef);
-            }
-          }
-
-          // soundLink (nouveau) ou soundName (ancien)
-          const soundRef: string = cell.soundLink ?? cell.soundName ?? '';
-          if (soundRef !== '') {
-            try {
-              const evalFile = await this.idbService.getFile(`${evalName}/audio/${this.extractFileName(soundRef)}`);
-              cell.soundFile = evalFile.file;
-            } catch {
-              console.warn('Son introuvable en IDB pour la case', key, ':', soundRef);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // ─── Helpers ────────────────────────────────────────────────────────────────
-
-  private extractFileName(ref: string): string {
-    return ref.includes('/') ? ref.split('/').pop()! : ref;
-  }
-
-  private getFileType(path: string): 'image' | 'sound' | 'video' {
-    if (path.includes('/images/')) return 'image';
-    if (path.includes('/audio/'))  return 'sound';
-    if (path.includes('/videos/')) return 'video';
-    return 'image';
-  }
-
-  private getMimeType(path: string): string {
-    if (path.includes('/images/')) return 'image/png';
-    if (path.includes('/videos/')) return 'video/mp4';
-    if (path.includes('/audio/'))  return 'audio/mpeg';
-    return 'application/octet-stream';
-  }
-
+  /**
+   * Importe un ZIP et sauvegarde le résultat dans un slot nommé (1, 2 ou 3)
+   * en plus du slot de travail (slot 0) mis à jour par loadZip.
+   *
+   * @param zipFile   Fichier ZIP à importer
+   * @param slotIndex Index du slot de destination (1, 2 ou 3)
+   */
   async loadZipToSlot(zipFile: File, slotIndex: FormatTypeConfig): Promise<void> {
-    await this.loadZip(zipFile);
-    this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
+    await this.loadZip(zipFile); // peuple le slot 0
+    this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto); // copie vers le slot cible
   }
 }

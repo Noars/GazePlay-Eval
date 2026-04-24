@@ -27,20 +27,28 @@ export class LoadSaveComponent implements OnInit {
     private overwriteGuard: OverwriteGuardService
   ) {}
 
+  /**
+   * Initialise les slots dans l'interface de load
+   */
   ngOnInit(): void {
     this.slots = [1, 2, 3].map(i => ({
       index: i,
-      data: this.loadService.getSlot(i as FormatTypeConfig)
+      data: this.loadService.getSlot(i as FormatTypeConfig) // Recup data du LocalStorage
     }));
   }
 
+  /**
+   * Charge la sauvegarde d'un slot nommé (1, 2 ou 3) dans le slot de travail (slot 0).
+   * Avertit l'utilisateur si le slot 0 contient une sauvegarde différente qui serait écrasée.
+   * @param slotIndex index du slot à charger : 1, 2 ou 3
+   */
   async loadSlot(slotIndex: number): Promise<void> {
     const save = this.loadService.getSlot(slotIndex as FormatTypeConfig);
     if (!save) return;
 
     if (!await this.overwriteGuard.check(0, save.nomEval)) return;
 
-    const step = save.step >= 0 ? save.step : 3;
+    const step = save.step >= 0 ? save.step : 3; // fallback sur create-eval si le step n'a pas été enregistré
     this.saveService.dataAuto = {
       nomEval: save.nomEval,
       format: save.format,
@@ -55,10 +63,18 @@ export class LoadSaveComponent implements OnInit {
     this.autoSaveService.tryResume();
   }
 
+  /**
+   * Formate une date ISO en date lisible au format français (jj/mm/aaaa).
+   * @param dateStr date au format ISO 8601
+   * @returns date formatée en français
+   */
   formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString('fr-FR');
   }
 
+  /**
+   * Redirige vers la page de gestion des sauvegardes.
+   */
   goBack(): void {
     this.router.navigate(['/sauvegarde']);
   }
