@@ -43,7 +43,7 @@ export class IndexedDBService {
         id,
         file,
         type,
-        uploadedAt: new Date()
+        lastEdit: new Date()
       };
 
       const check = store.get(id);
@@ -106,7 +106,7 @@ export class IndexedDBService {
         id,
         file,
         type,
-        uploadedAt: new Date()
+        lastEdit: new Date()
       };
 
       const request = store.put(entry);
