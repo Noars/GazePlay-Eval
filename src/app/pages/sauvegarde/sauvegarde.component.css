@@ -10,7 +10,7 @@
 
 /* Slot vide */
 .slot-empty {
-  border: 2px dashed #cbd5e1 !important;
+  border: 2px dashed var(--popup-input-border) !important;
   opacity: 0.6;
   transition: opacity 0.2s;
 }
@@ -21,19 +21,19 @@
 
 .slot-empty-icon {
   font-size: 2.5rem;
-  color: #94a3b8;
+  color: var(--popup-input-icon);
 }
 
 /* Slot rempli */
 .slot-filled {
-  border: 2px solid #1e3a8a !important;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.12) !important;
+  border: 2px solid var(--popup-accent) !important;
+  box-shadow: var(--slot-shadow) !important;
   transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
 }
 
 .slot-filled:hover {
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.2) !important;
+  box-shadow: var(--slot-shadow-hover) !important;
   transform: translateY(-3px);
 }
 
@@ -43,7 +43,7 @@
 
 .slot-filled-icon {
   font-size: 2.5rem;
-  color: #1e3a8a;
+  color: var(--popup-accent-text);
 }
 
 /* Boutons slot */
@@ -79,13 +79,12 @@
   padding: 12px 28px;
   font-size: 1rem;
 }
+
 .slot-card-selected {
-  border: 2px solid #1e3a8a !important;
-  background-color: #dbeafe !important;
+  border: 2px solid var(--popup-accent) !important;
+  background-color: var(--slot-selected-bg) !important;
 }
 
 .slot-delete-placeholder {
-  height: 38px; /* même hauteur que le bouton */
+  height: 38px;
 }
-
-
