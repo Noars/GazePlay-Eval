@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
+
 import {FormsModule} from '@angular/forms';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {Router} from '@angular/router';
@@ -9,7 +9,7 @@ import {saveModelDefault} from '../../shared/saveModel';
 
 @Component({
   selector: 'app-info-participant',
-  imports: [CommonModule, FormsModule, DragDropModule, MatTooltip],
+  imports: [FormsModule, DragDropModule, MatTooltip],
   templateUrl: './info-participant.component.html',
   standalone: true,
   styleUrl: './info-participant.component.css'

@@ -2,12 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
-import {CommonModule} from '@angular/common';
+
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, NavbarComponent, ProgressBarComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
