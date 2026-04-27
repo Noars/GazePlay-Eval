@@ -85,6 +85,10 @@
   background-color: var(--slot-selected-bg) !important;
 }
 
+.slot-hover-save {
+  background-color: rgba(25, 135, 84, 0.85); /* vert succès */
+}
+
 .slot-delete-placeholder {
   height: 38px;
 }

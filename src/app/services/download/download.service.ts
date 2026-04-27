@@ -204,9 +204,13 @@ export class DownloadService {
     jsonData.push(stimuliData);
   }
 
+  /**
+   * Génère un fichier ZIP à partir d'une évaluation sauvegardée.
+   * @param saveData l'évaluation à convertir en fichier ZIP.
+   */
   async generateSlotZip(saveData: saveModel): Promise<void> {
     try {
-      console.log('[generateSlotZip] saveData:', saveData);
+      // console.log('[generateSlotZip] saveData:', saveData);
       const zip = new JSZip();
       const evalName = saveData.nomEval || 'GazePlayEvalDefaultName';
       const jsonData: any[] = [];
@@ -228,15 +232,19 @@ export class DownloadService {
       zip.file(evalName + '/evalData.json', JSON.stringify(jsonData, null, 2));
       zip.file(evalName + '/evalInfo.json', JSON.stringify(this.getInfoEvalFromSlot(saveData), null, 2));
 
-      console.log('[generateSlotZip] generating zip for:', evalName);
+      // console.log('[generateSlotZip] generating zip for:', evalName);
       const content = await zip.generateAsync({type: 'blob'});
-      console.log('[generateSlotZip] calling saveAs');
+      // console.log('[generateSlotZip] calling saveAs');
       saveAs(content, evalName + '-gazeplayEval.zip');
     } catch (err) {
       console.error('[generateSlotZip] erreur:', err);
     }
   }
 
+  /**
+   * Créé l'objet JSON correspondant à `evalInfo.json` à partir d'une sauvegarde dans un slot.
+   * @param saveData l'évaluation dont les données seront extraites.
+   */
   getInfoEvalFromSlot(saveData: saveModel) {
     return {
       "Nom de l'évaluation": saveData.nomEval,
@@ -245,6 +253,12 @@ export class DownloadService {
     };
   }
 
+  /**
+   * Génère les données JSON d'un écran instruction pour l'export en ZIP d'un slot.
+   *
+   * @param evalData - L'écran instruction à transformer.
+   * @param jsonData - Le JSON dans lequel ajouter le résultat.
+   */
   generateInstructionScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
     const values = structuredClone(evalData.values);
     values.splice(5, 1);
@@ -255,6 +269,12 @@ export class DownloadService {
     jsonData.push({Type: instructionScreenConstModel, ...result});
   }
 
+  /**
+   * Génère les données JSON d'un écran de stimuli pour l'export en ZIP d'un slot.
+   *
+   * @param evalData - L'écran instruction à transformer.
+   * @param jsonData - Le JSON dans lequel ajouter le résultat.
+   */
   generateStimuliScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
     const values = structuredClone(evalData.values);
     const stimuliList = values[12];
