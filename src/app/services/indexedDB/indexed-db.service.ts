@@ -9,10 +9,11 @@ export class IndexedDBService {
   private storeName = 'evalFiles';
   private dbVersion = 1
   private db!: IDBDatabase;
-  private dbReady: Promise<void>;
+  readonly dbReady: Promise<void>;
   constructor() {
     this.dbReady = this.initDB();
   }
+
   initDB(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
@@ -43,7 +44,7 @@ export class IndexedDBService {
         id,
         file,
         type,
-        uploadedAt: new Date()
+        lastEdit: new Date()
       };
 
       const check = store.get(id);
@@ -106,7 +107,7 @@ export class IndexedDBService {
         id,
         file,
         type,
-        uploadedAt: new Date()
+        lastEdit: new Date()
       };
 
       const request = store.put(entry);
@@ -135,6 +136,31 @@ export class IndexedDBService {
       const req   = store.clear();
       req.onsuccess = () => resolve();
       req.onerror   = (e) => reject(req.error);
+    });
+  }
+
+  async changeID(oldID: string, newID: string): Promise<void> {
+    await this.dbReady;
+
+    let evalFile = await this.getFile(oldID);
+    await this.deleteFile(oldID);
+    await this.addFile(newID, evalFile.file, evalFile.type);
+  }
+
+  async getFilesByProject(projectName: string): Promise<EvalFile[]> {
+    await this.dbReady;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.storeName, 'readonly');
+      const store = transaction.objectStore(this.storeName);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const allFiles = request.result as EvalFile[];
+        const filtered = allFiles.filter(f => f.id.startsWith(`${projectName}/`));
+        resolve(filtered);
+      };
+      request.onerror = () => reject(request.error);
     });
   }
 }

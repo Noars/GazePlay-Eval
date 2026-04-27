@@ -80,10 +80,11 @@
 }
 
 .btn-overwrite {
-  background-color: #ea580c;
+  background-color: #d81111;
   color: white;
   border: none;
   border-radius: 8px;
+  min-width: 250px;
   padding: 10px 20px;
   font-size: 0.95rem;
   transition: background-color 0.2s, transform 0.1s;
@@ -91,6 +92,6 @@
 }
 
 .btn-overwrite:hover {
-  background-color: #c2410c;
+  background-color: #b10202;
   transform: translateY(-1px);
 }

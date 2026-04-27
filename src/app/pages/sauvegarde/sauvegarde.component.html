@@ -11,11 +11,32 @@
           <div class="col-md-4">
 
             @if (slot.data === null) {
-              <!-- Slot vide -->
-              <div class="card shadow-lg slot-empty slot-card d-flex align-items-center justify-content-center">
-                <i class="bi bi-folder2 slot-empty-icon"></i>
-                <span class="fst-italic text-muted fs-5">Vide</span>
-              </div>
+              @let slotAuto = getSlotAuto();
+              @if (slotAuto != null) {
+                <!-- Slot vide + avec saveAuto -->
+                <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
+                  <i class="bi bi-folder2 slot-empty-icon"></i>
+                  <span class="fst-italic text-muted fs-5">Emplacement disponible</span>
+                </div>
+                <div class="d-flex justify-content-center slot-actions">
+                  <button class="btn btn-success fw-semibold w-75"
+                          (click)="saveToSlot(slot, slotAuto)">
+                    <i class="bi bi-floppy me-1"></i> Sauvegarder
+                  </button>
+                </div>
+
+              } @else {
+                <!-- Slot vide + sans saveAuto -->
+                <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
+                  <i class="bi bi-folder2 slot-empty-icon"></i>
+                  <span class="fst-italic text-muted fs-5">Vide</span>
+                </div>
+                <div class="d-flex justify-content-center slot-actions">
+                  <button class="btn btn-success fw-semibold w-75" disabled>
+                    <i class="bi bi-floppy me-1"></i> Sauvegarder
+                  </button>
+                </div>
+              }
 
             } @else {
               <!-- Slot rempli -->
@@ -29,53 +50,56 @@
                 <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
                 <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
               </div>
-            }
 
-            <!-- Actions : modifier + télécharger + supprimer (visibles seulement si le slot est sélectionné) -->
-            @if (slot.data !== null && selectedSlot === slot.index) {
-              <div class="d-flex justify-content-center slot-actions">
-                <button class="btn btn-primary fw-semibold"
-                        matTooltip="Modifier"
-                        matTooltipClass="custom-tooltip-class"
-                        matTooltipPosition="above"
-                        (click)="editSlot(slot.index)">
-                  <i class="bi bi-pen"></i>
-                </button>
-                <button class="btn btn-primary fw-semibold"
-                        matTooltip="Télécharger"
-                        matTooltipClass="custom-tooltip-class"
-                        matTooltipPosition="above"
-                        (click)="downloadSlot(slot)">
-                  <i class="bi bi-download"></i>
-                </button>
-              </div>
-              <div class="d-flex justify-content-center slot-delete">
-                <button class="btn btn-danger fw-semibold w-75"
-                        (click)="openDeletePopup(slot)">
-                  <i class="bi bi-trash me-1"></i> Supprimer
-                </button>
-              </div>
-            } @else {
-              <div class="slot-actions-placeholder"></div>
-              <div class="slot-delete-placeholder"></div>
+              @if (selectedSlot === slot.index) {
+                <div class="d-flex justify-content-center slot-actions gap-2">
+                  <button class="btn btn-warning fw-semibold"
+                          matTooltip="Écraser avec l'évaluation en cours"
+                          matTooltipClass="custom-tooltip-class"
+                          matTooltipPosition="above"
+                          (click)="saveToSlot(slot)">
+                    <i class="bi bi-floppy"></i>
+                  </button>
+                  <button class="btn btn-primary fw-semibold"
+                          matTooltip="Modifier"
+                          matTooltipClass="custom-tooltip-class"
+                          matTooltipPosition="above"
+                          (click)="editSlot(slot.index)">
+                    <i class="bi bi-pen"></i>
+                  </button>
+                  <button class="btn btn-primary fw-semibold"
+                          matTooltip="Télécharger"
+                          matTooltipClass="custom-tooltip-class"
+                          matTooltipPosition="above"
+                          (click)="downloadSlot(slot)">
+                    <i class="bi bi-download"></i>
+                  </button>
+                </div>
+                <div class="d-flex justify-content-center slot-delete">
+                  <button class="btn btn-danger fw-semibold w-75"
+                          (click)="openDeletePopup(slot)">
+                    <i class="bi bi-trash me-1"></i> Supprimer
+                  </button>
+                </div>
+              } @else {
+                <div class="slot-actions-placeholder"></div>
+                <div class="slot-delete-placeholder"></div>
+              }
             }
 
           </div>
         }
       </div>
 
-      <!-- Boutons actions -->
-      <div class="d-flex align-items-start justify-content-center gap-4 flex-wrap bottom-actions">
-        <div class="d-flex flex-column align-items-center gap-3">
-          <div class="d-flex gap-3">
-            <button class="btn btn-success fw-semibold px-4" (click)="newEval()">
-              <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
-            </button>
-          </div>
-          <button class="btn btn-primary fw-semibold px-4" (click)="saveLastEval()">
-            <i class="bi bi-floppy me-2"></i>Sauvegarder la dernière évaluation
-          </button>
-        </div>
+      <!-- Boutons bas de page -->
+      <div class="d-flex justify-content-between w-100 mt-5 pt-3"
+           style="border-top: 1px solid var(--bs-border-color);">
+        <button class="btn btn-primary fw-semibold px-4" (click)="router.navigate(['/home'])">
+          <i class="bi bi-arrow-left me-2"></i>Retour
+        </button>
+        <button class="btn btn-success fw-semibold px-4" (click)="newEval()">
+          <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
+        </button>
       </div>
 
     </div>
