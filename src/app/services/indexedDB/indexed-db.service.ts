@@ -61,6 +61,7 @@ export class IndexedDBService {
       check.onerror = () => reject(check.error);
     });
   }
+
   async getFile(id:string): Promise<EvalFile> {
     await this.dbReady;
 
@@ -78,6 +79,7 @@ export class IndexedDBService {
       req.onerror = (e) => reject(req.error);
     });
   }
+
   async getAllFiles(): Promise<EvalFile[]> {
     await this.dbReady;
 
@@ -96,6 +98,7 @@ export class IndexedDBService {
       request.onerror = () => reject(request.error);
     });
   }
+
   async updateFile(id: string, file: File | Blob, type: 'image' | 'sound' | 'video'): Promise<void> {
     await this.dbReady;
 
@@ -115,6 +118,7 @@ export class IndexedDBService {
       request.onerror = () => reject(request.error);
     });
   }
+
   async deleteFile(id: string): Promise<void> {
     await this.dbReady;
 
@@ -127,6 +131,7 @@ export class IndexedDBService {
       request.onerror = () => reject(request.error);
     });
   }
+
   async deleteAll(): Promise<void> {
     await this.dbReady;
 
