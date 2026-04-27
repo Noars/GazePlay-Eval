@@ -22,13 +22,14 @@ export class SauvegardeComponent implements OnInit {
 
   slots: { index: FormatTypeConfig; data: saveModel | null }[] = [];
   selectedSlot: FormatTypeConfig | null = null;
+  hasUnsavedEval: boolean = false;
 
   constructor(
     private dialog: MatDialog,
     private loadService: LoadService,
-    private saveService: SaveService,
+    public saveService: SaveService,
     private autoSaveService: AutoSaveService,
-    private router: Router,
+    public router: Router,
     private downloadService: DownloadService,
     private overwriteGuard: OverwriteGuardService
   ) {}
@@ -38,6 +39,9 @@ export class SauvegardeComponent implements OnInit {
       index: i,
       data: this.loadService.getSlot(i) // récupération des données dans les différents slots
     }));
+
+    const autoSave = this.loadService.getSlot(0);
+    this.hasUnsavedEval = autoSave !== null && autoSave.nomEval !== '';
   }
 
   /**
@@ -72,6 +76,26 @@ export class SauvegardeComponent implements OnInit {
     };
     this.saveService.saveToSlot(0, this.saveService.dataAuto); // Sauvegarde dans le slot dynamique
     this.autoSaveService.tryResume();
+  }
+
+  async saveToSlot(
+    slot: { index: FormatTypeConfig; data: saveModel | null },
+    dataToSave?: Omit<saveModel, 'createdAt' | 'version'>
+  ): Promise<void> {
+    if (slot.data !== null) {
+      if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
+    }
+
+    // ✅ lit depuis le slot 0 (saveAuto) si pas de données passées
+    const autoSave = this.loadService.getSlot(0);
+    const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
+
+    this.saveService.saveToSlot(slot.index, data);
+    this.ngOnInit();
+  }
+
+  getSlotAuto() {
+    return this.loadService.getSlot(0);
   }
 
   /**
