@@ -13,7 +13,7 @@
     <!-- Alerte info -->
     <div class="popup-alert-info">
       <i class="bi bi-info-circle-fill alert-icon-info"></i>
-      <span>Sélectionnez un fichier <strong>.zip</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
+      <span>Sélectionnez un fichier <strong>.gpSave</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
     </div>
 
     <!-- Choix du mode -->
@@ -51,15 +51,15 @@
     <!-- Sélection fichier zip -->
     <div class="section-block">
       <label class="section-label">
-        <i class="bi bi-file-earmark-zip me-2"></i>
+        <i class="bi bi-file-earmark me-2"></i>
         Fichier à importer
       </label>
       <div class="file-input-wrapper" (click)="fileInput.click()">
         <i class="bi bi-cloud-upload file-input-icon"></i>
         <span class="file-input-text">
-          {{ zipFileName !== '' ? zipFileName : 'Cliquez pour sélectionner un fichier .zip' }}
+          {{ zipFileName !== '' ? zipFileName : 'Cliquez pour sélectionner un fichier .gpSave' }}
         </span>
-        <input #fileInput type="file" accept=".zip" hidden (change)="onZipSelected($event)">
+        <input #fileInput type="file" accept=".gpSave,.zip" hidden (change)="onZipSelected($event)">
       </div>
     </div>
 

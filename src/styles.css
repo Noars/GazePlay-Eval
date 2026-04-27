@@ -141,3 +141,13 @@ body {
   --slot-shadow-hover:         0 8px 24px rgba(59, 130, 246, 0.35);
   --slot-selected-bg:          rgba(59, 130, 246, 0.15);
 }
+.custom-tooltip-class {
+  font-size: 0.85rem;
+  background-color: #1e3a8a !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  max-width: 280px !important;
+  line-height: 1.5 !important;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2) !important;
+}

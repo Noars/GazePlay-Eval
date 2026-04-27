@@ -69,7 +69,7 @@ export class DownloadService {
     zip.file(saveService.getEvalName() + '/evalInfo.json', JSON.stringify(this.getInfoEval(saveService), null, 2));
 
     zip.generateAsync({type: 'blob'}).then(content => {
-      saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
+      saveAs(content, saveService.getEvalName() + '-gazeplayEval.gpSave');
     });
   }
 
@@ -235,7 +235,7 @@ export class DownloadService {
       // console.log('[generateSlotZip] generating zip for:', evalName);
       const content = await zip.generateAsync({type: 'blob'});
       // console.log('[generateSlotZip] calling saveAs');
-      saveAs(content, evalName + '-gazeplayEval.zip');
+      saveAs(content, evalName + '-gazeplayEval.gpSave');
     } catch (err) {
       console.error('[generateSlotZip] erreur:', err);
     }
