@@ -190,6 +190,7 @@
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
                               <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                               <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
@@ -203,6 +204,7 @@
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="videoFile" class="form-label flex-grow-1 me-2">Vidéo à afficher</label>
                               <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                               <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
@@ -229,6 +231,7 @@
                             <div class="d-flex align-items-center mb-2 gap-2">
                               <label for="soundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
                               <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                               <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                                 <i class="bi bi-eye"></i>
                               </button>
@@ -412,6 +415,7 @@
                         <div class="d-flex align-items-center mb-2 gap-2">
                           <label for="stimuliSoundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
                           <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
+                          <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
                           <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
                             <i class="bi bi-eye"></i>
                           </button>
