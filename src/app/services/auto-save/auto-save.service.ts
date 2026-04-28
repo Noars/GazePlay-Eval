@@ -41,7 +41,7 @@ export class AutoSaveService implements OnDestroy {
    *
    * @param targetUrl l'url de la page actuelle.
    */
-  private autoSave(targetUrl: string): void {
+  public autoSave(targetUrl: string): void {
     // Nettoyage de l'URL (on enlève le 1er '/')
     // Si jamais on a aussi des attributs dans l'URL, on ne garde que ce qu'il y a avant le '?'
     const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
