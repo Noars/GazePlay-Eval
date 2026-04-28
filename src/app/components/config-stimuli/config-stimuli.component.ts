@@ -1,4 +1,4 @@
-import {Component, ElementRef, Inject, Input, OnChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnChanges, ViewChild} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {stimuliScreenValues} from '../../shared/screenModel';
 import {CropImageComponent} from '../crop-image/crop-image.component';
@@ -14,83 +14,92 @@ import {MatDialog} from '@angular/material/dialog';
   standalone: true,
   styleUrl: './config-stimuli.component.css'
 })
-export class ConfigStimuliComponent implements OnChanges{
+export class ConfigStimuliComponent implements OnChanges {
 
   @Input() data!: {
-    cell: number,
-    screen: { [key:number]: stimuliScreenValues }
+    cell: number;
+    screen: { [key: number]: stimuliScreenValues };
+    rows: number;
+    cols: number;
   };
 
   @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
   @ViewChild('fileInputSound') fileInputSound!: ElementRef<HTMLInputElement>;
 
-  pageElement: HTMLElement | null = document.getElementById('configStimuli');
   isResizing = false;
-  previewImage: any = "";
-  previewSound: any = "";
+  previewImage: any = '';
+  previewSound: any = '';
 
-  constructor(private dialog: MatDialog){
-  }
+  constructor(private dialog: MatDialog) {}
 
   ngOnChanges() {
     this.checkCell();
   }
 
+  get totalCells(): number {
+    return this.data.rows * this.data.cols;
+  }
+
+  get allCells(): number[] {
+    return Array.from({ length: this.totalCells }, (_, i) => i);
+  }
+
   checkCell() {
     const cellData = this.data.screen[this.data.cell];
+    this.previewImage = cellData?.imageFile ? URL.createObjectURL(cellData.imageFile) : '';
+    this.previewSound = cellData?.soundFile ? URL.createObjectURL(cellData.soundFile) : '';
 
-    if (cellData.imageFile) {
-      this.previewImage = URL.createObjectURL(cellData.imageFile);
-    }else {
-      this.previewImage = '';
-    }
+    if (this.fileInputImage) this.fileInputImage.nativeElement.value = '';
+    if (this.fileInputSound) this.fileInputSound.nativeElement.value = '';
+  }
 
-    if (cellData.soundFile){
-      this.previewSound = URL.createObjectURL(cellData.soundFile);
-    }else {
-      this.previewSound = '';
-    }
-
-    if (this.fileInputImage && this.fileInputSound) {
-      this.fileInputImage.nativeElement.value = '';
-      this.fileInputSound.nativeElement.value = '';
+  navigate(direction: number) {
+    const next = this.data.cell + direction;
+    if (next >= 0 && next < this.totalCells) {
+      this.data.cell = next;
+      this.checkCell();
     }
   }
 
-  deleteCell(){
+  navigateTo(index: number) {
+    if (index >= 0 && index < this.totalCells) {
+      this.data.cell = index;
+      this.checkCell();
+    }
+  }
+
+  deleteCell() {
     this.data.screen[this.data.cell] = {
-      imageName: "",
+      imageName: '',
       imageFile: undefined,
-      soundName: "",
+      soundName: '',
       soundFile: undefined,
       goodAnswer: false,
-    }
+    };
     this.checkCell();
   }
 
-  getImageFile(event: Event){
+  getImageFile(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0){
+    if (input.files?.length) {
       this.data.screen[this.data.cell].imageName = input.files[0].name;
       this.data.screen[this.data.cell].imageFile = input.files[0];
-      this.previewImage =  URL.createObjectURL(input.files[0]);
+      this.previewImage = URL.createObjectURL(input.files[0]);
     }
   }
 
-  getSoundFile(event: Event){
+  getSoundFile(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0){
+    if (input.files?.length) {
       this.data.screen[this.data.cell].soundName = input.files[0].name;
       this.data.screen[this.data.cell].soundFile = input.files[0];
-      this.previewSound =  URL.createObjectURL(input.files[0]);
+      this.previewSound = URL.createObjectURL(input.files[0]);
     }
   }
 
-  cropImage(){
+  cropImage() {
     const dialogRef = this.dialog.open(CropImageComponent, {
-      data: {
-        image: this.data.screen[this.data.cell].imageFile
-      },
+      data: { image: this.data.screen[this.data.cell].imageFile },
       panelClass: 'crop-image',
       disableClose: true
     });
@@ -98,32 +107,29 @@ export class ConfigStimuliComponent implements OnChanges{
     dialogRef.afterClosed().subscribe((result: File | null) => {
       if (result) {
         this.data.screen[this.data.cell].imageFile = result;
-        this.previewImage =  URL.createObjectURL(result);
+        this.previewImage = URL.createObjectURL(result);
       }
     });
   }
 
-  startResize(event: MouseEvent){
+  startResize(event: MouseEvent) {
     this.isResizing = true;
-
+    event.preventDefault();
     document.addEventListener('mousemove', this.resize);
     document.addEventListener('mouseup', this.stopResize);
   }
 
   resize = (event: MouseEvent) => {
     if (!this.isResizing) return;
-
-    const newWidth = event.clientX;
     const el = document.getElementById('configStimuli');
-
     if (el) {
-      el.style.setProperty('--bs-offcanvas-width', `${newWidth}px`);
+      const newHeight = Math.max(200, Math.min(event.clientY, window.innerHeight - 60));
+      el.style.setProperty('--bs-offcanvas-height', `${newHeight}px`);
     }
   };
 
   stopResize = () => {
     this.isResizing = false;
-
     document.removeEventListener('mousemove', this.resize);
     document.removeEventListener('mouseup', this.stopResize);
   };

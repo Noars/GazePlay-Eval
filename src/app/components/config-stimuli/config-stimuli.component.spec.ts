@@ -14,6 +14,7 @@ describe('ConfigStimuliComponent', () => {
 
     fixture = TestBed.createComponent(ConfigStimuliComponent);
     component = fixture.componentInstance;
+    component.data = { cell: 0, screen: { 0: { imageName: '', imageFile: undefined, soundName: '', soundFile: undefined, goodAnswer: false } }, rows: 1, cols: 1 };
     fixture.detectChanges();
   });
 

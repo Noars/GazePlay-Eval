@@ -49,8 +49,10 @@ export class ModifyScreenComponent implements OnInit{
   showWarningMessage: boolean = false;
 
   dataStimuli!: {
-    cell: number,
-    screen: any
+    cell: number;
+    screen: any;
+    rows: number;
+    cols: number;
   }
   stimuliOffcanvasReady: boolean = false;
 
@@ -229,7 +231,12 @@ export class ModifyScreenComponent implements OnInit{
 
   openStimuliData(cellNumber: number) {
     const listScreen = this.screenToModify.values[12];
-    this.dataStimuli = {cell: cellNumber, screen: listScreen};
+    this.dataStimuli = {
+      cell: cellNumber,
+      screen: listScreen,
+      rows: this.screenToModify.values[0],
+      cols: this.screenToModify.values[1]
+    };
     this.stimuliOffcanvasReady = true;
     setTimeout(() => {
       this.openOffcanvasStimuli();
