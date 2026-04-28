@@ -153,48 +153,74 @@
                     </select>
                   </div>
                 </div>
+
                 @if (typeFile === 'Image') {
                   <div class="param-row">
                     <span class="param-label">Image à afficher</span>
-                    <div class="param-control">
-                      <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
-                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
-                      </button>
+                    <div class="param-control flex-column align-items-start">
+                      <div class="d-flex align-items-center gap-2 w-100">
+                        <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      @if (screenToModify.values[4]) {
+                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      }
                     </div>
                   </div>
                 } @else if (typeFile === 'Video') {
                   <div class="param-row">
                     <span class="param-label">Vidéo à afficher</span>
-                    <div class="param-control">
-                      <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
-                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
-                      </button>
+                    <div class="param-control flex-column align-items-start">
+                      <div class="d-flex align-items-center gap-2 w-100">
+                        <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      @if (screenToModify.values[4]) {
+                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      }
                     </div>
                   </div>
                 } @else if (typeFile === 'Texte') {
                   <div class="param-row">
                     <span class="param-label">Texte à afficher</span>
-                    <div class="param-control">
-                      <textarea class="form-control w-auto" rows="1" style="resize:none" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
+                    <div class="param-control flex-column align-items-start">
+                      <textarea class="form-control w-auto" rows="1" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
                       <button class="btn btn-primary btn-sm d-flex align-items-center" (click)="playText()" [disabled]="textToRead == ''">
-                        <i class="bi bi-play-fill"></i>
+                        <i class="bi bi-play-btn"></i>
                       </button>
                     </div>
                   </div>
                 } @else if (typeFile === 'Son') {
                   <div class="param-row">
                     <span class="param-label">Son à jouer</span>
-                    <div class="param-control">
-                      <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
-                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
-                      </button>
+                    <div class="param-control flex-column align-items-start">
+                      <div class="d-flex align-items-center gap-2 w-100">
+                        <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      @if (screenToModify.values[4]) {
+                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      }
                     </div>
+                  </div>
+                }
+
+                <!-- Preview des fichiers importés, initialement dans le modal -->
+                @if (haveInstructionFile && typeFile !== 'Texte') {
+                  <div class="d-flex justify-content-center align-items-center mt-4 mb-2">
+                    @if (typeFile === 'Image') {
+                      <img [src]="instructionFile" alt="Preview" class="img-fluid rounded shadow" style="max-height: 200px; object-fit: contain;">
+                    } @else if (typeFile === 'Video') {
+                      <video [src]="instructionFile" controls class="rounded shadow" style="max-height: 200px; max-width: 100%;"></video>
+                    } @else if (typeFile === 'Son') {
+                      <audio controls [src]="instructionFile"></audio>
+                    }
                   </div>
                 }
               }
