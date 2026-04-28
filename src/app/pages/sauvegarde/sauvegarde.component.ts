@@ -12,6 +12,7 @@ import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
+import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 
 @Component({
   selector: 'app-sauvegarde',
@@ -33,7 +34,8 @@ export class SauvegardeComponent implements OnInit {
     private flashMessageService: FlashService,
     public router: Router,
     private downloadService: DownloadService,
-    private overwriteGuard: OverwriteGuardService
+    private overwriteGuard: OverwriteGuardService,
+    private indexedDBService: IndexedDBService
   ) {}
 
   ngOnInit(): void {
@@ -99,12 +101,13 @@ export class SauvegardeComponent implements OnInit {
       if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
     }
 
-    // ✅ lit depuis le slot 0 (saveAuto) si pas de données passées
+    // on lit depuis le slot dynamique si pas de données passées
     const autoSave = this.loadService.getSlot(0);
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
     this.saveService.saveToSlot(slot.index, data);
     this.saveService.clearSlot(0); // On clear le slot dynamique
+    this.flashMessageService.show('success', 'Votre évaluation a été sauvegardée avec succès.')
     this.ngOnInit();
   }
 
@@ -120,6 +123,7 @@ export class SauvegardeComponent implements OnInit {
     console.log('[downloadSlot] slot:', slot);
     if (!slot.data) return; // Si le slot est vide
     this.downloadService.generateSlotZip(slot.data);
+    this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
   }
 
   /**
@@ -134,12 +138,17 @@ export class SauvegardeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'delete') {
-        this.saveService.clearSlot(slot.index); // suppresion des données dans le slot de l'index
+        const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? `Slot ${slot.index}`;
+        this.saveService.clearSlot(slot.index); // suppression des données dans le slot de l'index
+        this.indexedDBService.deleteFileByProject(slotName);
         this.ngOnInit(); // rafraîchit les slots
         this.selectedSlot = null; // le slot est désélectionné.
+        this.flashMessageService.show('success', 'L\'évaluation a été supprimée avec succès.');
       }
       if (result === 'download' && slot.data) {
         this.downloadService.generateSlotZip(slot.data);
+        this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
+
       }
     });
   }
