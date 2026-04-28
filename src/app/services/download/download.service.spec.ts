@@ -59,6 +59,6 @@ describe('DownloadService', () => {
 
     // Génération et Téléchargement
     expect(JSZip.prototype.generateAsync).toHaveBeenCalled();
-    expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'gazeplayEval.zip');
+    expect(FileSaver.saveAs).toHaveBeenCalledWith(jasmine.any(Blob), 'gazeplayEval.gpSave');
   });
 });

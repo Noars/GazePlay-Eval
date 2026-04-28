@@ -1,480 +1,411 @@
-<div class="container mt-1">
-  <div class="row">
-    <div class="col">
-      <div class="card shadow-lg">
-        <div class="card-header bg-secondary text-center text-white fw-semibold">
-          Modification de l’écran -> {{screenToModify.name}}
-        </div>
-        <div class="card-body fw-semibold text-center">
-          <div class="mb-4 d-flex align-items-center justify-content-center">
-            <label for="typeSelect" class="form-label me-3 mb-0 fw-semibold">Type d’écran :</label>
-            <select id="typeSelect" class="form-select w-auto" [(ngModel)]="screenToModify.type" (ngModelChange)="changeTypeScreen($event)">
+<div class="d-flex justify-content-center p-4">
+  <div style="width:100%;max-width:700px">
+
+    <div class="card">
+      <div class="card-header">
+        Modification de l'écran → {{screenToModify.name}}
+      </div>
+      <div class="card-body">
+
+        <div class="param-row">
+          <span class="param-label">Type d'écran</span>
+          <div class="param-control">
+            <select id="typeSelect" class="form-select" [(ngModel)]="screenToModify.type" (ngModelChange)="changeTypeScreen($event)">
               <option [value]="transitionScreenConstModel">Écran de transition</option>
               <option [value]="instructionScreenConstModel">Écran d'instruction</option>
               <option [value]="stimuliScreenConstModel">Écran de stimuli</option>
             </select>
           </div>
-          @if (screenToModify.type === transitionScreenConstModel) {
-            <div class="card shadow-lg mb-3">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                Informations écran transition
+        </div>
+
+        <!-- TRANSITION -->
+        @if (screenToModify.type === transitionScreenConstModel) {
+          <div class="card inner-card mt-3">
+            <div class="card-header inner-card-header">Informations écran transition</div>
+            <div class="inner-card-body">
+
+              <div class="param-section-title">Passage à l'écran suivant</div>
+              <div class="param-row">
+                <span class="param-label">Mettre un temps avant passage à l'écran suivant ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTY" [value]="true" [(ngModel)]="screenToModify.values[0]">
+                    <label class="form-check-label" for="timeNextScreenTY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTN" [value]="false" [(ngModel)]="screenToModify.values[0]">
+                    <label class="form-check-label" for="timeNextScreenTN">Non</label>
+                  </div>
+                </div>
               </div>
-              <div class="mt-4 px-3 mb-4 m-auto">
-                <ul class="custom-list">
-                  <li>
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTY" [value]="true" [(ngModel)]="screenToModify.values[0]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenTY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTN" [value]="false" [(ngModel)]="screenToModify.values[0]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenTN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  @if (screenToModify.values[0]) {
-                    <div class="arrow-container mt-2">
-                      <div class="arrow">
-                        <span></span>
-                      </div>
-                      <div class="d-flex align-items-center mb-2">
-                        <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                        <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="-1" [(ngModel)]="screenToModify.values[1]">
-                          <span class="input-group-text fw-semibold">secondes</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  <li class="mt-4">
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Mettre une croix de fixation ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="fixationCrossScreenY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="fixationCrossScreenN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  @if (screenToModify.values[2]) {
-                    <div class="arrow-container mt-2">
-                      <div class="arrow">
-                        <span></span>
-                      </div>
-                      <ul class="custom-list">
-                        <li>
-                          <div class="d-flex align-items-center mt-2">
-                            <span class="list-dash">-</span>
-                            <label class="form-label me-3 fw-semibold">Mettre un temps de fixation ?</label>
-                            <div>
-                              <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="screenToModify.values[3]">
-                                <label class="form-check-label fw-semibold" for="fixationTimeScreenY">Oui</label>
-                              </div>
-                              <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="screenToModify.values[3]">
-                                <label class="form-check-label fw-semibold" for="fixationTimeScreenN">Non</label>
-                              </div>
-                            </div>
-                          </div>
-                        </li>
-                        @if (screenToModify.values[3]) {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow">
-                              <span></span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                              <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                              <div class="input-group w-auto">
-                                <input type="number" class="form-control" min="-1" [(ngModel)]="screenToModify.values[4]">
-                                <span class="input-group-text fw-semibold">secondes</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                      </ul>
-                    </div>
-                  }
-                </ul>
-              </div>
-            </div>
-          } @else if (screenToModify.type === instructionScreenConstModel) {
-            <div class="card shadow-lg mb-3">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                Informations écran instruction
-              </div>
-              <div class="mt-4 px-3 mb-4 m-auto">
-                <ul class="custom-list">
-                  <li>
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Mettre un temps avant passage à l'écran suivant ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenI" id="timeNextScreenIY" [value]="true" [(ngModel)]="screenToModify.values[0]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenIY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenI" id="timeNextScreenIN" [value]="false" [(ngModel)]="screenToModify.values[0]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenIN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  @if (screenToModify.values[0]) {
-                    <div class="arrow-container mt-2">
-                      <div class="arrow">
-                        <span></span>
-                      </div>
-                      <div class="d-flex align-items-center mb-2">
-                        <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                        <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]">
-                          <span class="input-group-text fw-semibold">secondes</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  <li class="mt-4">
-                    <div class="d-flex align-items-center">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Ajouter un/une Image, Vidéo, Texte ou Son ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="addFileY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="addFile" id="addFileN" [value]="false" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="addFileN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  @if (screenToModify.values[2]) {
-                    <div class="arrow-container mt-2">
-                      <div class="arrow">
-                        <span></span>
-                      </div>
-                      <ul class="custom-list">
-                        <li>
-                          <div class="d-flex align-items-center mb-2">
-                            <span class="list-dash">-</span>
-                            <label class="form-label me-3 fw-semibold">Quel type d'élément voulez-vous choisir ?</label>
-                            <div>
-                              <select class="form-select" [(ngModel)]="screenToModify.values[3]" (ngModelChange)="changeTypeFile($event)">
-                                <option value="Image">Image</option>
-                                <option value="Video">Vidéo</option>
-                                <option value="Texte">Texte</option>
-                                <option value="Son">Son</option>
-                              </select>
-                            </div>
-                          </div>
-                        </li>
-                        @if (typeFile === 'Image') {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow">
-                              <span></span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                              <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-                              <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
-                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                                <i class="bi bi-eye"></i>
-                              </button>
-                            </div>
-                          </div>
-                        } @else if (typeFile === 'Video') {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow">
-                              <span></span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                              <label for="videoFile" class="form-label flex-grow-1 me-2">Vidéo à afficher</label>
-                              <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
-                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                                <i class="bi bi-eye"></i>
-                              </button>
-                            </div>
-                          </div>
-                        } @else if (typeFile === 'Texte') {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow">
-                              <span></span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                              <label class="form-label flex-grow-1 me-2">Texte à afficher</label>
-                              <textarea class="form-control w-auto" rows="1" style="resize: none;" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
-                              <button class="btn btn-primary d-flex align-items-center" (click)="playText()" [disabled]="textToRead == ''">
-                                <i class="bi bi-play-fill"></i>
-                              </button>
-                            </div>
-                          </div>
-                        } @else if (typeFile === 'Son') {
-                          <div class="arrow-container mt-2">
-                            <div class="arrow">
-                              <span></span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                              <label for="soundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
-                              <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
-                              <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
-                              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                                <i class="bi bi-eye"></i>
-                              </button>
-                            </div>
-                          </div>
-                        }
-                      </ul>
-                    </div>
-                  }
-                  <li class="mt-4">
-                    <div class="d-flex align-items-center">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Ajouter un bouton pour lancer l'évaluation ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonY" [value]="true" [(ngModel)]="screenToModify.values[6]">
-                          <label class="form-check-label fw-semibold" for="addStartButtonY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonN" [value]="false" [(ngModel)]="screenToModify.values[6]">
-                          <label class="form-check-label fw-semibold" for="addStartButtonN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  @if (screenToModify.values[6]) {
-                    <div class="arrow-container mt-2">
-                      <div class="arrow">
-                        <span></span>
-                      </div>
-                      <div class="d-flex align-items-center mb-2">
-                        <label class="form-label me-3 fw-semibold">Combien de temps de fixation?</label>
-                        <div class="input-group w-auto">
-                          <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[7]">
-                          <span class="input-group-text fw-semibold">secondes</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </ul>
-              </div>
-            </div>
-          } @else if (screenToModify.type === stimuliScreenConstModel) {
-            <div class="card shadow-lg mb-3">
-              <div class="card-header bg-secondary text-white fw-semibold">
-                Informations écran stimuli
-              </div>
-              <div class="mt-4 px-3 mb-4 m-auto">
-                <ul class="custom-list">
-                  <li>
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Combien de lignes ?</label>
-                      <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[0]" (change)="checkStimuliCells()">
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Combien de colonnes ?</label>
-                      <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[1]" (change)="checkStimuliCells()">
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Mettre un temps pour passage à l'écran suivant ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSY" [value]="true" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenSY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSN" [value]="false" [(ngModel)]="screenToModify.values[2]">
-                          <label class="form-check-label fw-semibold" for="timeNextScreenSN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-
-                    @if (screenToModify.values[2]) {
-                      <div class="arrow-container mt-2">
-                        <div class="arrow"><span></span></div>
-                        <div class="d-flex align-items-center mb-2">
-                          <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [(ngModel)]="screenToModify.values[3]">
-                            <span class="input-group-text fw-semibold">secondes</span>
-                          </div>
-                        </div>
-                      </div>
-                    }
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Temps de fixation ?</label>
-                      <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" max="9999" [(ngModel)]="screenToModify.values[4]">
-                      </div>
-                    </div>
-
-                    <ul class="custom-list">
-                      <li>
-                        <div class="d-flex align-items-center mb-2">
-                          <span class="list-dash">-</span>
-                          <label class="form-label me-3 fw-semibold">Combien de stimuli sélectionner ?</label>
-                          <div class="input-group w-auto">
-                            <input type="number" class="form-control" min="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
-                          </div>
-                        </div>
-                      </li>
-                      <div class="d-flex align-items-center mb-2">
-                        <div class="arrow">
-                          <span></span>
-                        </div>
-                        <label class="form-label me-3 fw-semibold">Pour quel choix de sélection ?</label>
-                        <div>
-                          <div class="form-check form-check-inline mb-0">
-                            <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
-                            <label class="form-check-label fw-semibold" for="choiceSelectionY">Tout</label>
-                          </div>
-                          <div class="form-check form-check-inline mb-0">
-                            <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionN" value="BonneReponse" [(ngModel)]="screenToModify.values[5]">
-                            <label class="form-check-label fw-semibold" for="choiceSelectionN">Uniquement les bonnes réponse</label>
-                          </div>
-                        </div>
-                      </div>
-                    </ul>
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Position des stimuli aléatoire ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
-                          <label class="form-check-label fw-semibold" for="randomStimuliY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
-                          <label class="form-check-label fw-semibold" for="randomStimuliN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Cacher les stimuli après sélection ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
-                          <label class="form-check-label fw-semibold" for="disableStimuliY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
-                          <label class="form-check-label fw-semibold" for="disableStimuliN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-2">
-                      <span class="list-dash">-</span>
-                      <label class="form-label me-3 fw-semibold">Jouer un son ?</label>
-                      <div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">
-                          <label class="form-check-label fw-semibold" for="playSoundStimuliY">Oui</label>
-                        </div>
-                        <div class="form-check form-check-inline mb-0">
-                          <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliN" [value]="false" [(ngModel)]="screenToModify.values[9]">
-                          <label class="form-check-label fw-semibold" for="playSoundStimuliN">Non</label>
-                        </div>
-                      </div>
-                    </div>
-
-                    @if (screenToModify.values[9]) {
-                      <div class="arrow-container mt-2">
-                        <div class="arrow">
-                          <span></span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2 gap-2">
-                          <label for="stimuliSoundFile" class="form-label flex-grow-1 me-2">Son à jouer</label>
-                          <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
-                          <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
-                          <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </li>
-
-                  <div class="wrapper">
-                    <div class="grid-container" [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'" [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
-                      @for (n of totalCells; track n; let i = $index) {
-                        <div [id]="i" class="cell" (click)="openStimuliData(i)">
-
-                          @if (screenToModify.values[12][i].goodAnswer === true) {
-                            <span class="cell-text icon valid">✓</span>
-                          } @else {
-                            <span class="cell-text icon invalid">✕</span>
-                          }
-
-                          @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
-                            <span class="cell-text">{{ i + 1 }}</span>
-                          }
-                          @if (screenToModify.values[12][i].imageName !== ""){
-                            <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
-                          }
-                          @if (screenToModify.values[12][i].soundName !== "") {
-                            <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
-                          }
-                        </div>
-                      }
+              @if (screenToModify.values[0]) {
+                <div class="param-row">
+                  <span class="param-label">Combien de temps ?</span>
+                  <div class="param-control">
+                    <div class="input-group w-auto">
+                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <span class="input-group-text">secondes</span>
                     </div>
                   </div>
+                </div>
+              }
 
-                </ul>
+              <div class="param-section-title">Croix de fixation</div>
+              <div class="param-row">
+                <span class="param-label">Mettre une croix de fixation ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="fixationCrossScreenY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="fixationCrossScreenN">Non</label>
+                  </div>
+                </div>
               </div>
+              @if (screenToModify.values[2]) {
+                <div class="param-row">
+                  <span class="param-label">Mettre un temps de fixation ?</span>
+                  <div class="param-control">
+                    <div class="form-check mb-0">
+                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="screenToModify.values[3]">
+                      <label class="form-check-label" for="fixationTimeScreenY">Oui</label>
+                    </div>
+                    <div class="form-check mb-0">
+                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="screenToModify.values[3]">
+                      <label class="form-check-label" for="fixationTimeScreenN">Non</label>
+                    </div>
+                  </div>
+                </div>
+                @if (screenToModify.values[3]) {
+                  <div class="param-row">
+                    <span class="param-label">Combien de temps ?</span>
+                    <div class="param-control">
+                      <div class="input-group w-auto">
+                        <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[4]">
+                        <span class="input-group-text">secondes</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+
             </div>
-          }
-        </div>
+          </div>
+        }
+
+        <!-- INSTRUCTION -->
+        @if (screenToModify.type === instructionScreenConstModel) {
+          <div class="card inner-card mt-3">
+            <div class="card-header inner-card-header">Informations écran instruction</div>
+            <div class="inner-card-body">
+
+              <div class="param-section-title">Passage à l'écran suivant</div>
+              <div class="param-row">
+                <span class="param-label">Mettre un temps avant passage à l'écran suivant ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenI" id="timeNextScreenIY" [value]="true" [(ngModel)]="screenToModify.values[0]">
+                    <label class="form-check-label" for="timeNextScreenIY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenI" id="timeNextScreenIN" [value]="false" [(ngModel)]="screenToModify.values[0]">
+                    <label class="form-check-label" for="timeNextScreenIN">Non</label>
+                  </div>
+                </div>
+              </div>
+              @if (screenToModify.values[0]) {
+                <div class="param-row">
+                  <span class="param-label">Combien de temps ?</span>
+                  <div class="param-control">
+                    <div class="input-group w-auto">
+                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <div class="param-section-title">Média</div>
+              <div class="param-row">
+                <span class="param-label">Ajouter un/une Image, Vidéo, Texte ou Son ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="addFile" id="addFileY" [value]="true" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="addFileY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="addFile" id="addFileN" [value]="false" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="addFileN">Non</label>
+                  </div>
+                </div>
+              </div>
+              @if (screenToModify.values[2]) {
+                <div class="param-row">
+                  <span class="param-label">Quel type d'élément ?</span>
+                  <div class="param-control">
+                    <select class="form-select" [(ngModel)]="screenToModify.values[3]" (ngModelChange)="changeTypeFile($event)">
+                      <option value="Image">Image</option>
+                      <option value="Video">Vidéo</option>
+                      <option value="Texte">Texte</option>
+                      <option value="Son">Son</option>
+                    </select>
+                  </div>
+                </div>
+                @if (typeFile === 'Image') {
+                  <div class="param-row">
+                    <span class="param-label">Image à afficher</span>
+                    <div class="param-control">
+                      <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
+                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                } @else if (typeFile === 'Video') {
+                  <div class="param-row">
+                    <span class="param-label">Vidéo à afficher</span>
+                    <div class="param-control">
+                      <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
+                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                } @else if (typeFile === 'Texte') {
+                  <div class="param-row">
+                    <span class="param-label">Texte à afficher</span>
+                    <div class="param-control">
+                      <textarea class="form-control w-auto" rows="1" style="resize:none" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
+                      <button class="btn btn-primary btn-sm d-flex align-items-center" (click)="playText()" [disabled]="textToRead == ''">
+                        <i class="bi bi-play-fill"></i>
+                      </button>
+                    </div>
+                  </div>
+                } @else if (typeFile === 'Son') {
+                  <div class="param-row">
+                    <span class="param-label">Son à jouer</span>
+                    <div class="param-control">
+                      <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
+                      <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+
+              <div class="param-section-title">Bouton de lancement</div>
+              <div class="param-row">
+                <span class="param-label">Ajouter un bouton pour lancer l'évaluation ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonY" [value]="true" [(ngModel)]="screenToModify.values[6]">
+                    <label class="form-check-label" for="addStartButtonY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="addStartButton" id="addStartButtonN" [value]="false" [(ngModel)]="screenToModify.values[6]">
+                    <label class="form-check-label" for="addStartButtonN">Non</label>
+                  </div>
+                </div>
+              </div>
+              @if (screenToModify.values[6]) {
+                <div class="param-row">
+                  <span class="param-label">Combien de temps de fixation ?</span>
+                  <div class="param-control">
+                    <div class="input-group w-auto">
+                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[7]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+            </div>
+          </div>
+        }
+
+        <!-- STIMULI -->
+        @if (screenToModify.type === stimuliScreenConstModel) {
+          <div class="card inner-card mt-3">
+            <div class="card-header inner-card-header">Informations écran stimuli</div>
+            <div class="inner-card-body">
+
+              <div class="param-section-title">Grille</div>
+              <div class="param-row">
+                <span class="param-label">Nombre de lignes</span>
+                <div class="param-control">
+                  <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[0]" (change)="checkStimuliCells()">
+                </div>
+              </div>
+              <div class="param-row">
+                <span class="param-label">Nombre de colonnes</span>
+                <div class="param-control">
+                  <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]" (change)="checkStimuliCells()">
+                </div>
+              </div>
+
+              <div class="param-section-title">Passage à l'écran suivant</div>
+              <div class="param-row">
+                <span class="param-label">Mettre un temps pour passage à l'écran suivant ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSY" [value]="true" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="timeNextScreenSY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="timeNextScreenS" id="timeNextScreenSN" [value]="false" [(ngModel)]="screenToModify.values[2]">
+                    <label class="form-check-label" for="timeNextScreenSN">Non</label>
+                  </div>
+                </div>
+              </div>
+              @if (screenToModify.values[2]) {
+                <div class="param-row">
+                  <span class="param-label">Combien de temps ?</span>
+                  <div class="param-control">
+                    <div class="input-group w-auto">
+                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[3]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <div class="param-section-title">Fixation & sélection</div>
+              <div class="param-row">
+                <span class="param-label">Temps de fixation</span>
+                <div class="param-control">
+                  <input type="number" class="form-control" min="1" max="9999" value="1" [(ngModel)]="screenToModify.values[4]">
+                </div>
+              </div>
+              <div class="param-row">
+                <span class="param-label">Combien de stimuli à sélectionner ?</span>
+                <div class="param-control">
+                  <input type="number" class="form-control" min="1" value="1" [max]="screenToModify.values[0] * screenToModify.values[1]" [(ngModel)]="screenToModify.values[6]">
+                </div>
+              </div>
+              <div class="param-row">
+                <span class="param-label">Pour quel choix de sélection ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionY" value="Tout" [(ngModel)]="screenToModify.values[5]">
+                    <label class="form-check-label" for="choiceSelectionY">Tout</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="choiceSelection" id="choiceSelectionN" value="BonneReponse" [(ngModel)]="screenToModify.values[5]">
+                    <label class="form-check-label" for="choiceSelectionN">Bonnes réponses</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-section-title">Comportement des stimuli</div>
+              <div class="param-row">
+                <span class="param-label">Position des stimuli aléatoire ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliY" [value]="true" [(ngModel)]="screenToModify.values[7]">
+                    <label class="form-check-label" for="randomStimuliY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="randomStimuli" id="randomStimuliN" [value]="false" [(ngModel)]="screenToModify.values[7]">
+                    <label class="form-check-label" for="randomStimuliN">Non</label>
+                  </div>
+                </div>
+              </div>
+              <div class="param-row">
+                <span class="param-label">Cacher les stimuli après sélection ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliY" [value]="true" [(ngModel)]="screenToModify.values[8]">
+                    <label class="form-check-label" for="disableStimuliY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="disableStimuli" id="disableStimuliN" [value]="false" [(ngModel)]="screenToModify.values[8]">
+                    <label class="form-check-label" for="disableStimuliN">Non</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-section-title">Son</div>
+              <div class="param-row">
+                <span class="param-label">Jouer un son ?</span>
+                <div class="param-control">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliY" [value]="true" [(ngModel)]="screenToModify.values[9]">
+                    <label class="form-check-label" for="playSoundStimuliY">Oui</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="playSoundStimuli" id="playSoundStimuliN" [value]="false" [(ngModel)]="screenToModify.values[9]">
+                    <label class="form-check-label" for="playSoundStimuliN">Non</label>
+                  </div>
+                </div>
+              </div>
+              @if (screenToModify.values[9]) {
+                <div class="param-row">
+                  <span class="param-label">Son à jouer</span>
+                  <div class="param-control">
+                    <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
+                    <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="wrapper mt-3">
+                <div class="grid-container"
+                     [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'"
+                     [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
+                  @for (n of totalCells; track n; let i = $index) {
+                    <div [id]="i" class="cell" (click)="openStimuliData(i)">
+                      @if (screenToModify.values[12][i].goodAnswer === true) {
+                        <span class="cell-text icon valid">✓</span>
+                      } @else {
+                        <span class="cell-text icon invalid">✕</span>
+                      }
+                      @if (screenToModify.values[12][i].imageName === "" && screenToModify.values[12][i].soundName === "") {
+                        <span class="cell-text">{{ i + 1 }}</span>
+                      }
+                      @if (screenToModify.values[12][i].imageName !== "") {
+                        <span class="cell-text">{{screenToModify.values[12][i].imageName}}</span>
+                      }
+                      @if (screenToModify.values[12][i].soundName !== "") {
+                        <span class="cell-text">{{screenToModify.values[12][i].soundName}}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+            </div>
+          </div>
+        }
+
       </div>
     </div>
+
+    @if (showWarningMessage) {
+      <div class="alert alert-warning alert-instruction mt-4" role="alert">
+        <p class="mb-1">⚠️ La durée de votre fichier dépasse le temps avant passage à l'écran suivant !</p>
+        <p class="mb-0">Êtes-vous sûr de vouloir continuer ? (ré-appuyer sur le bouton Sauvegarder et Retour)</p>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between mt-4">
+      <button class="btn btn-primary" (click)="backToScreenList()">
+        ← Sauvegarder et Retour
+      </button>
+    </div>
+
   </div>
-</div>
-@if (showWarningMessage){
-  <div class="alert alert-warning alert-instruction mt-4" role="alert">
-    <p class="mb-1">
-      ⚠️ La durée de votre fichier dépasse le temps avant passage à l'écran suivant !
-    </p>
-    <p class="mb-0">
-      Êtes-vous sûr de vouloir continuer ? (ré-appuyer sur le bouton Sauvegarder et Retour)
-    </p>
-  </div>
-}
-<div class="d-flex justify-content-between mt-4">
-  <button class="btn btn-primary" (click)="backToScreenList()">
-    ← Sauvegarder et Retour
-  </button>
 </div>
 
-<!-- Modals -->
+<!-- Modal -->
 <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content bg-dark">
@@ -491,17 +422,17 @@
         } @else if (typeFile === 'Video') {
           <video [src]="instructionFile" controls class="img-fluid rounded shadow"></video>
         } @else if (typeFile === 'Son') {
-            @if (actualTypeScreen === 'instruction') {
-              <audio controls [src]="instructionFile"></audio>
-            } @else if (actualTypeScreen === 'stimuli'){
-              <audio controls [src]="stimuliFile"></audio>
-            }
+          @if (actualTypeScreen === 'instruction') {
+            <audio controls [src]="instructionFile"></audio>
+          } @else if (actualTypeScreen === 'stimuli') {
+            <audio controls [src]="stimuliFile"></audio>
+          }
         }
       </div>
     </div>
   </div>
 </div>
 
-@if (stimuliOffcanvasReady){
+@if (stimuliOffcanvasReady) {
   <app-config-stimuli [data]="dataStimuli"></app-config-stimuli>
 }

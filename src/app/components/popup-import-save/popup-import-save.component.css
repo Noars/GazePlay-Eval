@@ -29,16 +29,16 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background-color: #eff6ff;
-  border: 1.5px solid #93c5fd;
+  background-color: var(--popup-accent-bg-subtle);
+  border: 1.5px solid var(--popup-accent-bg-selected);
   border-radius: 8px;
   padding: 14px 16px;
-  color: #1e40af;
+  color: var(--popup-accent-text);
   font-size: 0.9rem;
 }
 
 .alert-icon-info {
-  color: #3b82f6;
+  color: var(--popup-accent-text);
   font-size: 1.2rem;
   flex-shrink: 0;
   margin-top: 1px;
@@ -48,17 +48,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background-color: #fffbeb;
-  border: 1.5px solid #f59e0b;
+  background-color: var(--popup-warn-bg);
+  border: 1.5px solid var(--popup-warn-border);
   border-radius: 8px;
   padding: 14px 16px;
-  color: #b45309;
+  color: var(--popup-warn-text);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .alert-icon-warning {
-  color: #f59e0b;
+  color: var(--popup-warn-icon);
   font-size: 1.2rem;
   flex-shrink: 0;
 }
@@ -83,7 +83,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--popup-input-border);
   border-radius: 10px;
   padding: 16px 20px;
   cursor: pointer;
@@ -91,19 +91,19 @@
 }
 
 .file-input-wrapper:hover {
-  border-color: #1e3a8a;
-  background-color: #eff6ff;
+  border-color: var(--popup-accent);
+  background-color: var(--popup-accent-bg-subtle);
 }
 
 .file-input-icon {
   font-size: 1.5rem;
-  color: #94a3b8;
+  color: var(--popup-input-icon);
   flex-shrink: 0;
 }
 
 .file-input-text {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--popup-muted-text);
   word-break: break-all;
 }
 
@@ -122,32 +122,33 @@
   border-radius: 8px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
   font-size: 0.95rem;
   color: var(--bs-body-color);
 }
 
 .slot-option:hover {
-  border-color: #1e3a8a;
-  background-color: #eff6ff;
+  border-color: var(--popup-accent);
+  background-color: var(--popup-accent-bg-subtle);
+  color: var(--popup-hover-text);
 }
 
 .slot-option-selected {
-  border-color: #1e3a8a !important;
-  background-color: #dbeafe !important;
-  color: #1e3a8a !important;
+  border-color: var(--popup-accent) !important;
+  background-color: var(--popup-accent-bg-selected) !important;
+  color: var(--popup-accent-text) !important;
 }
 
 .slot-option-filled {
-  border-color: #fca5a5;
+  border-color: var(--popup-slot-filled-border);
 }
 
 .slot-warning-badge {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #b45309;
-  background-color: #fef3c7;
-  border: 1px solid #fcd34d;
+  color: var(--popup-warn-badge-color);
+  background-color: var(--popup-warn-badge-bg);
+  border: 1px solid var(--popup-warn-badge-border);
   border-radius: 6px;
   padding: 3px 8px;
 }
@@ -166,30 +167,31 @@
   border-radius: 8px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
   font-size: 0.95rem;
   color: var(--bs-body-color);
 }
 
 .mode-option:hover {
-  border-color: #1e3a8a;
-  background-color: #eff6ff;
+  border-color: var(--popup-accent);
+  background-color: var(--popup-accent-bg-subtle);
+  color: var(--popup-hover-text);
 }
 
 .mode-option-selected {
-  border-color: #1e3a8a !important;
-  background-color: #dbeafe !important;
-  color: #1e3a8a !important;
+  border-color: var(--popup-accent) !important;
+  background-color: var(--popup-accent-bg-selected) !important;
+  color: var(--popup-accent-text) !important;
 }
 
 .mode-desc {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--popup-muted-text);
   margin-top: 2px;
 }
 
 .mode-option-selected .mode-desc {
-  color: #3b82f6;
+  color: var(--popup-accent-text);
 }
 
 /* Boutons */
@@ -209,7 +211,7 @@
 }
 
 .btn-confirm {
-  background-color: #1e3a8a;
+  background-color: var(--popup-accent);
   color: white;
   border: none;
   border-radius: 8px;
@@ -224,8 +226,12 @@
   transform: translateY(-1px);
 }
 
+.btn-confirm:disabled,
 .btn-confirm-disabled {
-  background-color: #93c5fd !important;
+  background-color: var(--popup-accent-bg-selected) !important;
+  color: var(--popup-accent-text) !important;
   cursor: not-allowed !important;
   transform: none !important;
+  pointer-events: none;
+  opacity: 0.55;
 }
