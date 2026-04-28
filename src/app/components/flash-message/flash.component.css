@@ -33,30 +33,30 @@
 
 /* Info */
 .alert-info {
-  background-color: #eff6ff;
-  border-color: #93c5fd;
-  color: #1e40af;
+  background-color: var(--bs-info-bg-subtle);
+  border-color: var(--bs-info-border-subtle);
+  color: var(--bs-info-text-emphasis);
 }
 
 /* Success */
 .alert-success {
-  background-color: #f0fdf4;
-  border-color: #86efac;
-  color: #166534;
+  background-color: var(--bs-success-bg-subtle);
+  border-color: var(--bs-success-border-subtle);
+  color: var(--bs-success-text-emphasis);
 }
 
 /* Warning */
 .alert-warning {
-  background-color: #fffbeb;
-  border-color: #f59e0b;
-  color: #b45309;
+  background-color: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning-border-subtle);
+  color: var(--bs-warning-text-emphasis);
 }
 
 /* Error */
 .alert-danger {
-  background-color: #fef2f2;
-  border-color: #fca5a5;
-  color: #991b1b;
+  background-color: var(--bs-danger-bg-subtle);
+  border-color: var(--bs-danger-border-subtle);
+  color: var(--bs-danger-text-emphasis);
 }
 
 /* Icône */
