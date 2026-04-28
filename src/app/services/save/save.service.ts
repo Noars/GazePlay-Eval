@@ -10,6 +10,8 @@ export class SaveService {
 
   defaultEvalName: string = "GazePlayEvalDefaultName";
 
+  activeSlotIndex: FormatTypeConfig | null = null;
+
   dataAuto: Omit<saveModel, 'createdAt' | 'version'> = {
     nomEval: '',
     format: 'Csv&Xlsx',
@@ -23,6 +25,7 @@ export class SaveService {
 
   newSaveDataAuto(){
     this.dataAuto = structuredClone(saveModelDefault);
+    this.activeSlotIndex = null;
     this.saveToSlot(0, this.dataAuto);
   }
 

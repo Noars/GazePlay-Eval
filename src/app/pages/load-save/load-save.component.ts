@@ -22,7 +22,7 @@ export class LoadSaveComponent implements OnInit {
   constructor(
     private router: Router,
     private loadService: LoadService,
-    private saveService: SaveService,
+    public saveService: SaveService,
     private autoSaveService: AutoSaveService,
     private overwriteGuard: OverwriteGuardService
   ) {}
@@ -59,6 +59,7 @@ export class LoadSaveComponent implements OnInit {
       listScreens: save.listScreens,
       step: step
     };
+    this.saveService.activeSlotIndex = slotIndex as FormatTypeConfig;
     this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume();
   }

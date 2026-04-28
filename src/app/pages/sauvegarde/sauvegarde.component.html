@@ -43,6 +43,7 @@
               <div class="card shadow-lg slot-card d-flex align-items-center justify-content-center"
                    [class.slot-filled]="selectedSlot !== slot.index"
                    [class.slot-card-selected]="selectedSlot === slot.index"
+                   [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="selectSlot(slot.index)">
                 <i class="bi slot-filled-icon"
                    [class.bi-folder2-open]="selectedSlot === slot.index"

@@ -12,11 +12,28 @@ import {
   transitionScreenConstModel
 } from '../../shared/screenModel';
 import {saveModel} from '../../shared/saveModel';
+import {IndexedDBService} from '../indexedDB/indexed-db.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DownloadService {
+
+  constructor(private idbService: IndexedDBService) {}
+
+  private async getFileFromIDB(id: string): Promise<Blob | null> {
+    if (!id) return null;
+    try {
+      const entry = await this.idbService.getFile(id);
+      return entry.file;
+    } catch {
+      return null;
+    }
+  }
+
+  private isValidFile(f: any): f is File | Blob {
+    return f instanceof File || f instanceof Blob;
+  }
 
   async generateEvalZip(saveService: SaveService) {
     const zip = new JSZip();
@@ -39,15 +56,15 @@ export class DownloadService {
             switch (instructionValues[3]) {
 
               case "Image":
-                await this.generateInstructionScreenZipImg(saveService, instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipImg(saveService.getEvalName(), instructionValues, jsonData, zip);
                 break;
 
               case "Video":
-                await this.generateInstructionScreenZipVideo(saveService, instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipVideo(saveService.getEvalName(), instructionValues, jsonData, zip);
                 break;
 
               case "Son":
-                await this.generateInstructionScreenZipSound(saveService, instructionValues, jsonData, zip);
+                await this.generateInstructionScreenZipSound(saveService.getEvalName(), instructionValues, jsonData, zip);
                 break;
 
               default:
@@ -57,7 +74,7 @@ export class DownloadService {
           break;
 
         case stimuliScreenConstModel:
-          await this.generateStimuliScreenZip(saveService, evalData[i], jsonData, zip);
+          await this.generateStimuliScreenZip(saveService.getEvalName(), evalData[i], jsonData, zip);
           break;
 
         default:
@@ -69,7 +86,7 @@ export class DownloadService {
     zip.file(saveService.getEvalName() + '/evalInfo.json', JSON.stringify(this.getInfoEval(saveService), null, 2));
 
     zip.generateAsync({type: 'blob'}).then(content => {
-      saveAs(content, saveService.getEvalName() + '-gazeplayEval.gpSave');
+      saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
     });
   }
 
@@ -108,88 +125,108 @@ export class DownloadService {
     jsonData.push(instructionTxtData);
   }
 
-  async generateInstructionScreenZipImg(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
-    const imgFile: File = instructionValues[5];
+  async generateInstructionScreenZipImg(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+    let imgFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
+    if (!imgFile && instructionValues[4]) {
+      const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
+      imgFile = await this.getFileFromIDB(idbId);
+    }
     if (imgFile) {
       const imgArrayBuffer = await imgFile.arrayBuffer();
-      zip.file(saveService.getEvalName() + '/images/' + instructionValues[4], imgArrayBuffer);
+      zip.file(evalName + '/images/' + instructionValues[4], imgArrayBuffer);
     }
     instructionValues.splice(5, 1);
     const instructionImgResult = instructionScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = instructionValues[idx];
       return acc;
     }, {} as Record<string, any>);
-    const instructionImgData = {
+    jsonData.push({
       Type: instructionScreenConstModel,
       ...instructionImgResult,
-    }
-    jsonData.push(instructionImgData);
+    });
   }
 
-  async generateInstructionScreenZipVideo(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
-    const videoFile: File = instructionValues[5];
+  async generateInstructionScreenZipVideo(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+    let videoFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
+    if (!videoFile && instructionValues[4]) {
+      const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
+      videoFile = await this.getFileFromIDB(idbId);
+    }
     if (videoFile) {
       const videoArrayBuffer = await videoFile.arrayBuffer();
-      zip.file(saveService.getEvalName() + '/videos/' + instructionValues[4], videoArrayBuffer);
-      instructionValues.splice(5, 1);
+      zip.file(evalName + '/videos/' + instructionValues[4], videoArrayBuffer);
     }
+    instructionValues.splice(5, 1);
     const instructionVideoResult = instructionScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = instructionValues[idx];
       return acc;
     }, {} as Record<string, any>);
-    const instructionVideoData = {
+    jsonData.push({
       Type: instructionScreenConstModel,
       ...instructionVideoResult,
-    }
-    jsonData.push(instructionVideoData);
+    });
   }
 
-  async generateInstructionScreenZipSound(saveService: SaveService, instructionValues: any[], jsonData: any[], zip: JSZip){
-    const audioFile: File = instructionValues[5];
+  async generateInstructionScreenZipSound(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+    let audioFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
+    if (!audioFile && instructionValues[4]) {
+      const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
+      audioFile = await this.getFileFromIDB(idbId);
+    }
     if (audioFile) {
       const audioArrayBuffer = await audioFile.arrayBuffer();
-      zip.file(saveService.getEvalName() + '/audio/' + instructionValues[4], audioArrayBuffer);
-      instructionValues.splice(5, 1);
+      zip.file(evalName + '/audio/' + instructionValues[4], audioArrayBuffer);
     }
+    instructionValues.splice(5, 1);
     const instructionAudioResult = instructionScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = instructionValues[idx];
       return acc;
     }, {} as Record<string, any>);
-    const instructionAudioData = {
+    jsonData.push({
       Type: instructionScreenConstModel,
       ...instructionAudioResult,
-    }
-    jsonData.push(instructionAudioData);
+    });
   }
 
-  async generateStimuliScreenZip(saveService: SaveService, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
+  async generateStimuliScreenZip(evalName: string, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
     const stimuliValues = structuredClone(evalData.values);
     const stimuliList = stimuliValues[12];
 
     for (const key in stimuliList) {
       const entry = stimuliList[key];
       const entryNameImageFile: string = entry.imageName;
-      const entryImageFile: File = entry.imageFile;
       const entryNameSoundFile: string = entry.soundName;
-      const entrySoundFile: File = entry.soundFile;
 
+      let entryImageFile: File | Blob | null = this.isValidFile(entry.imageFile) ? entry.imageFile : null;
+      if (!entryImageFile && entryNameImageFile) {
+        entryImageFile = await this.getFileFromIDB(entry.imageId || `${evalName}/${entryNameImageFile}`);
+      }
       if (entryImageFile) {
         const arrayImageFileBuffer = await entryImageFile.arrayBuffer();
-        zip.file(saveService.getEvalName() + '/images/' + entryNameImageFile, arrayImageFileBuffer);
+        zip.file(evalName + '/images/' + entryNameImageFile, arrayImageFileBuffer);
+      }
+
+      let entrySoundFile: File | Blob | null = this.isValidFile(entry.soundFile) ? entry.soundFile : null;
+      if (!entrySoundFile && entryNameSoundFile) {
+        entrySoundFile = await this.getFileFromIDB(entry.soundId || `${evalName}/${entryNameSoundFile}`);
       }
       if (entrySoundFile) {
         const arraySoundFileBuffer = await entrySoundFile.arrayBuffer();
-        zip.file(saveService.getEvalName() + '/audio/' + entryNameSoundFile, arraySoundFileBuffer);
+        zip.file(evalName + '/audio/' + entryNameSoundFile, arraySoundFileBuffer);
       }
 
       delete entry.imageFile;
       delete entry.soundFile;
     }
 
-    const audioFile: File = stimuliValues[11];
+    let audioFile: File | Blob | null = this.isValidFile(stimuliValues[11]) ? stimuliValues[11] : null;
+    if (!audioFile && stimuliValues[10]) {
+      const soundId = stimuliValues[13] || `${evalName}/${stimuliValues[10]}`;
+      audioFile = await this.getFileFromIDB(soundId);
+    }
     if (audioFile) {
       const audioArrayBuffer = await audioFile.arrayBuffer();
-      zip.file(saveService.getEvalName() + '/audio/' + stimuliValues[10], audioArrayBuffer);
+      zip.file(evalName + '/audio/' + stimuliValues[10], audioArrayBuffer);
     }
     stimuliValues.splice(11, 1);
 
@@ -197,11 +234,10 @@ export class DownloadService {
       acc[key] = stimuliValues[idx];
       return acc;
     }, {} as Record<string, any>);
-    const stimuliData = {
+    jsonData.push({
       Type: stimuliScreenConstModel,
       ...stimuliResult,
-    }
-    jsonData.push(stimuliData);
+    });
   }
 
   /**
@@ -210,7 +246,6 @@ export class DownloadService {
    */
   async generateSlotZip(saveData: saveModel): Promise<void> {
     try {
-      // console.log('[generateSlotZip] saveData:', saveData);
       const zip = new JSZip();
       const evalName = saveData.nomEval || 'GazePlayEvalDefaultName';
       const jsonData: any[] = [];
@@ -221,10 +256,10 @@ export class DownloadService {
             this.generateTransitionScreenZip(screen, jsonData);
             break;
           case instructionScreenConstModel:
-            this.generateInstructionScreenZipSlot(screen, jsonData);
+            await this.generateInstructionScreenZipSlot(screen, jsonData, evalName, zip);
             break;
           case stimuliScreenConstModel:
-            this.generateStimuliScreenZipSlot(screen, jsonData);
+            await this.generateStimuliScreenZipSlot(screen, jsonData, evalName, zip);
             break;
         }
       }
@@ -232,9 +267,7 @@ export class DownloadService {
       zip.file(evalName + '/evalData.json', JSON.stringify(jsonData, null, 2));
       zip.file(evalName + '/evalInfo.json', JSON.stringify(this.getInfoEvalFromSlot(saveData), null, 2));
 
-      // console.log('[generateSlotZip] generating zip for:', evalName);
       const content = await zip.generateAsync({type: 'blob'});
-      // console.log('[generateSlotZip] calling saveAs');
       saveAs(content, evalName + '-gazeplayEval.gpSave');
     } catch (err) {
       console.error('[generateSlotZip] erreur:', err);
@@ -254,13 +287,22 @@ export class DownloadService {
   }
 
   /**
-   * Génère les données JSON d'un écran instruction pour l'export en ZIP d'un slot.
-   *
-   * @param evalData - L'écran instruction à transformer.
-   * @param jsonData - Le JSON dans lequel ajouter le résultat.
+   * Génère les données JSON et les médias d'un écran instruction pour l'export en ZIP d'un slot.
+   * Les fichiers sont récupérés depuis l'IDB si non présents en mémoire.
    */
-  generateInstructionScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
+  async generateInstructionScreenZipSlot(evalData: screenTypeModel, jsonData: any[], evalName: string, zip: JSZip): Promise<void> {
     const values = structuredClone(evalData.values);
+
+    if (values[3] !== 'Texte' && values[4]) {
+      const idbId = values[8] || `${evalName}/${values[4]}`;
+      const file = await this.getFileFromIDB(idbId);
+      if (file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const folder = values[3] === 'Image' ? 'images' : values[3] === 'Video' ? 'videos' : 'audio';
+        zip.file(`${evalName}/${folder}/${values[4]}`, arrayBuffer);
+      }
+    }
+
     values.splice(5, 1);
     const result = instructionScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = values[idx];
@@ -270,18 +312,43 @@ export class DownloadService {
   }
 
   /**
-   * Génère les données JSON d'un écran de stimuli pour l'export en ZIP d'un slot.
-   *
-   * @param evalData - L'écran instruction à transformer.
-   * @param jsonData - Le JSON dans lequel ajouter le résultat.
+   * Génère les données JSON et les médias d'un écran de stimuli pour l'export en ZIP d'un slot.
+   * Les fichiers sont récupérés depuis l'IDB si non présents en mémoire.
    */
-  generateStimuliScreenZipSlot(evalData: screenTypeModel, jsonData: any[]) {
+  async generateStimuliScreenZipSlot(evalData: screenTypeModel, jsonData: any[], evalName: string, zip: JSZip): Promise<void> {
     const values = structuredClone(evalData.values);
     const stimuliList = values[12];
 
     for (const key in stimuliList) {
-      delete stimuliList[key].imageFile;
-      delete stimuliList[key].soundFile;
+      const entry = stimuliList[key];
+
+      if (entry.imageName) {
+        const imageFile = await this.getFileFromIDB(entry.imageId || `${evalName}/${entry.imageName}`);
+        if (imageFile) {
+          const arrayBuffer = await imageFile.arrayBuffer();
+          zip.file(`${evalName}/images/${entry.imageName}`, arrayBuffer);
+        }
+      }
+
+      if (entry.soundName) {
+        const soundFile = await this.getFileFromIDB(entry.soundId || `${evalName}/${entry.soundName}`);
+        if (soundFile) {
+          const arrayBuffer = await soundFile.arrayBuffer();
+          zip.file(`${evalName}/audio/${entry.soundName}`, arrayBuffer);
+        }
+      }
+
+      delete entry.imageFile;
+      delete entry.soundFile;
+    }
+
+    if (values[10]) {
+      const soundId = values[13] || `${evalName}/${values[10]}`;
+      const soundFile = await this.getFileFromIDB(soundId);
+      if (soundFile) {
+        const arrayBuffer = await soundFile.arrayBuffer();
+        zip.file(`${evalName}/audio/${values[10]}`, arrayBuffer);
+      }
     }
 
     values.splice(11, 1);

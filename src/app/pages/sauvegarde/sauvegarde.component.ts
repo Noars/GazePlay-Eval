@@ -74,6 +74,7 @@ export class SauvegardeComponent implements OnInit {
       listScreens: save.listScreens,
       step: step
     };
+    this.saveService.activeSlotIndex = index;
     this.saveService.saveToSlot(0, this.saveService.dataAuto); // Sauvegarde dans le slot dynamique
     this.autoSaveService.tryResume();
   }
