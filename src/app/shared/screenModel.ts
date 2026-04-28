@@ -29,8 +29,10 @@ export const instructionScreenConstKey = [
 ];
 
 export interface stimuliScreenValues {
+  imageId?: string;
   imageName?: string;
   imageFile?: File;
+  soundId?: string;
   soundName?: string;
   soundFile?: File;
   goodAnswer?: Boolean;
@@ -38,8 +40,10 @@ export interface stimuliScreenValues {
 export const stimuliScreenDico: { [key: number]: stimuliScreenValues } = {
   0:
     {
+      imageId: "",
       imageName: "",
       imageFile: undefined,
+      soundId: "",
       soundName: "",
       soundFile: undefined,
       goodAnswer: false

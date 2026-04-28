@@ -1,123 +1,73 @@
-<!-- config-stimuli.component.html -->
 <div
-  class="offcanvas offcanvas-top custom-offcanvas"
+  class="offcanvas offcanvas-start custom-offcanvas"
   data-bs-backdrop="false"
   data-bs-scroll="true"
   tabindex="-1"
   id="configStimuli"
   aria-labelledby="configStimuliLabel"
 >
-  <!-- Poignée de redimensionnement (bord bas) -->
-  <div class="resize-handle" (mousedown)="startResize($event)"></div>
-
   <div class="offcanvas-header">
-    <h1 class="offcanvas-title" id="configStimuliLabel">
-      <i class="bi bi-grid-3x3 me-2"></i>Case n° {{ data.cell + 1 }}
-    </h1>
-
-    <!-- Navigation entre cellules -->
-    <div class="nav-controls">
-      <button class="btn btn-sm btn-outline-secondary nav-btn"
-              (click)="navigate(-1)"
-              [disabled]="data.cell === 0">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-      <span class="cell-counter">{{ data.cell + 1 }} / {{ totalCells }}</span>
-      <button class="btn btn-sm btn-outline-secondary nav-btn"
-              (click)="navigate(1)"
-              [disabled]="data.cell >= totalCells - 1">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-
+    <h1 class="offcanvas-title fw-semibold" id="configStimuliLabel">Case n° {{ data.cell + 1 }}</h1>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
   </div>
-
-  <div class="offcanvas-body">
-
-    <!-- Section config (partie haute, scrollable) -->
-    <div class="config-section">
-
-      <div class="param-row">
-        <span class="param-label">Ce stimuli est-il une bonne réponse ?</span>
-        <div class="param-control">
-          <div class="form-check mb-0">
-            <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerY" [value]="true" [(ngModel)]="data.screen[data.cell].goodAnswer">
-            <label class="form-check-label" for="goodAnswerY">Oui</label>
-          </div>
-          <div class="form-check mb-0">
-            <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerN" [value]="false" [(ngModel)]="data.screen[data.cell].goodAnswer">
-            <label class="form-check-label" for="goodAnswerN">Non</label>
-          </div>
+  <div class="resize-handle" (mousedown)="startResize($event)"></div>
+  <div class="offcanvas-body px-3 d-flex flex-column gap-3">
+    <div class="mb-4 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center mb-2 gap-2">
+        <label class="form-label me-3 fw-semibold">Ce stimuli est-il une bonne réponse ?</label>
+        <div class="form-check form-check-inline mb-0">
+          <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerY" [value]="true" [(ngModel)]="data.screen[this.data.cell].goodAnswer">
+          <label class="form-check-label fw-semibold" for="goodAnswerY">Oui</label>
+        </div>
+        <div class="form-check form-check-inline mb-0">
+          <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerN" [value]="false" [(ngModel)]="data.screen[this.data.cell].goodAnswer">
+          <label class="form-check-label fw-semibold" for="goodAnswerN">Non</label>
         </div>
       </div>
-
-      <div class="param-row">
-        <span class="param-label">Image à afficher</span>
-        <div class="param-control">
-          <input #fileInputImage class="form-control" type="file" id="imageFile" accept="image/*" (change)="getImageFile($event)">
-        </div>
-      </div>
-
-      @if (previewImage != "") {
-        <div class="param-row" style="flex-direction:column; align-items:flex-start; gap:0.75rem;">
-          <img [src]="previewImage" class="preview-image" alt="Preview">
-          <button class="btn btn-primary btn-sm" (click)="cropImage()">
-            Recadrer l'image
-          </button>
-        </div>
-      }
-
-      <div class="param-row">
-        <span class="param-label">Son à écouter</span>
-        <div class="param-control">
-          <input #fileInputSound class="form-control" type="file" id="soundFile" accept="audio/*" (change)="getSoundFile($event)">
-        </div>
-      </div>
-
-      @if (previewSound != "") {
-        <div class="param-row">
-          <audio controls [src]="previewSound"></audio>
-        </div>
-      }
-
-      <div class="actions-row">
-        <button class="btn btn-danger" (click)="deleteCell()">
-          <i class="bi bi-trash me-1"></i> Supprimer
-        </button>
-        <button class="btn btn-success" data-bs-dismiss="offcanvas" aria-label="Fermer">
-          <i class="bi bi-check-lg me-1"></i> Valider
-        </button>
-      </div>
-
     </div>
-
-    <!-- Section aperçu grille (partie basse) -->
-    <div class="preview-section">
-      <div class="grid-wrapper">
-        <div class="preview-grid"
-             [style.gridTemplateRows]="'repeat(' + data.rows + ', 70px)'"
-             [style.gridTemplateColumns]="'repeat(' + data.cols + ', 70px)'">
-          @for (n of allCells; track n; let i = $index) {
-            <div class="preview-cell"
-                 [class.preview-cell-active]="i === data.cell"
-                 [class.preview-cell-valid]="data.screen[i]?.goodAnswer === true"
-                 (click)="navigateTo(i)">
-              @if (data.screen[i]?.goodAnswer === true) {
-                <span class="preview-cell-icon valid">✓</span>
-              } @else {
-                <span class="preview-cell-icon invalid">✕</span>
-              }
-              @if (data.screen[i]?.imageName !== '') {
-                <span class="preview-cell-text">{{ data.screen[i]?.imageName }}</span>
-              } @else {
-                <span class="preview-cell-text">{{ i + 1 }}</span>
-              }
-            </div>
+    <div class="card-body fw-semibold text-center">
+      <div class="mb-4 d-flex align-items-center justify-content-center">
+        <div class="d-flex align-items-center mb-2 gap-2">
+          <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
+          @if (data.screen[data.cell].imageName) {
+            <span class="text-muted fst-italic">{{ data.screen[data.cell].imageName }}</span>
           }
+          <input #fileInputImage class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getImageFile($event)">
         </div>
       </div>
+      @if (previewImage) {
+        <div class="mb-4 d-flex align-items-center justify-content-center">
+          <div class="d-flex align-items-center mb-2 gap-2">
+            <img [src]="previewImage" class="preview-image" alt="Preview">
+          </div>
+        </div>
+        <div class="mb-4 d-flex align-items-center justify-content-center">
+          <div class="d-flex align-items-center mb-2 gap-2">
+            <button class="btn btn-primary fw-semibold" (click)="cropImage()">
+              Recadrer l'image
+            </button>
+          </div>
+        </div>
+      }
+      <div class="mb-4 d-flex align-items-center justify-content-center">
+        <div class="d-flex align-items-center mb-2 gap-2">
+          <label for="soundFile" class="form-label flex-grow-1 me-2">Son à écouter</label>
+          <input #fileInputSound class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getSoundFile($event)">
+        </div>
+      </div>
+      @if (previewSound) {
+        <div class="mb-4 d-flex align-items-center justify-content-center">
+          <div class="d-flex align-items-center mb-2 gap-2">
+            <audio controls [src]="previewSound"></audio>
+          </div>
+        </div>
+      }
+      <button class="btn btn-danger mt-3 me-3 fw-semibold" (click)="deleteCell()">
+        Supprimer les elements
+      </button>
+      <button class="btn btn-success mt-3 fw-semibold" data-bs-dismiss="offcanvas" aria-label="Fermer">
+        Valider les elements
+      </button>
     </div>
-
   </div>
 </div>

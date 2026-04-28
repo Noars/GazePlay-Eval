@@ -21,6 +21,7 @@ import {UpdateScreensService} from '../../services/updateScreens/update-screens.
 import {SaveService} from '../../services/save/save.service';
 import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component';
 import {Offcanvas} from 'bootstrap';
+import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 
 @Component({
   selector: 'app-modify-screen',
@@ -47,6 +48,8 @@ export class ModifyScreenComponent implements OnInit{
   textToRead: string = '';
   fileDuration: number = 0;
   showWarningMessage: boolean = false;
+  private instructionObjectUrl: string | null = null;
+  private stimuliObjectUrl: string | null = null;
 
   dataStimuli!: {
     cell: number;
@@ -56,13 +59,21 @@ export class ModifyScreenComponent implements OnInit{
   }
   stimuliOffcanvasReady: boolean = false;
 
-  constructor(private updateScreenService: UpdateScreensService, private saveService: SaveService) {
+  constructor(
+    private updateScreenService: UpdateScreensService,
+    private saveService: SaveService,
+    private idbService: IndexedDBService
+  ) {
   }
 
   ngOnInit(): void {
     this.actualTypeScreen = this.screenToModify.type;
-    this.haveInstructionFile = this.checkInstructionFileExist();
-    this.haveStimuliSoundFile = this.checkStimuliSoundFileExist();
+    void this.initializeMediaState();
+  }
+
+  private async initializeMediaState(): Promise<void> {
+    this.haveInstructionFile = await this.checkInstructionFileExist();
+    this.haveStimuliSoundFile = await this.checkStimuliSoundFileExist();
   }
 
   changeTypeScreen(type: string) {
@@ -78,14 +89,14 @@ export class ModifyScreenComponent implements OnInit{
         let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
         newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
-        this.haveInstructionFile = this.checkInstructionFileExist();
+        void this.refreshInstructionMediaState();
         break;
 
       case stimuliScreenConstModel :
         let newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
         newStimuliScreen = this.updateScreenService.updateStimuliScreen(newStimuliScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsStimuliScreen);
         this.screenToModify = newStimuliScreen;
-        this.haveStimuliSoundFile = this.checkStimuliSoundFileExist();
+        void this.refreshStimuliSoundState();
         this.checkStimuliCells();
         break;
 
@@ -98,73 +109,267 @@ export class ModifyScreenComponent implements OnInit{
     if (this.screenToModify.type === instructionScreenConstModel){
       this.screenToModify.values[3] = type;
       this.screenToModify.values[4] = "";
+      this.screenToModify.values[5] = undefined;
+      this.screenToModify.values[8] = '';
       this.typeFile = type;
       this.haveInstructionFile = false;
-      this.instructionFile = "";
+      this.setInstructionPreview('');
     }
   }
 
-  getInstructionFile(event: Event){
+  async getInstructionFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0 && this.screenToModify.type === instructionScreenConstModel ) {
-      this.screenToModify.values[4] = input.files[0].name;
-      this.screenToModify.values[5] = input.files[0];
+      const file = input.files[0];
+      const projectName = this.saveService.getEvalName();
+      const id = `${projectName}/${file.name}`;
+
+      try {
+        await this.idbService.addFile(id, file, this.getInstructionMediaType());
+      } catch {
+        await this.idbService.updateFile(id, file, this.getInstructionMediaType());
+      }
+
+      this.screenToModify.values[4] = file.name;
+      this.screenToModify.values[5] = file;
+      this.screenToModify.values[8] = id;
       this.haveInstructionFile = true;
-      this.nameFile = input.files[0].name;
-      this.instructionFile =  URL.createObjectURL(input.files[0]);
-      this.getFileDuration(input.files[0]);
+      this.nameFile = file.name;
+      this.setInstructionPreview(URL.createObjectURL(file));
+      this.getFileDuration(file);
     }else {
       this.haveInstructionFile = false;
     }
   }
 
-  getStimuliSoundFile(event: Event){
+  async getStimuliSoundFile(event: Event){
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0 && this.screenToModify.type === stimuliScreenConstModel ) {
-      this.screenToModify.values[10] = input.files[0].name;
-      this.screenToModify.values[11] = input.files[0];
+      const file = input.files[0];
+      const projectName = this.saveService.getEvalName();
+      const id = `${projectName}/${file.name}`;
+
+      try {
+        await this.idbService.addFile(id, file, 'sound');
+      } catch {
+        await this.idbService.updateFile(id, file, 'sound');
+      }
+
+      this.screenToModify.values[10] = file.name;
+      this.screenToModify.values[11] = file;
+      this.screenToModify.values[13] = id;
       this.haveStimuliSoundFile = true;
-      this.nameFile = input.files[0].name;
-      this.stimuliFile =  URL.createObjectURL(input.files[0]);
+      this.nameFile = file.name;
+      this.setStimuliPreview(URL.createObjectURL(file));
       this.typeFile = "Son";
     }else {
       this.haveStimuliSoundFile = false;
     }
   }
 
-  checkInstructionFileExist(){
+  async checkInstructionFileExist(): Promise<boolean> {
     if (this.screenToModify.type === instructionScreenConstModel){
       this.typeFile = this.screenToModify.values[3];
       if (this.typeFile === 'Texte'){
         this.textToRead = this.screenToModify.values[4];
+        this.setInstructionPreview('');
         return false;
       }else {
         if (this.screenToModify.values[4] !== ''){
           this.nameFile = this.screenToModify.values[4];
-          this.instructionFile = URL.createObjectURL(this.screenToModify.values[5]);
-          this.getFileDuration(this.screenToModify.values[5]);
-          return true;
+          const mediaFile = await this.resolveInstructionMediaFile();
+          if (mediaFile) {
+            this.screenToModify.values[5] = mediaFile.file;
+            this.screenToModify.values[8] = mediaFile.id;
+            this.setInstructionPreview(URL.createObjectURL(mediaFile.file));
+            this.getFileDuration(mediaFile.file);
+            return true;
+          }
         }else {
-          return false;
+          this.setInstructionPreview('');
         }
       }
-    } else {
-      return false;
     }
+    return false;
   }
 
-  checkStimuliSoundFileExist(){
+  async checkStimuliSoundFileExist(): Promise<boolean> {
     if (this.screenToModify.type === stimuliScreenConstModel){
       this.typeFile = "Son";
       if (this.screenToModify.values[10] !== ''){
         this.nameFile = this.screenToModify.values[10];
-        this.stimuliFile = URL.createObjectURL(this.screenToModify.values[11]);
-        return true;
+        const mediaFile = await this.resolveStimuliSoundFile();
+        if (mediaFile) {
+          this.screenToModify.values[11] = mediaFile.file;
+          this.screenToModify.values[13] = mediaFile.id;
+          this.setStimuliPreview(URL.createObjectURL(mediaFile.file));
+          return true;
+        }
       }else {
+        this.setStimuliPreview('');
         return false;
       }
-    }else {
-      return false;
+    }
+    return false;
+  }
+
+  private async refreshInstructionMediaState(): Promise<void> {
+    this.haveInstructionFile = await this.checkInstructionFileExist();
+  }
+
+  private async refreshStimuliSoundState(): Promise<void> {
+    this.haveStimuliSoundFile = await this.checkStimuliSoundFileExist();
+  }
+
+  private getInstructionMediaType(): 'image' | 'video' | 'sound' {
+    switch (this.typeFile) {
+      case 'Video':
+        return 'video';
+      case 'Son':
+        return 'sound';
+      default:
+        return 'image';
+    }
+  }
+
+  private async resolveInstructionMediaFile(): Promise<{ file: File, id: string } | undefined> {
+    const expectedType = this.getInstructionMediaType();
+    const mediaId = this.screenToModify.values[8] || this.screenToModify.values[4];
+    const candidateIds = this.getCandidateIds(mediaId);
+
+    for (const id of candidateIds) {
+      try {
+        const evalFile = await this.idbService.getFile(id);
+        if (evalFile.type !== expectedType) continue;
+        if (!(evalFile.file instanceof Blob)) continue;
+
+        if (evalFile.file instanceof File) {
+          return { file: evalFile.file, id };
+        }
+
+        const inferredName = this.extractFileNameFromId(id);
+        return {
+          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
+          id
+        };
+      } catch {
+        // essaie le candidat suivant
+      }
+    }
+
+    try {
+      const allFiles = await this.idbService.getAllFiles();
+      const baseName = this.extractFileNameFromId(mediaId);
+      const match = allFiles.find((entry) =>
+        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
+      );
+
+      if (match?.file instanceof Blob) {
+        if (match.file instanceof File) {
+          return { file: match.file, id: match.id };
+        }
+        return {
+          file: new File([match.file], baseName, { type: match.file.type }),
+          id: match.id
+        };
+      }
+    } catch {
+      // ignore: fallback best-effort
+    }
+
+    return undefined;
+  }
+
+  private async resolveStimuliSoundFile(): Promise<{ file: File, id: string } | undefined> {
+    const mediaId = this.screenToModify.values[13] || this.screenToModify.values[10];
+    const candidateIds = this.getCandidateIds(mediaId);
+
+    for (const id of candidateIds) {
+      try {
+        const evalFile = await this.idbService.getFile(id);
+        if (evalFile.type !== 'sound') continue;
+        if (!(evalFile.file instanceof Blob)) continue;
+
+        if (evalFile.file instanceof File) {
+          return { file: evalFile.file, id };
+        }
+
+        const inferredName = this.extractFileNameFromId(id);
+        return {
+          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
+          id
+        };
+      } catch {
+        // essaie le candidat suivant
+      }
+    }
+
+    try {
+      const allFiles = await this.idbService.getAllFiles();
+      const baseName = this.extractFileNameFromId(mediaId);
+      const match = allFiles.find((entry) =>
+        entry.type === 'sound' && this.extractFileNameFromId(entry.id) === baseName
+      );
+
+      if (match?.file instanceof Blob) {
+        if (match.file instanceof File) {
+          return { file: match.file, id: match.id };
+        }
+        return {
+          file: new File([match.file], baseName, { type: match.file.type }),
+          id: match.id
+        };
+      }
+    } catch {
+      // ignore: fallback best-effort
+    }
+
+    return undefined;
+  }
+
+  private getCandidateIds(fileName: string): string[] {
+    const cleanName = (fileName ?? '').trim();
+    if (!cleanName) return [];
+
+    const projectName = this.saveService.getEvalName();
+    const baseName = this.extractFileNameFromId(cleanName);
+    const ids = new Set<string>();
+
+    ids.add(cleanName);
+    ids.add(baseName);
+
+    if (projectName) {
+      ids.add(`${projectName}/${cleanName}`);
+      ids.add(`${projectName}/${baseName}`);
+    }
+
+    return [...ids];
+  }
+
+  private extractFileNameFromId(id: string): string {
+    const parts = (id ?? '').split('/');
+    return parts[parts.length - 1] || id;
+  }
+
+  private setInstructionPreview(url: string): void {
+    if (this.instructionObjectUrl) {
+      URL.revokeObjectURL(this.instructionObjectUrl);
+      this.instructionObjectUrl = null;
+    }
+    this.instructionFile = url;
+    if (url) {
+      this.instructionObjectUrl = url;
+    }
+  }
+
+  private setStimuliPreview(url: string): void {
+    if (this.stimuliObjectUrl) {
+      URL.revokeObjectURL(this.stimuliObjectUrl);
+      this.stimuliObjectUrl = null;
+    }
+    this.stimuliFile = url;
+    if (url) {
+      this.stimuliObjectUrl = url;
     }
   }
 
