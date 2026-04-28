@@ -157,7 +157,8 @@
                   <div class="param-row">
                     <span class="param-label">Image à afficher</span>
                     <div class="param-control">
-                      <input class="form-control" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                      <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                         <i class="bi bi-eye"></i>
                       </button>
@@ -167,7 +168,8 @@
                   <div class="param-row">
                     <span class="param-label">Vidéo à afficher</span>
                     <div class="param-control">
-                      <input class="form-control" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                      <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                         <i class="bi bi-eye"></i>
                       </button>
@@ -177,7 +179,7 @@
                   <div class="param-row">
                     <span class="param-label">Texte à afficher</span>
                     <div class="param-control">
-                      <textarea class="form-control" rows="1" style="resize:none" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
+                      <textarea class="form-control w-auto" rows="1" style="resize:none" [(ngModel)]="textToRead" (ngModelChange)="getText($event)" placeholder="Écris ton texte"></textarea>
                       <button class="btn btn-primary btn-sm d-flex align-items-center" (click)="playText()" [disabled]="textToRead == ''">
                         <i class="bi bi-play-fill"></i>
                       </button>
@@ -187,7 +189,8 @@
                   <div class="param-row">
                     <span class="param-label">Son à jouer</span>
                     <div class="param-control">
-                      <input class="form-control" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                      <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
+                      <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
                         <i class="bi bi-eye"></i>
                       </button>
@@ -345,7 +348,8 @@
                 <div class="param-row">
                   <span class="param-label">Son à jouer</span>
                   <div class="param-control">
-                    <input class="form-control" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
+                    <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
+                    <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
                     <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
                       <i class="bi bi-eye"></i>
                     </button>

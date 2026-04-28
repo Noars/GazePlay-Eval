@@ -29,10 +29,13 @@
       <div class="mb-4 d-flex align-items-center justify-content-center">
         <div class="d-flex align-items-center mb-2 gap-2">
           <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
+          @if (data.screen[data.cell].imageName) {
+            <span class="text-muted fst-italic">{{ data.screen[data.cell].imageName }}</span>
+          }
           <input #fileInputImage class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getImageFile($event)">
         </div>
       </div>
-      @if (previewImage != ""){
+      @if (previewImage) {
         <div class="mb-4 d-flex align-items-center justify-content-center">
           <div class="d-flex align-items-center mb-2 gap-2">
             <img [src]="previewImage" class="preview-image" alt="Preview">
@@ -52,7 +55,7 @@
           <input #fileInputSound class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getSoundFile($event)">
         </div>
       </div>
-      @if (previewSound != ""){
+      @if (previewSound) {
         <div class="mb-4 d-flex align-items-center justify-content-center">
           <div class="d-flex align-items-center mb-2 gap-2">
             <audio controls [src]="previewSound"></audio>
