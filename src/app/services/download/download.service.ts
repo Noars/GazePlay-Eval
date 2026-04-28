@@ -13,13 +13,15 @@ import {
 } from '../../shared/screenModel';
 import {saveModel} from '../../shared/saveModel';
 import {IndexedDBService} from '../indexedDB/indexed-db.service';
+import {$locationShim} from '@angular/common/upgrade';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DownloadService {
 
-  constructor(private idbService: IndexedDBService) {}
+  constructor(private idbService: IndexedDBService) {
+  }
 
   private async getFileFromIDB(id: string): Promise<Blob | null> {
     if (!id) return null;
@@ -90,7 +92,7 @@ export class DownloadService {
     });
   }
 
-  getInfoEval(saveService: SaveService){
+  getInfoEval(saveService: SaveService) {
     return {
       "Nom de l'évaluation": saveService.getEvalName(),
       "Format choisi": saveService.dataAuto.format,
@@ -98,7 +100,7 @@ export class DownloadService {
     };
   }
 
-  generateTransitionScreenZip(evalData: screenTypeModel, jsonData: any[]){
+  generateTransitionScreenZip(evalData: screenTypeModel, jsonData: any[]) {
     const transitionValues = structuredClone(evalData.values);
     const transitionResult = transitionScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = transitionValues[idx];
@@ -111,7 +113,7 @@ export class DownloadService {
     jsonData.push(transitionData);
   }
 
-  generateInstructionScreenZipText(evalData: screenTypeModel, jsonData: any[]){
+  generateInstructionScreenZipText(evalData: screenTypeModel, jsonData: any[]) {
     const instructionTextValues = structuredClone(evalData.values);
     instructionTextValues.splice(5, 1);
     const instructionTxtResult = instructionScreenConstKey.reduce((acc, key, idx) => {
@@ -125,7 +127,7 @@ export class DownloadService {
     jsonData.push(instructionTxtData);
   }
 
-  async generateInstructionScreenZipImg(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipImg(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip) {
     let imgFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
     if (!imgFile && instructionValues[4]) {
       const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
@@ -146,7 +148,7 @@ export class DownloadService {
     });
   }
 
-  async generateInstructionScreenZipVideo(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipVideo(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip) {
     let videoFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
     if (!videoFile && instructionValues[4]) {
       const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
@@ -167,7 +169,7 @@ export class DownloadService {
     });
   }
 
-  async generateInstructionScreenZipSound(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip){
+  async generateInstructionScreenZipSound(evalName: string, instructionValues: any[], jsonData: any[], zip: JSZip) {
     let audioFile: File | Blob | null = this.isValidFile(instructionValues[5]) ? instructionValues[5] : null;
     if (!audioFile && instructionValues[4]) {
       const idbId = instructionValues[8] || `${evalName}/${instructionValues[4]}`;
@@ -188,7 +190,7 @@ export class DownloadService {
     });
   }
 
-  async generateStimuliScreenZip(evalName: string, evalData: screenTypeModel, jsonData: any[], zip: JSZip){
+  async generateStimuliScreenZip(evalName: string, evalData: screenTypeModel, jsonData: any[], zip: JSZip) {
     const stimuliValues = structuredClone(evalData.values);
     const stimuliList = stimuliValues[12];
 
@@ -264,8 +266,10 @@ export class DownloadService {
         }
       }
 
+
       zip.file(evalName + '/evalData.json', JSON.stringify(jsonData, null, 2));
       zip.file(evalName + '/evalInfo.json', JSON.stringify(this.getInfoEvalFromSlot(saveData), null, 2));
+
 
       const content = await zip.generateAsync({type: 'blob'});
       saveAs(content, evalName + '-gazeplayEval.gpSave');
@@ -322,36 +326,49 @@ export class DownloadService {
     for (const key in stimuliList) {
       const entry = stimuliList[key];
 
-      if (entry.imageName) {
-        const imageFile = await this.getFileFromIDB(entry.imageId || `${evalName}/${entry.imageName}`);
-        if (imageFile) {
-          const arrayBuffer = await imageFile.arrayBuffer();
-          zip.file(`${evalName}/images/${entry.imageName}`, arrayBuffer);
-        }
+      // Résolution image : priorité au blob en mémoire, sinon IDB
+      let imageFile: File | Blob | null = this.isValidFile(entry.imageFile) ? entry.imageFile : null;
+      if (!imageFile && entry.imageName) {
+        imageFile = await this.getFileFromIDB(entry.imageId || `${evalName}/${entry.imageName}`);
+      }
+      if (imageFile) {
+        const arrayBuffer = await imageFile.arrayBuffer();
+        zip.file(`${evalName}/images/${entry.imageName}`, arrayBuffer);
       }
 
-      if (entry.soundName) {
-        const soundFile = await this.getFileFromIDB(entry.soundId || `${evalName}/${entry.soundName}`);
-        if (soundFile) {
-          const arrayBuffer = await soundFile.arrayBuffer();
-          zip.file(`${evalName}/audio/${entry.soundName}`, arrayBuffer);
-        }
+      // Résolution son stimuli : priorité au blob en mémoire, sinon IDB
+      let soundFile: File | Blob | null = this.isValidFile(entry.soundFile) ? entry.soundFile : null;
+      if (!soundFile && entry.soundName) {
+        soundFile = await this.getFileFromIDB(entry.soundId || `${evalName}/${entry.soundName}`);
       }
-
-      delete entry.imageFile;
-      delete entry.soundFile;
-    }
-
-    if (values[10]) {
-      const soundId = values[13] || `${evalName}/${values[10]}`;
-      const soundFile = await this.getFileFromIDB(soundId);
       if (soundFile) {
         const arrayBuffer = await soundFile.arrayBuffer();
-        zip.file(`${evalName}/audio/${values[10]}`, arrayBuffer);
+        zip.file(`${evalName}/audio/${entry.soundName}`, arrayBuffer);
       }
+
+      // Nettoyage des champs non-sérialisables et internes
+      delete entry.imageFile;
+      delete entry.soundFile;
+      delete entry.imageId;
+      delete entry.soundId;
     }
 
+    // Résolution du son global de l'écran stimuli
+    let globalAudioFile: File | Blob | null = this.isValidFile(values[11]) ? values[11] : null;
+    if (!globalAudioFile && values[10]) {
+      const soundId = values[13] || `${evalName}/${values[10]}`;
+      globalAudioFile = await this.getFileFromIDB(soundId);
+    }
+    if (globalAudioFile) {
+      const arrayBuffer = await globalAudioFile.arrayBuffer();
+      zip.file(`${evalName}/audio/${values[10]}`, arrayBuffer);
+    }
+
+    // Supprime le blob audio global (index 11), puis l'IDB id global (était index 13, devient 12 après splice)
     values.splice(11, 1);
+    if (values[12] !== undefined) {
+      values.splice(12, 1);
+    }
 
     const result = stimuliScreenConstKey.reduce((acc, key, idx) => {
       acc[key] = values[idx];
