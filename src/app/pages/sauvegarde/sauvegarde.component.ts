@@ -168,7 +168,7 @@ export class SauvegardeComponent implements OnInit {
     if (this.evalInProgress) {
       this.saveService.clearSlot(0);
       this.evalInProgress = !this.evalInProgress;
-      this.flashMessageService.show('success', 'L\'évaluation en cours a été supprimée avec succès.');
+      this.flashMessageService.show('success', 'Les dernières modifications ont été supprimés avec succès.');
       this.ngOnInit();
     }
   }
