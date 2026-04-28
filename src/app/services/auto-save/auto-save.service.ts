@@ -6,6 +6,7 @@ import {SaveService} from '../save/save.service';
 import {FlashService} from '../flash-message/flash.service';
 import {LoadService} from '../load/load.service';
 import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
+import {IndexedDBService} from '../indexedDB/indexed-db.service';
 
 @Injectable({ providedIn: 'root' })
 export class AutoSaveService implements OnDestroy {
@@ -18,7 +19,8 @@ export class AutoSaveService implements OnDestroy {
     private router: Router,
     private saveService: SaveService,
     private flashService: FlashService,
-    private loadService: LoadService
+    private loadService: LoadService,
+    private indexedDbService: IndexedDBService
   ) {}
 
   init(): void {
@@ -47,6 +49,10 @@ export class AutoSaveService implements OnDestroy {
     const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
 
     if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas les pages exclues
+
+    if (this.saveService.dataAuto.nomEval != this.loadService.getSlot(0)?.nomEval) {
+      this.indexedDbService.deleteFileByProject(this.loadService.getSlot(0)?.nomEval ?? '');
+    }
 
     // Sauvegarde auto de l'évaluation, avec message de succès ou d'avertissement
     try {
