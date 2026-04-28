@@ -25,6 +25,7 @@ export class SauvegardeComponent implements OnInit {
   slots: { index: FormatTypeConfig; data: saveModel | null }[] = [];
   selectedSlot: FormatTypeConfig | null = null;
   hasUnsavedEval: boolean = false;
+  evalInProgress: boolean | undefined;
 
   constructor(
     private dialog: MatDialog,
@@ -39,6 +40,7 @@ export class SauvegardeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.evalInProgress = this.loadService.getSlot(0) !== null;
     this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
       index: i,
       data: this.loadService.getSlot(i) // récupération des données dans les différents slots
@@ -162,10 +164,13 @@ export class SauvegardeComponent implements OnInit {
     this.router.navigate(['/info-eval']);
   }
 
-  /**
-   * Sauvegarde l'évaluation actuelle dans le slot dynamique.
-   */
-  saveLastEval(): void {
-    this.saveService.saveToSlot(0, this.saveService.dataAuto);
+  deleteAutoSave() {
+    if (this.evalInProgress) {
+      this.saveService.clearSlot(0);
+      this.evalInProgress = !this.evalInProgress;
+      this.flashMessageService.show('success', 'L\'évaluation en cours a été supprimée avec succès.');
+      this.ngOnInit();
+    }
   }
+
 }

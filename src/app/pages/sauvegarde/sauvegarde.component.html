@@ -98,6 +98,16 @@
         <button class="btn btn-primary fw-semibold px-4" (click)="router.navigate(['/home'])">
           <i class="bi bi-arrow-left me-2"></i>Retour
         </button>
+
+        @if(this.evalInProgress) {
+          <button class="btn btn-danger fw-semibold px-4" (click)="deleteAutoSave()">
+            <i class="bi bi-trash-fill me-2"></i>Supprimer l'évaluation en cours
+          </button>
+        } @else {
+          <button class="btn btn-danger fw-semibold px-4" disabled>
+            <i class="bi bi-trash-fill me-2"></i>Pas d'évaluation en cours
+          </button>
+        }
         <button class="btn btn-success fw-semibold px-4" (click)="newEval()">
           <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
         </button>
