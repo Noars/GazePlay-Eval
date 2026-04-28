@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {FlashService} from '../../services/flash-message/flash.service';
 
 @Component({
   selector: 'app-sauvegarde',
@@ -29,6 +30,7 @@ export class SauvegardeComponent implements OnInit {
     private loadService: LoadService,
     public saveService: SaveService,
     private autoSaveService: AutoSaveService,
+    private flashMessageService: FlashService,
     public router: Router,
     private downloadService: DownloadService,
     private overwriteGuard: OverwriteGuardService
@@ -41,7 +43,17 @@ export class SauvegardeComponent implements OnInit {
     }));
 
     const autoSave = this.loadService.getSlot(0);
-    this.hasUnsavedEval = autoSave !== null && autoSave.nomEval !== '';
+    if (autoSave !== null && autoSave.nomEval !== '') {
+      // On vérifie si l'autoSave correspond à un slot sauvegardé
+      const alreadySaved = this.slots.some(s => s.data?.nomEval === autoSave.nomEval);
+      this.hasUnsavedEval = !alreadySaved;
+    } else {
+      this.hasUnsavedEval = false;
+    }
+
+    if (this.hasUnsavedEval) {
+      this.flashMessageService.show('warning', 'Vous avez une évaluation qui n\'a pas encore été sauvegardée. Pensez à l\'enregistrer pour ne pas la perdre !');
+    }
   }
 
   /**
@@ -92,6 +104,7 @@ export class SauvegardeComponent implements OnInit {
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
     this.saveService.saveToSlot(slot.index, data);
+    this.saveService.clearSlot(0); // On clear le slot dynamique
     this.ngOnInit();
   }
 
