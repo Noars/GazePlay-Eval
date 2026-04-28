@@ -168,4 +168,13 @@ export class IndexedDBService {
       request.onerror = () => reject(request.error);
     });
   }
+
+  async deleteFileByProject(projectName: string): Promise<void> {
+    await this.dbReady;
+
+    const files = await this.getFilesByProject(projectName);
+    for (const file of files) {
+      await this.deleteFile(file.id);
+    }
+  }
 }
