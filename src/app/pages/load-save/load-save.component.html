@@ -25,6 +25,7 @@
             } @else {
               <!-- Slot rempli -->
               <div class="slot-card slot-filled d-flex align-items-center justify-content-center"
+                   [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="loadSlot(slot.index)">
                 <i class="bi bi-folder2-open slot-filled-icon"></i>
                 <span class="fw-bold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
