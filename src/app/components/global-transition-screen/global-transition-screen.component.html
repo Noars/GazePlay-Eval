@@ -1,93 +1,70 @@
 <div class="accordion-body">
-  <div class="mb-2">
-    <div class="mt-2 px-3">
-      <ul class="custom-list">
-        <li>
-          <div class="d-flex align-items-center mb-2">
-            <span class="list-dash">-</span>
-            <label class="form-label me-3 fw-semibold">Mettre un temps avant passage a l'écran suivant ?</label>
-            <div>
-              <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[0]">
-                <label class="form-check-label fw-semibold" for="timeNextScreenTY">Oui</label>
-              </div>
-              <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[0]">
-                <label class="form-check-label fw-semibold" for="timeNextScreenTN">Non</label>
-              </div>
-            </div>
-          </div>
-        </li>
-        @if (globalTransitionScreenInfos[0]) {
-          <div class="arrow-container mt-2">
-            <div class="arrow">
-              <span></span>
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-              <div class="input-group w-auto">
-                <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[1]">
-                <span class="input-group-text fw-semibold">secondes</span>
-              </div>
-            </div>
-          </div>
-        }
-        <li class="mt-4">
-          <div class="d-flex align-items-center mb-2">
-            <span class="list-dash">-</span>
-            <label class="form-label me-3 fw-semibold">Mettre une croix de fixation ?</label>
-            <div>
-              <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[2]">
-                <label class="form-check-label fw-semibold" for="fixationCrossScreenY">Oui</label>
-              </div>
-              <div class="form-check form-check-inline mb-0">
-                <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[2]">
-                <label class="form-check-label fw-semibold" for="fixationCrossScreenN">Non</label>
-              </div>
-            </div>
-          </div>
-        </li>
-        @if (globalTransitionScreenInfos[2]) {
-          <div class="arrow-container mt-2">
-            <div class="arrow">
-              <span></span>
-            </div>
-            <ul class="custom-list">
-              <li>
-                <div class="d-flex align-items-center mt-2">
-                  <span class="list-dash">-</span>
-                  <label class="form-label me-3 fw-semibold">Mettre un temps de fixation ?</label>
-                  <div>
-                    <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[3]">
-                      <label class="form-check-label fw-semibold" for="fixationTimeScreenY">Oui</label>
-                    </div>
-                    <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[3]">
-                      <label class="form-check-label fw-semibold" for="fixationTimeScreenN">Non</label>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              @if (globalTransitionScreenInfos[3]) {
-                <div class="arrow-container mt-2">
-                  <div class="arrow">
-                    <span></span>
-                  </div>
-                  <div class="d-flex align-items-center mb-2">
-                    <label class="form-label me-3 fw-semibold">Combien de temps ?</label>
-                    <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[4]">
-                      <span class="input-group-text fw-semibold">secondes</span>
-                    </div>
-                  </div>
-                </div>
-              }
-            </ul>
-          </div>
-        }
-      </ul>
+
+  <div class="param-section-title">Passage à l'écran suivant</div>
+  <div class="param-row">
+    <span class="param-label">Mettre un temps avant passage à l'écran suivant ?</span>
+    <div class="param-control">
+      <div class="form-check mb-0">
+        <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[0]">
+        <label class="form-check-label" for="timeNextScreenTY">Oui</label>
+      </div>
+      <div class="form-check mb-0">
+        <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[0]">
+        <label class="form-check-label" for="timeNextScreenTN">Non</label>
+      </div>
     </div>
   </div>
+  @if (globalTransitionScreenInfos[0]) {
+    <div class="param-row">
+      <span class="param-label">Combien de temps ?</span>
+      <div class="param-control">
+        <div class="input-group w-auto">
+          <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[1]">
+          <span class="input-group-text">secondes</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="param-section-title">Croix de fixation</div>
+  <div class="param-row">
+    <span class="param-label">Mettre une croix de fixation ?</span>
+    <div class="param-control">
+      <div class="form-check mb-0">
+        <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[2]">
+        <label class="form-check-label" for="fixationCrossScreenY">Oui</label>
+      </div>
+      <div class="form-check mb-0">
+        <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[2]">
+        <label class="form-check-label" for="fixationCrossScreenN">Non</label>
+      </div>
+    </div>
+  </div>
+  @if (globalTransitionScreenInfos[2]) {
+    <div class="param-row">
+      <span class="param-label">Mettre un temps de fixation ?</span>
+      <div class="param-control">
+        <div class="form-check mb-0">
+          <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[3]">
+          <label class="form-check-label" for="fixationTimeScreenY">Oui</label>
+        </div>
+        <div class="form-check mb-0">
+          <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[3]">
+          <label class="form-check-label" for="fixationTimeScreenN">Non</label>
+        </div>
+      </div>
+    </div>
+    @if (globalTransitionScreenInfos[3]) {
+      <div class="param-row">
+        <span class="param-label">Combien de temps ?</span>
+        <div class="param-control">
+          <div class="input-group w-auto">
+            <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[4]">
+            <span class="input-group-text">secondes</span>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
 </div>
