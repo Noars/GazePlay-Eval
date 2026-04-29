@@ -18,12 +18,12 @@
       <span>Accueil</span>
     </a>
 
-    <a href="#" class="menu-link">
+    <a class="menu-link" style="cursor:pointer" (click)="goToGuide(); $event.preventDefault()">
       <span class="menu-icon"><i class="bi bi-book-fill"></i></span>
       <span>Guide</span>
     </a>
 
-    <a href="#" class="menu-link">
+    <a class="menu-link" style="cursor:pointer" (click)="goToOptions(); $event.preventDefault()">
       <span class="menu-icon"><i class="bi bi-gear-fill"></i></span>
       <span>Options</span>
     </a>

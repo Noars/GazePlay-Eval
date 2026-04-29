@@ -7,6 +7,7 @@ import {CreateEvalComponent} from './pages/create-eval/create-eval.component';
 import {DownloadEvalComponent} from './pages/download-eval/download-eval.component';
 import {SauvegardeComponent} from './pages/sauvegarde/sauvegarde.component';
 import {LoadSaveComponent} from './pages/load-save/load-save.component';
+import {NoPage} from './pages/no-page/no-page';
 
 export const routes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -17,5 +18,6 @@ export const routes: Routes = [
   {path: 'download-eval', component: DownloadEvalComponent},
   {path: 'sauvegarde', component: SauvegardeComponent},
   { path: 'load-save', component: LoadSaveComponent },
+  { path: 'no-page', component: NoPage },
   {path: '', redirectTo: 'home', pathMatch: 'full',}
 ];
