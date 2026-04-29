@@ -108,7 +108,7 @@ export class SauvegardeComponent implements OnInit {
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
     this.saveService.saveToSlot(slot.index, data);
-    this.saveService.clearSlot(0); // On clear le slot dynamique
+    // this.saveService.clearSlot(0); // On clear le slot dynamique
     this.flashMessageService.show('success', 'Votre évaluation a été sauvegardée avec succès.')
     this.ngOnInit();
   }

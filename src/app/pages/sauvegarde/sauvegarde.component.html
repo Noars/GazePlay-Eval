@@ -45,12 +45,17 @@
                    [class.slot-card-selected]="selectedSlot === slot.index"
                    [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="selectSlot(slot.index)">
-                <i class="bi slot-filled-icon"
-                   [class.bi-folder2-open]="selectedSlot === slot.index"
-                   [class.bi-folder2]="selectedSlot !== slot.index"></i>
-                <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
-                <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
-              </div>
+                    @if (saveService.activeSlotIndex === slot.index) {
+                      <div class="slot-active-badge">EN COURS</div>
+                    }
+
+                    <i class="bi slot-filled-icon"
+                       [class.bi-folder2-open]="selectedSlot === slot.index"
+                       [class.bi-folder2]="selectedSlot !== slot.index"></i>
+                    <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
+                    <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
+
+            </div>
 
               @if (selectedSlot === slot.index) {
                 <div class="d-flex justify-content-center slot-actions gap-2">
