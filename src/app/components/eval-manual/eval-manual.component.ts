@@ -39,7 +39,8 @@ export class EvalManualComponent implements OnInit{
       this.globalTransitionScreenInfos,
       this.globalInstructionScreenInfos,
       this.globalStimuliScreenInfos,
-      this.saveService.dataAuto.listScreens);
+      this.saveService.dataAuto.listScreens,
+      this.saveService.dataAuto.step);
 
   }
 

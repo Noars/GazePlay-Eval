@@ -1,8 +1,90 @@
-[cdkDrag] {
-  cursor: grab;
+/* info-participant.component.css */
+
+.card {
+  border-radius: 16px;
+  border: 1px solid var(--bs-border-color);
 }
-[cdkDrag]:active {
-  cursor: grabbing;
+
+.card-header {
+  border-radius: 16px 16px 0 0 !important;
+  padding: 1.25rem 2.5rem 1rem;
+  background-color: var(--bs-body-bg);
+  border-bottom: 1px solid var(--bs-border-color);
+  text-align: center;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.alert-info {
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 400 !important;
+  text-align: left !important;
+  line-height: 1.5;
+  width: 100%;
+  padding: 0.6rem 1rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* Carte intérieure */
+.card .card {
+  border-radius: 12px;
+  border: 1px solid var(--bs-border-color);
+  overflow: hidden;
+  width: 100%;
+}
+
+.card .card .card-header {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px 12px 0 0 !important;
+  background-color: var(--bs-secondary-bg) !important;
+  border-bottom: 1px solid var(--bs-border-color);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bs-emphasis-color) !important;
+  text-align: center;
+}
+
+.card .card .mb-3 {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+}
+
+.col-7 {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.input-group {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.input-group-text {
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+}
+
+.form-control {
+  border: 1px solid var(--bs-border-color);
+  font-size: 0.95rem;
+  padding: 7px 12px;
+}
+
+.form-control:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
 }
 
 .btn-danger {
@@ -12,4 +94,24 @@
 .btn-danger:hover {
   background-color: #c82333;
   transform: scale(1.05);
+}
+
+.btn-primary {
+  padding: 9px 24px;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.btn-secondary {
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+[cdkDrag] {
+  cursor: grab;
+}
+
+[cdkDrag]:active {
+  cursor: grabbing;
 }

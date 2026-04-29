@@ -1,4 +1,4 @@
-<div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
+<div class="d-flex align-items-center justify-content-center bg-light-subtle p-4">
   <div class="card shadow-lg w-100" style="max-width: 600px;">
     <div class="card-header">
       <h1 class="card-title text-center">Création d'une évaluation pour GazePlay</h1>
@@ -16,6 +16,12 @@
         </ul>
       </div>
       <button class="btn btn-primary w-100 w-100 fw-semibold" (click)="goToInfoEval()">Nouvelle évaluation</button>
+
+      @let slotAuto = this.loadService.getSlot(0);
+      @if (slotAuto != null) {
+        <button class="btn btn-primary w-100 w-100 fw-semibold" (click)="goToLastStep()">Revenir à l'évaluation précédente</button>
+      }
+
     </div>
   </div>
 </div>

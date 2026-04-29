@@ -1,0 +1,117 @@
+<!-- popup-import-save.component.html -->
+<div class="popup-container">
+
+  <!-- Header -->
+  <div class="popup-header">
+    <i class="bi bi-upload me-2"></i>
+    Importer une évaluation
+  </div>
+
+  <!-- Body -->
+  <div class="popup-body">
+
+    <!-- Alerte info -->
+    <div class="popup-alert-info">
+      <i class="bi bi-info-circle-fill alert-icon-info"></i>
+      <span>Sélectionnez un fichier <strong>.gpSave</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
+    </div>
+
+    <!-- Choix du mode -->
+    <div class="section-block">
+      <label class="section-label">
+        <i class="bi bi-sliders me-2"></i>
+        Mode d'ouverture
+      </label>
+      <div class="mode-selector">
+        <div class="mode-option"
+             [class.mode-option-selected]="mode === 'consult'"
+             (click)="mode = 'consult'; selectedSlot = null">
+          <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-eye-fill"></i>
+            <div>
+              <div class="fw-semibold">Consultation</div>
+              <div class="mode-desc">Ouvrir sans sauvegarder</div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-option"
+             [class.mode-option-selected]="mode === 'save'"
+             (click)="mode = 'save'; selectedSlot = null">
+          <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-floppy-fill"></i>
+            <div>
+              <div class="fw-semibold">Sauvegarder</div>
+              <div class="mode-desc">Importer et sauvegarder dans un emplacement</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sélection fichier zip -->
+    <div class="section-block">
+      <label class="section-label">
+        <i class="bi bi-file-earmark me-2"></i>
+        Fichier à importer
+      </label>
+      <div class="file-input-wrapper" (click)="fileInput.click()">
+        <i class="bi bi-cloud-upload file-input-icon"></i>
+        <span class="file-input-text">
+          {{ zipFileName !== '' ? zipFileName : 'Cliquez pour sélectionner un fichier .gpSave' }}
+        </span>
+        <input #fileInput type="file" accept=".gpSave,.zip" hidden (change)="onZipSelected($event)">
+      </div>
+    </div>
+
+    <!-- Sélection slot (mode sauvegarder uniquement) -->
+    @if (mode === 'save') {
+      <div class="section-block">
+        <label class="section-label">
+          <i class="bi bi-folder2 me-2"></i>
+          Emplacement de sauvegarde
+        </label>
+        <div class="slots-list">
+          @for (slot of data.slots; track slot.index) {
+            <div class="slot-option"
+                 [class.slot-option-selected]="selectedSlot === slot.index"
+                 [class.slot-option-filled]="!slot.empty"
+                 (click)="selectedSlot = slot.index">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi" [class.bi-folder2]="slot.empty" [class.bi-folder2-open]="!slot.empty"></i>
+                <span class="fw-semibold">{{ slot.empty ? 'Emplacement vide' : slot.name }}</span>
+              </div>
+              @if (!slot.empty) {
+                <span class="slot-warning-badge">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                  Sera écrasé
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (selectedSlot !== null && !data.slots[selectedSlot].empty) {
+        <div class="popup-alert-warning">
+          <i class="bi bi-exclamation-triangle-fill alert-icon-warning"></i>
+          <span>Attention, l'évaluation existante sera <strong>définitivement remplacée</strong>.</span>
+        </div>
+      }
+    }
+
+    <!-- Boutons -->
+    <div class="d-flex justify-content-between gap-3 mt-2">
+      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
+        Annuler
+      </button>
+      <button class="btn-confirm fw-semibold flex-grow-1"
+              [disabled]="!canConfirm()"
+              [class.btn-confirm-disabled]="!canConfirm()"
+              (click)="confirm()">
+        <i class="bi bi-check-lg me-1"></i>
+        {{ mode === 'consult' ? 'Ouvrir' : 'Importer' }}
+      </button>
+    </div>
+
+  </div>
+</div>

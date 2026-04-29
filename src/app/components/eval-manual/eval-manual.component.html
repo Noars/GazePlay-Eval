@@ -1,12 +1,12 @@
 <div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
-  <div class="card shadow-lg w-100" style="max-width: 800px;">
-    <div class="card-header text-center">
+  <div class="card w-100" style="max-width: 800px;">
+    <div class="card-header">
       <h3 class="mb-0 fw-semibold">Personnalisation des paramètres globaux des écrans</h3>
     </div>
     <div class="card-body">
-      <div class="alert alert-info text-center fw-semibold">
-        Lors de cette étape, vous serez amené.e.s à créer des écrans qui se succéderont : écrans d’instructions, écrans de stimuli et écrans de transition <br>
-        Sur cette page, nous vous proposons de renseignez les caractéristiques globales de chacun de ces types d’écrans, afin que vous ne soyez pas obligé.e.s de les entrer manuellement à chaque nouvelle création d’écrans <br>
+      <div class="alert alert-info">
+        Lors de cette étape, vous serez amené.e.s à créer des écrans qui se succéderont : écrans d'instructions, écrans de stimuli et écrans de transition <br>
+        Sur cette page, nous vous proposons de renseignez les caractéristiques globales de chacun de ces types d'écrans, afin que vous ne soyez pas obligé.e.s de les entrer manuellement à chaque nouvelle création d'écrans <br>
         Vous pourrez toutefois procéder à des modifications par la suite !
       </div>
       <div class="accordion mt-4" id="globalParams">
@@ -33,7 +33,7 @@
                     data-bs-target="#collapseInstructionScreen"
                     aria-expanded="false"
                     aria-controls="collapseInstructionScreen">
-              Paramètres globaux des écrans d’instruction
+              Paramètres globaux des écrans d'instruction
             </button>
           </h2>
           <div id="collapseInstructionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
@@ -68,173 +68,103 @@
           </h2>
           <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
             <div class="accordion-body">
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Taille de la grille ?</label>
-                <div class="row g-3 align-items-center">
-                  <div class="col-4">
-                    <label for="nbRows" class="col-form-label">Nombre de lignes</label>
-                  </div>
-                  <div class="col-4">
-                    <input type="number" id="nbRows" class="form-control" min="1" step="1" aria-describedby="nbRowsInfo"
-                           [(ngModel)]="globalStimuliScreenInfos[0]">
-                  </div>
-                  <div class="col-4">
-                      <span id="nbRowsInfo" class="form-text fw-semibold">
-                        Minimum 1 !
-                      </span>
-                  </div>
-                </div>
-                <div class="row g-3 align-items-center">
-                  <div class="col-4">
-                    <label for="nbCols" class="col-form-label">Nombre de colonnes</label>
-                  </div>
-                  <div class="col-4">
-                    <input type="number" id="nbCols" class="form-control" min="1" step="1" aria-describedby="nbColsInfo"
-                           [(ngModel)]="globalStimuliScreenInfos[1]">
-                  </div>
-                  <div class="col-4">
-                      <span id="nbColsInfo" class="form-text fw-semibold">
-                        Minimum 1 !
-                      </span>
-                  </div>
+
+              <div class="param-section-title">Taille de la grille</div>
+              <div class="param-row">
+                <span class="param-label">Nombre de lignes</span>
+                <div class="param-control">
+                  <input type="number" id="nbRows" class="form-control" min="1" step="1" aria-describedby="nbRowsInfo" [(ngModel)]="globalStimuliScreenInfos[0]">
+                  <span id="nbRowsInfo" class="form-text">Min. 1</span>
                 </div>
               </div>
-              <br>
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Temps maximum par écran ?</label>
-                <div class="d-flex justify-content-center align-items-center gap-4">
-                  <label class="col-form-label">
-                    Mettre un temps maximum par écran ?
-                  </label>
+              <div class="param-row">
+                <span class="param-label">Nombre de colonnes</span>
+                <div class="param-control">
+                  <input type="number" id="nbCols" class="form-control" min="1" step="1" aria-describedby="nbColsInfo" [(ngModel)]="globalStimuliScreenInfos[1]">
+                  <span id="nbColsInfo" class="form-text">Min. 1</span>
+                </div>
+              </div>
+
+              <div class="param-section-title">Temps maximum par écran</div>
+              <div class="param-row">
+                <span class="param-label">Mettre un temps maximum par écran ?</span>
+                <div class="param-control">
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="timeScreen"
-                      class="form-check-input"
-                      id="timeScreenYes"
-                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[2]"
-                    />
+                    <input type="radio" name="timeScreen" class="form-check-input" id="timeScreenYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[2]">
                     <label class="form-check-label" for="timeScreenYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="timeScreen"
-                      class="form-check-input"
-                      id="timeScreenNo"
-                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[2]"
-                    />
+                    <input type="radio" name="timeScreen" class="form-check-input" id="timeScreenNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[2]">
                     <label class="form-check-label" for="timeScreenNo">Non</label>
                   </div>
                 </div>
-                @if (globalStimuliScreenInfos[2]) {
-                  <div class="row g-3 align-items-center justify-content-center">
-                    <div class="col-auto">
-                      <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1"
-                             aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
-                    </div>
-                    <div class="col-auto">
-                      <span id="nbFixationLengthInfo" class="form-text fw-semibold">
-                        La durée est en secondes !
-                      </span>
-                    </div>
-                  </div>
-                }
               </div>
-              <br>
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Durée de fixation pour validation ?</label>
-                <div class="row g-3 align-items-center justify-content-center">
-                  <div class="col-auto">
-                    <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1"
-                           aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
-                  </div>
-                  <div class="col-auto">
-                      <span id="nbFixationLengthInfo" class="form-text fw-semibold">
-                        La durée est en secondes !
-                      </span>
+              @if (globalStimuliScreenInfos[2]) {
+                <div class="param-row">
+                  <span class="param-label">Durée (secondes)</span>
+                  <div class="param-control">
+                    <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
+                    <span id="maxTimeScreenInfo" class="form-text">La durée est en secondes !</span>
                   </div>
                 </div>
-              </div>
-              <br>
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Nombre de stimuli a valider pour passage a l'écran suivant
-                  ?</label>
-                <div class="row g-3 align-items-center justify-content-center">
-                  <div class="col-auto">
-                    <input type="number" id="nbStimuli" class="form-control" min="1"
-                           [max]="Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1])" step="1"
-                           aria-describedby="nbStimuliInfo" [(ngModel)]="globalStimuliScreenInfos[5]">
-                  </div>
-                  <div class="col-auto">
-                      <span id="nbStimuliInfo" class="form-text fw-semibold">
-                        Maximum nombre de lignes * nombre de colonnes ({{ Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1]) }}
-                        ) !
-                      </span>
-                  </div>
+              }
+
+              <div class="param-section-title">Durée de fixation pour validation</div>
+              <div class="param-row">
+                <span class="param-label">Durée (secondes)</span>
+                <div class="param-control">
+                  <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
+                 <!-- <span id="nbFixationLengthInfo" class="form-text">La durée est en secondes !</span>-->
                 </div>
               </div>
-              <br>
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Qu’est-ce qu’il se passe si le stimuli est validé ?</label>
-                <div class="d-flex justify-content-center align-items-center gap-4">
-                  <label class="col-form-label">Désactivation de celui-ci ?</label>
+
+              <div class="param-section-title">Nombre de stimuli à valider pour passage à l'écran suivant</div>
+              <div class="param-row">
+<span class="param-label">
+  Maximum : {{ (Number(globalStimuliScreenInfos[0]) || 0) * (Number(globalStimuliScreenInfos[1]) || 0) }} (lignes × colonnes)
+</span>                <div class="param-control">
+                  <input type="number" id="nbStimuli" class="form-control" min="1"
+                         [max]="Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1])"
+                         step="1" aria-describedby="nbStimuliInfo" [(ngModel)]="globalStimuliScreenInfos[5]">
+                </div>
+              </div>
+
+              <div class="param-section-title">Qu'est-ce qu'il se passe si le stimuli est validé</div>
+              <div class="param-row">
+                <span class="param-label">Désactivation de celui-ci ?</span>
+                <div class="param-control">
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="disableStimuli"
-                      class="form-check-input"
-                      id="disableStimuliYes"
-                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]"
-                    />
+                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]">
                     <label class="form-check-label" for="disableStimuliYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="disableStimuli"
-                      class="form-check-input"
-                      id="disableStimuliNo"
-                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]"
-                    />
+                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]">
                     <label class="form-check-label" for="disableStimuliNo">Non</label>
                   </div>
                 </div>
               </div>
-              <br>
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Emplacement stimuli ?</label>
-                <div class="d-flex justify-content-center align-items-center gap-4">
-                  <label class="col-form-label">
-                    Placer les stimuli aléatoirement ?
-                  </label>
+
+              <div class="param-section-title">Emplacement stimuli</div>
+              <div class="param-row">
+                <span class="param-label">Placer les stimuli aléatoirement ?</span>
+                <div class="param-control">
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="randomStimuli"
-                      class="form-check-input"
-                      id="randomStimuliYes"
-                      [value]="true" [(ngModel)]="globalStimuliScreenInfos[7]"
-                    />
+                    <input type="radio" name="randomStimuli" class="form-check-input" id="randomStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[7]">
                     <label class="form-check-label" for="randomStimuliYes">Oui</label>
                   </div>
                   <div class="form-check mb-0">
-                    <input
-                      type="radio"
-                      name="randomStimuli"
-                      class="form-check-input"
-                      id="randomStimuliNo"
-                      [value]="false" [(ngModel)]="globalStimuliScreenInfos[7]"
-                    />
+                    <input type="radio" name="randomStimuli" class="form-check-input" id="randomStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[7]">
                     <label class="form-check-label" for="randomStimuliNo">Non</label>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
 
       </div>
+
       <div class="d-flex justify-content-center align-items-start mt-4">
         <button class="btn btn-primary fw-semibold" (click)="startCreateEvalManual()">
           Commencer la création manuelle de l'évaluation
@@ -246,6 +176,7 @@
           ← Retour
         </button>
       </div>
+
     </div>
   </div>
 </div>

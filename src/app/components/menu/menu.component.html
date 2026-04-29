@@ -1,3 +1,4 @@
+<!-- menu.component.html -->
 <div
   class="offcanvas offcanvas-start"
   tabindex="-1"
@@ -5,33 +6,48 @@
   aria-labelledby="menuLabel"
 >
   <div class="offcanvas-header">
-    <h1 class="offcanvas-title fw-semibold" id="menuLabel">Menu</h1>
+    <h1 class="offcanvas-title fw-semibold fs-6" id="menuLabel">Menu</h1>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
   </div>
-  <div class="offcanvas-body px-3 d-flex flex-column gap-3">
-    <a href="home" class="menu-link">
-      <i class="bi bi-house-door-fill"></i>
-      <span class="fw-semibold">Accueil</span>
+  <div class="offcanvas-body px-3 d-flex flex-column gap-1">
+
+    <p class="menu-section-label">Navigation</p>
+
+    <a href="/home" class="menu-link">
+      <span class="menu-icon"><i class="bi bi-house-door-fill"></i></span>
+      <span>Accueil</span>
     </a>
-    <a href="#" class="menu-link">
-      <i class="bi bi-floppy-fill"></i>
-      <span class="fw-semibold">Sauvegarder</span>
+
+    <a class="menu-link" style="cursor:pointer" (click)="goToGuide(); $event.preventDefault()">
+      <span class="menu-icon"><i class="bi bi-book-fill"></i></span>
+      <span>Guide</span>
     </a>
-    <a href="#" class="menu-link">
-      <i class="bi bi-folder-fill"></i>
-      <span class="fw-semibold">Charger</span>
+
+    <a class="menu-link" style="cursor:pointer" (click)="goToOptions(); $event.preventDefault()">
+      <span class="menu-icon"><i class="bi bi-gear-fill"></i></span>
+      <span>Options</span>
     </a>
-    <a href="#" class="menu-link">
-      <i class="bi bi-file-earmark-arrow-up-fill"></i>
-      <span class="fw-semibold">Importer</span>
+
+    <hr class="my-2 opacity-25">
+    <p class="menu-section-label">Projet</p>
+
+    <a class="menu-link" style="cursor:pointer" (click)="goToSauvegarde(); $event.preventDefault()">
+      <span class="menu-icon"><i class="bi bi-floppy-fill"></i></span>
+      <span>Sauvegarder</span>
     </a>
-    <a href="#" class="menu-link">
-      <i class="bi bi-book-fill"></i>
-      <span class="fw-semibold">Guide</span>
+
+    <a class="menu-link" style="cursor:pointer" (click)="goToLoadSave(); $event.preventDefault()">
+      <span class="menu-icon"><i class="bi bi-folder-fill"></i></span>
+      <span>Charger</span>
     </a>
-    <a href="#" class="menu-link">
-      <i class="bi bi-gear-fill"></i>
-      <span class="fw-semibold">Options</span>
+    <input #fileInput type="file" accept=".gpSave,.zip" hidden>
+
+    <a class="menu-link" style="cursor:pointer"
+       data-bs-dismiss="offcanvas"
+       (click)="openImportPopup(); $event.preventDefault()">
+      <span class="menu-icon"><i class="bi bi-file-earmark-arrow-up-fill"></i></span>
+      <span>Importer</span>
     </a>
+
   </div>
 </div>

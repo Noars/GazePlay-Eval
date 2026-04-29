@@ -93,3 +93,61 @@ body {
 .cdk-overlay-container {
   z-index: 2000;
 }
+
+/* Variables globales — light mode */
+:root {
+  --popup-accent:              #1e3a8a;
+  --popup-accent-text:         #1e3a8a;
+  --popup-accent-bg-subtle:    rgba(30, 58, 138, 0.06);
+  --popup-accent-bg-selected:  rgba(30, 58, 138, 0.12);
+  --popup-hover-text:          var(--bs-body-color);
+  --popup-muted-text:          #64748b;
+  --popup-input-border:        #cbd5e1;
+  --popup-input-icon:          #94a3b8;
+  --popup-warn-bg:             var(--bs-warning-bg-subtle);
+  --popup-warn-border:         var(--bs-warning-border-subtle);
+  --popup-warn-text:           var(--bs-warning-text-emphasis);
+  --popup-warn-icon:           #f59e0b;
+  --popup-warn-badge-color:    #b45309;
+  --popup-warn-badge-bg:       #fef3c7;
+  --popup-warn-badge-border:   #fcd34d;
+  --popup-slot-filled-border:  #fca5a5;
+
+  --slot-shadow:               0 4px 12px rgba(30, 58, 138, 0.12);
+  --slot-shadow-hover:         0 8px 24px rgba(30, 58, 138, 0.2);
+  --slot-selected-bg:          #dbeafe;
+}
+
+/* Variables globales — dark mode */
+[data-bs-theme="dark"] {
+  --popup-accent:              #3b82f6;
+  --popup-accent-text:         #93c5fd;
+  --popup-accent-bg-subtle:    rgba(59, 130, 246, 0.1);
+  --popup-accent-bg-selected:  rgba(59, 130, 246, 0.18);
+  --popup-hover-text:          #e2e8f0;
+  --popup-muted-text:          #94a3b8;
+  --popup-input-border:        #475569;
+  --popup-input-icon:          #64748b;
+  --popup-warn-bg:             var(--bs-warning-bg-subtle);
+  --popup-warn-border:         var(--bs-warning-border-subtle);
+  --popup-warn-text:           var(--bs-warning-text-emphasis);
+  --popup-warn-icon:           #fbbf24;
+  --popup-warn-badge-color:    #fbbf24;
+  --popup-warn-badge-bg:       rgba(245, 158, 11, 0.12);
+  --popup-warn-badge-border:   rgba(245, 158, 11, 0.35);
+  --popup-slot-filled-border:  #f87171;
+
+  --slot-shadow:               0 4px 12px rgba(59, 130, 246, 0.2);
+  --slot-shadow-hover:         0 8px 24px rgba(59, 130, 246, 0.35);
+  --slot-selected-bg:          rgba(59, 130, 246, 0.15);
+}
+.custom-tooltip-class {
+  font-size: 0.85rem;
+  background-color: #1e3a8a !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  max-width: 280px !important;
+  line-height: 1.5 !important;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2) !important;
+}

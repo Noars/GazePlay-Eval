@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-
 import {SaveService} from '../../services/save/save.service';
 import {formatTypeModel, saveModelDefault} from '../../shared/saveModel';
 import {Router} from '@angular/router';
@@ -34,7 +33,8 @@ export class InfoEvalComponent implements OnInit{
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
-      this.saveService.dataAuto.listScreens);
+      this.saveService.dataAuto.listScreens,
+      this.saveService.dataAuto.step); // Ajout du step dans l'objet évaluation
   }
 
   loadData(){

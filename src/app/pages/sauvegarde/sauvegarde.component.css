@@ -1,0 +1,106 @@
+.slot-card {
+  height: 250px;
+  border-radius: 12px !important;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;  /* ✅ nécessaire pour la banderole */
+  overflow: hidden;    /* ✅ nécessaire pour la banderole */
+}
+
+.slot-empty {
+  border: 2px dashed #cbd5e1 !important;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  background-color: var(--bs-body-bg);
+}
+
+.slot-empty:hover {
+  opacity: 0.8;
+}
+
+.slot-empty-icon {
+  font-size: 2.5rem;
+  color: #94a3b8;
+}
+
+.slot-filled {
+  border: 2px solid #1e3a8a !important;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.12) !important;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+  background-color: var(--bs-body-bg);
+}
+
+.slot-filled:hover {
+  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.25) !important;
+  transform: translateY(-3px);
+}
+
+.slot-filled-icon {
+  font-size: 2.5rem;
+  color: #1e3a8a;
+}
+
+.slot-meta {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: -4px;
+}
+
+.slot-card-selected {
+  border: 2px solid var(--popup-accent) !important;
+  background-color: var(--slot-selected-bg) !important;
+}
+
+.slot-active-badge {
+  position: absolute;
+  top: 12px;
+  right: -22px;
+  background-color: #22c55e;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 28px;
+  transform: rotate(35deg);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
+  letter-spacing: 0.05em;
+}
+
+.slot-active {
+  border: 2px solid #22c55e !important;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25), 0 4px 16px rgba(34, 197, 94, 0.15) !important;
+  animation: activeGlow 2s ease-in-out infinite;
+}
+
+@keyframes activeGlow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2), 0 4px 12px rgba(34, 197, 94, 0.1); }
+  50%       { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0.4), 0 4px 22px rgba(34, 197, 94, 0.3); }
+}
+
+.slot-actions {
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.slot-actions .btn {
+  width: 48px;
+  height: 48px;
+  font-size: 1.1rem;
+}
+
+.slot-delete {
+  margin-top: 10px;
+}
+
+.slot-delete .btn {
+  padding: 10px 0;
+  font-size: 0.95rem;
+}
+
+.slot-actions-placeholder {
+  height: 72px;
+}
+
+.slot-delete-placeholder {
+  height: 48px;
+}

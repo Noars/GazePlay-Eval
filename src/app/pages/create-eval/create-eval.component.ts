@@ -44,7 +44,8 @@ export class CreateEvalComponent implements OnInit{
       this.saveService.dataAuto.globalParamsTransitionScreen,
       this.saveService.dataAuto.globalParamsInstructionScreen,
       this.saveService.dataAuto.globalParamsStimuliScreen,
-      this.listScreens);
+      this.listScreens,
+      this.saveService.dataAuto.step);
   }
 
   loadData(){
