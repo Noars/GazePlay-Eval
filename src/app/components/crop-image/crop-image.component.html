@@ -5,18 +5,23 @@
   <div class="card-body" style="text-align: -webkit-center;">
     <div class="crop-container">
       <image-cropper
+        #cropper
         [imageBase64]="imageToCrop"
-        [maintainAspectRatio]="true"
+        [cropper]="cropperPosition"
+        [maintainAspectRatio]="false"
         [aspectRatio]="1"
-        [resizeToWidth]="500"
-        [cropperMinWidth]="500"
-        [cropperMinHeight]="500"
-        [cropperMaxWidth]="1000"
-        [cropperMaxHeight]="1000"
         [imageQuality]="1"
         format="png"
+        (cropperChange)="onCropperChange($event)"
         (imageCropped)="imageCropped($event)">
       </image-cropper>
+
+      <div class="mt-2 d-flex gap-3 align-items-center justify-content-center">
+        <label>Hauteur :</label>
+        <input type="number" class="form-control w-25" [max]="imageMaxHeight - cropHeightY1" [(ngModel)]="cropHeightSize" (ngModelChange)="changeHeightCropper($event)">
+        <label>Largeur :</label>
+        <input type="number" class="form-control w-25" [max]="imageMaxWidth - cropWidthX1" [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
+      </div>
 
       <div class="crop-buttons mt-3">
         <button class="btn btn-success fw-semibold me-2" (click)="validateCrop()">Valider</button>
