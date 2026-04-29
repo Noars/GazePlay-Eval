@@ -87,12 +87,37 @@ export class SauvegardeComponent implements OnInit {
       if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
     }
 
-    // ✅ lit depuis le slot 0 (saveAuto) si pas de données passées
     const autoSave = this.loadService.getSlot(0);
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
+    const uniqueName = this.getUniqueEvalName(data.nomEval, slot.index);
+    if (uniqueName !== data.nomEval) {
+      data.nomEval = uniqueName;
+    }
+
     this.saveService.saveToSlot(slot.index, data);
     this.ngOnInit();
+  }
+
+  /**
+   * Retourne un nom d'évaluation unique parmi les slots nommés (1, 2, 3).
+   * Si le nom existe déjà dans un autre slot, ajoute " 1", " 2", etc. jusqu'à trouver un nom libre.
+   * @param nomEval le nom initial de l'évaluation.
+   * @param targetSlotIndex l'index du slot de destination (exclu de la vérification).
+   */
+  private getUniqueEvalName(nomEval: string, targetSlotIndex: FormatTypeConfig): string {
+    const existingNames = new Set<string>();
+    for (const i of [1, 2, 3] as FormatTypeConfig[]) {
+      if (i === targetSlotIndex) continue;
+      const slot = this.loadService.getSlot(i);
+      if (slot?.nomEval) existingNames.add(slot.nomEval);
+    }
+
+    if (!existingNames.has(nomEval)) return nomEval;
+
+    let counter = 1;
+    while (existingNames.has(`${nomEval} ${counter}`)) counter++;
+    return `${nomEval} ${counter}`;
   }
 
   getSlotAuto() {
