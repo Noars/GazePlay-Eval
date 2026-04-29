@@ -22,6 +22,7 @@ import {SaveService} from '../../services/save/save.service';
 import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component';
 import {Offcanvas} from 'bootstrap';
 import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-modify-screen',
@@ -62,6 +63,7 @@ export class ModifyScreenComponent implements OnInit{
   constructor(
     private updateScreenService: UpdateScreensService,
     private saveService: SaveService,
+    private autoSaveService: AutoSaveService,
     private idbService: IndexedDBService
   ) {
   }
@@ -479,6 +481,7 @@ export class ModifyScreenComponent implements OnInit{
     }else {
       this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
     }
+    this.autoSaveService.autoSave('backToScreenList');
   }
 
   protected readonly instructionScreenConstModel = instructionScreenConstModel;

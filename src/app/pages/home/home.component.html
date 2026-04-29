@@ -16,6 +16,12 @@
         </ul>
       </div>
       <button class="btn btn-primary w-100 w-100 fw-semibold" (click)="goToInfoEval()">Nouvelle évaluation</button>
+
+      @let slotAuto = this.loadService.getSlot(0);
+      @if (slotAuto != null) {
+        <button class="btn btn-primary w-100 w-100 fw-semibold" (click)="goToLastStep()">Revenir à l'évaluation précédente</button>
+      }
+
     </div>
   </div>
 </div>

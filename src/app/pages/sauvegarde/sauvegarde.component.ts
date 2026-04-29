@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {FlashService} from '../../services/flash-message/flash.service';
+import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 
 @Component({
   selector: 'app-sauvegarde',
@@ -23,27 +25,41 @@ export class SauvegardeComponent implements OnInit {
   slots: { index: FormatTypeConfig; data: saveModel | null }[] = [];
   selectedSlot: FormatTypeConfig | null = null;
   hasUnsavedEval: boolean = false;
+  evalInProgress: boolean | undefined;
 
   constructor(
     private dialog: MatDialog,
     private loadService: LoadService,
     public saveService: SaveService,
     private autoSaveService: AutoSaveService,
+    private flashMessageService: FlashService,
     public router: Router,
     private downloadService: DownloadService,
-    private overwriteGuard: OverwriteGuardService
+    private overwriteGuard: OverwriteGuardService,
+    private indexedDBService: IndexedDBService
   ) {}
   /**
    * Charge les données dans les slots
    */
   ngOnInit(): void {
+    this.evalInProgress = this.loadService.getSlot(0) !== null;
     this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
       index: i,
       data: this.loadService.getSlot(i) // récupération des données dans les différents slots
     }));
 
     const autoSave = this.loadService.getSlot(0);
-    this.hasUnsavedEval = autoSave !== null && autoSave.nomEval !== '';
+    if (autoSave !== null && autoSave.nomEval !== '') {
+      // On vérifie si l'autoSave correspond à un slot sauvegardé
+      const alreadySaved = this.slots.some(s => s.data?.nomEval === autoSave.nomEval);
+      this.hasUnsavedEval = !alreadySaved;
+    } else {
+      this.hasUnsavedEval = false;
+    }
+
+    if (this.hasUnsavedEval) {
+      this.flashMessageService.show('warning', 'Vous avez une évaluation qui n\'a pas encore été sauvegardée. Pensez à l\'enregistrer pour ne pas la perdre !');
+    }
   }
 
   /**
@@ -89,6 +105,7 @@ export class SauvegardeComponent implements OnInit {
       if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
     }
 
+    // on lit depuis le slot dynamique si pas de données passées
     const autoSave = this.loadService.getSlot(0);
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
@@ -98,6 +115,8 @@ export class SauvegardeComponent implements OnInit {
     }
 
     this.saveService.saveToSlot(slot.index, data);
+    // this.saveService.clearSlot(0); // On clear le slot dynamique
+    this.flashMessageService.show('success', 'Votre évaluation a été sauvegardée avec succès.')
     this.ngOnInit();
   }
 
@@ -134,6 +153,7 @@ export class SauvegardeComponent implements OnInit {
     console.log('[downloadSlot] slot:', slot);
     if (!slot.data) return; // Si le slot est vide
     this.downloadService.generateSlotZip(slot.data);
+    this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
   }
 
   /**
@@ -148,12 +168,17 @@ export class SauvegardeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'delete') {
-        this.saveService.clearSlot(slot.index); // suppresion des données dans le slot de l'index
+        const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? `Slot ${slot.index}`;
+        this.saveService.clearSlot(slot.index); // suppression des données dans le slot de l'index
+        this.indexedDBService.deleteFileByProject(slotName);
         this.ngOnInit(); // rafraîchit les slots
         this.selectedSlot = null; // le slot est désélectionné.
+        this.flashMessageService.show('success', 'L\'évaluation a été supprimée avec succès.');
       }
       if (result === 'download' && slot.data) {
         this.downloadService.generateSlotZip(slot.data);
+        this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
+
       }
     });
   }
@@ -167,10 +192,13 @@ export class SauvegardeComponent implements OnInit {
     this.router.navigate(['/info-eval']);
   }
 
-  /**
-   * Sauvegarde l'évaluation actuelle dans le slot dynamique.
-   */
-  saveLastEval(): void {
-    this.saveService.saveToSlot(0, this.saveService.dataAuto);
+  deleteAutoSave() {
+    if (this.evalInProgress) {
+      this.saveService.clearSlot(0);
+      this.evalInProgress = !this.evalInProgress;
+      this.flashMessageService.show('success', 'Les dernières modifications ont été supprimés avec succès.');
+      this.ngOnInit();
+    }
   }
+
 }
