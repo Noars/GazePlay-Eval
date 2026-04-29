@@ -33,7 +33,9 @@ export class SauvegardeComponent implements OnInit {
     private downloadService: DownloadService,
     private overwriteGuard: OverwriteGuardService
   ) {}
-
+  /**
+   * Charge les données dans les slots
+   */
   ngOnInit(): void {
     this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
       index: i,

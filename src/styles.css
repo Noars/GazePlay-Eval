@@ -1,5 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Normalise la taille des emojis */
+img.emoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.1em;
+}
+
+/* Icônes thème-sensibles */
+.icon-light { display: inline-block; vertical-align: middle; }
+.icon-dark  { display: none;         vertical-align: middle; }
+[data-bs-theme="dark"] .icon-light { display: none; }
+[data-bs-theme="dark"] .icon-dark  { display: inline-block; }
+
 body {
   min-width: 1280px;
   min-height: 768px;

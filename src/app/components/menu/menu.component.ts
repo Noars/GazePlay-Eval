@@ -8,6 +8,7 @@ import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {ThemeService} from '../../services/theme/theme.service';
 
 @Component({
   selector: 'app-menu',
@@ -27,8 +28,13 @@ export class MenuComponent implements OnInit, OnDestroy {
     private loadServiceZip: LoadZipService,
     private autoSaveService: AutoSaveService,
     private loadService: LoadService,
-    private overwriteGuard: OverwriteGuardService
+    private overwriteGuard: OverwriteGuardService,
+    private themeService: ThemeService
   ) {}
+
+  isDark(): boolean {
+    return this.themeService.getTheme() === 'dark';
+  }
 
   // Executé dans le component est créé
   ngOnInit(): void {

@@ -160,7 +160,8 @@
                       <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
                       <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
+                        <img class="icon-light" src="assets/icons/eye/eye-dark.png" width="16" height="16" alt="">
+                        <img class="icon-dark" src="assets/icons/eye/eye.png" width="16" height="16" alt="">
                       </button>
                     </div>
                   </div>
@@ -171,7 +172,8 @@
                       <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
                       <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
+                        <img class="icon-light" src="assets/icons/eye/eye-dark.png" width="16" height="16" alt="">
+                        <img class="icon-dark" src="assets/icons/eye/eye.png" width="16" height="16" alt="">
                       </button>
                     </div>
                   </div>
@@ -192,7 +194,8 @@
                       <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
                       <span class="text-muted fst-italic">{{ screenToModify.values[4] || 'Aucun fichier choisi' }}</span>
                       <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                        <i class="bi bi-eye"></i>
+                        <img class="icon-light" src="assets/icons/eye/eye-dark.png" width="16" height="16" alt="">
+                        <img class="icon-dark" src="assets/icons/eye/eye.png" width="16" height="16" alt="">
                       </button>
                     </div>
                   </div>
