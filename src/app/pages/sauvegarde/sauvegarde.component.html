@@ -45,12 +45,17 @@
                    [class.slot-card-selected]="selectedSlot === slot.index"
                    [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="selectSlot(slot.index)">
-                <i class="bi slot-filled-icon"
-                   [class.bi-folder2-open]="selectedSlot === slot.index"
-                   [class.bi-folder2]="selectedSlot !== slot.index"></i>
-                <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
-                <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
-              </div>
+                    @if (saveService.activeSlotIndex === slot.index) {
+                      <div class="slot-active-badge">EN COURS</div>
+                    }
+
+                    <i class="bi slot-filled-icon"
+                       [class.bi-folder2-open]="selectedSlot === slot.index"
+                       [class.bi-folder2]="selectedSlot !== slot.index"></i>
+                    <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
+                    <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
+
+            </div>
 
               @if (selectedSlot === slot.index) {
                 <div class="d-flex justify-content-center slot-actions gap-2">
@@ -98,6 +103,16 @@
         <button class="btn btn-primary fw-semibold px-4" (click)="router.navigate(['/home'])">
           <i class="bi bi-arrow-left me-2"></i>Retour
         </button>
+
+        @if(this.evalInProgress) {
+          <button class="btn btn-danger fw-semibold px-4" (click)="deleteAutoSave()">
+            <i class="bi bi-trash-fill me-2"></i>Supprimer les modifications en cours
+          </button>
+        } @else {
+          <button class="btn btn-danger fw-semibold px-4" disabled>
+            <i class="bi bi-trash-fill me-2"></i>Pas de nouvelles modifications
+          </button>
+        }
         <button class="btn btn-success fw-semibold px-4" (click)="newEval()">
           <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
         </button>

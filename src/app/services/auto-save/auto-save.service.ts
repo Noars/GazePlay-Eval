@@ -6,19 +6,21 @@ import {SaveService} from '../save/save.service';
 import {FlashService} from '../flash-message/flash.service';
 import {LoadService} from '../load/load.service';
 import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
+import {IndexedDBService} from '../indexedDB/indexed-db.service';
 
 @Injectable({ providedIn: 'root' })
 export class AutoSaveService implements OnDestroy {
 
   private subscription!: Subscription; // abonnement aux événements du routeur (changement de page)
-  private pagesExclues = ['','home', 'sauvegarde', 'load-save']; // pages non concernés par la sauvegarde auto
+  private pagesExclues = ['','home', 'sauvegarde', 'load-save', 'no-page']; // pages non concernés par la sauvegarde auto
   private isResuming = false; // si on est en train de restaurer une session
 
   constructor(
     private router: Router,
     private saveService: SaveService,
     private flashService: FlashService,
-    private loadService: LoadService
+    private loadService: LoadService,
+    private indexedDbService: IndexedDBService
   ) {}
 
   init(): void {
@@ -41,12 +43,16 @@ export class AutoSaveService implements OnDestroy {
    *
    * @param targetUrl l'url de la page actuelle.
    */
-  private autoSave(targetUrl: string): void {
+  public autoSave(targetUrl: string): void {
     // Nettoyage de l'URL (on enlève le 1er '/')
     // Si jamais on a aussi des attributs dans l'URL, on ne garde que ce qu'il y a avant le '?'
     const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
 
     if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas les pages exclues
+
+    if (this.saveService.dataAuto.nomEval != this.loadService.getSlot(0)?.nomEval) {
+      this.indexedDbService.deleteFileByProject(this.loadService.getSlot(0)?.nomEval ?? '');
+    }
 
     // Sauvegarde auto de l'évaluation, avec message de succès ou d'avertissement
     try {

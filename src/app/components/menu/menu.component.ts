@@ -84,6 +84,16 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.router.navigate(['/load-save']);
   }
 
+  goToGuide() {
+    this.closeMenu();
+    this.router.navigate(['/no-page']);
+  }
+
+  goToOptions() {
+    this.closeMenu();
+    this.router.navigate(['/no-page']);
+  }
+
   /**
    * Ouvre la pop-up pour importer un fichier ZIP dans le site.
    */
