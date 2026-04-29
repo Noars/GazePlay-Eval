@@ -14,6 +14,9 @@ export class IndexedDBService {
     this.dbReady = this.initDB();
   }
 
+  /**
+   * Initialise l'IndexedDB.
+   */
   initDB(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
@@ -32,6 +35,12 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Ajoute un fichier image, son ou vidéo à l'IDB.
+   * @param id L'identifiant du fichier. Doit être de la forme "nomProjet/nomFichier".
+   * @param file Le fichier à stocker.
+   * @param type son type (image, sound, video).
+   */
   async addFile(id: string, file: File | Blob, type: 'image' | 'sound' | 'video'): Promise<void> {
     await this.dbReady;
 
@@ -50,7 +59,7 @@ export class IndexedDBService {
       const check = store.get(id);
 
       check.onsuccess = () => {
-        if (check.result) {
+        if (check.result) { // Si déjà présent dans l'IDB
           reject(new Error(`L'id "${id}" existe déjà`));
           return;
         }
@@ -62,6 +71,10 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Renvoie un fichier de l'IDB à partir de son ID.
+   * @param id L'identifiant du fichier. Doit être de la forme "nomProjet/nomFichier".
+   */
   async getFile(id:string): Promise<EvalFile> {
     await this.dbReady;
 
@@ -80,6 +93,9 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Renvoie tout les fichiers de l'IDB.
+   */
   async getAllFiles(): Promise<EvalFile[]> {
     await this.dbReady;
 
@@ -99,6 +115,12 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Met à jour un fichier dans l'IDB.
+   * @param id L'identifiant du fichier. Doit être de la forme "nomProjet/nomFichier".
+   * @param file Le fichier à stocker.
+   * @param type son type (image, sound, video).
+   */
   async updateFile(id: string, file: File | Blob, type: 'image' | 'sound' | 'video'): Promise<void> {
     await this.dbReady;
 
@@ -119,6 +141,10 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Supprime un fichier de l'IDB.
+   * @param id L'identifiant du fichier. Doit être de la forme "nomProjet/nomFichier".
+   */
   async deleteFile(id: string): Promise<void> {
     await this.dbReady;
 
@@ -132,6 +158,9 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Supprime tout les fichiers de l'IDB.
+   */
   async deleteAll(): Promise<void> {
     await this.dbReady;
 
@@ -144,6 +173,11 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Remplace un id d'un fichier de l'IDB.
+   * @param oldID l'ancien identifiant.
+   * @param newID le nouvel identifiant.
+   */
   async changeID(oldID: string, newID: string): Promise<void> {
     await this.dbReady;
 
@@ -152,6 +186,10 @@ export class IndexedDBService {
     await this.addFile(newID, evalFile.file, evalFile.type);
   }
 
+  /**
+   * Renvoie tout les fichiers qui contiennent le nom du projet dans leur id.
+   * @param projectName le nom du projet.
+   */
   async getFilesByProject(projectName: string): Promise<EvalFile[]> {
     await this.dbReady;
 
@@ -169,6 +207,10 @@ export class IndexedDBService {
     });
   }
 
+  /**
+   * Supprime tout les fichiers qui contiennent le nom du projet dans leur id.
+   * @param projectName le nom du projet.
+   */
   async deleteFileByProject(projectName: string): Promise<void> {
     await this.dbReady;
 
