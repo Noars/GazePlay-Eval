@@ -181,62 +181,69 @@ audio {
   display: flex;
   align-items: center;
   justify-content: center;
-.img-preview {
-  max-width: 100%;
-  max-height: 200px;
-  width: auto;
-  height: auto;
-  display: block;
-  object-fit: contain;
-  border-radius: 8px;
-}
 
-.preview-grid {
-  display: inline-grid;
-  gap: 8px;
-}
+  .img-preview {
+    max-width: 100%;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    border-radius: 8px;
+  }
 
-.preview-cell {
-  width: 70px;
-  height: 70px;
-  background: #1e3a8a;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, box-shadow 0.15s;
-  border: 2px solid transparent;
-  overflow: hidden;
-}
+  .preview-grid {
+    display: inline-grid;
+    gap: 8px;
+  }
 
-.preview-cell:hover {
-  background: #1d4ed8;
-}
+  .preview-cell {
+    width: 70px;
+    height: 70px;
+    background: #1e3a8a;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+    overflow: hidden;
+  }
 
-.preview-cell-active {
-  border-color: #facc15 !important;
-  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
-  background: #2563eb !important;
-}
+  .preview-cell:hover {
+    background: #1d4ed8;
+  }
 
-.preview-cell-icon {
-  font-size: 0.95rem;
-  align-self: flex-end;
-  margin-right: 4px;
-  line-height: 1;
-}
+  .preview-cell-active {
+    border-color: #facc15 !important;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
+    background: #2563eb !important;
+  }
 
-.preview-cell-text {
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.8);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 90%;
-  text-align: center;
-}
+  .preview-cell-icon {
+    font-size: 0.95rem;
+    align-self: flex-end;
+    margin-right: 4px;
+    line-height: 1;
+  }
 
-.valid  { color: #4ade80; }
-.invalid { color: #f87171; }
+  .preview-cell-text {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  .valid {
+    color: #4ade80;
+  }
+
+  .invalid {
+    color: #f87171;
+  }
+}

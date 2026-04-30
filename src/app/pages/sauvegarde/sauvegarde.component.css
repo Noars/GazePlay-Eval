@@ -3,8 +3,8 @@
   border-radius: 12px !important;
   flex-direction: column;
   gap: 10px;
-  position: relative;  /* ✅ nécessaire pour la banderole */
-  overflow: hidden;    /* ✅ nécessaire pour la banderole */
+  position: relative;
+  overflow: hidden;
 }
 
 .slot-empty {
