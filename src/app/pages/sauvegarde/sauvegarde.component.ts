@@ -38,7 +38,9 @@ export class SauvegardeComponent implements OnInit {
     private overwriteGuard: OverwriteGuardService,
     private indexedDBService: IndexedDBService
   ) {}
-
+  /**
+   * Charge les données dans les slots
+   */
   ngOnInit(): void {
     this.evalInProgress = this.loadService.getSlot(0) !== null;
     this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({

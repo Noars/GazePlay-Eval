@@ -11,11 +11,10 @@
         <div class="mb-3 mt-3">
           <label for="evalName" class="form-label fw-semibold">
             Comment souhaitez-vous appeler votre évaluation ?
-            <i class="bi bi-info-circle ms-1"
-               [matTooltip]="tooltipEvalName"
-               matTooltipClass="custom-tooltip-class"
-               matTooltipPosition="right">
-            </i>
+            <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                 [matTooltip]="tooltipEvalName" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+            <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                 [matTooltip]="tooltipEvalName" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
           </label>
           <div class="col-4">
             <input type="text" class="form-control" id="evalName" placeholder="Défaut: GazePlayEval"
@@ -25,11 +24,10 @@
         <div class="mb-3">
           <label class="form-label fw-semibold">
             Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?
-            <i class="bi bi-info-circle ms-1"
-               [matTooltip]="tooltipEvalType"
-               matTooltipClass="custom-tooltip-class"
-               matTooltipPosition="right">
-            </i>
+            <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+                 [matTooltip]="tooltipEvalType" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+            <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+                 [matTooltip]="tooltipEvalType" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
           </label>
           <div class="col-4">
             <select class="form-select" [(ngModel)]="resultType">

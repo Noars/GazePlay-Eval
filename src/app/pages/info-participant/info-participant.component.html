@@ -12,19 +12,17 @@
         Attention : veillez à ajouter un champ pour y renseigner chaque type d’information <br>
         <br>
         Les évaluations sont sauvegardés dans le stockage local du navigateur.
-        <i class="bi bi-info-circle ms-1"
-           [matTooltip]="tooltipTextData"
-           matTooltipClass="custom-tooltip-class"
-           matTooltipPosition="right">
-        </i>
+        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+             [matTooltip]="tooltipTextData" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+             [matTooltip]="tooltipTextData" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
       </div>
       <div class="alert alert-info text-center fw-semibold col-11">
         Vous pouvez réogarniser vos champs ci-dessous via du Drag and Drop !
-        <i class="bi bi-info-circle ms-1"
-           [matTooltip]="tooltipDragDrop"
-           matTooltipClass="custom-tooltip-class"
-           matTooltipPosition="right">
-        </i>
+        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
+             [matTooltip]="tooltipDragDrop" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
+        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
+             [matTooltip]="tooltipDragDrop" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
       </div>
       <div class="card shadow-lg col-11">
         <div class="card-header bg-secondary text-white fw-semibold">
@@ -57,7 +55,9 @@
           </div>
           <div class="text-center mt-4">
             <button (click)="addField()" class="btn btn-secondary px-4 fw-semibold">
-              <i class="bi bi-plus-circle me-2"></i>Ajouter un champ
+              <img class="icon-light me-2" src="assets/icons/plus/plus-dark.png" width="16" height="16" alt="">
+              <img class="icon-dark me-2" src="assets/icons/plus/plus.png" width="16" height="16" alt="">
+              Ajouter un champ
             </button>
           </div>
         </div>
