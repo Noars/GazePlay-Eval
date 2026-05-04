@@ -13,60 +13,45 @@
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseTransitionScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseTransitionScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'transition'"
+                    type="button"
+                    (click) = "toggleAccordion('transition')">
               Paramètres globaux des écrans de transition
             </button>
           </h2>
-          <div id="collapseTransitionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'transition'">
             <app-global-transition-screen [globalTransitionScreenInfos]="globalTransitionScreenInfos"></app-global-transition-screen>
           </div>
         </div>
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseInstructionScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseInstructionScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'instruction'"
+                    type="button"
+                    (click) = "toggleAccordion('instruction')">
               Paramètres globaux des écrans d'instruction
             </button>
           </h2>
-          <div id="collapseInstructionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'instruction'">
             <app-global-instruction-screen [globalInstructionScreenInfos]="globalInstructionScreenInfos"></app-global-instruction-screen>
           </div>
         </div>
 
-        <!--<div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseStimuliScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseStimuliScreen">
-              Écrans stimuli globaux
-            </button>
-          </h2>
-          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
-            <app-global-stimuli-screen [globalStimuliScreenInfos]="globalStimuliScreenInfos"></app-global-stimuli-screen>
-          </div>
-        </div>-->
-
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseStimuliScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseStimuliScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'stimuli'"
+                    type="button"
+                    (click) = "toggleAccordion('stimuli')">
               Paramètres globaux des écrans de stimuli
             </button>
           </h2>
-          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'stimuli'">
             <div class="accordion-body">
 
               <div class="param-section-title">Taille de la grille</div>
