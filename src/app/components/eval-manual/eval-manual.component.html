@@ -86,20 +86,24 @@
               </div>
               @if (globalStimuliScreenInfos[2]) {
                 <div class="param-row">
-                  <span class="param-label">Durée (secondes)</span>
+                  <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
-                    <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
-                    <span id="maxTimeScreenInfo" class="form-text">La durée est en secondes !</span>
+                    <div class="input-group w-auto">
+                      <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
                   </div>
                 </div>
               }
 
               <div class="param-section-title">Durée de fixation pour validation</div>
               <div class="param-row">
-                <span class="param-label">Durée (secondes)</span>
+                <span class="param-label">Quelle durée ?</span>
                 <div class="param-control">
-                  <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
-                 <!-- <span id="nbFixationLengthInfo" class="form-text">La durée est en secondes !</span>-->
+                  <div class="input-group w-auto">
+                    <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
+                    <span class="input-group-text">secondes</span>
+                  </div>
                 </div>
               </div>
 
