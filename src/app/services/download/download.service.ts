@@ -219,6 +219,8 @@ export class DownloadService {
 
       delete entry.imageFile;
       delete entry.soundFile;
+      delete entry.imageId;
+      delete entry.soundId;
     }
 
     let audioFile: File | Blob | null = this.isValidFile(stimuliValues[11]) ? stimuliValues[11] : null;
@@ -346,11 +348,8 @@ export class DownloadService {
         zip.file(`${evalName}/audio/${entry.soundName}`, arrayBuffer);
       }
 
-      // Nettoyage des champs non-sérialisables et internes
       delete entry.imageFile;
       delete entry.soundFile;
-      delete entry.imageId;
-      delete entry.soundId;
     }
 
     // Résolution du son global de l'écran stimuli
