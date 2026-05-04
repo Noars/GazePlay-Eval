@@ -19,7 +19,7 @@
       <span class="param-label">Combien de temps ?</span>
       <div class="param-control">
         <div class="input-group w-auto">
-          <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[1]">
+          <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="globalTransitionScreenInfos[1]">
           <span class="input-group-text">secondes</span>
         </div>
       </div>
@@ -59,7 +59,7 @@
         <span class="param-label">Combien de temps ?</span>
         <div class="param-control">
           <div class="input-group w-auto">
-            <input type="number" class="form-control" min="1" [(ngModel)]="globalTransitionScreenInfos[4]">
+            <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="globalTransitionScreenInfos[4]">
             <span class="input-group-text">secondes</span>
           </div>
         </div>

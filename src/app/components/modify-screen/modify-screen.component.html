@@ -43,7 +43,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -83,7 +83,7 @@
                     <span class="param-label">Combien de temps ?</span>
                     <div class="param-control">
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[4]">
+                        <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[4]">
                         <span class="input-group-text">secondes</span>
                       </div>
                     </div>
@@ -120,7 +120,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -244,7 +244,7 @@
                   <span class="param-label">Combien de temps de fixation ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[7]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[7]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -294,7 +294,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[3]">
+                      <input type="number" class="form-control" min="0.1" value="0.1" step="0.1" [(ngModel)]="screenToModify.values[3]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -303,9 +303,12 @@
 
               <div class="param-section-title">Fixation & sélection</div>
               <div class="param-row">
-                <span class="param-label">Temps de fixation</span>
+                <span class="param-label">Temps de fixation pour la validation</span>
                 <div class="param-control">
-                  <input type="number" class="form-control" min="1" max="9999" value="1" [(ngModel)]="screenToModify.values[4]">
+                  <div class="input-group w-auto">
+                    <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="screenToModify.values[4]">
+                    <span class="input-group-text">secondes</span>
+                  </div>
                 </div>
               </div>
               <div class="param-row">
