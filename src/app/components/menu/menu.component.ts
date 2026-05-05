@@ -112,7 +112,8 @@ export class MenuComponent implements OnInit, OnDestroy {
           { index: 3, name: this.loadService.getSlot(3)?.nomEval, empty: this.loadService.getSlot(3) === null },
         ]
       },
-      disableClose: true // empêche l'utilisateur de cliquer hors de la popup
+      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
+      panelClass: 'scrollable-dialog' // classe custom pour laisser le scroll
     });
 
     dialogRef.afterClosed().subscribe(async result => {

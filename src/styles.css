@@ -107,6 +107,27 @@ body {
   z-index: 2000;
 }
 
+/**
+Code pour activer le scroll dans la popup d'import
+ */
+.scrollable-dialog .mat-mdc-dialog-surface {
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.scrollable-dialog .popup-container {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.scrollable-dialog .popup-body {
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Variables globales — light mode */
 :root {
   --popup-accent:              #1e3a8a;
