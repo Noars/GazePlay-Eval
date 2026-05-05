@@ -42,6 +42,7 @@
                               placeholder="Titre de l'écran"
                               [(ngModel)]="screen.name"
                               [readonly]="editNameScreenDisable"
+                              (click)="$event.stopPropagation(); selectScreen(screen, i); editNameScreen(screen, !editNameScreenDisable, i)"
                               (drop)="$event.preventDefault(); $event.stopPropagation();"
                               (dragover)="$event.preventDefault(); $event.stopPropagation();"
                             />
