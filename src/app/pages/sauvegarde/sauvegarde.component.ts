@@ -26,6 +26,7 @@ export class SauvegardeComponent implements OnInit {
   selectedSlot: FormatTypeConfig | null = null;
   hasUnsavedEval: boolean = false;
   evalInProgress: boolean | undefined;
+  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
 
   constructor(
     private dialog: MatDialog,

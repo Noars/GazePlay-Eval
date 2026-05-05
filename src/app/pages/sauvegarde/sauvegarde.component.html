@@ -51,7 +51,7 @@
                    [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="selectSlot(slot.index)">
                 @if (saveService.activeSlotIndex === slot.index) {
-                  <div class="slot-active-badge">EN COURS</div>
+                  <div class="slot-active-badge" [matTooltip]="tooltipCurrentEval" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">EN COURS</div>
                 }
                 <img class="icon-light slot-filled-icon" src="assets/icons/folder/folder-dark.png" alt="">
                 <img class="icon-dark slot-filled-icon" src="assets/icons/folder/folder.png" alt="">

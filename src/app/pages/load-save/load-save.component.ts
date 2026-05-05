@@ -7,17 +7,20 @@ import { saveModel } from '../../shared/saveModel';
 import { CommonModule } from '@angular/common';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {MatTooltip} from '@angular/material/tooltip';
+
 
 @Component({
   selector: 'app-load-save',
   templateUrl: './load-save.component.html',
   styleUrl: './load-save.component.css',
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, MatTooltip]
 })
 export class LoadSaveComponent implements OnInit {
 
   slots: { index: number; data: saveModel | null }[] = [];
+  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
 
   constructor(
     private router: Router,

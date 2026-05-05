@@ -105,6 +105,11 @@ body {
 
 .cdk-overlay-container {
   z-index: 2000;
+  pointer-events: none !important;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  pointer-events: none !important;
 }
 
 /**
@@ -175,6 +180,10 @@ Code pour activer le scroll dans la popup d'import
   --slot-shadow-hover:         0 8px 24px rgba(59, 130, 246, 0.35);
   --slot-selected-bg:          rgba(59, 130, 246, 0.15);
 }
+
+/**
+Classe pour les infobulles qu'on affiche lors d'un hover d'élément
+ */
 .custom-tooltip-class {
   font-size: 0.85rem;
   background-color: #1e3a8a !important;
@@ -184,4 +193,8 @@ Code pour activer le scroll dans la popup d'import
   max-width: 280px !important;
   line-height: 1.5 !important;
   box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2) !important;
+}
+
+.mat-mdc-tooltip-panel {
+  pointer-events: none !important;
 }
