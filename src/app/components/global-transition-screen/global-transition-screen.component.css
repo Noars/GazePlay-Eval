@@ -16,7 +16,6 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 0;
-  border-bottom: 0.5px solid var(--bs-border-color);
   gap: 1rem;
   min-height: 48px;
 }
