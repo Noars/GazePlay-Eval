@@ -1,5 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Normalise la taille des emojis */
+img.emoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.1em;
+}
+
+/* Icônes thème-sensibles */
+.icon-light { display: inline-block; vertical-align: middle; }
+.icon-dark  { display: none;         vertical-align: middle; }
+[data-bs-theme="dark"] .icon-light { display: none; }
+[data-bs-theme="dark"] .icon-dark  { display: inline-block; }
+
 body {
   min-width: 1280px;
   min-height: 768px;
@@ -92,6 +105,32 @@ body {
 
 .cdk-overlay-container {
   z-index: 2000;
+  pointer-events: none !important;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  pointer-events: none !important;
+}
+
+/**
+Code pour activer le scroll dans la popup d'import
+ */
+.scrollable-dialog .mat-mdc-dialog-surface {
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.scrollable-dialog .popup-container {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.scrollable-dialog .popup-body {
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Variables globales — light mode */
@@ -141,6 +180,10 @@ body {
   --slot-shadow-hover:         0 8px 24px rgba(59, 130, 246, 0.35);
   --slot-selected-bg:          rgba(59, 130, 246, 0.15);
 }
+
+/**
+Classe pour les infobulles qu'on affiche lors d'un hover d'élément
+ */
 .custom-tooltip-class {
   font-size: 0.85rem;
   background-color: #1e3a8a !important;
@@ -150,4 +193,8 @@ body {
   max-width: 280px !important;
   line-height: 1.5 !important;
   box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2) !important;
+}
+
+.mat-mdc-tooltip-panel {
+  pointer-events: none !important;
 }

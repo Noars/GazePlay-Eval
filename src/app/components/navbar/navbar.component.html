@@ -17,8 +17,12 @@
         <span class="mx-auto fw-bold fs-2 clickable-title" (click)="goToHome()">GazePlay Eval</span>
       </div>
       <div>
-        <button class="btn btn-outline-secondary navbar-button" (click)="changeTheme()">
-          {{ getTheme() }}
+        <button class="btn btn-outline-secondary navbar-button d-flex align-items-center justify-content-center" (click)="changeTheme()">
+          @if (getTheme() === 'sun') {
+            <img ngSrc="assets/icons/sun.png" alt="Mode clair" width="20" height="20">
+          } @else {
+            <img ngSrc="assets/icons/moon.png" alt="Mode sombre" width="20" height="20">
+          }
         </button>
       </div>
     </div>

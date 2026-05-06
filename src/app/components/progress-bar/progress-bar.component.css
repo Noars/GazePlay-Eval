@@ -36,3 +36,8 @@
 .line.completed {
   background-color: #198754;
 }
+
+.evalName {
+  color: var(--bs-primary);
+  padding-top: 15px;
+}

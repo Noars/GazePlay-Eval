@@ -12,7 +12,7 @@ import {IndexedDBService} from '../indexedDB/indexed-db.service';
 export class AutoSaveService implements OnDestroy {
 
   private subscription!: Subscription; // abonnement aux événements du routeur (changement de page)
-  private pagesExclues = ['','home', 'sauvegarde', 'load-save', 'no-page']; // pages non concernés par la sauvegarde auto
+  private pagesExclues = ['','home', 'sauvegarde', 'load-save', 'no-page', 'option']; // pages non concernés par la sauvegarde auto
   private isResuming = false; // si on est en train de restaurer une session
 
   constructor(
@@ -61,7 +61,7 @@ export class AutoSaveService implements OnDestroy {
       if (this.saveService.activeSlotIndex !== null) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
-      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.', 2000);
+      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.');
     } catch (e) {
       this.flashService.show('warning', 'Vos modifications n\'ont pas pu être enregistrées');
     }

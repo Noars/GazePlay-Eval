@@ -9,6 +9,7 @@ import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {ThemeService} from '../../services/theme/theme.service';
 
 @Component({
   selector: 'app-menu',
@@ -30,7 +31,13 @@ export class MenuComponent implements OnInit, OnDestroy {
     private loadService: LoadService,
     private saveService: SaveService,
     private overwriteGuard: OverwriteGuardService
+    private overwriteGuard: OverwriteGuardService,
+    private themeService: ThemeService
   ) {}
+
+  isDark(): boolean {
+    return this.themeService.getTheme() === 'dark';
+  }
 
   // Executé dans le component est créé
   ngOnInit(): void {
@@ -93,7 +100,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   goToOptions() {
     this.closeMenu();
-    this.router.navigate(['/no-page']);
+    this.router.navigate(['/option']);
   }
 
   /**
@@ -108,7 +115,8 @@ export class MenuComponent implements OnInit, OnDestroy {
           { index: 3, name: this.loadService.getSlot(3)?.nomEval, empty: this.loadService.getSlot(3) === null },
         ]
       },
-      disableClose: true // empêche l'utilisateur de cliquer hors de la popup
+      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
+      panelClass: 'scrollable-dialog' // classe custom pour laisser le scroll
     });
 
     dialogRef.afterClosed().subscribe(async result => {
