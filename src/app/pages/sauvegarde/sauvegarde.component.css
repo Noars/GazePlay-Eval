@@ -3,8 +3,8 @@
   border-radius: 12px !important;
   flex-direction: column;
   gap: 10px;
-  position: relative;  /* ✅ nécessaire pour la banderole */
-  overflow: hidden;    /* ✅ nécessaire pour la banderole */
+  position: relative;
+  overflow: hidden;
 }
 
 .slot-empty {
@@ -19,7 +19,8 @@
 }
 
 .slot-empty-icon {
-  font-size: 2.5rem;
+  width: 40px;
+  height: 40px;
   color: #94a3b8;
 }
 
@@ -37,7 +38,8 @@
 }
 
 .slot-filled-icon {
-  font-size: 2.5rem;
+  width: 40px;
+  height: 40px;
   color: #1e3a8a;
 }
 

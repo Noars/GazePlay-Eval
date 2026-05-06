@@ -22,6 +22,7 @@ export class EvalManualComponent implements OnInit{
   globalTransitionScreenInfos: any[] = saveModelDefault.globalParamsTransitionScreen;
   globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
   globalStimuliScreenInfos: any[] = saveModelDefault.globalParamsStimuliScreen;
+  openAccordion: string | null = null;
 
   constructor(private router: Router,
               private saveService: SaveService,) {
@@ -58,6 +59,14 @@ export class EvalManualComponent implements OnInit{
   backToEvalChoice(){
     this.saveData();
     this.selectedModeChange.emit(null);
+  }
+
+  /**
+   * Méthode pour ouvrir/fermer un accordéon des paramètres globaux des écrans
+   * @param id - l'identifiant de l'accordéon (transition|instruction|stimuli)
+   */
+  toggleAccordion(id: string): void {
+    this.openAccordion = this.openAccordion === id ? null : id;
   }
 
   protected readonly Number = Number;

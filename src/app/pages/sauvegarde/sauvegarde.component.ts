@@ -26,6 +26,7 @@ export class SauvegardeComponent implements OnInit {
   selectedSlot: FormatTypeConfig | null = null;
   hasUnsavedEval: boolean = false;
   evalInProgress: boolean | undefined;
+  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
 
   constructor(
     private dialog: MatDialog,
@@ -38,7 +39,9 @@ export class SauvegardeComponent implements OnInit {
     private overwriteGuard: OverwriteGuardService,
     private indexedDBService: IndexedDBService
   ) {}
-
+  /**
+   * Charge les données dans les slots
+   */
   ngOnInit(): void {
     this.evalInProgress = this.loadService.getSlot(0) !== null;
     this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
