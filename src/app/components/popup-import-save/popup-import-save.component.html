@@ -64,7 +64,7 @@
         <img class="icon-light file-input-icon" src="assets/icons/import/import-dark.png" alt="">
         <img class="icon-dark file-input-icon" src="assets/icons/import/import.png" alt="">
         <span class="file-input-text">
-          {{ zipFileName !== '' ? zipFileName : 'Cliquez pour sélectionner un fichier .gpSave' }}
+          {{ isDragging ? 'Relâchez pour importer' : zipFileName !== '' ? zipFileName : 'Glissez un fichier .gpSave ou cliquez pour sélectionner' }}
         </span>
         <input #fileInput type="file" accept=".gpSave,.zip" hidden (change)="onZipSelected($event)">
       </div>

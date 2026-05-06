@@ -20,7 +20,7 @@
 /* Carte intérieure */
 .inner-card {
   border-radius: 12px;
-  border: 1px solid var(--bs-border-color);
+  border: 2px solid rgba(59, 130, 246, 0.45);
   overflow: hidden;
 }
 
@@ -28,10 +28,19 @@
   border-radius: 12px 12px 0 0 !important;
   padding: 0.75rem 1.25rem;
   background-color: var(--bs-secondary-bg) !important;
-  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--bs-emphasis-color) !important;
+  color: #3b82f6 !important;
+}
+
+[data-bs-theme="dark"] .inner-card {
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+[data-bs-theme="dark"] .inner-card-header {
+  color: #60a5fa !important;
+  border-bottom-color: rgba(96, 165, 250, 0.3);
 }
 
 .inner-card-body {
@@ -167,6 +176,12 @@
 
 .cell:hover {
   background: #1d4ed8;
+}
+
+.cell-active {
+  border: 2px solid #facc15 !important;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
+  background: #2563eb !important;
 }
 
 .cell-text {
