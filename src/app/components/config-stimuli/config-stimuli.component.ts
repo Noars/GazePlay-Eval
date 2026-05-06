@@ -262,8 +262,8 @@ export class ConfigStimuliComponent implements OnChanges{
       data: {
         image: this.data.screen[this.data.cell].imageFile
       },
-      panelClass: 'crop-image',
-      disableClose: true
+      panelClass: 'scrollable-dialog', // classe custom pour laisser le scroll
+      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
     });
 
     dialogRef.afterClosed().subscribe((result: File | null) => {

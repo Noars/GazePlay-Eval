@@ -1,9 +1,20 @@
-<div class="card shadow-lg w-100">
-  <div class="card-header bg-secondary text-white fw-semibold">
-    <h2 class="card-title text-center">Crop Image</h2>
+<div class="popup-container">
+
+  <!-- Header -->
+  <div class="popup-header">
+    Recadrer l'image
   </div>
-  <div class="card-body" style="text-align: -webkit-center;">
-    <div class="crop-container">
+
+  <!-- Body -->
+  <div class="popup-body">
+
+    <!-- Info -->
+    <div class="popup-alert-info">
+      <span>Utilisez les carrés pour redimensionner votre image.</span>
+    </div>
+
+    <!-- Recadrage -->
+    <div class="section-block">
       <image-cropper
         #cropper
         [imageBase64]="imageToCrop"
@@ -23,10 +34,13 @@
         <input type="number" class="form-control w-25" [max]="imageMaxWidth - cropWidthX1" [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
       </div>
 
-      <div class="crop-buttons mt-3">
-        <button class="btn btn-success fw-semibold me-2" (click)="validateCrop()">Valider</button>
-        <button class="btn btn-danger fw-semibold" (click)="cancelCrop()">Annuler</button>
-      </div>
     </div>
+
+    <!-- Boutons -->
+    <div class="d-flex justify-content-between gap-3 mt-2">
+      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancelCrop()">Annuler</button>
+      <button class="btn-confirm fw-semibold flex-grow-1" (click)="validateCrop()">Recadrer l'image</button>
+    </div>
+
   </div>
 </div>
