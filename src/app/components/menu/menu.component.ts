@@ -30,7 +30,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     private autoSaveService: AutoSaveService,
     private loadService: LoadService,
     private saveService: SaveService,
-    private overwriteGuard: OverwriteGuardService
     private overwriteGuard: OverwriteGuardService,
     private themeService: ThemeService
   ) {}
