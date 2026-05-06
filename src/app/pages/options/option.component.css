@@ -1,6 +1,7 @@
 .card {
   border-radius: 16px;
   border: 1px solid var(--bs-border-color);
+  margin-top: 25px;
 }
 
 .card-header {
