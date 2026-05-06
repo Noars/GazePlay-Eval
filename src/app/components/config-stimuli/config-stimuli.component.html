@@ -61,8 +61,8 @@
 
     <!-- Actions -->
     <div class="actions-footer">
-      <button class="btn-action btn-delete" (click)="deleteCell()">Supprimer</button>
-      <button class="btn-action btn-validate" data-bs-dismiss="offcanvas" aria-label="Fermer">Valider</button>
+      <button class="btn-action btn btn-danger fw-semibold" (click)="deleteCell()">Supprimer</button>
+      <button class="btn-action btn-validate" data-bs-dismiss="offcanvas" (click)="saveProgress()" aria-label="Valider">Valider</button>
     </div>
 
   </div>
