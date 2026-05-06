@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadZipService } from '../../services/load-zip/load-zip.service';
 import { LoadService} from '../../services/load/load.service';
+import { SaveService } from '../../services/save/save.service';
 import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
@@ -27,6 +28,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     private loadServiceZip: LoadZipService,
     private autoSaveService: AutoSaveService,
     private loadService: LoadService,
+    private saveService: SaveService,
     private overwriteGuard: OverwriteGuardService
   ) {}
 
@@ -115,8 +117,15 @@ export class MenuComponent implements OnInit, OnDestroy {
       if (!await this.overwriteGuard.check(0)) return; // Si l'import correspond à un slot
 
       if (result.mode === 'save') {
-        if (!await this.overwriteGuard.check(result.slotIndex as FormatTypeConfig)) return;
-        await this.loadServiceZip.loadZipToSlot(result.zipFile, result.slotIndex as FormatTypeConfig);
+        const slotIndex = result.slotIndex as FormatTypeConfig;
+        if (!await this.overwriteGuard.check(slotIndex)) return;
+        await this.loadServiceZip.loadZipToSlot(result.zipFile, slotIndex);
+        const uniqueName = this.overwriteGuard.getUniqueEvalName(this.saveService.dataAuto.nomEval, slotIndex);
+        if (uniqueName !== this.saveService.dataAuto.nomEval) {
+          this.saveService.dataAuto.nomEval = uniqueName;
+          this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
+          this.saveService.saveToSlot(0, this.saveService.dataAuto);
+        }
       } else {
         await this.loadServiceZip.loadZip(result.zipFile);
       }

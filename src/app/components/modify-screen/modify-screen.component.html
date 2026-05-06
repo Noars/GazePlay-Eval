@@ -388,7 +388,7 @@
                      [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'"
                      [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                   @for (n of totalCells; track n; let i = $index) {
-                    <div [id]="i" class="cell" (click)="openStimuliData(i)">
+                    <div [id]="i" class="cell" [class.cell-active]="activeCellIndex === i" (click)="openStimuliData(i)">
                       @if (screenToModify.values[12][i].goodAnswer === true) {
                         <span class="cell-text icon valid">✓</span>
                       } @else {

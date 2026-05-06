@@ -59,6 +59,7 @@ export class ModifyScreenComponent implements OnInit{
     cols: number;
   }
   stimuliOffcanvasReady: boolean = false;
+  activeCellIndex: number | null = null;
 
   constructor(
     private updateScreenService: UpdateScreensService,
@@ -438,6 +439,7 @@ export class ModifyScreenComponent implements OnInit{
 
   openStimuliData(cellNumber: number) {
     const listScreen = this.screenToModify.values[12];
+    this.activeCellIndex = cellNumber;
     this.dataStimuli = {
       cell: cellNumber,
       screen: listScreen,

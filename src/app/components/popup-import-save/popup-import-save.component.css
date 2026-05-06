@@ -95,6 +95,21 @@
   background-color: var(--popup-accent-bg-subtle);
 }
 
+.drag-over {
+  border-color: var(--popup-accent) !important;
+  background-color: var(--popup-accent-bg-selected) !important;
+  border-style: solid !important;
+}
+
+.drag-over .file-input-icon {
+  color: var(--popup-accent-text);
+}
+
+.drag-over .file-input-text {
+  color: var(--popup-accent-text);
+  font-weight: 600;
+}
+
 .file-input-icon {
   font-size: 1.5rem;
   color: var(--popup-input-icon);

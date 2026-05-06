@@ -376,3 +376,4 @@ export class DownloadService {
     jsonData.push({Type: stimuliScreenConstModel, ...result});
   }
 }
+

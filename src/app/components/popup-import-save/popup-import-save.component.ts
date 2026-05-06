@@ -24,10 +24,11 @@ import { FormsModule } from '@angular/forms';
 })
 export class PopupImportSaveComponent {
 
-  mode: 'consult' | 'save' | null = null; // mode sélectionné par l'utilisateur
-  selectedSlot: number | null = null;      // slot de destination, uniquement utilisé en mode 'save'
-  zipFile: File | null = null;             // fichier ZIP sélectionné
-  zipFileName: string = '';                // nom affiché dans l'interface
+  mode: 'consult' | 'save' | null = null;
+  selectedSlot: number | null = null;
+  zipFile: File | null = null;
+  zipFileName: string = '';
+  isDragging: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<PopupImportSaveComponent>,
@@ -36,16 +37,31 @@ export class PopupImportSaveComponent {
     }
   ) {}
 
-  /**
-   * Appelée lorsque l'utilisateur sélectionne un fichier via l'input file.
-   * Stocke le premier fichier sélectionné et son nom pour l'affichage.
-   */
   onZipSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.zipFile = input.files[0];
-      this.zipFileName = input.files[0].name;
-    }
+    if (input.files?.length) this.setFile(input.files[0]);
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging = false;
+    const file = event.dataTransfer?.files[0];
+    if (file) this.setFile(file);
+  }
+
+  private setFile(file: File) {
+    this.zipFile = file;
+    this.zipFileName = file.name;
   }
 
   /**

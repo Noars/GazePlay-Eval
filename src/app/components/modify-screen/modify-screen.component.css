@@ -180,6 +180,12 @@
   background: #1d4ed8;
 }
 
+.cell-active {
+  border: 2px solid #facc15 !important;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
+  background: #2563eb !important;
+}
+
 .cell-text {
   overflow: hidden;
   text-overflow: ellipsis;
