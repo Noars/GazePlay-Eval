@@ -1,22 +1,51 @@
 import { Injectable, signal } from '@angular/core';
 import { Flash } from '../../shared/flash.model';
+import { OptionService } from '../options/option-service';
+import {optionsModel} from '../../shared/optionsModel';
 
 @Injectable({ providedIn: 'root' })
 export class FlashService {
   flashs = signal<Flash[]>([]); // liste des flash-messages
   private counter = 0; // compteur pour les ids des messages
 
+  constructor(
+    private optionService: OptionService
+  ) {}
+
   /**
    * Affiche un flash-message en bas à droite du site, avec un contenu, un type, et une durée.
    * @param type le type du flash-message (info, warning, sucess, error).
    * @param message le contenu du flash-message.
-   * @param duration la durée d'affichage du flash-message, en ms. Vaut 5s par défaut.
+   * @param duration la durée d'affichage du flash-message, en ms.
    */
-  show(type: Flash['type'] = 'info',message: string, duration = 5000): void {
+  show(type: Flash['type'] = 'info',message: string, duration: number = -1): void {
+
+    let flashDuration: number = 5000;
+    if (duration == -1 ) {
+     flashDuration = this.getTimeout();
+    } else {
+      flashDuration = duration;
+    }
 
     const id = this.counter = this.counter + 1;
     this.flashs.update(t => [...t, { id, message, type }]);
-    setTimeout(() => this.remove(id), duration);
+    setTimeout(() => this.remove(id), flashDuration);
+  }
+
+  /**
+   * Récupère la durée des flash messages enregistré dans les options.
+   *
+   * @returns la durée en millisecondes, ou 5000 ms si la valeur n'a pas été trouvée.
+   */
+  private getTimeout(): number {
+
+    let options: optionsModel | null = this.optionService.getOptions();
+    if (options !== null) {
+      return options?.flashDuration as number;
+    } else {
+      return 5000;
+    }
+
   }
 
   /**

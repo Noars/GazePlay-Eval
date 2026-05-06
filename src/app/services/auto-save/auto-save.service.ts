@@ -61,7 +61,7 @@ export class AutoSaveService implements OnDestroy {
       if (this.saveService.activeSlotIndex !== null) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
-      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.', 2000);
+      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.');
     } catch (e) {
       this.flashService.show('warning', 'Vos modifications n\'ont pas pu être enregistrées');
     }
