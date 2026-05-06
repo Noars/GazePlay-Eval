@@ -154,10 +154,11 @@ export class CropImageComponent implements OnInit{
   validateCrop(){
     console.log('Cropped image:', this.croppedImage);
     this.dialogRef.close(this.croppedImage);
-    this.flashService.show("success", "Votre image a bien été redimensionnée.")
+    this.flashService.show("success", "Votre image a bien été recadrée.")
   }
 
   cancelCrop(){
     this.dialogRef.close();
+    this.flashService.show("info", "Les proportions de votre image ont été conservées.")
   }
 }

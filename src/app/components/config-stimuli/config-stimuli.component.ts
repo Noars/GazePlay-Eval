@@ -6,6 +6,7 @@ import {MatDialog} from '@angular/material/dialog';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
 import {SaveService} from '../../services/save/save.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-config-stimuli',
@@ -36,6 +37,7 @@ export class ConfigStimuliComponent implements OnChanges{
     private dialog: MatDialog,
     private idbService: IndexedDBService,
     private saveService: SaveService,
+    private saveAutoService: AutoSaveService,
     private sanitizer: DomSanitizer){
   }
 
@@ -111,6 +113,11 @@ export class ConfigStimuliComponent implements OnChanges{
     };
 
     this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+  }
+
+  public saveProgress(): void {
+    this.saveAutoService.autoSave('stimuli');
   }
 
   private async findFileInIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
