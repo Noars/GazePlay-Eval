@@ -5,6 +5,7 @@ import {CropImageComponent} from '../crop-image/crop-image.component';
 import {MatDialog} from '@angular/material/dialog';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
 import {SaveService} from '../../services/save/save.service';
+import {DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-config-stimuli',
@@ -28,13 +29,14 @@ export class ConfigStimuliComponent implements OnChanges{
 
   pageElement: HTMLElement | null = document.getElementById('configStimuli');
   isResizing = false;
-  previewImage: any = "";
-  previewSound: any = "";
+  previewImage: SafeUrl | string = '';
+  previewSound: SafeResourceUrl | string = '';
 
   constructor(
     private dialog: MatDialog,
     private idbService: IndexedDBService,
-    private saveService: SaveService){
+    private saveService: SaveService,
+    private sanitizer: DomSanitizer){
   }
 
   async ngOnChanges() {
@@ -58,7 +60,7 @@ export class ConfigStimuliComponent implements OnChanges{
     }
 
     if (cellData.imageFile instanceof Blob) {
-      this.previewImage = URL.createObjectURL(cellData.imageFile);
+      this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(cellData.imageFile));
     } else {
       this.previewImage = '';
     }
@@ -75,7 +77,7 @@ export class ConfigStimuliComponent implements OnChanges{
     }
 
     if (cellData.soundFile instanceof Blob) {
-      this.previewSound = URL.createObjectURL(cellData.soundFile);
+      this.previewSound = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(cellData.soundFile));
     } else {
       this.previewSound = '';
     }
@@ -232,7 +234,7 @@ export class ConfigStimuliComponent implements OnChanges{
     this.data.screen[this.data.cell].imageName = file.name;
     this.data.screen[this.data.cell].imageId = id;
     this.data.screen[this.data.cell].imageFile = file;
-    this.previewImage = URL.createObjectURL(file);
+    this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
   }
 
   async getSoundFile(event: Event){
@@ -252,7 +254,7 @@ export class ConfigStimuliComponent implements OnChanges{
     this.data.screen[this.data.cell].soundName = file.name;
     this.data.screen[this.data.cell].soundId = id;
     this.data.screen[this.data.cell].soundFile = file;
-    this.previewSound = URL.createObjectURL(file);
+    this.previewSound = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
   }
 
   cropImage(){
