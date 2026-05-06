@@ -20,7 +20,7 @@ export class OptionService {
     }
   }
 
-  public setOptions(optionsData:optionsModel): void {
+  public setOptions(optionsData: optionsModel | null): void {
     try {
       localStorage.setItem('options', JSON.stringify(optionsData))
     } catch (e) {

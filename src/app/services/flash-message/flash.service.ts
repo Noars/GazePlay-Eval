@@ -7,10 +7,27 @@ import {optionsModel} from '../../shared/optionsModel';
 export class FlashService {
   flashs = signal<Flash[]>([]); // liste des flash-messages
   private counter = 0; // compteur pour les ids des messages
+  private defaultDuration: number = 5000
 
   constructor(
-    private optionService: OptionService
-  ) {}
+    private optionService: OptionService,
+  )
+  {
+    try {
+      let options = this.optionService.getOptions();
+      if (options?.flashDuration) {
+        this.setDefaultDuration(options.flashDuration * 1000);
+      }
+    } catch { }
+  }
+
+  getDefaultDuration(): number {
+    return this.defaultDuration / 1000; // en secondes
+  }
+
+  setDefaultDuration(durationMs: number): void {
+    this.defaultDuration = durationMs;
+  }
 
   /**
    * Affiche un flash-message en bas à droite du site, avec un contenu, un type, et une durée.
@@ -18,18 +35,14 @@ export class FlashService {
    * @param message le contenu du flash-message.
    * @param duration la durée d'affichage du flash-message, en ms.
    */
-  show(type: Flash['type'] = 'info',message: string, duration: number = -1): void {
-
-    let flashDuration: number = 5000;
-    if (duration == -1 ) {
-     flashDuration = this.getTimeout();
-    } else {
-      flashDuration = duration;
+  show(type: Flash['type'] = 'info', message: string, duration?: number): void {
+    const id = this.counter++;
+    const d = duration ?? this.defaultDuration; // on utilise la durée par défaut si pas spécifiée
+    if (d <= 0) {
+      return ;
     }
-
-    const id = this.counter = this.counter + 1;
-    this.flashs.update(t => [...t, { id, message, type }]);
-    setTimeout(() => this.remove(id), flashDuration);
+    this.flashs.update(f => [...f, { id, message, type }]);
+    setTimeout(() => this.remove(id), d);
   }
 
   /**
