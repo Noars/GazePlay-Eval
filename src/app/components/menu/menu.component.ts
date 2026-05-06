@@ -97,7 +97,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   goToOptions() {
     this.closeMenu();
-    this.router.navigate(['/no-page']);
+    this.router.navigate(['/option']);
   }
 
   /**
