@@ -90,6 +90,43 @@ export class ConfigStimuliComponent implements OnChanges{
     }
   }
 
+  async deleteImage(): Promise<void> {
+    const cell = this.data.screen[this.data.cell];
+
+    // Supprimer les fichiers de l'IDB si ils existent
+    if (cell.imageId || cell.imageName) {
+      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
+    }
+
+
+    cell.imageId = '';
+    cell.imageName = '';
+    cell.imageFile = undefined;
+
+
+    this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+  }
+
+  async deleteSound(): Promise<void> {
+
+    const cell = this.data.screen[this.data.cell];
+
+    if (cell.soundId || cell.soundName) {
+      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
+    }
+
+
+    cell.soundId = '';
+    cell.soundName = '';
+    cell.soundFile = undefined;
+
+
+    this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+
+  }
+
   async deleteCell(): Promise<void> {
     const cell = this.data.screen[this.data.cell];
 

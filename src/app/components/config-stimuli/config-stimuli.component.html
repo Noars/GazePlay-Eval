@@ -38,10 +38,13 @@
         <input #fileInputImage type="file" accept="image/*" hidden (change)="getImageFile($event)">
       </label>
       @if (previewImage) {
+      <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImage()">Supprimer l'image</button>
         <div class="media-preview">
           <img [src]="previewImage" class="img-preview" alt="Aperçu image">
           <button class="btn-crop" (click)="cropImage()">Recadrer</button>
         </div>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer l'image</button>
       }
     </div>
 
@@ -53,15 +56,22 @@
         <input #fileInputSound type="file" accept="audio/*" hidden (change)="getSoundFile($event)">
       </label>
       @if (previewSound) {
+        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSound()">Supprimer le son</button>
         <div class="media-preview">
           <audio controls [attr.src]="previewSound"></audio>
         </div>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer le son</button>
       }
     </div>
 
     <!-- Actions -->
     <div class="actions-footer">
-      <button class="btn-action btn btn-danger fw-semibold" (click)="deleteCell()">Supprimer</button>
+      @if (previewImage || previewSound) {
+        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteCell()">Vider les pièces jointes</button>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold">Vider les pièces jointes</button>
+      }
       <button class="btn-action btn-validate" data-bs-dismiss="offcanvas" (click)="saveProgress()" aria-label="Valider">Valider</button>
     </div>
 
