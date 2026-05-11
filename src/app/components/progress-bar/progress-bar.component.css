@@ -12,7 +12,7 @@
 }
 
 .circle.active {
-  background-color: #1e3a8a;
+  background-color: var(--bs-primary);
 }
 
 .circle.completed {
