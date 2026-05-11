@@ -140,6 +140,8 @@ export class ModifyScreenComponent implements OnInit{
       this.nameFile = file.name;
       this.setInstructionPreview(URL.createObjectURL(file));
       this.getFileDuration(file);
+
+      input.value = '';
     }else {
       this.haveInstructionFile = false;
     }
@@ -165,6 +167,8 @@ export class ModifyScreenComponent implements OnInit{
       this.nameFile = file.name;
       this.setStimuliPreview(URL.createObjectURL(file));
       this.typeFile = "Son";
+
+      input.value = '';
     }else {
       this.haveStimuliSoundFile = false;
     }
@@ -222,6 +226,92 @@ export class ModifyScreenComponent implements OnInit{
 
   private async refreshStimuliSoundState(): Promise<void> {
     this.haveStimuliSoundFile = await this.checkStimuliSoundFileExist();
+  }
+
+  async deleteImageInstruction(): Promise<void> {
+    const imageName = this.screenToModify.values[4];
+    const imageId = this.screenToModify.values[8];
+
+    if (imageId || imageName) {
+      await this.deleteFileFromIDB(imageId || imageName, 'image');
+    }
+
+    this.screenToModify.values[4] = '';
+    this.screenToModify.values[5] = undefined;
+    this.screenToModify.values[8] = '';
+
+    this.haveInstructionFile = false;
+    this.setInstructionPreview('');
+
+    this.autoSaveService.autoSave('instruction');
+  }
+
+  async deleteSoundInstruction(): Promise<void> {
+    const soundName = this.screenToModify.values[4];
+    const soundId = this.screenToModify.values[8];
+
+    if (soundId || soundName) {
+      await this.deleteFileFromIDB(soundName, 'sound');
+    }
+
+    this.screenToModify.values[4] = '';
+    this.screenToModify.values[5] = undefined;
+    this.screenToModify.values[8] = '';
+
+    this.haveInstructionFile = false;
+    this.setInstructionPreview('');
+
+    this.autoSaveService.autoSave('instruction');
+  }
+
+  async deleteSoundStimuli(): Promise<void> {
+    const soundName = this.screenToModify.values[10];
+    const soundId = this.screenToModify.values[13];
+
+    if (soundId || soundName) {
+      await this.deleteFileFromIDB(soundId || soundName, 'sound');
+    }
+
+    this.screenToModify.values[10] = '';
+    this.screenToModify.values[11] = undefined;
+    this.screenToModify.values[13] = '';
+
+    this.haveStimuliSoundFile = false;
+    this.setStimuliPreview('');
+
+    this.autoSaveService.autoSave('stimuli');
+  }
+
+  private async deleteFileFromIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<void> {
+    const candidateIds = this.getCandidateIds(fileName);
+
+    for (const id of candidateIds) {
+      try {
+        const evalFile = await this.idbService.getFile(id);
+        if (evalFile.type !== expectedType) continue;
+        await this.idbService.deleteFile(id);
+      } catch {
+        // peut déjà être supprimé ou absent
+      }
+    }
+
+    try {
+      const allFiles = await this.idbService.getAllFiles();
+      const baseName = this.extractFileNameFromId(fileName);
+      const matches = allFiles.filter((entry) =>
+        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
+      );
+
+      for (const match of matches) {
+        try {
+          await this.idbService.deleteFile(match.id);
+        } catch {
+          // peut déjà être supprimé ou absent
+        }
+      }
+    } catch {
+      // ignore: cleanup best-effort
+    }
   }
 
   private getInstructionMediaType(): 'image' | 'video' | 'sound' {
@@ -330,8 +420,22 @@ export class ModifyScreenComponent implements OnInit{
     return undefined;
   }
 
-  private getCandidateIds(fileName: string): string[] {
-    const cleanName = (fileName ?? '').trim();
+  private getCandidateIds(fileName: any): string[] {
+    if (fileName == null) return [];
+
+    let cleanName = '';
+    if (typeof fileName === 'string') {
+      cleanName = fileName.trim();
+    } else if (fileName instanceof File) {
+      cleanName = (fileName.name || '').toString().trim();
+    } else if (typeof fileName === 'object' && fileName.name) {
+      cleanName = String(fileName.name).trim();
+    } else if (typeof fileName === 'object' && fileName.id) {
+      cleanName = String(fileName.id).trim();
+    } else {
+      cleanName = String(fileName).trim();
+    }
+
     if (!cleanName) return [];
 
     const projectName = this.saveService.getEvalName();
@@ -349,9 +453,13 @@ export class ModifyScreenComponent implements OnInit{
     return [...ids];
   }
 
-  private extractFileNameFromId(id: string): string {
-    const parts = (id ?? '').split('/');
-    return parts[parts.length - 1] || id;
+  private extractFileNameFromId(id: any): string {
+    if (id == null) return '';
+    if (id instanceof File) return id.name || '';
+    if (typeof id === 'object' && (id.name || id.id)) return String(id.name ?? id.id);
+    const asString = String(id);
+    const parts = asString.split('/');
+    return parts[parts.length - 1] || asString;
   }
 
   private setInstructionPreview(url: string): void {

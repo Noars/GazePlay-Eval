@@ -156,31 +156,39 @@
 
                 @if (typeFile === 'Image') {
                   <div class="param-row">
-                    <span class="param-label">Image à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une image' }}
+                        <input #fileInputImage type="file" accept="image/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer l'image
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer l'image
+                        </button>
                       }
                     </div>
                   </div>
                 } @else if (typeFile === 'Video') {
                   <div class="param-row">
-                    <span class="param-label">Vidéo à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une vidéo' }}
+                        <input #fileInputVideo type="file" accept="video/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer la vidéo
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer la vidéo
+                        </button>
                       }
                     </div>
                   </div>
@@ -196,16 +204,24 @@
                   </div>
                 } @else if (typeFile === 'Son') {
                   <div class="param-row">
-                    <span class="param-label">Son à jouer</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir un son' }}
+                        <input #fileInputSound type="file" accept="audio/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <div class="sound-preview-row">
+                          <audio controls [attr.src]="instructionFile"></audio>
+                          <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundInstruction()">
+                            Supprimer le son
+                          </button>
+                        </div>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer le son
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
                       }
                     </div>
                   </div>
@@ -375,13 +391,24 @@
               </div>
               @if (screenToModify.values[9]) {
                 <div class="param-row">
-                  <span class="param-label">Son à jouer</span>
-                  <div class="param-control">
-                    <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
-                    <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
-                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
-                      <i class="bi bi-eye"></i>
-                    </button>
+                  <div class="sound-block">
+                    <label class="file-upload-btn">
+                      {{ screenToModify.values[10] || 'Choisir un son' }}
+                      <input #fileInputSound type="file" accept="audio/*" hidden (change)="getStimuliSoundFile($event)">
+                    </label>
+
+                    @if (haveStimuliSoundFile) {
+                      <div class="sound-preview-row">
+                        <audio controls [attr.src]="stimuliFile"></audio>
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundStimuli()">
+                          Supprimer le son
+                        </button>
+                      </div>
+                    } @else {
+                      <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                        Supprimer le son
+                      </button>
+                    }
                   </div>
                 </div>
               }
