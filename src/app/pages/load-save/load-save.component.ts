@@ -77,9 +77,9 @@ export class LoadSaveComponent implements OnInit {
   }
 
   /**
-   * Redirige vers la page de gestion des sauvegardes.
+   * Redirige vers la page d'accueil.
    */
   goBack(): void {
-    this.router.navigate(['/sauvegarde']);
+    this.router.navigate(['/home']);
   }
 }
