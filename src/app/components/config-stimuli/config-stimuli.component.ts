@@ -5,6 +5,8 @@ import {CropImageComponent} from '../crop-image/crop-image.component';
 import {MatDialog} from '@angular/material/dialog';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
 import {SaveService} from '../../services/save/save.service';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 
 @Component({
   selector: 'app-config-stimuli',
@@ -28,13 +30,15 @@ export class ConfigStimuliComponent implements OnChanges{
 
   pageElement: HTMLElement | null = document.getElementById('configStimuli');
   isResizing = false;
-  previewImage: any = "";
-  previewSound: any = "";
+  previewImage: SafeUrl | string = '';
+  previewSound: string = '';
 
   constructor(
     private dialog: MatDialog,
     private idbService: IndexedDBService,
-    private saveService: SaveService){
+    private saveService: SaveService,
+    private saveAutoService: AutoSaveService,
+    private sanitizer: DomSanitizer){
   }
 
   async ngOnChanges() {
@@ -58,7 +62,7 @@ export class ConfigStimuliComponent implements OnChanges{
     }
 
     if (cellData.imageFile instanceof Blob) {
-      this.previewImage = URL.createObjectURL(cellData.imageFile);
+      this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(cellData.imageFile));
     } else {
       this.previewImage = '';
     }
@@ -86,6 +90,43 @@ export class ConfigStimuliComponent implements OnChanges{
     }
   }
 
+  async deleteImage(): Promise<void> {
+    const cell = this.data.screen[this.data.cell];
+
+    // Supprimer les fichiers de l'IDB si ils existent
+    if (cell.imageId || cell.imageName) {
+      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
+    }
+
+
+    cell.imageId = '';
+    cell.imageName = '';
+    cell.imageFile = undefined;
+
+
+    this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+  }
+
+  async deleteSound(): Promise<void> {
+
+    const cell = this.data.screen[this.data.cell];
+
+    if (cell.soundId || cell.soundName) {
+      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
+    }
+
+
+    cell.soundId = '';
+    cell.soundName = '';
+    cell.soundFile = undefined;
+
+
+    this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+
+  }
+
   async deleteCell(): Promise<void> {
     const cell = this.data.screen[this.data.cell];
 
@@ -109,6 +150,11 @@ export class ConfigStimuliComponent implements OnChanges{
     };
 
     this.checkCell();
+    this.saveAutoService.autoSave('stimuli');
+  }
+
+  public saveProgress(): void {
+    this.saveAutoService.autoSave('stimuli');
   }
 
   private async findFileInIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
@@ -232,7 +278,7 @@ export class ConfigStimuliComponent implements OnChanges{
     this.data.screen[this.data.cell].imageName = file.name;
     this.data.screen[this.data.cell].imageId = id;
     this.data.screen[this.data.cell].imageFile = file;
-    this.previewImage = URL.createObjectURL(file);
+    this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
   }
 
   async getSoundFile(event: Event){
@@ -260,8 +306,8 @@ export class ConfigStimuliComponent implements OnChanges{
       data: {
         image: this.data.screen[this.data.cell].imageFile
       },
-      panelClass: 'crop-image',
-      disableClose: true
+      panelClass: 'scrollable-dialog', // classe custom pour laisser le scroll
+      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
     });
 
     dialogRef.afterClosed().subscribe((result: File | null) => {

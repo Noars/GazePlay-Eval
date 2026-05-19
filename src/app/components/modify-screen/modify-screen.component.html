@@ -43,7 +43,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -83,7 +83,7 @@
                     <span class="param-label">Combien de temps ?</span>
                     <div class="param-control">
                       <div class="input-group w-auto">
-                        <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[4]">
+                        <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[4]">
                         <span class="input-group-text">secondes</span>
                       </div>
                     </div>
@@ -120,7 +120,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[1]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[1]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -156,31 +156,39 @@
 
                 @if (typeFile === 'Image') {
                   <div class="param-row">
-                    <span class="param-label">Image à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une image' }}
+                        <input #fileInputImage type="file" accept="image/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer l'image
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer l'image
+                        </button>
                       }
                     </div>
                   </div>
                 } @else if (typeFile === 'Video') {
                   <div class="param-row">
-                    <span class="param-label">Vidéo à afficher</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="videoFile" accept="video/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir une vidéo' }}
+                        <input #fileInputVideo type="file" accept="video/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImageInstruction()">
+                          Supprimer la vidéo
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer la vidéo
+                        </button>
                       }
                     </div>
                   </div>
@@ -196,16 +204,23 @@
                   </div>
                 } @else if (typeFile === 'Son') {
                   <div class="param-row">
-                    <span class="param-label">Son à jouer</span>
-                    <div class="param-control flex-column align-items-start">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <input class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getInstructionFile($event)">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveInstructionFile">
-                          <i class="bi bi-eye"></i>
+
+                    <div class="sound-block">
+                      <label class="file-upload-btn">
+                        {{ screenToModify.values[4] || 'Choisir un son' }}
+                        <input #fileInputSound type="file" accept="audio/*" hidden (change)="getInstructionFile($event)">
+                      </label>
+
+                      @if (haveInstructionFile) {
+                        <div class="sound-preview-row">
+                          <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundInstruction()">
+                            Supprimer le son
+                          </button>
+                        </div>
+                      } @else {
+                        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                          Supprimer le son
                         </button>
-                      </div>
-                      @if (screenToModify.values[4]) {
-                        <span class="text-muted fst-italic mt-1 text-truncate w-100">{{ screenToModify.values[4] }}</span>
                       }
                     </div>
                   </div>
@@ -244,7 +259,7 @@
                   <span class="param-label">Combien de temps de fixation ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[7]">
+                      <input type="number" class="form-control" min="0.1" value="1" step="0.1" [(ngModel)]="screenToModify.values[7]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -294,7 +309,7 @@
                   <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
                     <div class="input-group w-auto">
-                      <input type="number" class="form-control" min="1" value="1" [(ngModel)]="screenToModify.values[3]">
+                      <input type="number" class="form-control" min="0.1" value="0.1" step="0.1" [(ngModel)]="screenToModify.values[3]">
                       <span class="input-group-text">secondes</span>
                     </div>
                   </div>
@@ -303,9 +318,12 @@
 
               <div class="param-section-title">Fixation & sélection</div>
               <div class="param-row">
-                <span class="param-label">Temps de fixation</span>
+                <span class="param-label">Temps de fixation pour la validation</span>
                 <div class="param-control">
-                  <input type="number" class="form-control" min="1" max="9999" value="1" [(ngModel)]="screenToModify.values[4]">
+                  <div class="input-group w-auto">
+                    <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="screenToModify.values[4]">
+                    <span class="input-group-text">secondes</span>
+                  </div>
                 </div>
               </div>
               <div class="param-row">
@@ -372,13 +390,24 @@
               </div>
               @if (screenToModify.values[9]) {
                 <div class="param-row">
-                  <span class="param-label">Son à jouer</span>
-                  <div class="param-control">
-                    <input class="form-control w-auto" type="file" id="stimuliSoundFile" accept="audio/*" (change)="getStimuliSoundFile($event)">
-                    <span class="text-muted fst-italic">{{ screenToModify.values[10] || 'Aucun fichier choisi' }}</span>
-                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#filePreviewModal" [disabled]="!haveStimuliSoundFile">
-                      <i class="bi bi-eye"></i>
-                    </button>
+                  <div class="sound-block">
+                    <label class="file-upload-btn">
+                      {{ screenToModify.values[10] || 'Choisir un son' }}
+                      <input #fileInputSound type="file" accept="audio/*" hidden (change)="getStimuliSoundFile($event)">
+                    </label>
+
+                    @if (haveStimuliSoundFile) {
+                      <div class="sound-preview-row">
+                        <audio controls [attr.src]="stimuliFile"></audio>
+                        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSoundStimuli()">
+                          Supprimer le son
+                        </button>
+                      </div>
+                    } @else {
+                      <button class="btn-action btn btn-outline-danger fw-semibold" disabled>
+                        Supprimer le son
+                      </button>
+                    }
                   </div>
                 </div>
               }
@@ -388,7 +417,7 @@
                      [style.gridTemplateRows]="'repeat(' + screenToModify.values[0] + ', 80px)'"
                      [style.gridTemplateColumns]="'repeat(' + screenToModify.values[1] + ', 80px)'">
                   @for (n of totalCells; track n; let i = $index) {
-                    <div [id]="i" class="cell" (click)="openStimuliData(i)">
+                    <div [id]="i" class="cell" [class.cell-active]="activeCellIndex === i" (click)="openStimuliData(i)">
                       @if (screenToModify.values[12][i].goodAnswer === true) {
                         <span class="cell-text icon valid">✓</span>
                       } @else {

@@ -1,5 +1,3 @@
-/* load-save.component.css */
-
 /* Carte slot */
 .slot-card {
   height: 250px;
@@ -19,7 +17,8 @@
 }
 
 .slot-empty-icon {
-  font-size: 2.5rem;
+  width: 40px;
+  height: 40px;
   color: #94a3b8;
 }
 
@@ -37,7 +36,8 @@
 }
 
 .slot-filled-icon {
-  font-size: 2.5rem;
+  width: 40px;
+  height: 40px;
   color: #1e3a8a;
 }
 
@@ -74,6 +74,21 @@
   border: 2px solid #22c55e !important;
   box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25), 0 4px 16px rgba(34, 197, 94, 0.15) !important;
   animation: activeGlow 2s ease-in-out infinite;
+}
+
+.slot-active-badge {
+  position: absolute;
+  top: 12px;
+  right: -22px;
+  background-color: #22c55e;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 28px;
+  transform: rotate(35deg);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
+  letter-spacing: 0.05em;
+  z-index: 1;
 }
 
 @keyframes activeGlow {

@@ -2,6 +2,7 @@ import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {CropperPosition, ImageCropperComponent} from 'ngx-image-cropper';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormsModule} from '@angular/forms';
+import {FlashService} from '../../services/flash-message/flash.service';
 
 @Component({
   selector: 'app-crop-image',
@@ -37,7 +38,9 @@ export class CropImageComponent implements OnInit{
   };
 
   constructor(
-    public dialogRef: MatDialogRef<CropImageComponent>, @Inject(MAT_DIALOG_DATA) public data: {image: File}) {
+    public dialogRef: MatDialogRef<CropImageComponent>,
+    private flashService: FlashService,
+    @Inject(MAT_DIALOG_DATA) public data: {image: File}) {
   }
 
   ngOnInit() {
@@ -151,9 +154,11 @@ export class CropImageComponent implements OnInit{
   validateCrop(){
     console.log('Cropped image:', this.croppedImage);
     this.dialogRef.close(this.croppedImage);
+    this.flashService.show("success", "Votre image a bien été recadrée.")
   }
 
   cancelCrop(){
     this.dialogRef.close();
+    this.flashService.show("info", "Les proportions de votre image ont été conservées.")
   }
 }

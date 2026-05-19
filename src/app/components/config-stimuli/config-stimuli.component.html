@@ -7,67 +7,73 @@
   aria-labelledby="configStimuliLabel"
 >
   <div class="offcanvas-header">
-    <h1 class="offcanvas-title fw-semibold" id="configStimuliLabel">Case n° {{ data.cell + 1 }}</h1>
+    <h1 class="offcanvas-title" id="configStimuliLabel">Case n° {{ data.cell + 1 }}</h1>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
   </div>
+
   <div class="resize-handle" (mousedown)="startResize($event)"></div>
-  <div class="offcanvas-body px-3 d-flex flex-column gap-3">
-    <div class="mb-4 d-flex align-items-center justify-content-center">
-      <div class="d-flex align-items-center mb-2 gap-2">
-        <label class="form-label me-3 fw-semibold">Ce stimuli est-il une bonne réponse ?</label>
-        <div class="form-check form-check-inline mb-0">
-          <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerY" [value]="true" [(ngModel)]="data.screen[this.data.cell].goodAnswer">
-          <label class="form-check-label fw-semibold" for="goodAnswerY">Oui</label>
-        </div>
-        <div class="form-check form-check-inline mb-0">
-          <input class="form-check-input" type="radio" name="goodAnswer" id="goodAnswerN" [value]="false" [(ngModel)]="data.screen[this.data.cell].goodAnswer">
-          <label class="form-check-label fw-semibold" for="goodAnswerN">Non</label>
-        </div>
+
+  <div class="offcanvas-body">
+
+    <!-- Bonne réponse -->
+    <div class="section-block">
+      <label class="section-label">Bonne réponse ?</label>
+      <div class="answer-selector">
+        <label class="answer-option" [class.answer-yes]="data.screen[data.cell].goodAnswer === true">
+          <input type="radio" name="goodAnswer" [value]="true" [(ngModel)]="data.screen[this.data.cell].goodAnswer" hidden>
+          Oui
+        </label>
+        <label class="answer-option" [class.answer-no]="data.screen[data.cell].goodAnswer === false">
+          <input type="radio" name="goodAnswer" [value]="false" [(ngModel)]="data.screen[this.data.cell].goodAnswer" hidden>
+          Non
+        </label>
       </div>
     </div>
-    <div class="card-body fw-semibold text-center">
-      <div class="mb-4 d-flex align-items-center justify-content-center">
-        <div class="d-flex align-items-center mb-2 gap-2">
-          <label for="imageFile" class="form-label flex-grow-1 me-2">Image à afficher</label>
-          @if (data.screen[data.cell].imageName) {
-            <span class="text-muted fst-italic">{{ data.screen[data.cell].imageName }}</span>
-          }
-          <input #fileInputImage class="form-control w-auto" type="file" id="imageFile" accept="image/*" (change)="getImageFile($event)">
-        </div>
-      </div>
+
+    <!-- Image -->
+    <div class="section-block">
+      <label class="section-label">Image</label>
+      <label class="file-upload-btn">
+        {{ data.screen[data.cell].imageName || 'Choisir une image' }}
+        <input #fileInputImage type="file" accept="image/*" hidden (change)="getImageFile($event)">
+      </label>
       @if (previewImage) {
-        <div class="mb-4 d-flex align-items-center justify-content-center">
-          <div class="d-flex align-items-center mb-2 gap-2">
-            <img [src]="previewImage" class="img-preview" alt="Preview">
-          </div>
+      <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImage()">Supprimer l'image</button>
+        <div class="media-preview">
+          <img [src]="previewImage" class="img-preview" alt="Aperçu image">
+          <button class="btn-crop" (click)="cropImage()">Recadrer</button>
         </div>
-        <div class="mb-4 d-flex align-items-center justify-content-center">
-          <div class="d-flex align-items-center mb-2 gap-2">
-            <button class="btn btn-primary fw-semibold" (click)="cropImage()">
-              Recadrer l'image
-            </button>
-          </div>
-        </div>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer l'image</button>
       }
-      <div class="mb-4 d-flex align-items-center justify-content-center">
-        <div class="d-flex align-items-center mb-2 gap-2">
-          <label for="soundFile" class="form-label flex-grow-1 me-2">Son à écouter</label>
-          <input #fileInputSound class="form-control w-auto" type="file" id="soundFile" accept="audio/*" (change)="getSoundFile($event)">
-        </div>
-      </div>
-      @if (previewSound) {
-        <div class="mb-4 d-flex align-items-center justify-content-center">
-          <div class="d-flex align-items-center mb-2 gap-2">
-            <audio controls [src]="previewSound"></audio>
-          </div>
-        </div>
-      }
-      <button class="btn btn-danger mt-3 me-3 fw-semibold" (click)="deleteCell()">
-        Supprimer les elements
-      </button>
-      <button class="btn btn-success mt-3 fw-semibold" data-bs-dismiss="offcanvas" aria-label="Fermer">
-        Valider les elements
-      </button>
     </div>
+
+    <!-- Son -->
+    <div class="section-block">
+      <label class="section-label">Son</label>
+      <label class="file-upload-btn">
+        {{ data.screen[data.cell].soundName || 'Choisir un son' }}
+        <input #fileInputSound type="file" accept="audio/*" hidden (change)="getSoundFile($event)">
+      </label>
+      @if (previewSound) {
+        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSound()">Supprimer le son</button>
+        <div class="media-preview">
+          <audio controls [attr.src]="previewSound"></audio>
+        </div>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer le son</button>
+      }
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-footer">
+      @if (previewImage || previewSound) {
+        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteCell()">Vider les pièces jointes</button>
+      } @else {
+        <button class="btn-action btn btn-outline-danger fw-semibold">Vider les pièces jointes</button>
+      }
+      <button class="btn-action btn-validate" data-bs-dismiss="offcanvas" (click)="saveProgress()" aria-label="Valider">Valider</button>
+    </div>
+
   </div>
 </div>

@@ -6,7 +6,8 @@
     <div class="card-body px-5 py-5" style="text-align: -webkit-center;">
 
       <div class="alert alert-info fw-semibold col-10 mb-5">
-        <i class="bi bi-info-circle me-2"></i>
+        <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
         Sélectionnez un emplacement pour charger l'évaluation correspondante et reprendre votre travail.
       </div>
 
@@ -18,7 +19,8 @@
             @if (slot.data === null) {
               <!-- Slot vide -->
               <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
-                <i class="bi bi-folder2 slot-empty-icon"></i>
+                <img class="icon-light slot-empty-icon" src="assets/icons/folder/folder-dark.png" alt="">
+                <img class="icon-dark slot-empty-icon" src="assets/icons/folder/folder.png" alt="">
                 <span class="fst-italic text-muted fs-5">Vide</span>
               </div>
 
@@ -27,7 +29,11 @@
               <div class="slot-card slot-filled d-flex align-items-center justify-content-center"
                    [class.slot-active]="saveService.activeSlotIndex === slot.index"
                    (click)="loadSlot(slot.index)">
-                <i class="bi bi-folder2-open slot-filled-icon"></i>
+                @if (saveService.activeSlotIndex === slot.index) {
+                  <div class="slot-active-badge" [matTooltip]="tooltipCurrentEval" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">EN COURS</div>
+                }
+                <img class="icon-light slot-filled-icon" src="assets/icons/folder/folder-dark.png" alt="">
+                <img class="icon-dark slot-filled-icon" src="assets/icons/folder/folder.png" alt="">
                 <span class="fw-bold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
                 <span class="slot-meta">Modifié le {{ formatDate(slot.data.createdAt) }}</span>
                 <div class="slot-hover-overlay">

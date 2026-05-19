@@ -70,11 +70,28 @@ export class OverwriteGuardService {
   }
 
   /**
+   * Retourne un nom d'évaluation unique parmi les slots nommés (1, 2, 3).
+   * Si le nom existe déjà dans un autre slot, ajoute " 1", " 2", etc.
+   *
+   * @param nomEval         Nom initial de l'évaluation
+   * @param targetSlotIndex Slot de destination (exclu de la vérification)
+   */
+  getUniqueEvalName(nomEval: string, targetSlotIndex: FormatTypeConfig): string {
+    const existingNames = new Set<string>();
+    for (const i of [1, 2, 3] as FormatTypeConfig[]) {
+      if (i === targetSlotIndex) continue;
+      const slot = this.loadService.getSlot(i);
+      if (slot?.nomEval) existingNames.add(slot.nomEval);
+    }
+    if (!existingNames.has(nomEval)) return nomEval;
+    let counter = 1;
+    while (existingNames.has(`${nomEval} ${counter}`)) counter++;
+    return `${nomEval} ${counter}`;
+  }
+
+  /**
    * Cherche parmi les slots nommés (1, 2, 3) lequel contient une évaluation
    * portant le même nom que celui passé en paramètre.
-   *
-   * @param nomEval Nom de l'évaluation à rechercher
-   * @returns L'index du slot correspondant, ou null si aucun slot ne correspond
    */
   private findNamedSlotByEvalName(nomEval: string): FormatTypeConfig | null {
     for (const i of [1, 2, 3] as FormatTypeConfig[]) {

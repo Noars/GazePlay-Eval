@@ -3,7 +3,8 @@
 
   <!-- Header -->
   <div class="popup-header">
-    <i class="bi bi-upload me-2"></i>
+    <img class="icon-light me-2" src="assets/icons/import/import-dark.png" width="16" height="16" alt="">
+    <img class="icon-dark me-2" src="assets/icons/import/import.png" width="16" height="16" alt="">
     Importer une évaluation
   </div>
 
@@ -12,14 +13,16 @@
 
     <!-- Alerte info -->
     <div class="popup-alert-info">
-      <i class="bi bi-info-circle-fill alert-icon-info"></i>
+      <img class="icon-light alert-icon-info" src="assets/icons/info/info-dark.png" alt="">
+      <img class="icon-dark alert-icon-info" src="assets/icons/info/info.png" alt="">
       <span>Sélectionnez un fichier <strong>.gpSave</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
     </div>
 
     <!-- Choix du mode -->
     <div class="section-block">
       <label class="section-label">
-        <i class="bi bi-sliders me-2"></i>
+        <img class="icon-light me-2" src="assets/icons/settings/settings-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark me-2" src="assets/icons/settings/settings.png" width="16" height="16" alt="">
         Mode d'ouverture
       </label>
       <div class="mode-selector">
@@ -27,7 +30,8 @@
              [class.mode-option-selected]="mode === 'consult'"
              (click)="mode = 'consult'; selectedSlot = null">
           <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-eye-fill"></i>
+            <img class="icon-light" src="assets/icons/eye/eye-dark.png" width="16" height="16" alt="">
+            <img class="icon-dark" src="assets/icons/eye/eye.png" width="16" height="16" alt="">
             <div>
               <div class="fw-semibold">Consultation</div>
               <div class="mode-desc">Ouvrir sans sauvegarder</div>
@@ -38,7 +42,8 @@
              [class.mode-option-selected]="mode === 'save'"
              (click)="mode = 'save'; selectedSlot = null">
           <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-floppy-fill"></i>
+            <img class="icon-light" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
+            <img class="icon-dark" src="assets/icons/save/save.png" width="16" height="16" alt="">
             <div>
               <div class="fw-semibold">Sauvegarder</div>
               <div class="mode-desc">Importer et sauvegarder dans un emplacement</div>
@@ -51,13 +56,20 @@
     <!-- Sélection fichier zip -->
     <div class="section-block">
       <label class="section-label">
-        <i class="bi bi-file-earmark me-2"></i>
+        <img class="icon-light me-2" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark me-2" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
         Fichier à importer
       </label>
-      <div class="file-input-wrapper" (click)="fileInput.click()">
-        <i class="bi bi-cloud-upload file-input-icon"></i>
+      <div class="file-input-wrapper"
+           [class.drag-over]="isDragging"
+           (click)="fileInput.click()"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)">
+        <img class="icon-light file-input-icon" src="assets/icons/import/import-dark.png" alt="">
+        <img class="icon-dark file-input-icon" src="assets/icons/import/import.png" alt="">
         <span class="file-input-text">
-          {{ zipFileName !== '' ? zipFileName : 'Cliquez pour sélectionner un fichier .gpSave' }}
+          {{ isDragging ? 'Relâchez pour importer' : zipFileName !== '' ? zipFileName : 'Glissez un fichier .gpSave ou cliquez pour sélectionner' }}
         </span>
         <input #fileInput type="file" accept=".gpSave,.zip" hidden (change)="onZipSelected($event)">
       </div>
@@ -67,7 +79,8 @@
     @if (mode === 'save') {
       <div class="section-block">
         <label class="section-label">
-          <i class="bi bi-folder2 me-2"></i>
+          <img class="icon-light me-2" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
           Emplacement de sauvegarde
         </label>
         <div class="slots-list">
@@ -77,12 +90,14 @@
                  [class.slot-option-filled]="!slot.empty"
                  (click)="selectedSlot = slot.index">
               <div class="d-flex align-items-center gap-3">
-                <i class="bi" [class.bi-folder2]="slot.empty" [class.bi-folder2-open]="!slot.empty"></i>
+                <img class="icon-light" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
+                <img class="icon-dark" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
                 <span class="fw-semibold">{{ slot.empty ? 'Emplacement vide' : slot.name }}</span>
               </div>
               @if (!slot.empty) {
                 <span class="slot-warning-badge">
-                  <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                  <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="12" height="12" alt="">
+                  <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="12" height="12" alt="">
                   Sera écrasé
                 </span>
               }
@@ -91,9 +106,10 @@
         </div>
       </div>
 
-      @if (selectedSlot !== null && !data.slots[selectedSlot].empty) {
+      @if (selectedSlot !== null && !data.slots.find(s => s.index === selectedSlot)?.empty) {
         <div class="popup-alert-warning">
-          <i class="bi bi-exclamation-triangle-fill alert-icon-warning"></i>
+          <img class="icon-light alert-icon-warning" src="assets/icons/warning/warning-dark.png" alt="">
+          <img class="icon-dark alert-icon-warning" src="assets/icons/warning/warning.png" alt="">
           <span>Attention, l'évaluation existante sera <strong>définitivement remplacée</strong>.</span>
         </div>
       }
@@ -108,7 +124,8 @@
               [disabled]="!canConfirm()"
               [class.btn-confirm-disabled]="!canConfirm()"
               (click)="confirm()">
-        <i class="bi bi-check-lg me-1"></i>
+        <img class="icon-light me-1" src="assets/icons/success/success-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark me-1" src="assets/icons/success/success.png" width="16" height="16" alt="">
         {{ mode === 'consult' ? 'Ouvrir' : 'Importer' }}
       </button>
     </div>

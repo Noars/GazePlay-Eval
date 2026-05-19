@@ -13,60 +13,45 @@
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseTransitionScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseTransitionScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'transition'"
+                    type="button"
+                    (click) = "toggleAccordion('transition')">
               Paramètres globaux des écrans de transition
             </button>
           </h2>
-          <div id="collapseTransitionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'transition'">
             <app-global-transition-screen [globalTransitionScreenInfos]="globalTransitionScreenInfos"></app-global-transition-screen>
           </div>
         </div>
 
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseInstructionScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseInstructionScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'instruction'"
+                    type="button"
+                    (click) = "toggleAccordion('instruction')">
               Paramètres globaux des écrans d'instruction
             </button>
           </h2>
-          <div id="collapseInstructionScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'instruction'">
             <app-global-instruction-screen [globalInstructionScreenInfos]="globalInstructionScreenInfos"></app-global-instruction-screen>
           </div>
         </div>
 
-        <!--<div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseStimuliScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseStimuliScreen">
-              Écrans stimuli globaux
-            </button>
-          </h2>
-          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
-            <app-global-stimuli-screen [globalStimuliScreenInfos]="globalStimuliScreenInfos"></app-global-stimuli-screen>
-          </div>
-        </div>-->
-
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed fw-semibold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseStimuliScreen"
-                    aria-expanded="false"
-                    aria-controls="collapseStimuliScreen">
+            <button class="accordion-button fw-semibold"
+                    [class.collapsed]="openAccordion !== 'stimuli'"
+                    type="button"
+                    (click) = "toggleAccordion('stimuli')">
               Paramètres globaux des écrans de stimuli
             </button>
           </h2>
-          <div id="collapseStimuliScreen" class="accordion-collapse collapse" data-bs-parent="#globalParams">
+          <div class="accordion-collapse collapse"
+               [class.show]="openAccordion === 'stimuli'">
             <div class="accordion-body">
 
               <div class="param-section-title">Taille de la grille</div>
@@ -101,20 +86,24 @@
               </div>
               @if (globalStimuliScreenInfos[2]) {
                 <div class="param-row">
-                  <span class="param-label">Durée (secondes)</span>
+                  <span class="param-label">Combien de temps ?</span>
                   <div class="param-control">
-                    <input type="number" id="maxTimeScreen" class="form-control" min="1" step="1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
-                    <span id="maxTimeScreenInfo" class="form-text">La durée est en secondes !</span>
+                    <div class="input-group w-auto">
+                      <input type="number" id="maxTimeScreen" class="form-control" min="0.1" step="0.1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
+                      <span class="input-group-text">secondes</span>
+                    </div>
                   </div>
                 </div>
               }
 
               <div class="param-section-title">Durée de fixation pour validation</div>
               <div class="param-row">
-                <span class="param-label">Durée (secondes)</span>
+                <span class="param-label">Quelle durée ?</span>
                 <div class="param-control">
-                  <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
-                 <!-- <span id="nbFixationLengthInfo" class="form-text">La durée est en secondes !</span>-->
+                  <div class="input-group w-auto">
+                    <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
+                    <span class="input-group-text">secondes</span>
+                  </div>
                 </div>
               </div>
 

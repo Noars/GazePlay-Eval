@@ -43,26 +43,41 @@
 
 /* Liste des écrans */
 .list-group-item {
-  border-left: none;
+  border-left: 3px solid transparent;
   border-right: none;
   padding: 0.5rem 0.75rem;
   background-color: var(--bs-body-bg);
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 .list-group-item:hover {
-  background-color: var(--bs-secondary-bg);
+  background-color: rgba(30, 58, 138, 0.07);
+  border-left-color: rgba(30, 58, 138, 0.3);
 }
 
 .list-group-item.active {
-  background-color: rgba(30, 58, 138, 0.08) !important;
-  border-color: var(--bs-border-color) !important;
+  background-color: rgba(30, 58, 138, 0.13) !important;
+  border-left-color: #1e3a8a !important;
+  border-top-color: var(--bs-border-color) !important;
+  border-bottom-color: var(--bs-border-color) !important;
+  border-right-color: transparent !important;
   color: var(--bs-body-color) !important;
 }
 
 .list-group-item.active .form-control {
   background-color: transparent;
   color: var(--bs-body-color);
+}
+
+/* Dark mode */
+:host-context([data-bs-theme="dark"]) .list-group-item:hover {
+  background-color: rgba(134, 239, 172, 0.12);
+  border-left-color: rgba(134, 239, 172, 0.55);
+}
+
+:host-context([data-bs-theme="dark"]) .list-group-item.active {
+  background-color: rgba(134, 239, 172, 0.18) !important;
+  border-left-color: #86efac !important;
 }
 
 .editName {

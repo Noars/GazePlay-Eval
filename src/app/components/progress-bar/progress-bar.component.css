@@ -12,7 +12,7 @@
 }
 
 .circle.active {
-  background-color: #1e3a8a;
+  background-color: var(--bs-primary);
 }
 
 .circle.completed {
@@ -35,4 +35,9 @@
 
 .line.completed {
   background-color: #198754;
+}
+
+.evalName {
+  color: var(--bs-primary);
+  padding-top: 15px;
 }
