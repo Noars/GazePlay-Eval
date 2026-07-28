@@ -64,7 +64,7 @@ export class LoadSaveComponent implements OnInit {
     };
     this.saveService.activeSlotIndex = slotIndex as FormatTypeConfig;
     this.saveService.saveToSlot(0, this.saveService.dataAuto);
-    this.autoSaveService.tryResume();
+    this.autoSaveService.tryResume(true);
   }
 
   /**

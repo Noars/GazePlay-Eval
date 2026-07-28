@@ -94,4 +94,8 @@ export class PopupImportSaveComponent {
       mode: this.mode
     });
   }
+
+  get selectedSlotData() {
+    return this.data.slots.find(s => s.index === this.selectedSlot);
+  }
 }

@@ -76,7 +76,7 @@ export class AutoSaveService implements OnDestroy {
    *
    * Si le step n'est pas valide, la méthode ne fait rien.
    */
-  tryResume(): void {
+  tryResume(resumeFromStart: boolean): void {
     // récupération du slot dynamique
     const save = this.loadService.getSlot(0);
 
@@ -92,9 +92,15 @@ export class AutoSaveService implements OnDestroy {
       return;
     }
 
-    const route = STEP_TO_ROUTE[save.step]; // Si la route est invalide
-    if (!route) return;
+    // on regarde si on reprend l'éval du début ou de la dernière étape
+    let route: string;
+    if (resumeFromStart) {
+      route = STEP_TO_ROUTE[0];
+    }else {
+      route = STEP_TO_ROUTE[save.step]; // Si la route est invalide
+    }
 
+    if (!route) return;
 
     this.saveService.dataAuto = {
       nomEval: save.nomEval,

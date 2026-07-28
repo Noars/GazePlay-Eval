@@ -106,7 +106,7 @@
         </div>
       </div>
 
-      @if (selectedSlot !== null && !data.slots.find(s => s.index === selectedSlot)?.empty) {
+      @if (selectedSlot !== null && !selectedSlotData?.empty) {
         <div class="popup-alert-warning">
           <img class="icon-light alert-icon-warning" src="assets/icons/warning/warning-dark.png" alt="">
           <img class="icon-dark alert-icon-warning" src="assets/icons/warning/warning.png" alt="">

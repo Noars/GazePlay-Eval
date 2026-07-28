@@ -62,7 +62,7 @@ export class GuideImportComponent {
         await this.loadServiceZip.loadZip(result.zipFile);
       }
 
-      this.autoSaveService.tryResume(); // Enmène l'utilisateur au step enregistré
+      this.autoSaveService.tryResume(true);
     });
   }
 }
