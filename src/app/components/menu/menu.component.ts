@@ -141,8 +141,8 @@ export class MenuComponent implements OnInit, OnDestroy {
       } else {
         await this.loadServiceZip.loadZip(result.zipFile);
       }
-
-      this.autoSaveService.tryResume(); // Enmène l'utilisateur au step enregistré
+      await this.router.navigate(['/home']);
+      this.autoSaveService.tryResume(true);
     });
   }
 }

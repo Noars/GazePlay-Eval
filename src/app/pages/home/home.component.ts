@@ -29,6 +29,6 @@ export class HomeComponent {
   }
 
   async goToLastStep(): Promise<void> {
-    this.autoSaveService.tryResume();
+    this.autoSaveService.tryResume(false);
   }
 }

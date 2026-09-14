@@ -68,7 +68,7 @@ export class App implements OnInit{
       this.router.navigate(['/home']).then(() => {
         // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
         // S'il n'y en a pas, on reste sur la page d'accueil
-        this.autoSaveService.tryResume();
+        this.autoSaveService.tryResume(false);
       });
       return ;
     }

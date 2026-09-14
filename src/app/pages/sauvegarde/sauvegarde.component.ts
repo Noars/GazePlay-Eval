@@ -95,7 +95,7 @@ export class SauvegardeComponent implements OnInit {
     };
     this.saveService.activeSlotIndex = index;
     this.saveService.saveToSlot(0, this.saveService.dataAuto); // Sauvegarde dans le slot dynamique
-    this.autoSaveService.tryResume();
+    this.autoSaveService.tryResume(true);
   }
 
   async saveToSlot(
