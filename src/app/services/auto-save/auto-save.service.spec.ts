@@ -83,6 +83,8 @@ describe('AutoSaveService', () => {
   it('tryResume → reconstruit dataAuto et navigue vers la bonne route', () => {
     loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, nomEval: 'TestEval', step: 3 });
 
+    service.tryResume(false);
+
     expect(saveServiceSpy.dataAuto.nomEval).toBe('TestEval');
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/create-eval']);
   });
@@ -90,11 +92,15 @@ describe('AutoSaveService', () => {
   it('tryResume → ne fait rien si slot null', () => {
     loadServiceSpy.getSlot.and.returnValue(null);
 
+    service.tryResume(true);
+
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
   it('tryResume → ne fait rien si step = -1', () => {
     loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, step: -1 });
+
+    service.tryResume(true);
 
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
