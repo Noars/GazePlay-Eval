@@ -23,7 +23,8 @@ describe('App Component (Angular 20)', () => {
     routerEvents$ = new Subject();
 
     router = jasmine.createSpyObj<Router>('Router', ['navigate'], {
-      events: routerEvents$.asObservable()
+      events: routerEvents$.asObservable(),
+      url: '/home'
     });
 
     await TestBed.configureTestingModule({
