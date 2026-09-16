@@ -16,10 +16,14 @@ import {IconGuidePopupComponent} from './components/icon-guide-popup/icon-guide-
 export class App implements OnInit{
   protected title = 'GazePlay-Eval';
 
+  private readonly hiddenOnRoutes = [
+    '/guide'
+  ];
+
   steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et Exportation'];
   currentStepIndex = -1;
 
-  constructor(private router: Router, private autoSaveService:AutoSaveService) {
+  constructor(protected router: Router, private autoSaveService:AutoSaveService) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(event => {
@@ -72,5 +76,13 @@ export class App implements OnInit{
       });
       return ;
     }
+  }
+
+  // Regarde si la page courante n'est pas dans la liste hiddenOnRoutes
+  // Si oui, le bouton guide est caché
+  protected get showGuideButton(): boolean {
+    return !this.hiddenOnRoutes.some(route =>
+      this.router.url.includes(route)
+    );
   }
 }

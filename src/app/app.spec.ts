@@ -12,11 +12,19 @@ describe('App Component (Angular 20)', () => {
   let routerEvents$: Subject<any>;
   let router: jasmine.SpyObj<Router>;
 
+  const setRouterUrl = (url: string): void => {
+    Object.defineProperty(router, 'url', {
+      get: () => url,
+      configurable: true
+    });
+  };
+
   beforeEach(async () => {
     routerEvents$ = new Subject();
 
     router = jasmine.createSpyObj<Router>('Router', ['navigate'], {
-      events: routerEvents$.asObservable()
+      events: routerEvents$.asObservable(),
+      url: '/home'
     });
 
     await TestBed.configureTestingModule({
@@ -45,15 +53,6 @@ describe('App Component (Angular 20)', () => {
     routerEvents$.next(event);
     expect(component.currentStepIndex).toBe(2);
   });
-
-/*  it('devrait retourner à /home en cas de rechargement hors /home', () => {
-    spyOn(performance, 'getEntriesByType').and.returnValue([
-      { type: 'reload' } as PerformanceNavigationTiming
-    ]);
-    spyOnProperty(router, 'url', 'get').and.returnValue('/create-eval'); // il faut verifier si une éval est en cours p
-    component.ngOnInit();
-    expect(router.navigate).toHaveBeenCalledWith(['/home']);
-  });*/
 
   it('ne devrait pas afficher la barre de progression si currentStepIndex = -1', () => {
     component.currentStepIndex = -1;
@@ -117,5 +116,24 @@ describe('App Component (Angular 20)', () => {
     await Promise.resolve();
 
     expect(router.navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  it('devrait afficher le bouton guide sur /home et /home ne devrait pas être dans hiddenOnRoutes', () => {
+    setRouterUrl('/home');
+
+    expect(component['hiddenOnRoutes']).not.toContain('/home');
+    expect(component['showGuideButton']).toBeTrue();
+  });
+
+  it('ne devrait pas afficher le bouton guide sur les routes configurées', () => {
+    const hiddenRoutes = component['hiddenOnRoutes'];
+
+    hiddenRoutes.forEach(route => {
+      setRouterUrl(route);
+
+      expect(component['showGuideButton'])
+        .withContext(`Le bouton devrait être caché sur ${route}`)
+        .toBeFalse();
+    });
   });
 });

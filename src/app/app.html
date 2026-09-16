@@ -20,4 +20,6 @@
 <app-flash></app-flash>
 
 <!-- Bouton d'aide contextuel (présent sur toutes les pages) -->
-<app-icon-guide-popup></app-icon-guide-popup>
+@if (showGuideButton){
+  <app-icon-guide-popup></app-icon-guide-popup>
+}
