@@ -9,4 +9,12 @@ import {Component} from '@angular/core';
   styleUrl: './guide.component.css',
 
 })
-export class GuideComponent {}
+export class GuideComponent {
+
+  scrollToBottom(): void {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+}
