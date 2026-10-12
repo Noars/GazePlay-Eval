@@ -51,6 +51,20 @@ export class OptionComponent implements OnInit {
 
   }
 
+  changeFont(font: string): void {
+    document.documentElement.style.setProperty(
+      '--accessibility-font',
+      font
+    );
+  }
+
+  changeSize(size: string): void {
+    document.documentElement.style.setProperty(
+      '--accessibility-font-size',
+      size
+    );
+  }
+
   goBack(): void {
     this.router.navigate(['/home']);
   }
