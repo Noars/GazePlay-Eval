@@ -1,6 +1,6 @@
 <div class="card mb-4">
   <div class="card-header">
-    <h2 class="card-title">Importation d'évaluations</h2>
+    <h1 class="card-title">Importation d'évaluations</h1>
   </div>
   <div class="card-body">
 
@@ -29,7 +29,7 @@
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Mode Consultation</div>
+      <h2 class="guide-section-title">Mode Consultation</h2>
       <div class="guide-section-body">
         <p>Le mode Consultation permet de charger une évaluation sans la sauvegarder.
          Cette option peut être pratique si vous souhaitez visualiser le contenu d'une
@@ -47,7 +47,7 @@
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Mode Sauvegarde</div>
+      <h2 class="guide-section-title">Mode Sauvegarde</h2>
       <div class="guide-section-body">
         <p>Le mode Sauvegarde permet de placer l'évaluation importée dans un des trois emplacements disponibles
         sur le site. Il est donc possible de la consulter dans l'immédiat, de revenir dessus plus tard ou
@@ -83,7 +83,7 @@
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Aide</div>
+      <h2 class="guide-section-title">Aide</h2>
         <div class="guide-section-body">
           <p>
             Si vous n'arrivez pas à accéder à la Pop-Up d'importation, vous pouvez cliquer sur le bouton vert ci-dessous.
@@ -91,7 +91,7 @@
           </p>
 
           <div class="text-center">
-            <button class="btn btn-success mt-3" (click)="openImportPopup()">
+            <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="openImportPopup()">
               Importer une évaluation
             </button>
           </div>
@@ -100,9 +100,7 @@
 
 
 
-    <button class="btn btn-primary" routerLink="/guide">
-      ← Retour
-    </button>
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a>
 
   </div>
 </div>

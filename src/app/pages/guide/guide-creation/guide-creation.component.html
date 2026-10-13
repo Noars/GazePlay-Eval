@@ -1,6 +1,6 @@
 <div class="card mb-4">
   <div class="card-header">
-    <h2 class="card-title">Création d'évaluation</h2>
+    <h1 class="card-title">Création d'évaluation</h1>
   </div>
   <div class="card-body">
 
@@ -20,7 +20,7 @@
 
 
       <div class="guide-section-card mb-3">
-        <div class="guide-section-title">Aide</div>
+        <h2 class="guide-section-title">Aide</h2>
         <div class="guide-section-body">
           <p>
             En cas de besoin, vous pouvez également retrouver une version vidéo complète du processus de création d'évaluation,
@@ -28,8 +28,11 @@
           </p>
 
           <div class="text-center">
-            <iframe width="600" height="400"
-                    src="https://www.youtube.com/embed/2Nl7yLddWd8?controls=1">
+            <iframe class="guide-video"
+                    title="Vidéo : démonstration complète de GazePlay Eval (création, sauvegarde, chargement et import)"
+                    src="https://www.youtube-nocookie.com/embed/2Nl7yLddWd8?controls=1"
+                    loading="lazy"
+                    allowfullscreen>
             </iframe>
           </div>
         </div>
@@ -66,7 +69,7 @@
     </div>
 
     <div class="guide-section-card mb-3" [id]="'info-eval'">
-      <div class="guide-section-title">Partie 1 — Informations de l'évaluation</div>
+      <h2 class="guide-section-title">Partie 1 — Informations de l'évaluation</h2>
       <div class="guide-section-body">
         <p>La première partie du processus de création d'évaluation consiste à renseigner des informations générales, tel
         que son nom. Il s'agira de celui utilisé par la suite pour les emplacements de <a routerLink="/guide/sauvegardes">sauvegarde</a>
@@ -80,7 +83,7 @@
     </div>
 
     <div class="guide-section-card mb-3" [id]="'info-participant'">
-      <div class="guide-section-title">Partie 2 — Informations du/de la participant·e</div>
+      <h2 class="guide-section-title">Partie 2 — Informations du/de la participant·e</h2>
       <div class="guide-section-body">
         <p>Cette partie facultative vous permet d'ajouter une liste de champs (“Nom”, “Prénom”, “Âge”, ...). Lorsque vous ferez passer
           l’évaluation à quelqu’un depuis Gazeplay Learning, ces champs seront affichés afin que vous puissiez les remplir avec les
@@ -105,7 +108,7 @@
     </div>
 
     <div class="guide-section-card mb-3" [id]="'setup-eval'">
-      <div class="guide-section-title">Partie 3 — Mode d'évaluation et paramètres globaux</div>
+      <h2 class="guide-section-title">Partie 3 — Mode d'évaluation et paramètres globaux</h2>
       <div class="guide-section-body">
         <p>La page suivante est en deux temps. Premièrement, il faut choisir le mode de création de l'évaluation. Le mode manuel permet de créer
           chaque écran à la main, en partant de configurations globales. Le mode automatique permet de générer son évaluation à partir de médias
@@ -171,7 +174,7 @@
     </div>
 
     <div class="guide-section-card mb-3" [id]="'create-eval'">
-      <div class="guide-section-title">Partie 4 — Création des écrans d'évaluation</div>
+      <h2 class="guide-section-title">Partie 4 — Création des écrans d'évaluation</h2>
       <div class="guide-section-body">
         <p>Une fois les paramètres globaux renseignés, vous pouvez créer un ensemble d'écrans qui composeront votre évaluation.
           Pour cela, vous pouvez utiliser la page suivante :
@@ -296,7 +299,7 @@
     </div>
 
     <div class="guide-section-card mb-3" [id]="'download-eval'">
-      <div class="guide-section-title">Partie 5 — Téléchargement de l'évaluation</div>
+      <h2 class="guide-section-title">Partie 5 — Téléchargement de l'évaluation</h2>
       <div class="guide-section-body">
         <p>Une fois les écrans de l'évaluation créés, la dernière page permet de télécharger l'évaluation sous deux formats différents :
         </p>
@@ -309,9 +312,7 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" routerLink="/guide">
-      ← Retour
-    </button>
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a>
 
   </div>
 </div>

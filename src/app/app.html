@@ -1,25 +1,45 @@
-<main class="mt-5">
-  <app-navbar></app-navbar>
-  @if (currentStepIndex >= 0){
-    <app-progress-bar [steps]="steps" [currentStepIndex]="currentStepIndex"></app-progress-bar>
+<div class="gp-app">
+  <a class="gp-skip-link" href="#main-content" (click)="skipToContent($event)">Aller au contenu principal</a>
+
+  <app-navbar (menuRequested)="openMenu()"></app-navbar>
+
+  @if (storageNotices.upgradeBlocked()) {
+    <div class="gp-callout gp-callout--warning app-banner" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <div class="gp-callout__body">
+        <strong class="gp-callout__title">Mise à jour du stockage en attente</strong>
+        GazePlay Eval est ouvert dans un autre onglet avec une version précédente. Fermez cet
+        onglet pour que vos préférences et vos médias soient à nouveau accessibles.
+      </div>
+    </div>
   }
-  <router-outlet></router-outlet>
-</main>
-<footer class="bg-body-tertiary text-center text-muted py-4 shadow-sm">
-  <div class="container d-flex flex-column align-items-center">
-    <a href="https://github.com/Noars/GazePlay-Eval" target="_blank" class="text-muted mb-2">
-      <i class="bi bi-github fs-4"></i>
-    </a>
-    <div class="fw-semibold">
-      © 2026 GazePlayEval
+
+  <div class="gp-shell">
+    <aside class="gp-shell__sidebar">
+      <app-menu mode="sidebar"></app-menu>
+    </aside>
+
+    <div class="gp-shell__content">
+      @if (currentStepIndex >= 0) {
+        <app-progress-bar [steps]="steps" [currentStepIndex]="currentStepIndex"></app-progress-bar>
+      }
+
+      <main id="main-content" class="gp-shell__main" tabindex="-1">
+        <router-outlet></router-outlet>
+      </main>
+
+      <footer class="gp-footer">
+        <span>© 2026 GazePlay Eval · Vos données restent sur cet appareil.</span>
+        <a href="https://github.com/Noars/GazePlay-Eval" target="_blank" rel="noopener noreferrer">
+          <i class="bi bi-github" aria-hidden="true"></i>
+          Code source sur GitHub<span class="visually-hidden"> (nouvel onglet)</span>
+        </a>
+      </footer>
     </div>
   </div>
-</footer>
+</div>
 
-<!-- Pour les flash-messages -->
+<app-menu #drawerMenu mode="drawer"></app-menu>
+
+<!-- Notifications (zone annoncée aux lecteurs d'écran) -->
 <app-flash></app-flash>
-
-<!-- Bouton d'aide contextuel (présent sur toutes les pages) -->
-@if (showGuideButton){
-  <app-icon-guide-popup></app-icon-guide-popup>
-}

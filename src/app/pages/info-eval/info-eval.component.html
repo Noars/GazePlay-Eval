@@ -1,46 +1,75 @@
-<div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 800px;">
-    <div class="card-header">
-      <h2 class="card-title text-center">Informations évaluation</h2>
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <span class="gp-page-header__eyebrow">Étape 1 sur 5</span>
+      <h1 class="gp-page-header__title">Informations de l'évaluation</h1>
+      <p class="gp-page-header__lead">Donnez un nom à votre évaluation et choisissez le format des résultats.</p>
     </div>
-    <div class="card-body" style="text-align: -webkit-center;">
-      <div class="card shadow-lg col-11">
-        <div class="card-header bg-secondary text-white fw-semibold">
-          Nom évaluation & format
+  </header>
+
+  <form class="gp-card" (ngSubmit)="goToInfoParticipant()" novalidate>
+    <div class="gp-card__body gp-stack">
+      <div class="gp-field">
+        <label for="evalName" class="gp-field__label">
+          Nom de l'évaluation
+          <app-help-tip topic="nom de l'évaluation" [text]="tooltipEvalName"></app-help-tip>
+        </label>
+        <p class="gp-field__hint" id="evalNameHint">
+          Utilisé pour les fichiers exportés et pour retrouver l'évaluation dans GazePlay.
+          Sans nom, l'évaluation s'appellera « Nouvelle Evaluation ».
+        </p>
+        <input #nameInput
+               type="text"
+               class="form-control"
+               id="evalName"
+               name="evalName"
+               autocomplete="off"
+               placeholder="Ex. : Reconnaissance des couleurs"
+               [attr.aria-invalid]="nameError ? 'true' : null"
+               [attr.aria-describedby]="nameError ? 'evalNameHint evalNameError' : 'evalNameHint'"
+               [ngModel]="evaluationName"
+               (ngModelChange)="onNameChange($event)">
+        @if (nameError) {
+          <p class="gp-field__error" id="evalNameError">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>{{ nameError }}
+          </p>
+        }
+      </div>
+
+      <fieldset class="gp-field">
+        <legend class="gp-field__label">
+          Format des résultats
+          <app-help-tip topic="format des résultats" [text]="tooltipEvalType"></app-help-tip>
+        </legend>
+        <p class="gp-field__hint">Format des fichiers de résultats produits par GazePlay-Learning après chaque passation.</p>
+        <div class="gp-choice-grid">
+          @for (format of formats; track format.value) {
+            <label class="gp-choice">
+              <input class="gp-choice__input"
+                     type="radio"
+                     name="resultType"
+                     [value]="format.value"
+                     [checked]="resultType === format.value"
+                     (change)="onFormatChange(format.value)">
+              <span class="gp-choice__body">
+                <span class="gp-choice__title">{{ format.label }}</span>
+                <span class="gp-choice__desc">{{ format.description }}</span>
+              </span>
+            </label>
+          }
         </div>
-        <div class="mb-3 mt-3">
-          <label for="evalName" class="form-label fw-semibold">
-            Comment souhaitez-vous appeler votre évaluation ?
-            <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
-                 [matTooltip]="tooltipEvalName" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-            <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
-                 [matTooltip]="tooltipEvalName" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-          </label>
-          <div class="col-4">
-            <input type="text" class="form-control" id="evalName" placeholder="Défaut: GazePlayEval"
-                   [(ngModel)]="evaluationName">
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">
-            Sous quel format souhaitez-vous récupérer les résultats de votre évaluation ?
-            <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
-                 [matTooltip]="tooltipEvalType" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-            <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
-                 [matTooltip]="tooltipEvalType" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-          </label>
-          <div class="col-4">
-            <select class="form-select" [(ngModel)]="resultType">
-              <option value="Csv&Xlsx">CSV & XLSX</option>
-              <option value="Csv">CSV</option>
-              <option value="Xlsx">XLSX</option>
-            </select>
-          </div>
+      </fieldset>
+    </div>
+
+    <div class="gp-card__footer">
+      <div class="gp-actions mt-0 pt-0 border-0">
+        <div class="gp-actions__end">
+          <button type="submit" class="gp-btn gp-btn--primary">
+            Suivant : participant
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
-      <div class="d-flex justify-content-center mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="goToInfoParticipant()">Suivant →</button>
-      </div>
     </div>
-  </div>
+  </form>
 </div>

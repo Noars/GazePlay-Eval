@@ -1,123 +1,193 @@
-<div class="d-flex justify-content-center p-4">
-  <div style="width:100%; max-width:700px">
-
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title text-center">Options </h2>
-      </div>
-      <div class="card-body">
-
-        <div class="card inner-card mt-3">
-          <div class="card-header inner-card-header">Notifications</div>
-          <div class="inner-card-body">
-
-            <div class="param-section-title">Affichage des messages</div>
-            <div class="param-row">
-              <span class="param-label">Durée d'affichage des messages</span>
-              <div class="param-control">
-                <div class="input-group w-auto">
-                  <input type="number"
-                         class="form-control"
-                         min="0"
-                         max="30"
-                         step="0.5"
-                         [(ngModel)]="options.flashDuration">
-                  <span class="input-group-text">secondes</span>
-                </div>
-              </div>
-            </div>
-
-            @if (options.flashDuration === 0) {
-              <div class="alert alert-warning py-1 px-3 mb-2" style="font-size: 0.8rem;">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Une durée de 0 seconde désactive les messages.
-              </div>
-
-                <div class="param-row">
-                <span class="param-label">Aperçu</span>
-                <div class="param-control">
-                  <button class="btn btn-secondary btn-sm disabled">
-                    Tester
-                  </button>
-                </div>
-              </div>
-
-            } @else {
-              <div class="param-row">
-                <span class="param-label">Aperçu</span>
-                <div class="param-control">
-                  <button class="btn btn-secondary btn-sm"
-                          (click)="flashService.show('info', 'Ceci est un message de test !', options.flashDuration * 1000)">
-                    Tester
-                  </button>
-                </div>
-              </div>
-            }
-
-
-
-          </div>
-        </div>
-
-        <div class="card inner-card mt-3">
-          <div class="card-header inner-card-header">Accessibilité</div>
-          <div class="inner-card-body">
-
-            <div class="param-section-title">Choix de la police d'écriture</div>
-            <div class="param-row">
-              <span class="param-label">Police de caractère</span>
-              <div class="param-control">
-                <select class="form-select" (change)="changeFont($any($event.target).value)">
-                  <option value="Roboto">Roboto</option>
-                  <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="param-section-title">Choix de la taille de la police d'écriture</div>
-            <div class="param-row">
-              <span class="param-label">Taille de caractère</span>
-              <div class="param-control">
-                <select class="form-select" (change)="changeSize($any($event.target).value)">
-                  <option value="50%">50%</option>
-                  <option value="75%">75%</option>
-                  <option value="100%">100%</option>
-                  <option value="125%">125%</option>
-                  <option value="150%">150%</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card inner-card mt-3">
-          <div class="card-header inner-card-header">Stockage</div>
-          <div class="inner-card-body">
-
-            <div class="param-section-title">Stockage des pièces jointes (en cours de développement)</div>
-            <div class="param-row justify-content-center">
-              <div class="param-control min-w-0">
-                <button class="btn btn-danger btn-sm"
-                        (click)="this.emptyDB()">
-                  Supprimer tous les fichiers
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <h1 class="gp-page-header__title">Options et accessibilité</h1>
+      <p class="gp-page-header__lead">
+        Adaptez l'affichage à vos besoins. Les réglages s'appliquent immédiatement et sont
+        enregistrés sur cet appareil uniquement.
+      </p>
     </div>
+  </header>
 
-    <div class="d-flex justify-content-between mt-4">
-      <button class="btn btn-primary" (click)="goBack()">
-        ← Retour
-      </button>
-      <button class="btn btn-success fw-semibold" (click)="saveDuration()">
-        Sauvegarder
-      </button>
+  @if (preferencesService.saveError()) {
+    <div class="gp-callout gp-callout--warning mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <div class="gp-callout__body"><p>{{ preferencesService.saveError() }}</p></div>
     </div>
+  }
 
+  <div class="gp-stack">
+    <!-- Aperçu -->
+    <section class="gp-card preview" aria-labelledby="preview-title">
+      <div class="gp-card__body">
+        <h2 class="preview__title" id="preview-title">Aperçu</h2>
+        <p class="mb-2">
+          Le participant regarde l'image du chat pendant deux secondes pour valider sa réponse.
+          Les <a href="#/guide">liens</a> et les boutons suivent vos réglages.
+        </p>
+        <div class="gp-btn-group">
+          <span class="gp-btn gp-btn--primary gp-btn--sm" aria-hidden="true">Bouton principal</span>
+          <span class="gp-btn gp-btn--secondary gp-btn--sm" aria-hidden="true">Bouton secondaire</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Apparence -->
+    <section class="gp-card" aria-labelledby="appearance-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="appearance-title"><i class="bi bi-palette me-2" aria-hidden="true"></i>Apparence</h2>
+      </div>
+      <div class="gp-card__body">
+        <app-choice-setting label="Thème"
+                            hint="« Système » suit le réglage clair ou sombre de votre appareil."
+                            [options]="themeOptions"
+                            [ngModel]="prefs().theme"
+                            (ngModelChange)="set('theme', $event)"></app-choice-setting>
+        <app-choice-setting label="Contraste"
+                            hint="Le contraste renforcé utilise des couleurs plus franches et des bordures épaisses."
+                            [options]="contrastOptions"
+                            [ngModel]="prefs().contrast"
+                            (ngModelChange)="set('contrast', $event)"></app-choice-setting>
+        <app-choice-setting label="Animations"
+                            hint="Réduit les transitions et les mouvements à l'écran."
+                            [options]="motionOptions"
+                            [ngModel]="prefs().motion"
+                            (ngModelChange)="set('motion', $event)"></app-choice-setting>
+      </div>
+    </section>
+
+    <!-- Lecture -->
+    <section class="gp-card" aria-labelledby="reading-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="reading-title"><i class="bi bi-fonts me-2" aria-hidden="true"></i>Confort de lecture</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="font-select">Police</label>
+            <p class="gp-setting__hint" id="font-hint">
+              {{ selectedFont().description }}
+              @if (selectedFont().remoteStylesheet) {
+                <br><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>
+                Téléchargée depuis Google Fonts lors de sa sélection.
+              }
+            </p>
+          </div>
+          <div class="gp-setting__control">
+            <select id="font-select" class="form-select font-select" aria-describedby="font-hint"
+                    [ngModel]="prefs().font" (ngModelChange)="setFont($event)">
+              @for (font of fonts; track font.id) {
+                <option [value]="font.id">{{ font.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="text-scale">Taille du texte</label>
+            <p class="gp-setting__hint">S'ajoute au zoom de votre navigateur.</p>
+          </div>
+          <div class="gp-setting__control">
+            <select id="text-scale" class="form-select"
+                    [ngModel]="prefs().textScale" (ngModelChange)="set('textScale', +$event)">
+              @for (option of textScaleOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <app-choice-setting label="Interligne"
+                            [options]="lineHeightOptions"
+                            [ngModel]="prefs().lineHeight"
+                            (ngModelChange)="set('lineHeight', $event)"></app-choice-setting>
+        <app-choice-setting label="Espacement des lettres"
+                            [options]="letterSpacingOptions"
+                            [ngModel]="prefs().letterSpacing"
+                            (ngModelChange)="set('letterSpacing', $event)"></app-choice-setting>
+        <app-choice-setting label="Espacement des mots"
+                            [options]="wordSpacingOptions"
+                            [ngModel]="prefs().wordSpacing"
+                            (ngModelChange)="set('wordSpacing', $event)"></app-choice-setting>
+        <app-choice-setting label="Souligner tous les liens"
+                            hint="Facilite le repérage des liens sans s'appuyer sur la couleur."
+                            [ngModel]="prefs().underlineLinks"
+                            (ngModelChange)="set('underlineLinks', $event)"></app-choice-setting>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="gp-card" aria-labelledby="notifications-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="notifications-title"><i class="bi bi-bell me-2" aria-hidden="true"></i>Notifications</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="message-duration">Durée d'affichage des messages</label>
+            <p class="gp-setting__hint" id="message-duration-hint">
+              De 0 à 30 secondes. À 0, les messages d'information sont désactivés ; les erreurs restent toujours affichées.
+            </p>
+          </div>
+          <div class="gp-setting__control">
+            <span class="gp-input-unit">
+              <input id="message-duration" class="form-control" type="number" min="0" max="30" step="0.5"
+                     aria-describedby="message-duration-hint message-duration-unit"
+                     [ngModel]="prefs().messageDuration" (ngModelChange)="setMessageDuration($event)">
+              <span class="gp-input-unit__unit" id="message-duration-unit">secondes</span>
+            </span>
+            <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm"
+                    [disabled]="prefs().messageDuration === 0" (click)="testMessage()">
+              Tester
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stockage -->
+    <section class="gp-card" aria-labelledby="storage-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="storage-title"><i class="bi bi-hdd me-2" aria-hidden="true"></i>Stockage des médias</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <p class="gp-setting__label">Libérer de l'espace</p>
+            <p class="gp-setting__hint">Supprime les images, sons et vidéos qui ne sont plus utilisés par aucune évaluation.</p>
+          </div>
+          <div class="gp-setting__control">
+            <button type="button" class="gp-btn gp-btn--secondary" [disabled]="storageBusy" (click)="cleanupUnusedMedia()">
+              <i class="bi bi-stars" aria-hidden="true"></i> Nettoyer
+            </button>
+          </div>
+        </div>
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <p class="gp-setting__label">Supprimer tous les fichiers</p>
+            <p class="gp-setting__hint">Efface tous les médias, y compris ceux de vos évaluations sauvegardées. Une confirmation est demandée.</p>
+          </div>
+          <div class="gp-setting__control">
+            <button type="button" class="gp-btn gp-btn--danger-outline" [disabled]="storageBusy" (click)="emptyDB()">
+              <i class="bi bi-trash3" aria-hidden="true"></i> Tout supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <nav class="gp-actions" aria-label="Actions de la page">
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="goBack()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      Retour à l'accueil
+    </button>
+    <div class="gp-actions__end">
+      <button type="button" class="gp-btn gp-btn--ghost" (click)="resetPreferences()">
+        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+        Rétablir l'affichage par défaut
+      </button>
+    </div>
+  </nav>
 </div>

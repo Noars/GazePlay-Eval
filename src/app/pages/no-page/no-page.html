@@ -1,16 +1,15 @@
-<div class="d-flex align-items-center justify-content-center bg-light-subtle p-4 min-vh-100">
-  <div class="card shadow-lg w-100" style="max-width: 600px;">
-    <div class="card-header">
-      <h1 class="card-title text-center">Oups !</h1>
-    </div>
-    <div class="card-body">
-      <div class="card-text">
-        <p>Cette page n'existe pas...</p>
-        <p>La fonctionnalité n'a pas encore été implémentée. Vous pouvez cliquer sur le bouton ci-dessous pour revenir à l'accueil.</p>
+<div class="gp-page gp-page--narrow">
+  <div class="gp-card">
+    <div class="gp-card__body gp-empty">
+      <i class="bi bi-signpost-split" aria-hidden="true"></i>
+      <h1 class="gp-empty__title">Page introuvable</h1>
+      <p>Cette page n'existe pas ou n'est pas encore disponible.</p>
+      <div class="gp-btn-group justify-content-center">
+        <button type="button" class="gp-btn gp-btn--primary" (click)="router.navigate(['/home'])">
+          <i class="bi bi-house" aria-hidden="true"></i> Retour à l'accueil
+        </button>
+        <a class="gp-btn gp-btn--ghost" routerLink="/guide">Consulter le guide</a>
       </div>
-      <button class="btn btn-primary w-100 w-100 fw-semibold" (click)="router.navigate(['/home'])">Retour</button>
-
     </div>
   </div>
 </div>
-

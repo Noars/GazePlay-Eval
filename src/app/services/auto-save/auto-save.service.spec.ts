@@ -4,7 +4,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { SaveService } from '../save/save.service';
 import { FlashService } from '../flash-message/flash.service';
 import { LoadService } from '../load/load.service';
-import { IndexedDBService } from '../indexedDB/indexed-db.service';
+import { MediaCleanupService } from '../../core/media/media-cleanup.service';
 import { Subject } from 'rxjs';
 import { saveModelDefault } from '../../shared/saveModel';
 
@@ -15,7 +15,7 @@ describe('AutoSaveService', () => {
   let saveServiceSpy: jasmine.SpyObj<SaveService>;
   let flashServiceSpy: jasmine.SpyObj<FlashService>;
   let loadServiceSpy: jasmine.SpyObj<LoadService>;
-  let indexedDbSpy: jasmine.SpyObj<IndexedDBService>;
+  let cleanupSpy: jasmine.SpyObj<MediaCleanupService>;
 
   beforeEach(() => {
     routerEvents$ = new Subject();
@@ -24,15 +24,16 @@ describe('AutoSaveService', () => {
     });
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveToSlot'], {
+    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveToSlot', 'loadIntoWorkspace'], {
       dataAuto: { ...saveModelDefault, nomEval: 'TestEval', step: 0 }
     });
+    saveServiceSpy.loadIntoWorkspace.and.callFake((save: any) => Object.assign(saveServiceSpy.dataAuto, save));
     saveServiceSpy.activeSlotIndex = null;
 
     flashServiceSpy = jasmine.createSpyObj('FlashService', ['show']);
     loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    indexedDbSpy = jasmine.createSpyObj('IndexedDBService', ['deleteFileByProject']);
-    indexedDbSpy.deleteFileByProject.and.returnValue(Promise.resolve());
+    cleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['cleanupProject']);
+    cleanupSpy.cleanupProject.and.returnValue(Promise.resolve(0));
 
     TestBed.configureTestingModule({
       providers: [
@@ -41,7 +42,7 @@ describe('AutoSaveService', () => {
         { provide: SaveService,    useValue: saveServiceSpy },
         { provide: FlashService,   useValue: flashServiceSpy },
         { provide: LoadService,    useValue: loadServiceSpy },
-        { provide: IndexedDBService, useValue: indexedDbSpy }
+        { provide: MediaCleanupService, useValue: cleanupSpy }
       ]
     });
 
@@ -124,13 +125,47 @@ describe('AutoSaveService', () => {
     expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
   });
 
-  it('autoSave — nomEvals différents → deleteFileByProject appelé', () => {
+  it("autoSave — évaluation renommée → nettoyage prudent des médias de l'ancien nom, après la sauvegarde", () => {
     saveServiceSpy.dataAuto.nomEval = 'NouvelleEval';
     loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, nomEval: 'AncienneEval', step: 0 });
 
     service.autoSave('/create-eval');
 
-    expect(indexedDbSpy.deleteFileByProject).toHaveBeenCalled();
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalled();
+    expect(cleanupSpy.cleanupProject).toHaveBeenCalledWith('AncienneEval');
+  });
+
+  it('autoSave — même nom → aucun nettoyage', () => {
+    service.autoSave('/create-eval');
+    expect(cleanupSpy.cleanupProject).not.toHaveBeenCalled();
+  });
+
+  it('autoSave — page hors parcours (accueil, options, page inconnue) → aucune sauvegarde', () => {
+    ['/home', '/option', '/guide/creation', '/inconnue', '/toString'].forEach(url => service.autoSave(url));
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it("autoSave — pseudo-route de l'éditeur → étape 3 enregistrée", () => {
+    service.autoSave('stimuli');
+    expect(saveServiceSpy.dataAuto.step).toBe(3);
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, saveServiceSpy.dataAuto);
+  });
+
+  it('autoSave — emplacement actif → sauvegardé aussi dans cet emplacement', () => {
+    saveServiceSpy.activeSlotIndex = 2;
+    service.autoSave('/setup-eval');
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(2, saveServiceSpy.dataAuto);
+  });
+
+  it("autoSave — stockage plein → message d'erreur, pas de nettoyage", () => {
+    saveServiceSpy.saveToSlot.and.throwError('QuotaExceededError');
+    saveServiceSpy.dataAuto.nomEval = 'Renommée';
+    spyOn(console, 'error');
+
+    service.autoSave('/create-eval');
+
+    expect(flashServiceSpy.show).toHaveBeenCalledWith('error', jasmine.any(String));
+    expect(cleanupSpy.cleanupProject).not.toHaveBeenCalled();
   });
 
   it('tryResume — step sans route → ne navigue pas', () => {

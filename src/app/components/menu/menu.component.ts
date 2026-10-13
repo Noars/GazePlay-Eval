@@ -1,148 +1,110 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Offcanvas } from 'bootstrap';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { LoadZipService } from '../../services/load-zip/load-zip.service';
-import { LoadService} from '../../services/load/load.service';
-import { SaveService } from '../../services/save/save.service';
-import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
-import { AutoSaveService } from '../../services/auto-save/auto-save.service';
-import {FormatTypeConfig} from '../../shared/dataBaseConfig';
-import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
-import {ThemeService} from '../../services/theme/theme.service';
+import {Component, DestroyRef, ElementRef, inject, Input, ViewChild} from '@angular/core';
+import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
+import {NgTemplateOutlet} from '@angular/common';
+import {filter} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ImportFlowService} from '../../services/import-flow/import-flow.service';
+import {LoadService} from '../../services/load/load.service';
 
+interface NavItem {
+  label: string;
+  icon: string;
+  route: string;
+  exact?: boolean;
+}
+
+/**
+ * Navigation principale.
+ *
+ * - `mode="sidebar"` : liste affichée en permanence dans la colonne de gauche (grands écrans) ;
+ * - `mode="drawer"`  : même liste dans un tiroir `<dialog>` modal (petits écrans), ouvert
+ *   depuis l'en-tête. Le tiroir se ferme après une navigation, avec Échap ou un clic sur le fond.
+ */
 @Component({
   selector: 'app-menu',
-  imports: [],
+  imports: [RouterLink, RouterLinkActive, NgTemplateOutlet],
   templateUrl: './menu.component.html',
   standalone: true,
-  styleUrl: './menu.component.css'
+  styleUrl: './menu.component.scss'
 })
-export class MenuComponent implements OnInit, OnDestroy {
+export class MenuComponent {
+  private readonly router = inject(Router);
+  private readonly importFlow = inject(ImportFlowService);
+  private readonly loadService = inject(LoadService);
 
-  // Stocke l'instance du menu latéral
-  private offcanvasInstance!: Offcanvas;
+  @Input() mode: 'sidebar' | 'drawer' = 'sidebar';
 
-  constructor(
-    private router: Router,
-    private dialog: MatDialog,
-    private loadServiceZip: LoadZipService,
-    private autoSaveService: AutoSaveService,
-    private loadService: LoadService,
-    private saveService: SaveService,
-    private overwriteGuard: OverwriteGuardService,
-    private themeService: ThemeService
-  ) {}
+  @ViewChild('drawer') private drawer?: ElementRef<HTMLDialogElement>;
 
-  isDark(): boolean {
-    return this.themeService.getTheme() === 'dark';
+  readonly navigationItems: NavItem[] = [
+    {label: 'Accueil', icon: 'bi-house', route: '/home', exact: true},
+    {label: 'Guide', icon: 'bi-book', route: '/guide'},
+    {label: 'Options', icon: 'bi-sliders', route: '/option'},
+  ];
+
+  readonly projectItems: NavItem[] = [
+    {label: 'Mes sauvegardes', icon: 'bi-floppy', route: '/sauvegarde'},
+    {label: 'Charger', icon: 'bi-folder2-open', route: '/load-save'},
+  ];
+
+  readonly importing = this.importFlow.importing;
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed(inject(DestroyRef)),
+    ).subscribe(() => this.close());
   }
 
-  // Executé dans le component est créé
-  ngOnInit(): void {
-    const offcanvasEl = document.getElementById('menu')!;
-
-    // créé l'élement ou le récupère (donc pas de doublon)
-    this.offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasEl, {
-      backdrop: true,
-      scroll: false
-    });
-
-    // mise en écoute de l'événement du canvas dissimulé pour pouvoir le supprimer
-    offcanvasEl.addEventListener('hide.bs.offcanvas', () => {
-      this.removeElement();
-    });
+  /** Vrai si une évaluation est en cours (slot 0 non vide). */
+  hasCurrentEval(): boolean {
+    return this.loadService.getSlot(0) !== null;
   }
 
-  // Executé quand le component est détruit
-  ngOnDestroy(): void {
-    this.offcanvasInstance?.dispose();
+  open(): void {
+    const dialog = this.drawer?.nativeElement;
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+    }
   }
 
-  /**
-   * Ferme le menu latéral et supprime le backdrop gris en fond.
-   */
-  private closeMenu(): void {
-    const offcanvasEl = document.getElementById('menu');
-    if (!offcanvasEl) return;
-
-    const instance = Offcanvas.getInstance(offcanvasEl);
-    instance?.hide();
-
-    this.removeElement();
+  close(): void {
+    const dialog = this.drawer?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
   }
 
-  /**
-   * Supprime le backdrop gris derrière le menu afin d'éviter qu'il reste si on clique ailleurs sur la page.
-   */
-  private removeElement(): void {
-    document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
-    document.body.classList.remove('modal-open', 'offcanvas-open');
-    document.body.style.removeProperty('overflow');
-    document.body.style.removeProperty('padding-right');
+  /** Clic sur le fond du tiroir : fermeture. */
+  onDrawerClick(event: MouseEvent): void {
+    if (event.target === this.drawer?.nativeElement) {
+      this.close();
+    }
+  }
+
+  /** Ouvre la fenêtre d'import d'une archive `.gpSave` / `.zip`. */
+  async openImportPopup(): Promise<void> {
+    this.close();
+    await this.importFlow.start();
   }
 
   goToAccueil() {
-    this.closeMenu();
     this.router.navigate(['/home']);
   }
 
   goToSauvegarde() {
-    this.closeMenu();
     this.router.navigate(['/sauvegarde']);
   }
 
   goToLoadSave() {
-    this.closeMenu();
     this.router.navigate(['/load-save']);
   }
 
   goToGuide() {
-    this.closeMenu();
     this.router.navigate(['/guide']);
   }
 
   goToOptions() {
-    this.closeMenu();
     this.router.navigate(['/option']);
-  }
-
-  /**
-   * Ouvre la pop-up pour importer un fichier ZIP dans le site.
-   */
-  openImportPopup() {
-    const dialogRef = this.dialog.open(PopupImportSaveComponent, {
-      data: {
-        slots: [
-          { index: 1, name: this.loadService.getSlot(1)?.nomEval, empty: this.loadService.getSlot(1) === null },
-          { index: 2, name: this.loadService.getSlot(2)?.nomEval, empty: this.loadService.getSlot(2) === null },
-          { index: 3, name: this.loadService.getSlot(3)?.nomEval, empty: this.loadService.getSlot(3) === null },
-        ]
-      },
-      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
-      panelClass: 'scrollable-dialog' // classe custom pour laisser le scroll
-    });
-
-    dialogRef.afterClosed().subscribe(async result => {
-      if (!result) return; // annulation de l'import
-
-      if (!await this.overwriteGuard.check(0)) return; // Si l'import correspond à un slot
-
-      if (result.mode === 'save') {
-        const slotIndex = result.slotIndex as FormatTypeConfig;
-        if (!await this.overwriteGuard.check(slotIndex)) return;
-        await this.loadServiceZip.loadZipToSlot(result.zipFile, slotIndex);
-        const uniqueName = this.overwriteGuard.getUniqueEvalName(this.saveService.dataAuto.nomEval, slotIndex);
-        if (uniqueName !== this.saveService.dataAuto.nomEval) {
-          this.saveService.dataAuto.nomEval = uniqueName;
-          this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
-          this.saveService.saveToSlot(0, this.saveService.dataAuto);
-        }
-      } else {
-        await this.loadServiceZip.loadZip(result.zipFile);
-      }
-      await this.router.navigate(['/home']);
-      this.autoSaveService.tryResume(true);
-    });
   }
 }

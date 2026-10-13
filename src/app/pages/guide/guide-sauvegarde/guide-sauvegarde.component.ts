@@ -1,9 +1,12 @@
 import {RouterLink} from '@angular/router';
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {FlashService} from '../../../services/flash-message/flash.service';
-import {OptionService} from '../../../services/options/option-service';
-import {optionsModel, optionsModelDefault} from '../../../shared/optionsModel';
+import {UserPreferencesService} from '../../../core/preferences/user-preferences.service';
 
+/**
+ * Guide « Sauvegarde et chargement ». Également affiché dans l'aide contextuelle des
+ * pages Sauvegardes et Charger.
+ */
 @Component({
   selector: 'app-guide-sauvegarde',
   standalone: true,
@@ -11,30 +14,21 @@ import {optionsModel, optionsModelDefault} from '../../../shared/optionsModel';
   templateUrl: './guide-sauvegarde.component.html',
   styleUrl: '../guide.component.css'
 })
-export class GuideSauvegardeComponent implements OnInit{
-
-  public options!: optionsModel;
+export class GuideSauvegardeComponent {
 
   constructor(
     private flashService: FlashService,
-    private optionService: OptionService
+    private preferences: UserPreferencesService
   ) {}
 
-  ngOnInit(): void {
-    // S'il n'y a pas d'option, on prend les valeurs par défaut
-    this.options = this.optionService.getOptions() ?? { ...optionsModelDefault };
-  }
-
-
-  resetDuration(): void {
-    try {
-      this.optionService.setOptions(this.options);
-      this.flashService.setDefaultDuration(3000);
-
-      // La durée des flash-message est hardcoded, car si l'utilisateur met un temps de 0ms il n'aura pas de confirmation.
+  /** Réactive les notifications avec une durée de 3 secondes (enregistrée dans les préférences). */
+  async resetDuration(): Promise<void> {
+    const ok = await this.preferences.update({messageDuration: 3});
+    if (ok) {
+      // Durée imposée : si les messages étaient désactivés, l'utilisateur doit voir la confirmation.
       this.flashService.show('success', 'La durée d\'affichage des notifications a été définie à 3 secondes.', 3000);
-    } catch (e) {
-      this.flashService.show('error', 'Une erreur est survenue lors de la rénitialisation de la durée d\'affichage des notifications', 3000);
+    } else {
+      this.flashService.show('error', 'La durée d\'affichage des notifications n\'a pas pu être enregistrée.', 3000);
     }
   }
 }

@@ -1,0 +1,120 @@
+// =============================================================================
+// Accessibilité transversale
+// =============================================================================
+
+// --- Focus visible : anneau épais, double (halo + couleur) pour rester visible sur
+// toutes les surfaces, uniquement pour la navigation clavier (:focus-visible).
+:where(a, button, input, select, textarea, summary, [tabindex], [contenteditable]):focus {
+  outline: none;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex], [contenteditable]):focus-visible,
+.gp-focus-ring:focus-visible {
+  outline: 3px solid var(--gp-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--gp-focus-halo);
+}
+
+// Les champs texte gardent un indicateur de focus même au clic (on y tape au clavier).
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):focus {
+  outline: 3px solid var(--gp-focus);
+  outline-offset: 1px;
+}
+
+// --- Lien d'évitement ---------------------------------------------------------
+.gp-skip-link {
+  position: absolute;
+  left: var(--gp-space-3);
+  top: var(--gp-space-3);
+  z-index: 3000;
+  padding: var(--gp-space-3) var(--gp-space-4);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-primary);
+  color: var(--gp-on-primary);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--gp-transition-fast);
+
+  &:focus,
+  &:focus-visible {
+    transform: translateY(0);
+    color: var(--gp-on-primary);
+  }
+}
+
+// --- Masquage accessible (Bootstrap fournit aussi .visually-hidden) -------------
+.gp-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// --- Cibles tactiles : 24 × 24 px minimum (WCAG 2.5.8), 44 px visés pour les actions principales.
+:where(button, [role="button"], a.gp-btn, input[type="checkbox"], input[type="radio"]) {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+// --- Réduction des animations : préférence système ou préférence de l'application.
+@mixin reduce-motion {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @include reduce-motion;
+}
+
+[data-motion="reduce"] {
+  @include reduce-motion;
+}
+
+// --- Mode contraste renforcé : bordures visibles partout, pas de fonds dégradés.
+[data-contrast="high"] {
+  .gp-card,
+  .gp-panel,
+  .gp-btn,
+  .gp-cell,
+  .gp-callout {
+    border-width: 2px;
+  }
+
+  // Liens de texte soulignés ; les liens présentés comme boutons, cartes ou entrées de
+  // navigation gardent leur forme (ils sont déjà identifiables par leur bordure).
+  a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card):not(.stepper__step) {
+    text-decoration: underline;
+  }
+
+  .gp-nav__link.is-active,
+  .gp-nav__link[aria-current="page"] {
+    outline: 2px solid var(--gp-primary);
+  }
+}
+
+// --- Mode couleurs forcées (Windows Contraste élevé) : on laisse le système gérer
+// les couleurs mais on garde les contours des composants.
+@media (forced-colors: active) {
+  .gp-btn,
+  .gp-card,
+  .gp-cell,
+  .gp-segmented__option {
+    border: 1px solid CanvasText;
+  }
+
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

@@ -1,6 +1,6 @@
 <div class="card mb-4">
   <div class="card-header">
-    <h2 class="card-title">Sauvegarde et Chargement d'évaluation</h2>
+    <h1 class="card-title">Sauvegarde et Chargement d'évaluation</h1>
   </div>
   <div class="card-body">
 
@@ -18,7 +18,7 @@
     </div>
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 1 — Sauvegarde automatique</div>
+      <h2 class="guide-section-title">Partie 1 — Sauvegarde automatique</h2>
       <div class="guide-section-body">
         <p>Lorsque vous créez une <a routerLink="/guide/creation">évaluation</a> dans GazePlay-Eval,
           votre progression est enregistrée et conservée dans votre navigateur, à chaque étape que vous remplissez.
@@ -39,12 +39,12 @@
         <p>Le site fournit un moyen simple pour vérifier que votre évaluation s'est bien sauvegardée automatiquement :
           les notifications. Si l'option "affichage des messages" est activée dans les <a routerLink="/option">options</a>
           (ce qui est le cas par défaut), vous pouvez voir des messages éphémères apparaître en bas à droite de votre écran
-          à chaque fois que l'évaluation est sauvegardée. Si l'enregistrement ne peut pa s'effectuer, un message d'erreur
+          à chaque fois que l'évaluation est sauvegardée. Si l'enregistrement ne peut pas s'effectuer, un message d'erreur
           remplacera le message de confirmation.
         </p>
 
         <div class="guide-section-card mb-3">
-          <div class="guide-section-title">Aide</div>
+          <h2 class="guide-section-title">Aide</h2>
           <div class="guide-section-body">
             <p>
               Vous ne voyez aucune notification apparaître ? Vous les avez peut-être désactivées en renseignant une durée d'affichage de
@@ -53,8 +53,8 @@
             </p>
 
             <div class="text-center">
-              <button class="btn btn-success mt-3" (click)="resetDuration()">
-                Rénitialiser la durée d'affichage des notifications
+              <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="resetDuration()">
+                Réactiver les notifications (3 secondes)
               </button>
             </div>
           </div>
@@ -73,7 +73,7 @@
 
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 2 — La page de sauvegarde</div>
+      <h2 class="guide-section-title">Partie 2 — La page de sauvegarde</h2>
       <div class="guide-section-body">
         <p>En complément à la sauvegarde automatique, il est également possible de placer une évaluation créée dans un emplacement
         réservé et accessible à tout moment depuis la page de <a routerLink="/sauvegarde">sauvegarde</a>. Cette page permet de conserver les évaluations
@@ -186,7 +186,7 @@
 
 
     <div class="guide-section-card mb-3">
-      <div class="guide-section-title">Partie 3 — La page de chargement d'évaluations</div>
+      <h2 class="guide-section-title">Partie 3 — La page de chargement d'évaluations</h2>
       <div class="guide-section-body">
         <p>La page de chargement d’évaluations vous permet, comme son nom l’indique, de charger les évaluations précédemment sauvegardées.
         Charger une évaluation vous ramènera à la dernière étape visitée avant la sauvegarde de l’évaluation.
@@ -223,9 +223,7 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" routerLink="/guide">
-      ← Retour
-    </button>
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a>
 
   </div>
 </div>

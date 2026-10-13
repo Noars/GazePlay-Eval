@@ -1,70 +1,61 @@
-<div
-  class="offcanvas offcanvas-start"
-  tabindex="-1"
-  id="menu"
-  aria-labelledby="menuLabel"
->
-  <div class="offcanvas-header">
-    <h1 class="offcanvas-title fw-semibold fs-6" id="menuLabel">Menu</h1>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
-  </div>
-  <div class="offcanvas-body px-3 d-flex flex-column gap-1">
+<ng-template #navContent>
+  <nav class="gp-nav" aria-label="Navigation principale">
+    <p class="gp-nav__section" aria-hidden="true">Navigation</p>
+    <ul class="gp-nav__list">
+      @for (item of navigationItems; track item.route) {
+        <li>
+          <a class="gp-nav__link"
+             [routerLink]="item.route"
+             routerLinkActive="is-active"
+             ariaCurrentWhenActive="page"
+             [routerLinkActiveOptions]="{exact: !!item.exact}">
+            <i class="bi" [class]="item.icon" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
 
-    <p class="menu-section-label">Navigation</p>
+    <p class="gp-nav__section" aria-hidden="true">Projet</p>
+    <ul class="gp-nav__list">
+      @for (item of projectItems; track item.route) {
+        <li>
+          <a class="gp-nav__link"
+             [routerLink]="item.route"
+             routerLinkActive="is-active"
+             ariaCurrentWhenActive="page">
+            <i class="bi" [class]="item.icon" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      }
+      <li>
+        <button type="button" class="gp-nav__link" [disabled]="importing()" (click)="openImportPopup()">
+          @if (importing()) {
+            <span class="gp-spinner" aria-hidden="true"></span>
+            <span>Import en cours…</span>
+          } @else {
+            <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
+            <span>Importer un fichier</span>
+          }
+        </button>
+      </li>
+    </ul>
+  </nav>
+</ng-template>
 
-    <a class="menu-link" style="cursor:pointer" (click)="goToAccueil(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/home/home-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/home/home.png" width="16" height="16" alt="">
-      </span>
-      <span>Accueil</span>
-    </a>
-
-    <a class="menu-link" style="cursor:pointer" (click)="goToGuide(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/book/book-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/book/book.png" width="16" height="16" alt="">
-      </span>
-      <span>Guide</span>
-    </a>
-
-    <a class="menu-link" style="cursor:pointer" (click)="goToOptions(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/settings/settings-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/settings/settings.png" width="16" height="16" alt="">
-      </span>
-      <span>Options</span>
-    </a>
-
-    <hr class="my-2 opacity-25">
-    <p class="menu-section-label">Projet</p>
-
-    <a class="menu-link" style="cursor:pointer" (click)="goToSauvegarde(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/save/save.png" width="16" height="16" alt="">
-      </span>
-      <span>Sauvegardes</span>
-    </a>
-
-    <a class="menu-link" style="cursor:pointer" (click)="goToLoadSave(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
-      </span>
-      <span>Charger</span>
-    </a>
-    <input #fileInput type="file" accept=".gpSave,.zip" hidden>
-
-    <a class="menu-link" style="cursor:pointer"
-       data-bs-dismiss="offcanvas"
-       (click)="openImportPopup(); $event.preventDefault()">
-      <span class="menu-icon">
-        <img class="icon-light" src="assets/icons/import/import-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark" src="assets/icons/import/import.png" width="16" height="16" alt="">
-      </span>
-      <span>Importer</span>
-    </a>
-
-  </div>
-</div>
+@if (mode === 'sidebar') {
+  <ng-container [ngTemplateOutlet]="navContent"></ng-container>
+} @else {
+  <dialog #drawer class="gp-drawer" aria-labelledby="menu-drawer-title" (click)="onDrawerClick($event)">
+    <div class="gp-drawer__header">
+      <h2 class="gp-drawer__title" id="menu-drawer-title">Menu</h2>
+      <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon" aria-label="Fermer le menu" (click)="close()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="gp-drawer__body">
+      <ng-container [ngTemplateOutlet]="navContent"></ng-container>
+    </div>
+  </dialog>
+}

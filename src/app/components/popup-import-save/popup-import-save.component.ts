@@ -77,6 +77,14 @@ export class PopupImportSaveComponent {
     return true;
   }
 
+  /** Explique ce qui manque pour pouvoir confirmer (affiché sous le formulaire). */
+  missingRequirement(): string {
+    if (this.zipFile === null) return "Choisissez d'abord un fichier à importer.";
+    if (this.mode === null) return 'Choisissez ce que vous voulez faire du fichier.';
+    if (this.mode === 'save' && this.selectedSlot === null) return 'Choisissez un emplacement de sauvegarde.';
+    return '';
+  }
+
   /** L'utilisateur annule la popup sans importer. */
   cancel() {
     this.dialogRef.close(null);

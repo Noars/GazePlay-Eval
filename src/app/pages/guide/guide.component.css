@@ -1,175 +1,188 @@
+/* Styles partagés des pages du guide (aussi utilisés dans le panneau d'aide). */
+
 .card {
-  border-radius: 16px;
-  border: 1px solid var(--bs-border-color);
-  margin-top: 25px;
+  margin-top: var(--gp-space-5);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-lg);
+  background: var(--gp-surface);
+  color: var(--gp-text);
+  box-shadow: var(--gp-shadow-sm);
 }
 
 .card-header {
-  border-radius: 16px 16px 0 0 !important;
-  padding: 1rem 1.5rem;
-  background-color: var(--bs-body-bg);
-  border-bottom: 1px solid var(--bs-border-color);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--bs-emphasis-color);
+  padding: var(--gp-space-4) var(--gp-space-5);
+  border-bottom: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-lg) var(--gp-radius-lg) 0 0 !important;
+  background: transparent;
 }
 
 .card-title {
-  font-size: 1.4rem;
-  font-weight: 700;
   margin: 0;
-  text-align: center;
+  font-size: var(--gp-text-2xl);
+  font-weight: 800;
 }
 
 .card-body {
-  padding: 1.5rem 2rem;
+  padding: var(--gp-space-5);
+}
+
+@media (max-width: 575.98px) {
+  .card-header,
+  .card-body {
+    padding-inline: var(--gp-space-4);
+  }
 }
 
 /* Carte de navigation rapide */
 .guide-nav-card {
-  border-radius: 10px;
-  border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
   overflow: hidden;
 }
 
 .guide-nav-card-header {
-  padding: 0.6rem 1rem;
-  background-color: var(--bs-secondary-bg);
-  border-bottom: 1px solid var(--bs-border-color);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--bs-secondary-color);
+  padding: var(--gp-space-2) var(--gp-space-4);
+  border-bottom: 1px solid var(--gp-border);
+  background: var(--gp-surface-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .guide-nav-card-body {
-  padding: 1rem;
+  padding: var(--gp-space-4);
 }
 
 /* Sections de contenu */
 .guide-section-card {
-  border-radius: 10px;
-  border: 1px solid var(--bs-border-color);
+  margin: var(--gp-space-6) 0 0;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
   overflow: hidden;
-  margin: 65px 0 0 0;
-}
-
-.guide-section-intro {
-  font-size: 1rem;
-}
-
-.guide-section-important {
-
 }
 
 .guide-section-title {
-  padding: 0.6rem 1rem;
-  background-color: var(--bs-secondary-bg);
-  border-bottom: 1px solid var(--bs-border-color);
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin: 0;
+  padding: var(--gp-space-3) var(--gp-space-4);
+  border-bottom: 1px solid var(--gp-border);
+  background: var(--gp-surface-2);
+  font-size: var(--gp-text-lg);
+  font-weight: 700;
 }
 
 .guide-section-body {
-  padding: 1rem;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  padding: var(--gp-space-4);
+}
+
+.guide-section-intro {
+  font-size: var(--gp-text-md);
 }
 
 .btn-section-card {
   display: flex;
   flex-direction: column;
-  flex: 1 1 200px;
-  min-width: 160px;
-  max-width: 200px;
-  padding: 1.25rem;
-  border-radius: 12px;
-  border: 1px solid var(--bs-border-color);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  flex: 1 1 12rem;
+  padding: var(--gp-space-4);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface);
+  color: var(--gp-text);
   text-decoration: none;
-  cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color var(--gp-transition-fast), background-color var(--gp-transition-fast);
 }
 
 .btn-section-card:hover {
-  border-color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.05);
-  color: var(--bs-body-color);
+  border-color: var(--gp-primary);
+  background: var(--gp-primary-subtle);
+  color: var(--gp-text);
 }
 
-[data-bs-theme="dark"] .btn-section-card:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+.btn-section-card .bi {
+  color: var(--gp-primary-text);
 }
 
 .btn-section-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-  color: var(--bs-emphasis-color);
+  margin-bottom: var(--gp-space-1);
+  font-weight: 700;
 }
 
 .btn-section-desc {
-  font-size: 0.82rem;
-  color: var(--bs-secondary-color);
-  line-height: 1.5;
-}
-
-.btn-primary {
-  padding: 7px 18px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.btn-outline-secondary {
-  padding: 7px 18px;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
 }
 
 .guide-content-title {
-  font-size: 1.2rem;
+  font-size: var(--gp-text-lg);
   font-weight: 700;
 }
 
 .guide-content-sub {
-  padding-bottom: 15px;
+  color: var(--gp-text-muted);
 }
 
 .guide-content-image {
-  width: auto;
-  max-width: 500px;
-  height: auto;
-  max-height: 500px;
-  border-radius: 8px;
-  border: 1px solid var(--bs-border-color);
   display: block;
-  margin: 0 auto;
+  max-width: min(100%, 32rem);
+  height: auto;
+  margin: var(--gp-space-4) auto 0;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
 }
 
 .guide-content-image-desc {
-  margin-top: 10px;
-  font-size: 0.9rem;
+  margin-top: var(--gp-space-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
   font-style: italic;
   text-align: center;
 }
 
-strong {
-  font-size: 1.4rem;
-  font-weight: bolder;
+/* Vidéo responsive (16:9) */
+.guide-video {
+  display: block;
+  width: 100%;
+  max-width: 40rem;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  margin: 0 auto;
+  border: 0;
+  border-radius: var(--gp-radius-md);
 }
 
+/* Encadrés hérités (alertes Bootstrap) alignés sur les jetons */
+.alert {
+  border-radius: var(--gp-radius-md);
+  font-weight: 500 !important;
+}
+
+.alert-tip {
+  border: 1px solid var(--gp-primary-subtle-border);
+  background: var(--gp-primary-subtle);
+  color: var(--gp-text);
+}
+
+.alert-warning {
+  border-color: var(--gp-warning-border);
+  background: var(--gp-warning-subtle);
+  color: var(--gp-text);
+}
+
+.alert-info {
+  border-color: var(--gp-info-border);
+  background: var(--gp-info-subtle);
+  color: var(--gp-text);
+}
 
 .scroll-bottom-button {
   position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1;
-  z-index: 1000;
+  bottom: var(--gp-space-4);
+  left: var(--gp-space-4);
+  z-index: 900;
+}
+
+@media (min-width: 992px) {
+  .scroll-bottom-button {
+    left: calc(var(--gp-sidebar-width) + var(--gp-space-4));
+  }
 }

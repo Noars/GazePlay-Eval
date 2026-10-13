@@ -1,4 +1,15 @@
-import {Component, EventEmitter, inject, Input, Output, Type} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  Type,
+  ViewChild
+} from '@angular/core';
 import {NgComponentOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {GuideSauvegardeComponent} from '../../pages/guide/guide-sauvegarde/guide-sauvegarde.component';
@@ -15,29 +26,39 @@ interface PageGuide {
   sections?: GuideSection[];
 }
 
+/**
+ * Panneau d'aide contextuelle, ouvert depuis le bouton « Aide » de l'en-tête.
+ *
+ * Implémenté avec un élément `<dialog>` natif ouvert en modal : le focus y est confiné,
+ * Échap le ferme et le navigateur rend le focus au bouton d'origine. La largeur est
+ * réglable à la souris (poignée) ou au clavier (flèches sur la poignée).
+ */
 @Component({
   selector: 'app-guide-popup',
   standalone: true,
   imports: [NgComponentOutlet],
   templateUrl: './guide-popup-component.html',
-  styleUrl: './guide-popup-component.css',
+  styleUrl: './guide-popup-component.scss',
 })
-export class GuidePopupComponent {
+export class GuidePopupComponent implements OnChanges {
 
   router = inject(Router);
 
   @Input() isOpen = false;
   @Output() closed = new EventEmitter<void>();
 
-  panelWidth = 400;
+  @ViewChild('dialog', {static: true}) private dialog?: ElementRef<HTMLDialogElement>;
+
+  panelWidth = 440;
   isResizing = false;
 
   private readonly minWidth = 280;
+  private readonly keyboardStep = 40;
 
   // Guide affiché par défaut (pas de page dédiée)
   private readonly defaultGuide: PageGuide = {
-    title: 'Guide',
-    intro: "Le guide correspondant à cette page est en cours de développement.",
+    title: 'Aide',
+    intro: "Le guide détaillé de cette page n'est pas encore disponible. Consultez le guide complet depuis le menu « Guide ».",
     sections: [],
   };
 
@@ -124,6 +145,20 @@ export class GuidePopupComponent {
         },
       ],
     },
+    option: {
+      title: "Options et accessibilité",
+      intro: "Adaptez l'affichage à vos besoins. Chaque réglage est appliqué immédiatement et enregistré sur cet appareil.",
+      sections: [
+        {
+          title: "Apparence",
+          body: "Choisissez un thème clair, sombre ou celui de votre système, et activez le contraste renforcé si besoin.",
+        },
+        {
+          title: "Lecture",
+          body: "Modifiez la police, la taille du texte, l'interligne et les espacements pour faciliter la lecture.",
+        },
+      ],
+    },
   };
 
   // Pages pour lesquelles on réutilise directement le composant du guide statique
@@ -159,35 +194,83 @@ export class GuidePopupComponent {
 
   // Sous-partie du guide à afficher en premier
   get currentGuideInputs(): Record<string, unknown> | undefined {
-    return {sectionId : this.currentSegment};
+    return {sectionId: this.currentSegment};
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['isOpen']) return;
+    const dialog = this.dialog?.nativeElement;
+    if (!dialog) return;
+
+    if (this.isOpen && !dialog.open) {
+      if (typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      } else {
+        dialog.setAttribute('open', '');
+      }
+    } else if (!this.isOpen && dialog.open) {
+      dialog.close();
+    }
   }
 
   close(): void {
+    const dialog = this.dialog?.nativeElement;
+    if (dialog?.open) {
+      dialog.close(); // déclenche l'événement `close`, géré par onDialogClosed()
+    } else {
+      this.closed.emit();
+    }
+  }
+
+  /** Fermeture par Échap, par le bouton ou par clic sur le fond. */
+  onDialogClosed(): void {
     this.closed.emit();
   }
 
-  startResize(event: MouseEvent): void {
+  /** Un clic sur le fond (hors du panneau) ferme le guide. */
+  onDialogClick(event: MouseEvent): void {
+    if (event.target === this.dialog?.nativeElement) {
+      this.close();
+    }
+  }
+
+  startResize(event: PointerEvent | MouseEvent): void {
     event.preventDefault();
     this.isResizing = true;
 
-    document.addEventListener('mousemove', this.resize);
-    document.addEventListener('mouseup', this.stopResize);
+    document.addEventListener('pointermove', this.resize);
+    document.addEventListener('pointerup', this.stopResize);
   }
 
-  resize = (event: MouseEvent): void => {
+  resize = (event: PointerEvent | MouseEvent): void => {
     if (!this.isResizing) return;
-
     // Le panneau est ancré à droite
-    const newWidth = window.innerWidth - event.clientX;
-    const maxWidth = window.innerWidth * 0.9;
-
-    this.panelWidth = Math.min(Math.max(newWidth, this.minWidth), maxWidth);
+    this.setWidth(window.innerWidth - event.clientX);
   };
 
   stopResize = (): void => {
     this.isResizing = false;
 
-    document.removeEventListener('mousemove', this.resize);
-    document.removeEventListener('mouseup', this.stopResize);
+    document.removeEventListener('pointermove', this.resize);
+    document.removeEventListener('pointerup', this.stopResize);
   };
+
+  /** Redimensionnement au clavier : flèche gauche = plus large, flèche droite = plus étroit. */
+  onResizeKey(event: KeyboardEvent): void {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.setWidth(this.panelWidth + this.keyboardStep);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.setWidth(this.panelWidth - this.keyboardStep);
+    }
+  }
+
+  get maxWidth(): number {
+    return Math.round(window.innerWidth * 0.9);
+  }
+
+  private setWidth(width: number): void {
+    this.panelWidth = Math.round(Math.min(Math.max(width, this.minWidth), this.maxWidth));
+  }
 }

@@ -1,0 +1,96 @@
+// =============================================================================
+// Styles de base : document, typographie, liens, médias
+// =============================================================================
+
+html {
+  // La taille de base est fixée par la préférence « Taille du texte » (font-size en %).
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--gp-header-height) + var(--gp-space-4));
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--gp-bg);
+  color: var(--gp-text);
+  font-family: var(--gp-font-family);
+  font-size: var(--gp-text-md);
+  line-height: var(--gp-line-height);
+  letter-spacing: var(--gp-letter-spacing);
+  word-spacing: var(--gp-word-spacing);
+  -webkit-font-smoothing: antialiased;
+  // Coupure en fin de mot (césure française) ; coupure forcée seulement si un mot dépasse.
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+// L'espacement entre paragraphes suit l'interligne (WCAG 1.4.12 : ≥ 2 × la taille).
+p {
+  margin-block: 0 calc(var(--gp-line-height) * 0.6em);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--gp-text);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: max(var(--gp-letter-spacing), -0.01em);
+  margin-block: 0 var(--gp-space-3);
+}
+
+h1 { font-size: var(--gp-text-3xl); }
+h2 { font-size: var(--gp-text-2xl); }
+h3 { font-size: var(--gp-text-xl); }
+h4 { font-size: var(--gp-text-lg); }
+
+a {
+  color: var(--gp-primary-text);
+  text-underline-offset: 0.18em;
+
+  &:hover {
+    color: var(--gp-primary-hover);
+  }
+}
+
+// Préférence « Souligner les liens » : tous les liens du contenu sont soulignés.
+[data-underline-links="true"] a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card) {
+  text-decoration: underline;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+code {
+  font-family: var(--gp-font-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--gp-radius-sm);
+  background: var(--gp-surface-3);
+  color: var(--gp-text);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--gp-border);
+  opacity: 1;
+}
+
+::selection {
+  background: var(--gp-primary);
+  color: var(--gp-on-primary);
+}
+
+// Icônes PNG historiques à deux variantes (claire/sombre)
+.icon-light { display: inline-block; vertical-align: middle; }
+.icon-dark  { display: none; vertical-align: middle; }
+[data-bs-theme="dark"] .icon-light { display: none; }
+[data-bs-theme="dark"] .icon-dark  { display: inline-block; }
+
+// Icônes Bootstrap Icons : toujours décoratives, alignées sur le texte
+.bi {
+  line-height: 1;
+  vertical-align: -0.125em;
+}

@@ -1,0 +1,908 @@
+// =============================================================================
+// Composants du système de design (préfixe .gp-)
+// -----------------------------------------------------------------------------
+// Les composants Angular utilisent ces classes plutôt que des styles locaux
+// afin de garder une interface homogène. Les styles propres à un composant
+// (ex. grille de stimuli) restent dans son fichier .scss.
+// =============================================================================
+
+// --- Boutons ------------------------------------------------------------------
+.gp-btn {
+  --gp-btn-bg: var(--gp-surface);
+  --gp-btn-color: var(--gp-text);
+  --gp-btn-border: var(--gp-border-strong);
+  --gp-btn-bg-hover: var(--gp-surface-3);
+  --gp-btn-color-hover: var(--gp-btn-color);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gp-space-2);
+  min-height: 2.75rem;
+  padding: 0.5rem 1.125rem;
+  border: 1px solid var(--gp-btn-border);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-btn-bg);
+  color: var(--gp-btn-color);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--gp-transition-fast), border-color var(--gp-transition-fast), color var(--gp-transition-fast), box-shadow var(--gp-transition-fast);
+
+  &:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--gp-btn-bg-hover);
+    color: var(--gp-btn-color-hover);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .bi {
+    font-size: 1.1em;
+  }
+
+  &--primary {
+    --gp-btn-bg: var(--gp-primary);
+    --gp-btn-color: var(--gp-on-primary);
+    --gp-btn-border: var(--gp-primary);
+    --gp-btn-bg-hover: var(--gp-primary-hover);
+  }
+
+  &--secondary {
+    --gp-btn-bg: var(--gp-primary-subtle);
+    --gp-btn-color: var(--gp-primary-text);
+    --gp-btn-border: var(--gp-primary-subtle-border);
+    --gp-btn-bg-hover: var(--gp-surface-3);
+  }
+
+  &--ghost {
+    --gp-btn-bg: transparent;
+    --gp-btn-border: transparent;
+    --gp-btn-color: var(--gp-text);
+    --gp-btn-bg-hover: var(--gp-surface-3);
+  }
+
+  &--danger {
+    --gp-btn-bg: var(--gp-danger);
+    --gp-btn-color: var(--gp-on-danger);
+    --gp-btn-border: var(--gp-danger);
+    --gp-btn-bg-hover: var(--gp-danger-hover);
+  }
+
+  &--danger-outline {
+    --gp-btn-bg: transparent;
+    --gp-btn-color: var(--gp-danger);
+    --gp-btn-border: var(--gp-danger);
+    --gp-btn-bg-hover: var(--gp-danger-subtle);
+  }
+
+  &--sm {
+    min-height: 2.25rem;
+    padding: 0.3rem 0.75rem;
+    font-size: var(--gp-text-sm);
+  }
+
+  &--lg {
+    min-height: 3.25rem;
+    padding: 0.75rem 1.5rem;
+    font-size: var(--gp-text-lg);
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  // Bouton icône seule : le nom accessible est porté par aria-label.
+  &--icon {
+    padding: 0;
+    width: 2.75rem;
+    min-width: 2.75rem;
+
+    &.gp-btn--sm {
+      width: 2.25rem;
+      min-width: 2.25rem;
+    }
+  }
+}
+
+.gp-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gp-space-2);
+  align-items: center;
+}
+
+// --- Cartes et panneaux --------------------------------------------------------
+.gp-card {
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-lg);
+  box-shadow: var(--gp-shadow-sm);
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--gp-space-3);
+    padding: var(--gp-space-4) var(--gp-space-5);
+    border-bottom: 1px solid var(--gp-border);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--gp-text-lg);
+    font-weight: 700;
+  }
+
+  &__subtitle {
+    margin: var(--gp-space-1) 0 0;
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+  }
+
+  &__body {
+    padding: var(--gp-space-5);
+  }
+
+  &__footer {
+    padding: var(--gp-space-4) var(--gp-space-5);
+    border-top: 1px solid var(--gp-border);
+    background: var(--gp-surface-2);
+    border-radius: 0 0 var(--gp-radius-lg) var(--gp-radius-lg);
+  }
+
+  @media (max-width: 575.98px) {
+    &__header,
+    &__body,
+    &__footer {
+      padding-inline: var(--gp-space-4);
+    }
+  }
+}
+
+.gp-panel {
+  background: var(--gp-surface-2);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
+  padding: var(--gp-space-4);
+}
+
+// --- Mise en page des pages ------------------------------------------------------
+.gp-page {
+  width: 100%;
+  max-width: var(--gp-content-medium);
+  margin-inline: auto;
+  padding: var(--gp-space-6) var(--gp-space-5) var(--gp-space-7);
+
+  &--narrow { max-width: var(--gp-content-narrow); }
+  &--wide { max-width: var(--gp-content-wide); }
+
+  @media (max-width: 575.98px) {
+    padding: var(--gp-space-4) var(--gp-space-3) var(--gp-space-6);
+  }
+}
+
+.gp-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gp-space-4);
+  margin-bottom: var(--gp-space-5);
+
+  &__text {
+    min-width: 0;
+    flex: 1 1 24rem;
+  }
+
+  &__eyebrow {
+    display: inline-block;
+    margin-bottom: var(--gp-space-2);
+    color: var(--gp-primary-text);
+    font-size: var(--gp-text-sm);
+    font-weight: 700;
+    letter-spacing: max(var(--gp-letter-spacing), 0.04em);
+    text-transform: uppercase;
+  }
+
+  &__title {
+    margin: 0;
+  }
+
+  &__lead {
+    margin: var(--gp-space-2) 0 0;
+    max-width: 65ch;
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-lg);
+  }
+}
+
+.gp-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-5);
+
+  &--sm { gap: var(--gp-space-3); }
+}
+
+// --- Barre d'actions de bas de page (Précédent / Suivant) -------------------------
+.gp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gp-space-3);
+  margin-top: var(--gp-space-6);
+  padding-top: var(--gp-space-5);
+  border-top: 1px solid var(--gp-border);
+
+  &__end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gp-space-3);
+    margin-left: auto;
+  }
+
+  @media (max-width: 575.98px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .gp-btn,
+    &__end {
+      width: 100%;
+    }
+
+    &__end {
+      flex-direction: column-reverse;
+      margin-left: 0;
+    }
+  }
+}
+
+// --- Champs de formulaire ------------------------------------------------------------
+.gp-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-2);
+  min-width: 0;
+
+  &__label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gp-space-2);
+    margin: 0;
+    color: var(--gp-text);
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+  }
+
+  &__error {
+    display: flex;
+    gap: var(--gp-space-2);
+    margin: 0;
+    color: var(--gp-danger);
+    font-size: var(--gp-text-sm);
+    font-weight: 600;
+  }
+
+  &__control {
+    display: flex;
+    align-items: stretch;
+    gap: var(--gp-space-2);
+    min-width: 0;
+  }
+}
+
+// Ligne « libellé à gauche / contrôle à droite » qui s'empile sur petit écran.
+.gp-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--gp-space-2) var(--gp-space-5);
+  padding: var(--gp-space-4) 0;
+  border-bottom: 1px solid var(--gp-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &__text {
+    min-width: 0;
+  }
+
+  &__label-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gp-space-1);
+  }
+
+  &__label {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: var(--gp-space-1) 0 0;
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+  }
+
+  &__control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--gp-space-2);
+    min-width: 0;
+  }
+
+  &--stacked {
+    grid-template-columns: minmax(0, 1fr);
+
+    .gp-setting__control {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 639.98px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__control {
+      justify-content: flex-start;
+    }
+  }
+
+  // Dans un conteneur étroit (colonne de réglages de l'éditeur, panneau), libellé au-dessus.
+  @container gp-panel (max-width: 30rem) {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__control {
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Les corps de cartes servent de conteneurs de requêtes pour les réglages ci-dessus.
+.gp-card__body {
+  container: gp-panel / inline-size;
+}
+
+// Champ numérique avec unité (« 10 secondes »)
+.gp-input-unit {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+
+  .form-control {
+    width: 7.5rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &__unit {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--gp-space-3);
+    border: 1px solid var(--gp-border-strong);
+    border-left: 0;
+    border-radius: 0 var(--gp-radius-md) var(--gp-radius-md) 0;
+    background: var(--gp-surface-2);
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+    white-space: nowrap;
+  }
+
+  &--plain .form-control {
+    border-radius: var(--gp-radius-md);
+  }
+}
+
+// --- Contrôle segmenté (groupe de boutons radio) ------------------------------------
+.gp-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 3px;
+  border: 1px solid var(--gp-border-strong);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface-2);
+  margin: 0;
+  min-width: 0;
+
+  &__option {
+    position: relative;
+    display: inline-flex;
+  }
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gp-space-1);
+    min-height: 2.25rem;
+    padding: 0.35rem 0.95rem;
+    border-radius: calc(var(--gp-radius-md) - 3px);
+    color: var(--gp-text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--gp-transition-fast), color var(--gp-transition-fast);
+  }
+
+  &__input:checked + &__label {
+    background: var(--gp-surface);
+    color: var(--gp-primary-text);
+    box-shadow: var(--gp-shadow-sm), inset 0 0 0 1px var(--gp-primary);
+  }
+
+  &__input:focus-visible + &__label {
+    outline: 3px solid var(--gp-focus);
+    outline-offset: 2px;
+  }
+
+  &__input:hover:not(:checked) + &__label {
+    color: var(--gp-text);
+    background: var(--gp-surface-3);
+  }
+}
+
+[data-contrast="high"] .gp-segmented__input:checked + .gp-segmented__label {
+  background: var(--gp-primary);
+  color: var(--gp-on-primary);
+}
+
+// --- Choix sous forme de cartes (radio) ------------------------------------------------
+.gp-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--gp-space-3);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.gp-choice {
+  position: relative;
+  display: flex;
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gp-space-1);
+    width: 100%;
+    padding: var(--gp-space-4);
+    border: 1px solid var(--gp-border-strong);
+    border-radius: var(--gp-radius-md);
+    background: var(--gp-surface);
+    cursor: pointer;
+    transition: border-color var(--gp-transition-fast), background-color var(--gp-transition-fast);
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: var(--gp-space-2);
+    font-weight: 700;
+  }
+
+  &__desc {
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+  }
+
+  &__input:checked + &__body {
+    border-color: var(--gp-primary);
+    background: var(--gp-primary-subtle);
+    box-shadow: inset 0 0 0 1px var(--gp-primary);
+  }
+
+  &__input:focus-visible + &__body {
+    outline: 3px solid var(--gp-focus);
+    outline-offset: 2px;
+  }
+
+  &__body:hover {
+    border-color: var(--gp-primary);
+  }
+}
+
+// --- Encadrés d'information ------------------------------------------------------------
+.gp-callout {
+  --gp-callout-bg: var(--gp-info-subtle);
+  --gp-callout-border: var(--gp-info-border);
+  --gp-callout-icon: var(--gp-info);
+
+  display: flex;
+  gap: var(--gp-space-3);
+  align-items: flex-start;
+  padding: var(--gp-space-3) var(--gp-space-4);
+  border: 1px solid var(--gp-callout-border);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-callout-bg);
+  color: var(--gp-text);
+
+  > .bi {
+    flex-shrink: 0;
+    margin-top: 0.15em;
+    color: var(--gp-callout-icon);
+    font-size: 1.15em;
+  }
+
+  &__body {
+    min-width: 0;
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__title {
+    display: block;
+    margin-bottom: var(--gp-space-1);
+    font-weight: 700;
+  }
+
+  &--success {
+    --gp-callout-bg: var(--gp-success-subtle);
+    --gp-callout-border: var(--gp-success-border);
+    --gp-callout-icon: var(--gp-success);
+  }
+
+  &--warning {
+    --gp-callout-bg: var(--gp-warning-subtle);
+    --gp-callout-border: var(--gp-warning-border);
+    --gp-callout-icon: var(--gp-warning);
+  }
+
+  &--danger {
+    --gp-callout-bg: var(--gp-danger-subtle);
+    --gp-callout-border: var(--gp-danger-border);
+    --gp-callout-icon: var(--gp-danger);
+  }
+
+  &--neutral {
+    --gp-callout-bg: var(--gp-surface-2);
+    --gp-callout-border: var(--gp-border);
+    --gp-callout-icon: var(--gp-text-muted);
+  }
+}
+
+// --- Badges ---------------------------------------------------------------------
+.gp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gp-space-1);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--gp-radius-pill);
+  border: 1px solid var(--gp-border);
+  background: var(--gp-surface-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-xs);
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  &--primary {
+    background: var(--gp-primary-subtle);
+    border-color: var(--gp-primary-subtle-border);
+    color: var(--gp-primary-text);
+  }
+
+  &--success {
+    background: var(--gp-success-subtle);
+    border-color: var(--gp-success-border);
+    color: var(--gp-success);
+  }
+
+  &--warning {
+    background: var(--gp-warning-subtle);
+    border-color: var(--gp-warning-border);
+    color: var(--gp-warning);
+  }
+
+  &--danger {
+    background: var(--gp-danger-subtle);
+    border-color: var(--gp-danger-border);
+    color: var(--gp-danger);
+  }
+}
+
+// --- Sections repliables (remplace les accordéons Bootstrap) --------------------------
+.gp-disclosure {
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-lg);
+  background: var(--gp-surface);
+  overflow: hidden;
+
+  & + & {
+    margin-top: var(--gp-space-3);
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: var(--gp-text-md);
+  }
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--gp-space-3);
+    width: 100%;
+    padding: var(--gp-space-4) var(--gp-space-5);
+    border: 0;
+    background: transparent;
+    color: var(--gp-text);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--gp-surface-2);
+    }
+
+    .gp-disclosure__chevron {
+      margin-left: auto;
+      transition: transform var(--gp-transition);
+    }
+
+    &[aria-expanded="true"] .gp-disclosure__chevron {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--gp-radius-md);
+    background: var(--gp-primary-subtle);
+    color: var(--gp-primary-text);
+    flex-shrink: 0;
+  }
+
+  &__summary {
+    display: block;
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+    font-weight: 400;
+  }
+
+  &__panel {
+    padding: 0 var(--gp-space-5) var(--gp-space-3);
+    border-top: 1px solid var(--gp-border);
+
+    @media (max-width: 575.98px) {
+      padding-inline: var(--gp-space-4);
+    }
+  }
+}
+
+// --- Titres de sous-section dans un formulaire ----------------------------------------
+.gp-subheading {
+  margin: var(--gp-space-5) 0 0;
+  padding-bottom: var(--gp-space-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+  font-weight: 700;
+  letter-spacing: max(var(--gp-letter-spacing), 0.04em);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--gp-border);
+
+  &:first-child {
+    margin-top: var(--gp-space-3);
+  }
+}
+
+// --- Cartes d'action (accueil, choix du mode) -------------------------------------------
+.gp-action-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gp-space-4);
+  width: 100%;
+  padding: var(--gp-space-5);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-lg);
+  background: var(--gp-surface);
+  color: var(--gp-text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--gp-shadow-sm);
+  transition: border-color var(--gp-transition-fast), box-shadow var(--gp-transition-fast), transform var(--gp-transition-fast);
+
+  &:hover:not(:disabled) {
+    border-color: var(--gp-primary);
+    box-shadow: var(--gp-shadow-md);
+    color: var(--gp-text);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &__icon {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--gp-radius-md);
+    background: var(--gp-primary-subtle);
+    color: var(--gp-primary-text);
+    font-size: 1.4rem;
+  }
+
+  &__title {
+    display: block;
+    font-size: var(--gp-text-lg);
+    font-weight: 700;
+  }
+
+  &__desc {
+    display: block;
+    margin-top: var(--gp-space-1);
+    color: var(--gp-text-muted);
+  }
+
+  &--primary {
+    border-color: var(--gp-primary);
+    background: var(--gp-primary);
+    color: var(--gp-on-primary);
+
+    .gp-action-card__icon {
+      background: rgb(255 255 255 / 0.16);
+      color: var(--gp-on-primary);
+    }
+
+    .gp-action-card__desc {
+      color: var(--gp-on-primary);
+      opacity: 0.92;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--gp-primary-hover);
+      color: var(--gp-on-primary);
+    }
+  }
+}
+
+.gp-grid {
+  display: grid;
+  gap: var(--gp-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+
+// --- État vide ------------------------------------------------------------------------
+.gp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gp-space-2);
+  padding: var(--gp-space-6) var(--gp-space-4);
+  color: var(--gp-text-muted);
+  text-align: center;
+
+  > .bi {
+    font-size: 2rem;
+    color: var(--gp-text-subtle);
+  }
+
+  &__title {
+    color: var(--gp-text);
+    font-weight: 700;
+  }
+}
+
+// --- Zone de dépôt / sélection de fichier ------------------------------------------------
+.gp-file-picker {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+
+  &__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  &__button {
+    max-width: 100%;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__input:focus-visible + &__button {
+    outline: 3px solid var(--gp-focus);
+    outline-offset: 2px;
+  }
+}
+
+// --- Liste de définitions compacte ------------------------------------------------------
+.gp-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--gp-space-1) var(--gp-space-3);
+  margin: 0;
+  font-size: var(--gp-text-sm);
+
+  dt {
+    color: var(--gp-text-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+  }
+}
+
+// --- Indicateur de chargement -----------------------------------------------------------
+.gp-spinner {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: gp-spin 0.8s linear infinite;
+  vertical-align: -0.2em;
+}
+
+@keyframes gp-spin {
+  to { transform: rotate(360deg); }
+}
+
+// --- Texte utilitaire -------------------------------------------------------------------
+.gp-muted { color: var(--gp-text-muted); }
+.gp-text-sm { font-size: var(--gp-text-sm); }
+.gp-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}

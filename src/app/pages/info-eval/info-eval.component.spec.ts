@@ -80,10 +80,32 @@ describe('InfoEvalComponent', () => {
 
   it('devrait réagir correctement au clic sur le bouton "Suivant"', () => {
     spyOn(component, 'goToInfoParticipant');
-    const button = fixture.nativeElement.querySelector('button');
+    const button = fixture.nativeElement.querySelector('button[type="submit"]');
     button.click();
     fixture.detectChanges();
 
     expect(component.goToInfoParticipant).toHaveBeenCalled();
+  });
+
+  it("nom contenant un caractère interdit → erreur affichée et pas de navigation", () => {
+    component.onNameChange('Classe 3/4');
+    component.goToInfoParticipant();
+    fixture.detectChanges();
+
+    expect(component.nameError).toContain('/');
+    expect(fixture.nativeElement.querySelector('#evalName').getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.querySelector('#evalNameError')).not.toBeNull();
+  });
+
+  it("onNameChange / onFormatChange → répercutés immédiatement dans l'évaluation de travail", () => {
+    component.onNameChange('Couleurs');
+    component.onFormatChange('Xlsx');
+    expect(component['saveService'].dataAuto.nomEval).toBe('Couleurs');
+    expect(component['saveService'].dataAuto.format).toBe('Xlsx');
+  });
+
+  it("propose les trois formats avec leurs valeurs historiques", () => {
+    const values = Array.from(fixture.nativeElement.querySelectorAll('input[name="resultType"]') as NodeListOf<HTMLInputElement>).map(i => i.value);
+    expect(values).toEqual(['Csv&Xlsx', 'Csv', 'Xlsx']);
   });
 });

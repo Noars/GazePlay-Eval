@@ -1,39 +1,55 @@
-@if (isOpen) {
-  <div class="guide-popup-backdrop" (click)="close()"></div>
-}
+<dialog #dialog
+        class="gp-drawer gp-drawer--end guide-popup-panel"
+        [class.open]="isOpen"
+        [style.width.px]="panelWidth"
+        aria-labelledby="guide-popup-title"
+        (close)="onDialogClosed()"
+        (click)="onDialogClick($event)">
+  <div class="resize-handle"
+       role="separator"
+       tabindex="0"
+       aria-orientation="vertical"
+       aria-label="Largeur du panneau d'aide (flèches gauche et droite)"
+       [attr.aria-valuenow]="panelWidth"
+       aria-valuemin="280"
+       [attr.aria-valuemax]="maxWidth"
+       (pointerdown)="startResize($event)"
+       (keydown)="onResizeKey($event)"></div>
 
-<aside class="guide-popup-panel" [class.open]="isOpen" [style.width.px]="panelWidth" role="dialog" aria-label="Guide">
-  <div class="resize-handle" (mousedown)="startResize($event)"></div>
-  <div class="guide-popup-header">
-    <h2 class="guide-popup-title">{{ currentGuide.title }}</h2>
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Fermer le guide"
-      title="Fermer le guide"
-      (click)="close()">
+  <div class="gp-drawer__header guide-popup-header">
+    <h2 class="gp-drawer__title guide-popup-title" id="guide-popup-title">
+      <i class="bi bi-question-circle me-2" aria-hidden="true"></i>{{ currentGuide.title }}
+    </h2>
+    <button type="button"
+            class="gp-btn gp-btn--ghost gp-btn--icon"
+            aria-label="Fermer l'aide"
+            title="Fermer l'aide"
+            (click)="close()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
   </div>
 
   <div class="guide-popup-body">
-    @if (currentGuideComponent) {
-      <ng-container *ngComponentOutlet="currentGuideComponent; inputs: currentGuideInputs"></ng-container>
-    } @else {
-      @if (currentGuide.intro) {
-        <p class="guide-content-sub">{{ currentGuide.intro }}</p>
-      }
+    @if (isOpen) {
+      @if (currentGuideComponent) {
+        <ng-container *ngComponentOutlet="currentGuideComponent; inputs: currentGuideInputs"></ng-container>
+      } @else {
+        @if (currentGuide.intro) {
+          <p class="guide-content-sub">{{ currentGuide.intro }}</p>
+        }
 
-      @for (section of currentGuide.sections; track section.title) {
-        <div class="guide-section-card">
-          <div class="guide-section-title">{{ section.title }}</div>
-          <div class="guide-section-body">{{ section.body }}</div>
-        </div>
-      } @empty {
-        <!-- Icone de plot de chantier -->
-        <div class="guide-empty">
-          <i class="bi bi-cone-striped"></i>
-        </div>
+        @for (section of currentGuide.sections; track section.title) {
+          <section class="guide-section-card">
+            <h3 class="guide-section-title">{{ section.title }}</h3>
+            <p class="guide-section-body">{{ section.body }}</p>
+          </section>
+        } @empty {
+          <div class="gp-empty">
+            <i class="bi bi-book" aria-hidden="true"></i>
+            <a class="gp-btn gp-btn--secondary" href="#/guide" (click)="close()">Ouvrir le guide complet</a>
+          </div>
+        }
       }
     }
   </div>
-</aside>
+</dialog>

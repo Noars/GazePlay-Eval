@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LoadService } from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
@@ -7,7 +7,6 @@ import { saveModel } from '../../shared/saveModel';
 import { CommonModule } from '@angular/common';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
-import {MatTooltip} from '@angular/material/tooltip';
 
 
 @Component({
@@ -15,7 +14,7 @@ import {MatTooltip} from '@angular/material/tooltip';
   templateUrl: './load-save.component.html',
   styleUrl: './load-save.component.css',
   standalone: true,
-  imports: [CommonModule, MatTooltip]
+  imports: [CommonModule, RouterLink]
 })
 export class LoadSaveComponent implements OnInit {
 
@@ -52,17 +51,8 @@ export class LoadSaveComponent implements OnInit {
     if (!await this.overwriteGuard.check(0, save.nomEval)) return;
 
     const step = save.step >= 0 ? save.step : 3; // fallback sur create-eval si le step n'a pas été enregistré
-    this.saveService.dataAuto = {
-      nomEval: save.nomEval,
-      format: save.format,
-      infoParticipant: save.infoParticipant,
-      globalParamsTransitionScreen: save.globalParamsTransitionScreen,
-      globalParamsInstructionScreen: save.globalParamsInstructionScreen,
-      globalParamsStimuliScreen: save.globalParamsStimuliScreen,
-      listScreens: save.listScreens,
-      step: step
-    };
-    this.saveService.activeSlotIndex = slotIndex as FormatTypeConfig;
+    this.saveService.loadIntoWorkspace(save, step);
+    this.saveService.setActiveSlot(slotIndex as FormatTypeConfig);
     this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume(true);
   }

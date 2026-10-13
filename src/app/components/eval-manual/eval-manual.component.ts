@@ -6,10 +6,11 @@ import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
 import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
+import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
+  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent, GlobalStimuliScreenComponent],
   templateUrl: './eval-manual.component.html',
   standalone: true,
   styleUrl: './eval-manual.component.css'
@@ -22,6 +23,13 @@ export class EvalManualComponent implements OnInit{
   globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
   globalStimuliScreenInfos: any[] = saveModelDefault.globalParamsStimuliScreen;
   openAccordion: string | null = null;
+
+  /** Sections repliables, une par type d'écran. */
+  readonly sections = [
+    {id: 'transition', title: 'Écrans de transition', icon: 'bi-hourglass-split', summary: 'Délai et croix de fixation entre deux écrans.'},
+    {id: 'instruction', title: "Écrans d'instruction", icon: 'bi-chat-square-text', summary: 'Consigne : média, délai et bouton de lancement.'},
+    {id: 'stimuli', title: 'Écrans de stimuli', icon: 'bi-grid-3x3-gap', summary: 'Grille, temps maximum et règles de validation.'},
+  ];
 
   constructor(private router: Router,
               private saveService: SaveService,) {
@@ -68,5 +76,4 @@ export class EvalManualComponent implements OnInit{
     this.openAccordion = this.openAccordion === id ? null : id;
   }
 
-  protected readonly Number = Number;
 }

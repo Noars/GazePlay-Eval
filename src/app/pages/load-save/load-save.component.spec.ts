@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { LoadService } from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import { saveModel } from '../../shared/saveModel';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
-import {MatTooltip} from '@angular/material/tooltip';
 
 import { LoadSaveComponent } from './load-save.component';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
@@ -21,7 +20,13 @@ describe('LoadSaveComponent', () => {
 
 
   beforeEach(async () => {
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName']);
+    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName', 'loadIntoWorkspace', 'setActiveSlot']);
+    // Reproduit le comportement réel des méthodes utilisées par la page.
+    saveServiceSpy.loadIntoWorkspace.and.callFake((save: saveModel, step: number = save.step) => {
+      const {createdAt, version, ...rest} = save;
+      saveServiceSpy.dataAuto = {...rest, step};
+    });
+    saveServiceSpy.setActiveSlot.and.callFake((index: any) => saveServiceSpy.activeSlotIndex = index);
     saveServiceSpy.dataAuto = {
       format: 'Csv',
       globalParamsInstructionScreen: [],
@@ -37,7 +42,6 @@ describe('LoadSaveComponent', () => {
     loadServiceSpy.getSlot.and.returnValue(null);
 
     autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
 
     await TestBed.configureTestingModule({
@@ -46,11 +50,14 @@ describe('LoadSaveComponent', () => {
         { provide: SaveService, useValue: saveServiceSpy },
         { provide: LoadService, useValue: loadServiceSpy },
         { provide: AutoSaveService, useValue: autoSaveServiceSpy },
-        { provide: Router, useValue: routerSpy },
+        provideRouter([]),
         { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
       ]
     })
       .compileComponents();
+
+    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(routerSpy, 'navigate').and.returnValue(Promise.resolve(true));
 
     fixture = TestBed.createComponent(LoadSaveComponent);
     component = fixture.componentInstance;

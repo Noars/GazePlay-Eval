@@ -47,13 +47,20 @@ describe('LoadService', () => {
       expect(all).toEqual([null, null, null]);
     });
 
-    it('retourne les slots correctement remplis aux bons index', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[0], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot0' }));
+    it('retourne les emplacements nommés 1, 2 et 3 (jamais la sauvegarde automatique)', () => {
+      localStorage.setItem(SAVE_SLOT_LIST[0], JSON.stringify({ ...saveModelDefault, nomEval: 'Auto' }));
       localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot1' }));
+      localStorage.setItem(SAVE_SLOT_LIST[3], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot3' }));
       const all = service.getAllSlots();
-      expect(all[0]?.nomEval).toBe('Slot0');
-      expect(all[1]?.nomEval).toBe('Slot1');
-      expect(all[2]).toBeNull();
+      expect(all[0]?.nomEval).toBe('Slot1');
+      expect(all[1]).toBeNull();
+      expect(all[2]?.nomEval).toBe('Slot3');
+    });
+
+    it('un emplacement au JSON corrompu est renvoyé comme vide', () => {
+      localStorage.setItem(SAVE_SLOT_LIST[2], '{corrompu');
+      spyOn(console, 'error');
+      expect(service.getAllSlots()[1]).toBeNull();
     });
   });
 });

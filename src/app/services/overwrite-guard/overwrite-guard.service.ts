@@ -58,7 +58,11 @@ export class OverwriteGuardService {
     const result = await firstValueFrom(
       this.dialog.open(PopupOverwriteSaveComponent, {
         data: {save: existing, slotLabel: SLOT_LABELS[slotIndex] ?? `Emplacement ${slotIndex}`},
-        disableClose: true
+        disableClose: true,
+        panelClass: 'gp-dialog-panel',
+        autoFocus: '.js-cancel',
+        ariaLabelledBy: 'overwrite-title',
+        ariaDescribedBy: 'overwrite-message',
       }).afterClosed()
     );
 

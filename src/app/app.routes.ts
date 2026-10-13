@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {HomeComponent} from './pages/home/home.component';
 import {InfoEvalComponent} from './pages/info-eval/info-eval.component';
 import {InfoParticipantComponent} from './pages/info-participant/info-participant.component';
@@ -15,26 +15,32 @@ import {GuideCreationComponent} from './pages/guide/guide-creation/guide-creatio
 import {GuideImportComponent} from './pages/guide/guide-import/guide-import.component';
 import {GuideSauvegardeComponent} from './pages/guide/guide-sauvegarde/guide-sauvegarde.component';
 
+/**
+ * Routes de l'application (routage par hash : `/#/home`).
+ * Chaque route déclare un `title` utilisé pour le titre du document (voir AppTitleStrategy).
+ */
 export const routes: Routes = [
-  {path: 'home', component: HomeComponent},
-  {path: 'info-eval', component: InfoEvalComponent},
-  {path: 'info-participant', component: InfoParticipantComponent},
-  {path: 'setup-eval', component: SetupEvalComponent},
-  {path: 'create-eval', component: CreateEvalComponent},
-  {path: 'download-eval', component: DownloadEvalComponent},
-  {path: 'sauvegarde', component: SauvegardeComponent},
-  { path: 'load-save', component: LoadSaveComponent },
-  { path: 'option', component: OptionComponent},
+  {path: 'home', component: HomeComponent, title: 'Accueil'},
+  {path: 'info-eval', component: InfoEvalComponent, title: 'Étape 1 · Informations de l\'évaluation'},
+  {path: 'info-participant', component: InfoParticipantComponent, title: 'Étape 2 · Informations du participant'},
+  {path: 'setup-eval', component: SetupEvalComponent, title: 'Étape 3 · Mode et paramètres'},
+  {path: 'create-eval', component: CreateEvalComponent, title: 'Étape 4 · Création des écrans'},
+  {path: 'download-eval', component: DownloadEvalComponent, title: 'Étape 5 · Téléchargement et export'},
+  {path: 'sauvegarde', component: SauvegardeComponent, title: 'Mes sauvegardes'},
+  {path: 'load-save', component: LoadSaveComponent, title: 'Charger une évaluation'},
+  {path: 'option', component: OptionComponent, title: 'Options et accessibilité'},
   {
     path: 'guide',
     component: GuideComponent,
     children: [
-      { path: '', component: GuideHomeComponent },
-      { path: 'creation', component: GuideCreationComponent },
-      { path: 'sauvegardes', component: GuideSauvegardeComponent },
-      { path: 'imports', component: GuideImportComponent },
+      {path: '', component: GuideHomeComponent, title: 'Guide'},
+      {path: 'creation', component: GuideCreationComponent, title: 'Guide · Création'},
+      {path: 'sauvegardes', component: GuideSauvegardeComponent, title: 'Guide · Sauvegardes'},
+      {path: 'imports', component: GuideImportComponent, title: 'Guide · Importation'},
     ]
   },
-  { path: 'no-page', component: NoPage },
-  {path: '', redirectTo: 'home', pathMatch: 'full',}
+  {path: 'no-page', component: NoPage, title: 'Page introuvable'},
+  {path: '', redirectTo: 'home', pathMatch: 'full'},
+  // Toute adresse inconnue mène à la page « introuvable » plutôt qu'à une page blanche.
+  {path: '**', component: NoPage, title: 'Page introuvable'},
 ];

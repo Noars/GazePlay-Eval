@@ -1,6 +1,11 @@
 import {Injectable} from '@angular/core';
 import {optionsModel} from '../../shared/optionsModel';
 
+/**
+ * @deprecated Remplacé par `UserPreferencesService` (préférence `messageDuration`).
+ * L'ancienne clé localStorage `options` n'est plus que lue, une fois, lors de la migration.
+ * Plus utilisé par l'application ; conservé en attendant sa suppression.
+ */
 @Injectable({ providedIn: 'root' })
 export class OptionService {
 

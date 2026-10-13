@@ -1,59 +1,44 @@
-<div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 1100px;">
-    <div class="card-header text-center py-4">
-      <h2 class="card-title text-center mb-0">Charger une évaluation</h2>
+<div class="gp-page">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <h1 class="gp-page-header__title">Charger une évaluation</h1>
+      <p class="gp-page-header__lead">Choisissez un emplacement pour reprendre l'évaluation qui y est enregistrée.</p>
     </div>
-    <div class="card-body px-5 py-5" style="text-align: -webkit-center;">
+    <a class="gp-btn gp-btn--ghost" routerLink="/sauvegarde">
+      <i class="bi bi-floppy" aria-hidden="true"></i>
+      Gérer les sauvegardes
+    </a>
+  </header>
 
-      <div class="alert alert-info fw-semibold col-10 mb-5">
-        <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-        Sélectionnez un emplacement pour charger l'évaluation correspondante et reprendre votre travail.
-      </div>
-
-      <!-- Slots -->
-      <div class="row g-5 justify-content-center w-100">
-        @for (slot of slots; track slot.index) {
-          <div class="col-md-4">
-
-            @if (slot.data === null) {
-              <!-- Slot vide -->
-              <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
-                <img class="icon-light slot-empty-icon" src="assets/icons/folder/folder-dark.png" alt="">
-                <img class="icon-dark slot-empty-icon" src="assets/icons/folder/folder.png" alt="">
-                <span class="fst-italic text-muted fs-5">Vide</span>
-              </div>
-
-            } @else {
-              <!-- Slot rempli -->
-              <div class="slot-card slot-filled d-flex align-items-center justify-content-center"
-                   [class.slot-active]="saveService.activeSlotIndex === slot.index"
-                   (click)="loadSlot(slot.index)">
-                @if (saveService.activeSlotIndex === slot.index) {
-                  <div class="slot-active-badge" [matTooltip]="tooltipCurrentEval" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">EN COURS</div>
-                }
-                <img class="icon-light slot-filled-icon" src="assets/icons/folder/folder-dark.png" alt="">
-                <img class="icon-dark slot-filled-icon" src="assets/icons/folder/folder.png" alt="">
-                <span class="fw-bold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
-                <span class="slot-meta">Modifié le {{ formatDate(slot.data.createdAt) }}</span>
-                <div class="slot-hover-overlay">
-                  <i class="bi bi-play-fill me-2"></i>Charger
-                </div>
-              </div>
-            }
-
+  <ul class="slots">
+    @for (slot of slots; track slot.index) {
+      <li>
+        @if (slot.data === null) {
+          <div class="load-card load-card--empty">
+            <span class="load-card__number">Emplacement {{ slot.index }}</span>
+            <span class="load-card__title">Vide</span>
           </div>
+        } @else {
+          <button type="button" class="load-card" (click)="loadSlot(slot.index)">
+            <span class="load-card__number">
+              Emplacement {{ slot.index }}
+              @if (saveService.activeSlotIndex === slot.index) {
+                <span class="gp-badge gp-badge--primary ms-1" [title]="tooltipCurrentEval">En cours</span>
+              }
+            </span>
+            <span class="load-card__title gp-truncate">{{ slot.data.nomEval || 'Sans nom' }}</span>
+            <span class="load-card__meta">Modifiée le {{ formatDate(slot.data.createdAt) }} · {{ slot.data.listScreens.length || 0 }} écran(s)</span>
+            <span class="load-card__cta"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Charger</span>
+          </button>
         }
-      </div>
+      </li>
+    }
+  </ul>
 
-      <!-- Bouton retour -->
-      <div class="d-flex justify-content-start w-100 mt-5 pt-3"
-           style="border-top: 1px solid var(--bs-border-color);">
-        <button class="btn btn-primary fw-semibold px-4" (click)="goBack()">
-          <i class="bi bi-arrow-left me-2"></i>Retour
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <nav class="gp-actions" aria-label="Retour">
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="goBack()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      Retour à l'accueil
+    </button>
+  </nav>
 </div>

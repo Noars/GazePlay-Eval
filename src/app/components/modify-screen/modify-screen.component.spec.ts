@@ -6,11 +6,16 @@ import { AutoSaveService } from '../../services/auto-save/auto-save.service';
 import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
 import { FlashService } from '../../services/flash-message/flash.service';
 import { ConfigStimuliComponent } from '../config-stimuli/config-stimuli.component';
-import { Component } from '@angular/core';
-import * as bootstrap from 'bootstrap';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MediaCleanupService } from '../../core/media/media-cleanup.service';
+import { emptyReferences } from '../../core/media/media-references';
+import { ConfirmService } from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 
 @Component({ selector: 'app-config-stimuli', template: '', standalone: true })
-class ConfigStimuliStubComponent {}
+class ConfigStimuliStubComponent {
+  @Input() data: unknown;
+  @Output() closed = new EventEmitter<void>();
+}
 
 describe('ModifyScreenComponent', () => {
   let component: ModifyScreenComponent;
@@ -20,6 +25,8 @@ describe('ModifyScreenComponent', () => {
   let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
   let idbSpy: jasmine.SpyObj<IndexedDBService>;
   let flashSpy: jasmine.SpyObj<FlashService>;
+  let cleanupSpy: jasmine.SpyObj<MediaCleanupService>;
+  let confirmSpy: jasmine.SpyObj<ConfirmService>;
 
   function makeTransition(): any {
     return { name: 'TS', type: 'transition', values: [false, 0, false, false, 0] };
@@ -60,6 +67,10 @@ describe('ModifyScreenComponent', () => {
       'getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile'
     ]);
     flashSpy = jasmine.createSpyObj('FlashService', ['show']);
+    cleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['collectAllReferences']);
+    cleanupSpy.collectAllReferences.and.callFake(() => emptyReferences());
+    confirmSpy = jasmine.createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(Promise.resolve(true));
 
     saveSpy.getEvalName.and.returnValue('TestProject');
     idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
@@ -81,7 +92,9 @@ describe('ModifyScreenComponent', () => {
         { provide: SaveService, useValue: saveSpy },
         { provide: AutoSaveService, useValue: autoSaveSpy },
         { provide: IndexedDBService, useValue: idbSpy },
-        { provide: FlashService, useValue: flashSpy }
+        { provide: FlashService, useValue: flashSpy },
+        { provide: MediaCleanupService, useValue: cleanupSpy },
+        { provide: ConfirmService, useValue: confirmSpy }
       ]
     })
     .overrideComponent(ModifyScreenComponent, {
@@ -463,7 +476,7 @@ describe('ModifyScreenComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('instruction');
   });
 
-  it('deleteImageInstruction → releaseFile appelé si imageId présent', async () => {
+  it('deleteImageInstruction → média libéré à la sortie de l\'éditeur seulement', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
     idbSpy.getFile.and.returnValue(Promise.resolve({
@@ -472,8 +485,13 @@ describe('ModifyScreenComponent', () => {
 
     await component.deleteImageInstruction();
 
-    expect(idbSpy.releaseFile).toHaveBeenCalled();
+    // La libération est différée : rien n'est supprimé tant que l'éditeur est ouvert.
+    expect(idbSpy.releaseFile).not.toHaveBeenCalled();
     expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+
+    await component.commitMediaJournal();
+    // Dernière référence et média plus utilisé ailleurs → supprimé à la sortie.
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/photo.png');
   });
 
   // ─── deleteSoundInstruction ───────────────────────────────────────────────────
@@ -506,7 +524,7 @@ describe('ModifyScreenComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('deleteSoundStimuli → releaseFile appelé si soundId présent', async () => {
+  it('deleteSoundStimuli → son libéré à la sortie de l\'éditeur seulement', async () => {
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
     idbSpy.getFile.and.returnValue(Promise.resolve({
@@ -514,9 +532,10 @@ describe('ModifyScreenComponent', () => {
     } as any));
 
     await component.deleteSoundStimuli();
-
-    expect(idbSpy.releaseFile).toHaveBeenCalled();
     expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+
+    await component.commitMediaJournal();
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/son.mp3');
   });
 
   // ─── getText ──────────────────────────────────────────────────────────────────
@@ -653,27 +672,32 @@ describe('ModifyScreenComponent', () => {
 
   // ─── openOffcanvasStimuli ─────────────────────────────────────────────────────
 
-  it('openOffcanvasStimuli — élément trouvé → Offcanvas.show appelé', async () => {
+  it('openOffcanvasStimuli → ouvre le panneau de la case et y place le focus', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
-
-    const mockElement = document.createElement('div');
-    spyOn(document, 'getElementById').and.returnValue(mockElement);
-    const offcanvasSpy = jasmine.createSpyObj('Offcanvas', ['show']);
-    spyOn(bootstrap.Offcanvas, 'getOrCreateInstance').and.returnValue(offcanvasSpy as any);
+    const heading = document.createElement('h2');
+    heading.tabIndex = -1;
+    spyOn(document, 'getElementById').and.returnValue(heading);
+    const focus = spyOn(heading, 'focus');
 
     component.openOffcanvasStimuli();
+    await new Promise(resolve => setTimeout(resolve));
 
-    expect(offcanvasSpy.show).toHaveBeenCalled();
+    expect(component.configStimuliOpen).toBeTrue();
+    expect(focus).toHaveBeenCalled();
   });
 
-  it('openOffcanvasStimuli — élément non trouvé → aucune erreur levée', async () => {
+  it('closeConfigStimuli → ferme le panneau et rend le focus à la case', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
+    component.openStimuliData(0);
+    const focusCell = spyOn(component, 'focusCell');
 
-    spyOn(document, 'getElementById').and.returnValue(null);
+    component.closeConfigStimuli();
 
-    expect(() => component.openOffcanvasStimuli()).not.toThrow();
+    expect(component.activeCellIndex).toBeNull();
+    expect(component.stimuliOffcanvasReady).toBeFalse();
+    expect(focusCell).toHaveBeenCalledWith(0);
   });
 
   // ─── checkFileDurationAndTimeScreen ──────────────────────────────────────────
@@ -682,6 +706,7 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeInstruction('Video'));
     await fixture.whenStable();
     component.fileDuration = 30;
+    component.screenToModify.values[0] = true; // passage automatique activé
     component.screenToModify.values[1] = 10;
 
     spyOn(component.selectedScreenChange, 'emit');
@@ -695,6 +720,7 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeInstruction('Video'));
     await fixture.whenStable();
     component.fileDuration = 30;
+    component.screenToModify.values[0] = true; // passage automatique activé
     component.screenToModify.values[1] = 10;
     component.showWarningMessage = true;
 
@@ -1049,8 +1075,13 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
 
     expect(component.screenToModify.values[12][0].hidden).toBeTrue();
-    expect(idbSpy.releaseFile).toHaveBeenCalled();
     expect(component.pendingDeleteCells).toBeNull();
+    // Libération différée pour permettre l'annulation…
+    expect(idbSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+    // … puis appliquée à la sortie de l'éditeur.
+    await component.commitMediaJournal();
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/img.png');
   });
 
   it('cancelDelete — réinitialise les cases en attente', async () => {
@@ -1150,24 +1181,26 @@ describe('ModifyScreenComponent', () => {
 
   // ─── zoomIn / zoomOut ───────────────────────────────────────────────────────
 
-  it('zoomIn — augmente cellSize sans dépasser le maximum (160)', async () => {
+  it('zoomIn — augmente cellSize sans dépasser le maximum (168)', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
-    component.cellSize = 150;
+    component.cellSize = 160;
 
     component.zoomIn();
 
-    expect(component.cellSize).toBe(160); // 150 + 20 plafonné à 160
+    expect(component.cellSize).toBe(168); // 160 + 20 plafonné à 168
+    expect(component.canZoomIn).toBeFalse();
   });
 
-  it('zoomOut — diminue cellSize sans descendre sous le minimum (40)', async () => {
+  it('zoomOut — diminue cellSize sans descendre sous le minimum (48)', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
-    component.cellSize = 40;
+    component.cellSize = 56;
 
     component.zoomOut();
 
-    expect(component.cellSize).toBe(40); // plancher à 40
+    expect(component.cellSize).toBe(48); // plancher à 48
+    expect(component.canZoomOut).toBeFalse();
   });
 
   // ─── openStimuliData — mode échange ─────────────────────────────────────────
@@ -1328,52 +1361,6 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[12][1].imageName).toBe('base.png');
   });
 
-  // ─── getCandidateIds / extractFileNameFromId (entrées atypiques) ────────────
-
-  it('getCandidateIds — entrée null → tableau vide', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-    expect((component as any).getCandidateIds(null)).toEqual([]);
-  });
-
-  it('getCandidateIds — entrée File → utilise le nom du fichier', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-    const file = new File([''], 'photo.png');
-
-    const ids = (component as any).getCandidateIds(file);
-
-    expect(ids).toContain('photo.png');
-    expect(ids).toContain('TestProject/photo.png');
-  });
-
-  it('getCandidateIds — objet avec id → utilise l\'id', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-
-    const ids = (component as any).getCandidateIds({ id: 'TestProject/x.png' });
-
-    expect(ids).toContain('TestProject/x.png');
-  });
-
-  it('extractFileNameFromId — null → chaîne vide', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-    expect((component as any).extractFileNameFromId(null)).toBe('');
-  });
-
-  it('extractFileNameFromId — File → nom du fichier', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-    expect((component as any).extractFileNameFromId(new File([''], 'a.png'))).toBe('a.png');
-  });
-
-  it('extractFileNameFromId — chemin avec dossiers → dernier segment', async () => {
-    createComponent(makeStimuli());
-    await fixture.whenStable();
-    expect((component as any).extractFileNameFromId('Projet/sous/fichier.png')).toBe('fichier.png');
-  });
-
   // ─── setInstructionPreview / setStimuliPreview (révocation d'URL) ───────────
 
   it('setInstructionPreview — remplace une URL existante → révoque l\'ancienne', async () => {
@@ -1499,5 +1486,213 @@ describe('ModifyScreenComponent', () => {
     expect(component.activeCellIndex).toBeNull();
     expect(component.stimuliOffcanvasReady).toBeFalse();
     expect(component.openOffcanvasStimuli).not.toHaveBeenCalled();
+  });
+
+  // ─── Annulation et médias ────────────────────────────────────────────────────
+
+  it('undo après suppression → la case et ses médias sont restaurés, aucune libération à la sortie', async () => {
+    createComponent(makeStimuliGrid(1, 2, {
+      0: cell({imageName: 'chat.png', imageId: 'TestProject/chat.png'}),
+      1: cell({imageName: 'chien.png', imageId: 'TestProject/chien.png'}),
+    }));
+    await fixture.whenStable();
+    component.pendingDeleteCells = [0];
+    component.confirmDelete();
+
+    component.undo();
+    await component.commitMediaJournal();
+
+    expect(component.screenToModify.values[12][0].imageName).toBe('chat.png');
+    expect(component.screenToModify.values[12][0].hidden).toBeFalse();
+    expect(idbSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('undo après duplication → la référence ajoutée est rendue', async () => {
+    createComponent(makeStimuliGrid(1, 2, {
+      0: cell({imageName: 'chat.png', imageId: 'TestProject/chat.png'}),
+      1: cell(),
+    }));
+    await fixture.whenStable();
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/chat.png', file: new File([''], 'chat.png'), type: 'image', lastEdit: new Date(), refCount: 2
+    } as any));
+
+    component.toggleDuplicateMode();
+    component.openStimuliData(0);
+    component.openStimuliData(1);
+    await fixture.whenStable();
+    expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/chat.png');
+
+    component.undo();
+    await fixture.whenStable();
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(idbSpy.releaseFile).toHaveBeenCalledWith('TestProject/chat.png');
+    expect(component.screenToModify.values[12][1].imageName).toBe('');
+  });
+
+  it('duplication vers une case remplie → ancien média libéré à la sortie', async () => {
+    createComponent(makeStimuliGrid(1, 2, {
+      0: cell({imageName: 'chat.png', imageId: 'TestProject/chat.png'}),
+      1: cell({imageName: 'chien.png', imageId: 'TestProject/chien.png'}),
+    }));
+    await fixture.whenStable();
+    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], 'f.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.duplicateCell(0, 1);
+    await component.commitMediaJournal();
+
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/chien.png');
+    expect(idbSpy.deleteFile).not.toHaveBeenCalledWith('TestProject/chat.png');
+  });
+
+  it('ngOnDestroy → applique les libérations en attente', async () => {
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+    const commit = spyOn(component, 'commitMediaJournal').and.returnValue(Promise.resolve());
+
+    fixture.destroy();
+
+    expect(commit).toHaveBeenCalled();
+  });
+
+  // ─── Changement de type d'écran ─────────────────────────────────────────────
+
+  it('requestTypeChange — écran avec contenu → confirmation demandée', async () => {
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+
+    await component.requestTypeChange('transition');
+
+    expect(confirmSpy.confirm).toHaveBeenCalled();
+    expect(component.screenToModify.type).toBe('transition');
+  });
+
+  it('requestTypeChange — confirmation refusée → écran inchangé', async () => {
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+    confirmSpy.confirm.and.returnValue(Promise.resolve(false));
+
+    await component.requestTypeChange('stimuli');
+
+    expect(component.screenToModify.type).toBe('instruction');
+    expect(component.screenToModify.values[4]).toBe('photo.png');
+  });
+
+  it('requestTypeChange — écran vide → pas de confirmation', async () => {
+    createComponent(makeTransition());
+    await fixture.whenStable();
+
+    await component.requestTypeChange('stimuli');
+
+    expect(confirmSpy.confirm).not.toHaveBeenCalled();
+    expect(component.screenToModify.type).toBe('stimuli');
+  });
+
+  it('changeTypeFile → l\'ancien média de la consigne sera libéré', async () => {
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+    idbSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.changeTypeFile('Texte');
+    await component.commitMediaJournal();
+
+    expect(component.screenToModify.values[4]).toBe('');
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/photo.png');
+  });
+
+  it('getInstructionFile — même fichier choisi à nouveau → contenu remplacé sans référence supplémentaire', async () => {
+    createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
+    await fixture.whenStable();
+    const file = new File(['v2'], 'photo.png', {type: 'image/png'});
+
+    await component.getInstructionFile(file);
+
+    expect(idbSpy.updateFile).toHaveBeenCalledWith('TestProject/photo.png', file, 'image');
+    expect(idbSpy.addFile).not.toHaveBeenCalled();
+    expect(idbSpy.incrementRef).not.toHaveBeenCalled();
+  });
+
+  // ─── Accessibilité de la grille ───────────────────────────────────────────────
+
+  it('cellLabel → position, contenu et réponse attendue', async () => {
+    createComponent(makeStimuliGrid(2, 2, {
+      0: cell(), 1: cell(), 2: cell(),
+      3: cell({imageName: 'chat.png', soundName: 'miaou.mp3', goodAnswer: true}),
+    }));
+    await fixture.whenStable();
+
+    expect(component.cellLabel(3)).toBe('Case 4, ligne 2, colonne 2 : image chat.png, son miaou.mp3, bonne réponse');
+  });
+
+  it('cellLabel — emplacement vide → indiqué comme tel', async () => {
+    createComponent(makeStimuliGrid(1, 2, {0: cell(), 1: cell({hidden: true})}));
+    await fixture.whenStable();
+    expect(component.cellLabel(1)).toContain('emplacement vide');
+  });
+
+  it('les cases sont des boutons nommés, une seule dans l\'ordre de tabulation', async () => {
+    createComponent(makeStimuliGrid(2, 2, {0: cell(), 1: cell(), 2: cell(), 3: cell()}));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cells = Array.from(fixture.nativeElement.querySelectorAll('button.cell') as NodeListOf<HTMLButtonElement>);
+    expect(cells.length).toBe(4);
+    cells.forEach(button => expect(button.getAttribute('aria-label')).toContain('Case'));
+    expect(cells.filter(button => button.tabIndex === 0).length).toBe(1);
+  });
+
+  it('onGridKeydown → flèches, Début et Fin déplacent le focus dans la grille', async () => {
+    createComponent(makeStimuliGrid(2, 3, {0: cell(), 1: cell(), 2: cell(), 3: cell(), 4: cell(), 5: cell()}));
+    await fixture.whenStable();
+    const focusCell = spyOn(component, 'focusCell');
+
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'ArrowRight'}), 0);
+    expect(focusCell).toHaveBeenCalledWith(1);
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'ArrowDown'}), 1);
+    expect(focusCell).toHaveBeenCalledWith(4);
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'ArrowUp'}), 1);
+    expect(focusCell).toHaveBeenCalledWith(1);
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'End'}), 3);
+    expect(focusCell).toHaveBeenCalledWith(5);
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'Home'}), 5);
+    expect(focusCell).toHaveBeenCalledWith(3);
+  });
+
+  it('onGridKeydown — Échap → quitte le mode actif', async () => {
+    createComponent(makeStimuli());
+    await fixture.whenStable();
+    component.toggleSwapMode();
+
+    component.onGridKeydown(new KeyboardEvent('keydown', {key: 'Escape'}), 0);
+
+    expect(component.swapMode).toBeFalse();
+  });
+
+  it('modeHint → consigne adaptée au mode actif', async () => {
+    createComponent(makeStimuliGrid(1, 2, {0: cell(), 1: cell()}));
+    await fixture.whenStable();
+    expect(component.modeHint).toBe('');
+    component.toggleSwapMode();
+    expect(component.modeHint).toContain('première case');
+    component.openStimuliData(0);
+    expect(component.modeHint).toContain('seconde case');
+  });
+
+  it('addAdjacentToActive (alternative clavier aux « + ») → la case active suit son nouvel index', async () => {
+    createComponent(makeStimuliGrid(1, 1, {0: cell({imageName: 'base.png'})}));
+    await fixture.whenStable();
+    component.openStimuliData(0);
+
+    component.addAdjacentToActive(new Event('click'), 'left');
+
+    expect(Number(component.screenToModify.values[1])).toBe(2);
+    expect(component.activeCellIndex).toBe(1);
+    expect(component.screenToModify.values[12][1].imageName).toBe('base.png');
   });
 });

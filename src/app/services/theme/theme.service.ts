@@ -1,5 +1,10 @@
 import {Injectable, signal} from '@angular/core';
 
+/**
+ * @deprecated Remplacé par `UserPreferencesService` (core/preferences), qui stocke le thème
+ * dans IndexedDB. Plus utilisé par l'application ; conservé en attendant sa suppression.
+ * Ne pas réutiliser : il écrit encore l'ancienne clé localStorage `theme`.
+ */
 @Injectable({
   providedIn: 'root'
 })

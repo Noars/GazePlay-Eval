@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
 import {DownloadService} from '../../services/download/download.service';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
-import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
+import {MediaCleanupService} from '../../core/media/media-cleanup.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import { SauvegardeComponent } from './sauvegarde.component';
 import {of} from 'rxjs';
 
@@ -23,12 +24,19 @@ describe('SauvegardeComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>
   let downloadServiceSpy: jasmine.SpyObj<DownloadService>
   let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>
-  let indexedDBServiceSpy: jasmine.SpyObj<IndexedDBService>
+  let mediaCleanupSpy: jasmine.SpyObj<MediaCleanupService>
+  let confirmSpy: jasmine.SpyObj<ConfirmService>
   let dialogSpy: jasmine.SpyObj<MatDialog>
 
 
   beforeEach(async () => {
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName']);
+    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName', 'loadIntoWorkspace', 'setActiveSlot']);
+    // Reproduit le comportement réel des méthodes utilisées par la page.
+    saveServiceSpy.loadIntoWorkspace.and.callFake((save: saveModel, step: number = save.step) => {
+      const {createdAt, version, ...rest} = save;
+      saveServiceSpy.dataAuto = {...rest, step};
+    });
+    saveServiceSpy.setActiveSlot.and.callFake((index: any) => saveServiceSpy.activeSlotIndex = index);
     saveServiceSpy.dataAuto = {
       format: 'Csv',
       globalParamsInstructionScreen: [],
@@ -48,7 +56,10 @@ describe('SauvegardeComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     downloadServiceSpy = jasmine.createSpyObj('DownloadService', ['generateSlotZip']);
     overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
-    indexedDBServiceSpy = jasmine.createSpyObj('IndexedDBService', ['deleteFileByProject']);
+    mediaCleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['cleanupProject']);
+    mediaCleanupSpy.cleanupProject.and.returnValue(Promise.resolve(0));
+    confirmSpy = jasmine.createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(Promise.resolve(true));
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open'])
 
     await TestBed.configureTestingModule({
@@ -61,7 +72,8 @@ describe('SauvegardeComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: DownloadService, useValue: downloadServiceSpy },
         { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
-        { provide: IndexedDBService, useValue: indexedDBServiceSpy},
+        { provide: MediaCleanupService, useValue: mediaCleanupSpy},
+        { provide: ConfirmService, useValue: confirmSpy},
         { provide: MatDialog, useValue: dialogSpy}
       ]
     })
@@ -261,7 +273,7 @@ describe('SauvegardeComponent', () => {
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'Votre évaluation a été sauvegardée avec succès.');
   });
 
-  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', async () => {
     const slotToDelete: saveModel = {
       nomEval: 'EvalToDelete',
       format: 'Csv',
@@ -279,19 +291,21 @@ describe('SauvegardeComponent', () => {
       if (index === 1) return slotToDelete;
       return null;
     });
-    indexedDBServiceSpy.deleteFileByProject.and.returnValue(Promise.resolve());
 
     dialogSpy.open.and.returnValue({
       afterClosed: () => of('delete')
     } as any);
 
     component.openDeletePopup({ index: 1, data: slotToDelete });
+    await new Promise(resolve => setTimeout(resolve));
 
     expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(1);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'L\'évaluation a été supprimée avec succès.');
+    // Les médias ne sont supprimés que s'ils ne servent plus à aucune sauvegarde.
+    expect(mediaCleanupSpy.cleanupProject).toHaveBeenCalledWith('EvalToDelete');
   });
 
-  it('en cas de suppression (avec download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+  it('en cas de suppression (avec download), supprime le slot, rafraîchit et affiche un message de succès', async () => {
     const slotToDelete: saveModel = {
       nomEval: 'EvalToDelete',
       format: 'Csv',
@@ -309,7 +323,9 @@ describe('SauvegardeComponent', () => {
       afterClosed: () => of('download')
     } as any);
 
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
     component.openDeletePopup({ index: 1, data: slotToDelete });
+    await new Promise(resolve => setTimeout(resolve));
 
     expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotToDelete);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
@@ -333,7 +349,6 @@ describe('SauvegardeComponent', () => {
       if (index === 1) return slotToDelete;
       return null;
     });
-    indexedDBServiceSpy.deleteFileByProject.and.returnValue(Promise.resolve());
 
     dialogSpy.open.and.returnValue({
       afterClosed: () => of('delete')
@@ -370,12 +385,12 @@ describe('SauvegardeComponent', () => {
     expect(component.getSlotAuto()).toBeNull();
   });
 
-  it('downloadSlot — slot avec données → generateSlotZip + message info', () => {
+  it('downloadSlot — slot avec données → generateSlotZip + message info', async () => {
     const slotData = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
-    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve());
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
     fixture.detectChanges();
 
-    component.downloadSlot({ index: 1, data: slotData });
+    await component.downloadSlot({ index: 1, data: slotData });
 
     expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotData);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
@@ -529,20 +544,40 @@ describe('SauvegardeComponent', () => {
 
     await component.saveToSlot({ index: 0, data: null }, DynamicSlot);
 
-    component.deleteAutoSave()
+    component.evalInProgress = true;
+    await component.deleteAutoSave();
 
     fixture.detectChanges();
 
+    expect(confirmSpy.confirm).toHaveBeenCalledWith(jasmine.objectContaining({tone: 'danger'}));
     expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(0);
     expect(component.evalInProgress).toBeFalse();
-    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'Les dernières modifications ont été supprimés avec succès.');
+    expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'Les dernières modifications ont été supprimées avec succès.');
     expect(component.slots[0].data).toBeNull();
     expect(component.slots).toEqual([
       { index: 1, data: null },
       { index: 2, data: null },
       { index: 3, data: null }
     ]);
-
   });
 
+  it('deleteAutoSave — confirmation refusée → rien n\'est supprimé', async () => {
+    loadServiceSpy.getSlot.and.callFake((index: number) => index === 0 ? { nomEval: 'X', listScreens: [] } as any : null);
+    fixture.detectChanges();
+    confirmSpy.confirm.and.returnValue(Promise.resolve(false));
+
+    await component.deleteAutoSave();
+
+    expect(saveServiceSpy.clearSlot).not.toHaveBeenCalled();
+  });
+
+  it('les actions des emplacements remplis sont visibles sans sélection préalable', () => {
+    loadServiceSpy.getSlot.and.callFake((index: number) => index === 2 ? { nomEval: 'Rempli', createdAt: '', listScreens: [] } as any : null);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Ouvrir');
+    expect(text).toContain('Télécharger');
+    expect(text).toContain('Supprimer');
+  });
 });

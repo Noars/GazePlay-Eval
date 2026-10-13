@@ -1,20 +1,32 @@
+<!--
+  Deux zones annoncées en permanence dans le DOM (condition pour que les lecteurs d'écran
+  annoncent les messages ajoutés) : polie pour les informations, assertive pour les erreurs.
+-->
 <div class="flash-container">
-    <!-- Boucle sur le signal des flashs-messages avec leur id (pour ne pas impacter tout les messages) -->
+  <div class="flash-region" role="status" aria-live="polite">
     @for (flash of flashService.flashs(); track flash.id) {
-
-      <!-- applique la classe selon le type du message -->
-      <div class="alert alert-{{ mapType(flash.type) }}"
-           [class.fade-out]="flash.fadingOut">
-
-        <div class="d-flex align-items-start gap-3">
-          <i class="bi {{ mapIcon(flash.type) }} alert-icon"></i>
-          <span>{{ flash.message }}</span>
-        </div>
-
-        <button class="btn-close" (click)="flashService.remove(flash.id)"></button>
-
-      </div>
-
+      @if (flash.type === 'info' || flash.type === 'success') {
+        <ng-container [ngTemplateOutlet]="flashTemplate" [ngTemplateOutletContext]="{$implicit: flash}"></ng-container>
+      }
     }
+  </div>
+  <div class="flash-region" role="alert" aria-live="assertive">
+    @for (flash of flashService.flashs(); track flash.id) {
+      @if (flash.type === 'warning' || flash.type === 'error') {
+        <ng-container [ngTemplateOutlet]="flashTemplate" [ngTemplateOutletContext]="{$implicit: flash}"></ng-container>
+      }
+    }
+  </div>
 </div>
 
+<ng-template #flashTemplate let-flash>
+  <div class="flash flash--{{ mapType(flash.type) }}" [class.fade-out]="flash.fadingOut">
+    <i class="bi {{ mapIcon(flash.type) }} flash__icon" aria-hidden="true"></i>
+    <p class="flash__message">
+      <span class="visually-hidden">{{ mapLabel(flash.type) }} : </span>{{ flash.message }}
+    </p>
+    <button type="button" class="flash__close" aria-label="Fermer la notification" (click)="flashService.remove(flash.id)">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+</ng-template>

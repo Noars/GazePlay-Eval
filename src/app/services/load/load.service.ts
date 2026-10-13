@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { saveModel } from '../../shared/saveModel';
-import { FormatTypeConfig, MaxSlots, SAVE_SLOT_LIST } from '../../shared/dataBaseConfig';
+import {Injectable} from '@angular/core';
+import {saveModel} from '../../shared/saveModel';
+import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class LoadService {
 
   /**
@@ -14,7 +14,13 @@ export class LoadService {
    */
   getSlot(slotIndex: FormatTypeConfig): saveModel | null {
     const slotKey = SAVE_SLOT_LIST[slotIndex]; // traduit l'index en clé localStorage (ex: 'save1')
-    const raw = localStorage.getItem(slotKey);
+    let raw: string | null;
+    try {
+      raw = localStorage.getItem(slotKey);
+    } catch (e) {
+      console.error(`Stockage local inaccessible (slot ${slotKey})`, e);
+      return null;
+    }
     if (!raw) return null; // slot vide
 
     try {
@@ -31,14 +37,9 @@ export class LoadService {
    * Le slot 0 (auto-save) n'est pas inclus dans ce résultat.
    *
    * @returns Tuple de trois éléments correspondant aux slots 1, 2 et 3,
-   *          chaque élément étant la sauvegarde du slot ou null si vide
+   *          chaque élément étant la sauvegarde du slot ou null si vide ou illisible
    */
   getAllSlots(): [saveModel | null, saveModel | null, saveModel | null] {
-    const allSlots: [saveModel | null, saveModel | null, saveModel | null] = [null, null, null];
-    for (let i = 0; i < MaxSlots; i++) {
-      const raw = localStorage.getItem(SAVE_SLOT_LIST[i]);
-      allSlots[i] = raw ? JSON.parse(raw) as saveModel : null;
-    }
-    return allSlots;
+    return [this.getSlot(1), this.getSlot(2), this.getSlot(3)];
   }
 }

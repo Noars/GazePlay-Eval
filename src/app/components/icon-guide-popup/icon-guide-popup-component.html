@@ -1,10 +1,11 @@
-<button
-  type="button"
-  class="guide-popup-button btn btn-primary rounded-circle shadow"
-  aria-label="Ouvrir le guide"
-  title="Ouvrir le guide"
-  (click)="openGuide()">
-  ?
+<button type="button"
+        class="gp-btn gp-btn--ghost guide-button"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="isGuideOpen"
+        title="Aide sur cette page"
+        (click)="openGuide()">
+  <i class="bi bi-question-circle" aria-hidden="true"></i>
+  <span class="guide-button__label">Aide</span>
 </button>
 
 <app-guide-popup [isOpen]="isGuideOpen" (closed)="closeGuide()"></app-guide-popup>

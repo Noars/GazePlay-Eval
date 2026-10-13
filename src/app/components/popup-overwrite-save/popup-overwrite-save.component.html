@@ -1,41 +1,31 @@
-<div class="popup-container">
-
-  <div class="popup-header">
-    <img class="icon-light me-2" src="assets/icons/error/error-dark.png" width="16" height="16" alt="">
-    <img class="icon-dark me-2" src="assets/icons/error/error.png" width="16" height="16" alt="">
-    Sauvegarde en danger
+<div class="gp-dialog">
+  <div class="gp-dialog__header">
+    <span class="gp-dialog__icon gp-dialog__icon--warning" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+    <div>
+      <h2 class="gp-dialog__title" id="overwrite-title">Remplacer une évaluation ?</h2>
+      <p class="gp-dialog__subtitle">{{ data.slotLabel }}</p>
+    </div>
   </div>
 
-  <div class="popup-body">
-
-    <div class="popup-alert">
-      <img class="icon-light alert-icon" src="assets/icons/warning/warning-dark.png" alt="">
-      <img class="icon-dark alert-icon" src="assets/icons/warning/warning.png" alt="">
-      <span>
-        <strong>{{ data.save.nomEval || 'Sans nom' }}</strong>
-        ({{ data.slotLabel }}) va être écrasée par cette action.
-      </span>
+  <div class="gp-dialog__body" id="overwrite-message">
+    <p class="mb-0">
+      L'évaluation <strong>« {{ data.save.nomEval || 'Sans nom' }} »</strong> va être remplacée par cette action.
+      Elle a été modifiée pour la dernière fois le {{ data.save.createdAt | date:'dd/MM/yyyy à HH:mm' }}.
+    </p>
+    <div class="gp-callout gp-callout--neutral">
+      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+      <div class="gp-callout__body">
+        <p>Conseil : téléchargez-la d'abord au format <code>.gpSave</code> pour pouvoir la réimporter plus tard.</p>
+      </div>
     </div>
+  </div>
 
-    <span class="save-date">
-      Dernière modification&nbsp;: {{ data.save.createdAt | date:'dd/MM/yyyy à HH:mm' }}
-    </span>
-
-    <button class="btn-download fw-semibold w-100" (click)="download()">
-      <img class="icon-light me-2" src="assets/icons/download/download-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-2" src="assets/icons/download/download.png" width="16" height="16" alt="">
-      Télécharger avant d'écraser
+  <div class="gp-dialog__footer">
+    <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="cancel()">Annuler</button>
+    <button type="button" class="gp-btn gp-btn--danger-outline" (click)="overwrite()">Remplacer sans télécharger</button>
+    <button type="button" class="gp-btn gp-btn--primary" (click)="download()">
+      <i class="bi bi-download" aria-hidden="true"></i>
+      Télécharger puis remplacer
     </button>
-
-    <div class="d-flex justify-content-between gap-3">
-      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
-        Annuler
-      </button>
-      <button class="btn-overwrite fw-semibold flex-shrink-1" (click)="overwrite()">
-        <i class="bi bi-arrow-right me-1"></i>
-        Écraser quand même
-      </button>
-    </div>
-
   </div>
 </div>

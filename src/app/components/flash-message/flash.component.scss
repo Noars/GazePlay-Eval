@@ -1,0 +1,107 @@
+.flash-container {
+  position: fixed;
+  right: var(--gp-space-4);
+  bottom: var(--gp-space-4);
+  z-index: 2500;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-2);
+  width: min(26rem, calc(100vw - 2rem));
+  pointer-events: none;
+
+  @media (max-width: 575.98px) {
+    right: var(--gp-space-3);
+    left: var(--gp-space-3);
+    bottom: var(--gp-space-3);
+    width: auto;
+  }
+}
+
+.flash-region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-2);
+}
+
+.flash {
+  --flash-accent: var(--gp-info);
+  --flash-bg: var(--gp-info-subtle);
+  --flash-border: var(--gp-info-border);
+
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gp-space-3);
+  padding: var(--gp-space-3) var(--gp-space-3) var(--gp-space-3) var(--gp-space-4);
+  border: 1px solid var(--flash-border);
+  border-left: 4px solid var(--flash-accent);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface);
+  background-image: linear-gradient(var(--flash-bg), var(--flash-bg));
+  color: var(--gp-text);
+  box-shadow: var(--gp-shadow-lg);
+  pointer-events: auto;
+  animation: flash-in 0.25s ease both;
+
+  &--success {
+    --flash-accent: var(--gp-success);
+    --flash-bg: var(--gp-success-subtle);
+    --flash-border: var(--gp-success-border);
+  }
+
+  &--warning {
+    --flash-accent: var(--gp-warning-strong);
+    --flash-bg: var(--gp-warning-subtle);
+    --flash-border: var(--gp-warning-border);
+  }
+
+  &--danger {
+    --flash-accent: var(--gp-danger);
+    --flash-bg: var(--gp-danger-subtle);
+    --flash-border: var(--gp-danger-border);
+  }
+
+  &.fade-out {
+    animation: flash-out 0.3s ease forwards;
+  }
+}
+
+.flash__icon {
+  margin-top: 0.2em;
+  color: var(--flash-accent);
+  font-size: 1.15rem;
+}
+
+.flash__message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-weight: 600;
+}
+
+.flash__close {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--gp-radius-sm);
+  background: transparent;
+  color: var(--gp-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gp-surface-3);
+    color: var(--gp-text);
+  }
+}
+
+@keyframes flash-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flash-out {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(8px); }
+}

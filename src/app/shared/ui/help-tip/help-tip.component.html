@@ -1,0 +1,13 @@
+<button type="button"
+        class="help-tip__button"
+        [attr.aria-expanded]="open()"
+        [attr.aria-controls]="bubbleId"
+        [attr.aria-label]="topic ? 'Aide : ' + topic : 'Afficher l\'aide'"
+        (click)="toggle()">
+  <i class="bi bi-info-circle" aria-hidden="true"></i>
+</button>
+<span class="help-tip__bubble" role="status" [id]="bubbleId">
+  @if (open()) {
+    <span class="help-tip__content">{{ text }}</span>
+  }
+</span>

@@ -1,4 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import {Event, NavigationStart, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -6,64 +6,71 @@ import {SaveService} from '../save/save.service';
 import {FlashService} from '../flash-message/flash.service';
 import {LoadService} from '../load/load.service';
 import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
-import {IndexedDBService} from '../indexedDB/indexed-db.service';
+import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 
-@Injectable({ providedIn: 'root' })
+/**
+ * Sauvegarde automatique de l'évaluation en cours (slot 0, et emplacement nommé actif).
+ *
+ * Déclenchée à chaque navigation vers une étape du parcours de création, et appelée
+ * directement par l'éditeur avec des pseudo-routes (`stimuli`, `instruction`,
+ * `backToScreenList`, voir `ROUTE_TO_STEP`). Les autres pages (accueil, sauvegardes,
+ * options, guide…) ne déclenchent pas de sauvegarde.
+ */
+@Injectable({providedIn: 'root'})
 export class AutoSaveService implements OnDestroy {
+  private readonly router = inject(Router);
+  private readonly saveService = inject(SaveService);
+  private readonly flashService = inject(FlashService);
+  private readonly loadService = inject(LoadService);
+  private readonly mediaCleanup = inject(MediaCleanupService);
 
-  private subscription!: Subscription; // abonnement aux événements du routeur (changement de page)
-  private pagesExclues = ['','home', 'sauvegarde', 'load-save', 'no-page', 'option', 'guide', 'guide/creation', 'guide/sauvegardes', 'guide/imports']; // pages non concernés par la sauvegarde auto
-  private isResuming = false; // si on est en train de restaurer une session
-
-  constructor(
-    private router: Router,
-    private saveService: SaveService,
-    private flashService: FlashService,
-    private loadService: LoadService,
-    private indexedDbService: IndexedDBService
-  ) {}
+  private subscription?: Subscription;
+  private isResuming = false; // vrai pendant la restauration d'une session
 
   init(): void {
+    if (this.subscription) return;
     this.subscription = this.router.events.pipe(
-      // Filtre pour ne garder que l'événement où l'utilisateur quitte une page
       filter((event: Event): event is NavigationStart => event instanceof NavigationStart)
     ).subscribe((event: NavigationStart) => {
-      //
-      if (!this.isResuming) { // Si on est déjà dans une session active
+      if (!this.isResuming) {
         this.autoSave(event.url);
       }
     });
   }
 
   /**
-   * Sauvegarde automatiquement les changements de l'évaluation courante dans le LocalStorage.
+   * Sauvegarde l'évaluation courante dans le localStorage et mémorise l'étape atteinte
+   * pour pouvoir y revenir au rechargement.
    *
-   * Enregistre également l'avancée de l'utilisateur dans l'évaluation pour pouvoir le rediriger
-   * au rechargement de la page.
-   *
-   * @param targetUrl l'url de la page actuelle.
+   * @param targetUrl l'URL (ou pseudo-route) de la page concernée.
    */
   public autoSave(targetUrl: string): void {
-    // Nettoyage de l'URL (on enlève le 1er '/')
-    // Si jamais on a aussi des attributs dans l'URL, on ne garde que ce qu'il y a avant le '?'
+    // Nettoyage de l'URL : sans le premier « / » ni les paramètres.
     const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
 
-    if (this.pagesExclues.includes(pageActuelle)) return; // on ne save pas les pages exclues
+    // Seules les étapes du parcours (et leurs sous-pages) sont sauvegardées.
+    if (!Object.hasOwn(ROUTE_TO_STEP, pageActuelle)) return;
 
-    if (this.saveService.dataAuto.nomEval != this.loadService.getSlot(0)?.nomEval) {
-      this.indexedDbService.deleteFileByProject(this.loadService.getSlot(0)?.nomEval ?? '');
-    }
+    const previousName = this.loadService.getSlot(0)?.nomEval;
 
-    // Sauvegarde auto de l'évaluation, avec message de succès ou d'avertissement
     try {
-      this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle] ?? -1;
+      this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle];
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
       if (this.saveService.activeSlotIndex !== null) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
       this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.');
     } catch (e) {
-      this.flashService.show('warning', 'Vos modifications n\'ont pas pu être enregistrées');
+      console.error('Sauvegarde automatique impossible :', e);
+      this.flashService.show('error', 'Vos modifications n\'ont pas pu être enregistrées : le stockage du navigateur est peut-être plein.');
+      return;
+    }
+
+    // Après un renommage, les médias de l'ancien nom qui ne servent plus à aucune
+    // sauvegarde sont libérés (les médias encore référencés sont conservés).
+    if (previousName && previousName !== this.saveService.dataAuto.nomEval) {
+      this.mediaCleanup.cleanupProject(previousName).catch(error =>
+        console.warn('Nettoyage des médias ignoré :', error));
     }
   }
 
@@ -72,49 +79,30 @@ export class AutoSaveService implements OnDestroy {
   }
 
   /**
-   * Essaye de rediriger l'utilisateur vers la dernière page de modification de l'évaluation qu'il a consulté.
+   * Ramène l'utilisateur à l'étape de l'évaluation enregistrée dans le slot 0
+   * (ou au début du parcours si `resumeFromStart`).
    *
-   * Si le step n'est pas valide, la méthode ne fait rien.
+   * Ne fait rien s'il n'y a pas de sauvegarde ; affiche une erreur si l'étape est invalide.
    */
   tryResume(resumeFromStart: boolean): void {
-    // récupération du slot dynamique
     const save = this.loadService.getSlot(0);
-
-    // si pas de sauvegarde
     if (!save) {
       return;
     }
 
-    // si l'avancée est invalide
     if (save.step === -1) {
-      this.flashService.show("error", "Une erreur s'est produite lors de la tentative de rechargement" +
+      this.flashService.show("error", "Une erreur s'est produite lors de la tentative de rechargement " +
         "de l'évaluation. Tentez de la sauvegarder et de l'ouvrir à nouveau.");
       return;
     }
 
-    // on regarde si on reprend l'éval du début ou de la dernière étape
-    let route: string;
-    if (resumeFromStart) {
-      route = STEP_TO_ROUTE[0];
-    }else {
-      route = STEP_TO_ROUTE[save.step]; // Si la route est invalide
-    }
-
+    const route = resumeFromStart ? STEP_TO_ROUTE[0] : STEP_TO_ROUTE[save.step];
     if (!route) return;
 
-    this.saveService.dataAuto = {
-      nomEval: save.nomEval,
-      format: save.format,
-      infoParticipant: save.infoParticipant,
-      globalParamsTransitionScreen: save.globalParamsTransitionScreen,
-      globalParamsInstructionScreen: save.globalParamsInstructionScreen,
-      globalParamsStimuliScreen: save.globalParamsStimuliScreen,
-      listScreens: save.listScreens,
-      step: save.step
-    };
+    this.saveService.loadIntoWorkspace(save);
 
     this.isResuming = true;
-    this.router.navigate([route]).then(() => {
+    this.router.navigate([route]).finally(() => {
       this.isResuming = false;
     });
   }

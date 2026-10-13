@@ -98,4 +98,32 @@ describe('InfoParticipantComponent', () => {
     expect(component.saveData).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/setup-eval']);
   });
+
+  it("moveField → déplace le champ (alternative clavier au glisser-déposer) et l'annonce", () => {
+    component.infoParticipantList = ['Nom', 'Prénom', 'Âge'];
+    component.moveField(0, 1, 'down');
+    expect(component.infoParticipantList).toEqual(['Prénom', 'Nom', 'Âge']);
+    expect(component.announcement).toContain('position 2 sur 3');
+  });
+
+  it("moveField — hors limites → rien ne change", () => {
+    component.infoParticipantList = ['Nom', 'Prénom'];
+    component.moveField(0, -1, 'up');
+    component.moveField(1, 1, 'down');
+    expect(component.infoParticipantList).toEqual(['Nom', 'Prénom']);
+  });
+
+  it("addField(valeur) → ajoute une suggestion ; availableSuggestions exclut les champs existants", () => {
+    component.infoParticipantList = ['nom'];
+    expect(component.availableSuggestions()).not.toContain('Nom');
+    component.addField('Âge');
+    expect(component.infoParticipantList).toEqual(['nom', 'Âge']);
+    expect(component.availableSuggestions()).not.toContain('Âge');
+  });
+
+  it("removeField → annonce la suppression", () => {
+    component.infoParticipantList = ['Nom', 'Âge'];
+    component.removeField(1);
+    expect(component.announcement).toContain('Âge');
+  });
 });

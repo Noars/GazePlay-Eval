@@ -1,12 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConfigStimuliComponent } from './config-stimuli.component';
-import { MatDialog } from '@angular/material/dialog';
-import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
-import { SaveService } from '../../services/save/save.service';
-import { AutoSaveService } from '../../services/auto-save/auto-save.service';
-import { DomSanitizer } from '@angular/platform-browser';
-import { of } from 'rxjs';
-import { stimuliScreenValues } from '../../shared/screenModel';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatDialog} from '@angular/material/dialog';
+import {of} from 'rxjs';
+import {ConfigStimuliComponent} from './config-stimuli.component';
+import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
+import {SaveService} from '../../services/save/save.service';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {FlashService} from '../../services/flash-message/flash.service';
+import {MediaCleanupService} from '../../core/media/media-cleanup.service';
+import {emptyReferences, MediaReferences} from '../../core/media/media-references';
+import {stimuliScreenValues} from '../../shared/screenModel';
 
 function makeCell(overrides: Partial<stimuliScreenValues> = {}): stimuliScreenValues {
   return {
@@ -24,13 +26,19 @@ describe('ConfigStimuliComponent', () => {
   let idbServiceSpy: jasmine.SpyObj<IndexedDBService>;
   let saveServiceSpy: jasmine.SpyObj<SaveService>;
   let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let sanitizer: DomSanitizer;
+  let flashSpy: jasmine.SpyObj<FlashService>;
+  let cleanupSpy: jasmine.SpyObj<MediaCleanupService>;
+  let references: MediaReferences;
 
   beforeEach(async () => {
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile']);
     saveServiceSpy = jasmine.createSpyObj('SaveService', ['getEvalName']);
     autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
+    flashSpy = jasmine.createSpyObj('FlashService', ['show']);
+    cleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['collectAllReferences']);
+    references = emptyReferences();
+    cleanupSpy.collectAllReferences.and.callFake(() => references);
 
     idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
     idbServiceSpy.addFile.and.returnValue(Promise.resolve());
@@ -40,24 +48,26 @@ describe('ConfigStimuliComponent', () => {
     idbServiceSpy.incrementRef.and.returnValue(Promise.resolve());
     idbServiceSpy.releaseFile.and.returnValue(Promise.resolve());
     saveServiceSpy.getEvalName.and.returnValue('TestProject');
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+    dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
 
     await TestBed.configureTestingModule({
       imports: [ConfigStimuliComponent],
       providers: [
-        { provide: MatDialog, useValue: dialogSpy },
-        { provide: IndexedDBService, useValue: idbServiceSpy },
-        { provide: SaveService, useValue: saveServiceSpy },
-        { provide: AutoSaveService, useValue: autoSaveSpy }
+        {provide: MatDialog, useValue: dialogSpy},
+        {provide: IndexedDBService, useValue: idbServiceSpy},
+        {provide: SaveService, useValue: saveServiceSpy},
+        {provide: AutoSaveService, useValue: autoSaveSpy},
+        {provide: FlashService, useValue: flashSpy},
+        {provide: MediaCleanupService, useValue: cleanupSpy},
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConfigStimuliComponent);
     component = fixture.componentInstance;
-    sanitizer = TestBed.inject(DomSanitizer);
 
-    component.data = { cell: 0, screen: { 0: makeCell() } };
+    component.data = {cell: 0, screen: {0: makeCell()}, cols: 2};
     spyOn(URL, 'createObjectURL').and.returnValue('blob:fake-url');
+    spyOn(URL, 'revokeObjectURL');
     fixture.detectChanges();
   });
 
@@ -65,135 +75,83 @@ describe('ConfigStimuliComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('affiche la position de la case et un titre focalisable', () => {
+    const title: HTMLElement = fixture.nativeElement.querySelector('#configStimuliLabel');
+    expect(title.textContent).toContain('Case 1');
+    expect(title.textContent).toContain('ligne 1, colonne 1');
+    expect(title.getAttribute('tabindex')).toBe('-1');
+  });
+
   // ─── checkCell ────────────────────────────────────────────────────────────
 
-  it('checkCell — imageFile déjà un Blob → previewImage défini sans appel IDB', async () => {
-    const blob = new Blob(['img'], { type: 'image/png' });
-    component.data.screen[0].imageFile = blob as File;
+  it('checkCell — imageFile déjà un Blob → aperçu sans appel IDB', async () => {
+    component.data.screen[0].imageFile = new Blob(['img'], {type: 'image/png'}) as File;
     idbServiceSpy.getFile.calls.reset();
-    const sanitizerSpy = spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe-url' as any);
 
     await component.checkCell();
 
     expect(idbServiceSpy.getFile).not.toHaveBeenCalled();
-    expect(sanitizerSpy).toHaveBeenCalled();
-    expect(component.previewImage as string).toBe('safe-url');
+    expect(component.previewImage).toBe('blob:fake-url');
   });
 
-  it('checkCell — imageId présent sans imageFile → getFile appelé et imageFile mis à jour', async () => {
-    component.data.screen[0].imageId = 'TestProject/img.png';
-    component.data.screen[0].imageFile = undefined;
-    const mockFile = new File(['img'], 'img.png', { type: 'image/png' });
+  it('checkCell — imageId sans fichier en mémoire → résolu depuis l\'IDB', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
     idbServiceSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/img.png', file: mockFile, type: 'image', lastEdit: new Date()
-    } as any));
+      id: 'TestProject/img.png', file: new File(['img'], 'img.png', {type: 'image/png'}), type: 'image', lastEdit: new Date(), refCount: 1
+    }));
 
     await component.checkCell();
 
-    expect(idbServiceSpy.getFile).toHaveBeenCalled();
     expect(component.data.screen[0].imageFile).toBeTruthy();
+    expect(component.previewImage).toBe('blob:fake-url');
+    expect(component.missingImage).toBeFalse();
   });
 
-  it('checkCell — soundFile déjà un Blob → previewSound défini sans appel IDB', async () => {
-    const blob = new Blob(['snd'], { type: 'audio/mp3' });
-    component.data.screen[0].soundFile = blob as File;
-    idbServiceSpy.getFile.calls.reset();
+  it('checkCell — son stocké sous forme de Blob → converti en File', async () => {
+    component.data.screen[0] = makeCell({soundId: 'TestProject/snd.mp3', soundName: 'snd.mp3'});
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/snd.mp3', file: new Blob(['snd'], {type: 'audio/mpeg'}), type: 'sound', lastEdit: new Date(), refCount: 1
+    }));
 
     await component.checkCell();
 
-    expect(idbServiceSpy.getFile).not.toHaveBeenCalled();
+    expect(component.data.screen[0].soundFile instanceof File).toBeTrue();
     expect(component.previewSound).toBe('blob:fake-url');
   });
 
-  it('checkCell — soundId présent sans soundFile → getFile appelé et soundFile mis à jour', async () => {
-    component.data.screen[0].soundId = 'TestProject/snd.mp3';
-    component.data.screen[0].soundFile = undefined;
-    const mockFile = new File(['snd'], 'snd.mp3', { type: 'audio/mp3' });
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/snd.mp3', file: mockFile, type: 'sound', lastEdit: new Date()
-    } as any));
+  it('checkCell — média introuvable → avertissement « introuvable »', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/missing.png', imageName: 'missing.png'});
 
     await component.checkCell();
-
-    expect(idbServiceSpy.getFile).toHaveBeenCalled();
-    expect(component.data.screen[0].soundFile).toBeTruthy();
-  });
-
-  it('checkCell — cellule vide (pas d\'id ni de fichier) → previewImage et previewSound vides', async () => {
-    component.data.screen[0] = makeCell(); // tout vide
-    await component.checkCell();
-    expect(idbServiceSpy.getFile).not.toHaveBeenCalled();
-    expect(component.previewImage).toBe('');
-    expect(component.previewSound).toBe('');
-  });
-
-  it('checkCell — imageId présent mais IDB introuvable → match undefined → previewImage vide', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/missing.png', imageName: 'missing.png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
-
-    await component.checkCell();
+    fixture.detectChanges();
 
     expect(component.previewImage).toBe('');
+    expect(component.missingImage).toBeTrue();
+    expect(fixture.nativeElement.textContent).toContain('missing.png');
   });
 
-  it('checkCell — getFile retourne mauvais type → passe au candidat suivant → previewImage vide', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'sound', lastEdit: new Date()
-    } as any));
-    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
-
-    await component.checkCell();
-
-    expect(component.previewImage).toBe('');
-  });
-
-  it('checkCell — getFile retourne Blob (pas File) → crée un File → previewImage défini', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
-    const blob = new Blob(['img'], { type: 'image/png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/img.png', file: blob, type: 'image', lastEdit: new Date()
-    } as any));
-
-    await component.checkCell();
-
-    expect(component.previewImage).not.toBe('');
-  });
-
-  it('checkCell — getFile rejette mais getAllFiles retourne un match (File) → previewImage défini', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    const mockFile = new File(['img'], 'img.png', { type: 'image/png' });
+  it('checkCell — repli par nom de fichier quand l\'identifiant ne correspond pas', async () => {
+    component.data.screen[0] = makeCell({imageId: 'AutreNom/img.png', imageName: 'img.png'});
     idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([
-      { id: 'TestProject/img.png', file: mockFile, type: 'image', lastEdit: new Date() }
-    ] as any));
+      {id: 'Ancien/img.png', file: new File(['img'], 'img.png'), type: 'image' as const, lastEdit: new Date(), refCount: 1}
+    ]));
 
     await component.checkCell();
 
-    expect(component.previewImage).not.toBe('');
-    expect(component.data.screen[0].imageFile).toBeTruthy();
+    expect(component.data.screen[0].imageId).toBe('Ancien/img.png');
   });
 
-  it('checkCell — getAllFiles retourne Blob (pas File) → crée un File depuis Blob', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    const blob = new Blob(['img'], { type: 'image/png' });
-    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([
-      { id: 'TestProject/img.png', file: blob, type: 'image', lastEdit: new Date() }
-    ] as any));
+  // ─── Réponse ──────────────────────────────────────────────────────────────
 
-    await component.checkCell();
-
-    expect(component.previewImage).not.toBe('');
+  it('setGoodAnswer → met à jour la case', () => {
+    component.setGoodAnswer(true);
+    expect(component.data.screen[0].goodAnswer).toBeTrue();
   });
 
-  // ─── deleteImage ──────────────────────────────────────────────────────────
+  // ─── Suppression ──────────────────────────────────────────────────────────
 
-  it('deleteImage → réinitialise imageId/imageName/imageFile et appelle autoSave', async () => {
-    component.data.screen[0].imageId = 'TestProject/img.png';
-    component.data.screen[0].imageName = 'img.png';
-    component.data.screen[0].imageFile = new File([''], 'img.png') as any;
+  it('deleteImage → vide la case et sauvegarde', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
 
     await component.deleteImage();
 
@@ -203,62 +161,11 @@ describe('ConfigStimuliComponent', () => {
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  // ─── deleteSound ──────────────────────────────────────────────────────────
-
-  it('deleteSound → réinitialise soundId/soundName/soundFile et appelle autoSave', async () => {
-    component.data.screen[0].soundId = 'TestProject/snd.mp3';
-    component.data.screen[0].soundName = 'snd.mp3';
-
-    await component.deleteSound();
-
-    expect(component.data.screen[0].soundId).toBe('');
-    expect(component.data.screen[0].soundName).toBe('');
-    expect(component.data.screen[0].soundFile).toBeUndefined();
-    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
-  });
-
-  // ─── deleteCell ───────────────────────────────────────────────────────────
-
-  it('deleteCell → réinitialise toute la cellule et appelle autoSave', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', soundId: 'TestProject/snd.mp3' });
-
-    await component.deleteCell();
-
-    const cell = component.data.screen[0];
-    expect(cell.imageId).toBe('');
-    expect(cell.soundId).toBe('');
-    expect(cell.imageFile).toBeUndefined();
-    expect(cell.soundFile).toBeUndefined();
-    expect(cell.goodAnswer).toBeFalse();
-    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
-  });
-
-  it('deleteImage — imageId et imageName vides → releaseFile non appelé', async () => {
-    component.data.screen[0] = makeCell(); // ids vides
-    await component.deleteImage();
-    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
-    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
-  });
-
-  it('deleteSound — soundId et soundName vides → releaseFile non appelé', async () => {
-    component.data.screen[0] = makeCell();
-    await component.deleteSound();
-    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
-    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
-  });
-
-  it('deleteCell — imageId/soundId vides → releaseFile non appelé', async () => {
-    component.data.screen[0] = makeCell();
-    await component.deleteCell();
-    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
-    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
-  });
-
-  it('deleteImage — image présente dans l\'IDB → releaseFile appelé (pas deleteFile direct)', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', imageName: 'img.png' });
+  it('deleteImage — média partagé (refCount 2) → une référence libérée, fichier conservé', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
     idbServiceSpy.getFile.and.returnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 2
-    } as any));
+    }));
 
     await component.deleteImage();
 
@@ -266,33 +173,69 @@ describe('ConfigStimuliComponent', () => {
     expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
   });
 
-  it('deleteCell — image et son présents → releaseFile appelé pour les deux', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/img.png', soundId: 'TestProject/snd.mp3' });
+  it('deleteImage — dernière référence et plus utilisé ailleurs → fichier supprimé', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    }));
+
+    await component.deleteImage();
+
+    expect(idbServiceSpy.deleteFile).toHaveBeenCalledWith('TestProject/img.png');
+  });
+
+  it('deleteImage — dernière référence mais encore utilisé par une sauvegarde → fichier conservé', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
+    }));
+    references.ids.add('TestProject/img.png');
+
+    await component.deleteImage();
+
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
+  });
+
+  it('deleteSound → vide le son et sauvegarde', async () => {
+    component.data.screen[0] = makeCell({soundId: 'TestProject/snd.mp3', soundName: 'snd.mp3'});
+
+    await component.deleteSound();
+
+    expect(component.data.screen[0].soundId).toBe('');
+    expect(component.data.screen[0].soundName).toBe('');
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+  });
+
+  it('deleteImage — case sans média → aucune opération IDB', async () => {
+    await component.deleteImage();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('deleteCell → vide image, son et réponse, libère les deux médias', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', soundId: 'TestProject/snd.mp3', goodAnswer: true});
     idbServiceSpy.getFile.and.callFake((id: string) => Promise.resolve({
-      id, file: new File([''], 'f'), type: id.includes('mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
+      id, file: new File([''], 'f'), type: id.includes('mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 2
     } as any));
 
     await component.deleteCell();
 
+    const cell = component.data.screen[0];
+    expect(cell.imageId).toBe('');
+    expect(cell.soundId).toBe('');
+    expect(cell.goodAnswer).toBeFalse();
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/img.png');
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/snd.mp3');
-  });
-
-  // ─── saveProgress ─────────────────────────────────────────────────────────
-
-  it('saveProgress → appelle autoSave(\'stimuli\')', () => {
-    component.saveProgress();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  // ─── getImageFile ─────────────────────────────────────────────────────────
+  // ─── Ajout / remplacement ─────────────────────────────────────────────────
 
-  it('getImageFile — fichier sélectionné → addFile + cellule mise à jour + previewImage', async () => {
-    const file = new File(['img'], 'photo.png', { type: 'image/png' });
-    const event = { target: { files: [file] } } as unknown as Event;
-    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe-img' as any);
+  it('getImageFile — nouveau fichier → enregistré sous "<eval>/<nom>"', async () => {
+    const file = new File(['img'], 'photo.png', {type: 'image/png'});
 
-    await component.getImageFile(event);
+    await component.getImageFile(file);
 
     expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/photo.png', file, 'image');
     expect(component.data.screen[0].imageName).toBe('photo.png');
@@ -300,146 +243,126 @@ describe('ConfigStimuliComponent', () => {
     expect(component.data.screen[0].imageFile).toBe(file);
   });
 
-  it('getImageFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
-    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
-    const file = new File(['img'], 'photo.png', { type: 'image/png' });
-    const event = { target: { files: [file] } } as unknown as Event;
-    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe' as any);
+  it('getImageFile — accepte aussi un événement de champ fichier', async () => {
+    const file = new File(['img'], 'photo.png', {type: 'image/png'});
+    const input = {files: [file], value: 'C:\\fakepath\\photo.png'};
 
-    await component.getImageFile(event);
+    await component.getImageFile({target: input} as unknown as Event);
 
-    expect(idbServiceSpy.incrementRef).toHaveBeenCalledWith('TestProject/photo.png');
-    expect(idbServiceSpy.updateFile).not.toHaveBeenCalled();
+    expect(component.data.screen[0].imageName).toBe('photo.png');
+    expect(input.value).toBe('');
   });
 
-  it('getImageFile — remplace une image existante → ancienne libérée puis nouvelle ajoutée', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/old.png', imageName: 'old.png' });
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
-      id: 'TestProject/old.png', file: new File([''], 'old.png'), type: 'image', lastEdit: new Date(), refCount: 1
-    } as any));
-    const file = new File(['img'], 'new.png', { type: 'image/png' });
-    const event = { target: { files: [file] } } as unknown as Event;
-    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe' as any);
+  it('getImageFile — fichier déjà présent → une référence ajoutée', async () => {
+    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
 
-    await component.getImageFile(event);
+    await component.getImageFile(new File(['img'], 'photo.png'));
+
+    expect(idbServiceSpy.incrementRef).toHaveBeenCalledWith('TestProject/photo.png');
+  });
+
+  it('getImageFile — remplace une image → l\'ancienne est libérée', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/old.png', imageName: 'old.png'});
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/old.png', file: new File([''], 'old.png'), type: 'image', lastEdit: new Date(), refCount: 2
+    }));
+
+    await component.getImageFile(new File(['img'], 'new.png'));
 
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/old.png');
-    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/new.png', file, 'image');
     expect(component.data.screen[0].imageId).toBe('TestProject/new.png');
   });
 
-  it('getImageFile — re-sélectionne le même fichier → ni release ni add (refCount inchangé)', async () => {
-    component.data.screen[0] = makeCell({ imageId: 'TestProject/photo.png', imageName: 'photo.png' });
-    const file = new File(['img'], 'photo.png', { type: 'image/png' });
-    const event = { target: { files: [file] } } as unknown as Event;
-    spyOn(sanitizer, 'bypassSecurityTrustUrl').and.returnValue('safe' as any);
+  it('getImageFile — même fichier choisi à nouveau → contenu remplacé, compteur inchangé', async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/photo.png', imageName: 'photo.png'});
+    const file = new File(['v2'], 'photo.png', {type: 'image/png'});
 
-    await component.getImageFile(event);
+    await component.getImageFile(file);
 
-    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.updateFile).toHaveBeenCalledWith('TestProject/photo.png', file, 'image');
     expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
     expect(idbServiceSpy.incrementRef).not.toHaveBeenCalled();
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
   });
 
-  it('getImageFile — aucun fichier sélectionné → rien ne se passe', async () => {
-    const event = { target: { files: [] } } as unknown as Event;
+  it('getImageFile — échec d\'enregistrement → message d\'erreur, case inchangée', async () => {
+    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('quota')));
+    idbServiceSpy.incrementRef.and.returnValue(Promise.reject(new Error('introuvable')));
 
-    await component.getImageFile(event);
+    await component.getImageFile(new File(['img'], 'photo.png'));
 
-    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+    expect(flashSpy.show).toHaveBeenCalledWith('error', jasmine.stringMatching('photo.png'));
+    expect(component.data.screen[0].imageName).toBe('');
+    expect(component.busy).toBeNull();
   });
 
-  // ─── getSoundFile ─────────────────────────────────────────────────────────
+  it('getSoundFile — nouveau son → enregistré et prévisualisé', async () => {
+    const file = new File(['snd'], 'son.mp3', {type: 'audio/mpeg'});
 
-  it('getSoundFile — fichier sélectionné → addFile + cellule mise à jour + previewSound', async () => {
-    const file = new File(['snd'], 'son.mp3', { type: 'audio/mp3' });
-    const event = { target: { files: [file] } } as unknown as Event;
-
-    await component.getSoundFile(event);
+    await component.getSoundFile(file);
 
     expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/son.mp3', file, 'sound');
-    expect(component.data.screen[0].soundName).toBe('son.mp3');
     expect(component.data.screen[0].soundId).toBe('TestProject/son.mp3');
     expect(component.previewSound).toBe('blob:fake-url');
   });
 
-  it('getSoundFile — aucun fichier sélectionné → rien ne se passe', async () => {
-    const event = { target: { files: [] } } as unknown as Event;
-
-    await component.getSoundFile(event);
-
+  it('getSoundFile — aucun fichier → rien ne se passe', async () => {
+    await component.getSoundFile({target: {files: [], value: ''}} as unknown as Event);
     expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
   });
 
-  // ─── cropImage ────────────────────────────────────────────────────────────
+  // ─── Recadrage ────────────────────────────────────────────────────────────
 
-  it('cropImage — dialog ferme avec un fichier → imageFile mis à jour', () => {
-    const croppedFile = new File(['cropped'], 'cropped.png', { type: 'image/png' });
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(croppedFile) } as any);
+  it('cropImage — résultat → enregistré comme nouveau fichier, ancienne référence libérée', async () => {
+    const original = new File(['original'], 'chat.jpg', {type: 'image/jpeg'});
+    component.data.screen[0] = makeCell({imageId: 'TestProject/chat.jpg', imageName: 'chat.jpg', imageFile: original});
+    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+      id: 'TestProject/chat.jpg', file: original, type: 'image', lastEdit: new Date(), refCount: 2
+    }));
+    dialogSpy.open.and.returnValue({afterClosed: () => of(new Blob(['cropped'], {type: 'image/png'}))} as any);
 
-    component.cropImage();
+    await component.cropImage();
 
-    expect(component.data.screen[0].imageFile).toBe(croppedFile);
-    expect(component.previewImage as string).toBe('blob:fake-url');
+    const cell = component.data.screen[0];
+    expect(cell.imageName).toBe('chat-recadree.png');
+    expect(cell.imageId).toBe('TestProject/chat-recadree.png');
+    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/chat-recadree.png', jasmine.any(File), 'image');
+    expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/chat.jpg');
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
-  it('cropImage — dialog ferme avec null → imageFile inchangé', () => {
-    const original = new File(['original'], 'orig.png') as any;
-    component.data.screen[0].imageFile = original;
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+  it('cropImage — nom recadré déjà pris → suffixe numérique', async () => {
+    component.data.screen[0] = makeCell({imageName: 'chat.jpg', imageFile: new File(['o'], 'chat.jpg')});
+    idbServiceSpy.addFile.and.callFake((id: string) => id === 'TestProject/chat-recadree.png'
+      ? Promise.reject(new Error('exists')) : Promise.resolve());
+    dialogSpy.open.and.returnValue({afterClosed: () => of(new Blob(['c']))} as any);
 
-    component.cropImage();
+    await component.cropImage();
+
+    expect(component.data.screen[0].imageName).toBe('chat-recadree-1.png');
+  });
+
+  it('cropImage — fenêtre annulée → image inchangée', async () => {
+    const original = new File(['original'], 'orig.png');
+    component.data.screen[0] = makeCell({imageName: 'orig.png', imageFile: original});
+
+    await component.cropImage();
 
     expect(component.data.screen[0].imageFile).toBe(original);
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
   });
 
-  // ─── resize ───────────────────────────────────────────────────────────────
+  // ─── Fermeture ────────────────────────────────────────────────────────────
 
-  it('resize — isResizing false → retourne sans modifier le style', () => {
-    component.isResizing = false;
-    spyOn(document, 'getElementById').and.returnValue(document.createElement('div'));
-    component.resize(new MouseEvent('mousemove'));
-    // Pas d'erreur et pas d'effet
-    expect(component.isResizing).toBeFalse();
+  it('finish → sauvegarde puis émet closed', () => {
+    const closed = spyOn(component.closed, 'emit');
+    component.finish();
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
+    expect(closed).toHaveBeenCalled();
   });
 
-  it('resize — isResizing true et élément trouvé → style mis à jour', () => {
-    component.isResizing = true;
-    const el = document.createElement('div');
-    spyOn(document, 'getElementById').and.returnValue(el);
-
-    const event = new MouseEvent('mousemove', { clientX: 400 });
-    component.resize(event);
-
-    expect(el.style.getPropertyValue('--bs-offcanvas-width')).toBe('400px');
-  });
-
-  it('resize — isResizing true mais élément absent → aucune erreur', () => {
-    component.isResizing = true;
-    spyOn(document, 'getElementById').and.returnValue(null);
-    expect(() => component.resize(new MouseEvent('mousemove', { clientX: 300 }))).not.toThrow();
-  });
-
-  // ─── startResize / stopResize ─────────────────────────────────────────────
-
-  it('startResize → isResizing passe à true et listeners ajoutés', () => {
-    spyOn(document, 'addEventListener');
-
-    component.startResize(new MouseEvent('mousedown'));
-
-    expect(component.isResizing).toBeTrue();
-    expect(document.addEventListener).toHaveBeenCalledWith('mousemove', component.resize);
-    expect(document.addEventListener).toHaveBeenCalledWith('mouseup', component.stopResize);
-  });
-
-  it('stopResize → isResizing passe à false et listeners retirés', () => {
-    component.isResizing = true;
-    spyOn(document, 'removeEventListener');
-
-    component.stopResize();
-
-    expect(component.isResizing).toBeFalse();
-    expect(document.removeEventListener).toHaveBeenCalledWith('mousemove', component.resize);
-    expect(document.removeEventListener).toHaveBeenCalledWith('mouseup', component.stopResize);
+  it('saveProgress → autoSave(\'stimuli\')', () => {
+    component.saveProgress();
+    expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 });

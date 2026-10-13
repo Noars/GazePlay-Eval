@@ -1,39 +1,72 @@
-import {Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {Component, ElementRef, inject, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
-import {CdkDrag, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 import {SaveService} from '../../services/save/save.service';
 import {
-  transitionScreenModel,
-  screenTypeModel,
+  defaultInstructionScreenModel,
+  defaultStimuliScreenModel,
   defaultTransitionScreenModel,
-  transitionScreenConstModel,
   instructionScreenConstModel,
+  instructionScreenModel,
+  screenTypeModel,
   stimuliScreenConstModel,
+  stimuliScreenModel,
+  transitionScreenConstModel,
+  transitionScreenModel,
 } from '../../shared/screenModel';
 import {ModifyScreenComponent} from '../../components/modify-screen/modify-screen.component';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
-import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
+import {MediaLibraryService} from '../../core/media/media-library.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import {FlashService} from '../../services/flash-message/flash.service';
 
+type ScreenType = typeof transitionScreenConstModel | typeof instructionScreenConstModel | typeof stimuliScreenConstModel;
+
+/** Libellés et icônes des types d'écrans. */
+export const SCREEN_TYPES: {type: ScreenType, label: string, icon: string, description: string}[] = [
+  {type: instructionScreenConstModel, label: 'Instruction', icon: 'bi-chat-square-text', description: 'Une consigne : texte, image, vidéo ou son.'},
+  {type: stimuliScreenConstModel, label: 'Stimuli', icon: 'bi-grid-3x3-gap', description: 'Une grille de cases à regarder pour répondre.'},
+  {type: transitionScreenConstModel, label: 'Transition', icon: 'bi-hourglass-split', description: 'Une pause entre deux écrans.'},
+];
+
+/**
+ * Étape 4 : liste des écrans de l'évaluation et aperçu de l'écran sélectionné.
+ * L'édition détaillée d'un écran est déléguée à `ModifyScreenComponent`.
+ */
 @Component({
   selector: 'app-create-eval',
-  imports: [ReactiveFormsModule, FormsModule, CdkDropList, CdkDrag, CdkDragHandle, ModifyScreenComponent],
+  imports: [FormsModule, CdkDropList, CdkDrag, CdkDragHandle, ModifyScreenComponent],
   templateUrl: './create-eval.component.html',
   standalone: true,
   styleUrl: './create-eval.component.css'
 })
 export class CreateEvalComponent implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
+  private readonly saveService = inject(SaveService);
+  private readonly updateScreenService = inject(UpdateScreensService);
+  private readonly autoSaveService = inject(AutoSaveService);
+  private readonly media = inject(MediaLibraryService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly flashService = inject(FlashService);
 
   @ViewChildren('listScreenInputText') inputs!: QueryList<ElementRef<HTMLInputElement>>;
+
+  readonly screenTypes = SCREEN_TYPES;
 
   isModifyScreen: boolean = false;
   listScreens: screenTypeModel[] = [];
   selectedScreen: screenTypeModel | null = null;
   indexSelectedScreen: number = -1;
   idScreen: number = 1;
+  /** Index de l'écran en cours de renommage, ou -1. */
+  renamingIndex = -1;
+  /** Conservé pour compatibilité : vrai quand aucun renommage n'est en cours. */
   editNameScreenDisable: boolean = true;
-  cellSize: number = 70;
+  cellSize: number = 64;
+  /** Message lu par les lecteurs d'écran après une action sur la liste. */
+  announcement = '';
 
   /** Miniatures (data URLs réduites) des images de stimuli de l'écran prévisualisé. */
   cellImageUrls: { [key: number]: string } = {};
@@ -54,16 +87,14 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
-
-  constructor(private router: Router,
-              private saveService: SaveService,
-              private updateScreenService: UpdateScreensService,
-              private autoSaveService: AutoSaveService,
-              private idbService: IndexedDBService) {
-  }
+  protected readonly transitionScreenConstModel = transitionScreenConstModel;
 
   ngOnInit(): void {
     this.loadData();
+    this.idScreen = this.listScreens.length + 1;
+    if (this.listScreens.length > 0) {
+      this.selectScreen(this.listScreens[0], 0);
+    }
   }
 
   ngOnDestroy(): void {
@@ -88,23 +119,30 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     this.listScreens = this.saveService.dataAuto.listScreens;
   }
 
-  addScreen() {
-    let newScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
-    newScreen = this.updateScreenService.updateTransitionScreen(newScreen, 'Ecran ' + this.idScreen++, this.saveService.dataAuto.globalParamsTransitionScreen);
-    this.selectedScreen = newScreen;
+  /**
+   * Ajoute un écran du type demandé, pré-rempli avec les paramètres globaux, et le sélectionne.
+   * @param type type d'écran (transition par défaut, comme auparavant).
+   */
+  addScreen(type: ScreenType = transitionScreenConstModel) {
+    const name = 'Ecran ' + this.nextScreenNumber();
+    const newScreen = this.createScreen(type, name);
     this.listScreens.push(newScreen);
-    this.indexSelectedScreen = this.listScreens.length - 1;
-    this.cellImageUrls = {};
-    this.stopSound();
-    this.clearInstructionPreview();
+    this.selectScreen(newScreen, this.listScreens.length - 1);
+    this.announcement = `Écran « ${name} » ajouté en position ${this.listScreens.length}.`;
 
     this.autoSaveService.autoSave('create-eval');
 
-    // Scroll en bas de la liste
+    // Fait défiler la liste jusqu'au nouvel écran.
     setTimeout(() => {
-      const container = this.inputs.last?.nativeElement.closest('.screen-list-scroll');
-      container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-    }, 200);
+      const item = document.getElementById(`screen-item-${this.listScreens.length - 1}`);
+      item?.scrollIntoView({block: 'nearest'});
+    }, 50);
+  }
+
+  /** Ajoute un écran puis ouvre directement son édition. */
+  addAndEdit(type: ScreenType): void {
+    this.addScreen(type);
+    this.isModifyScreen = true;
   }
 
   selectScreen(screen: screenTypeModel, index: number) {
@@ -113,24 +151,61 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     void this.loadScreenPreview(screen);
   }
 
+  /** Ouvre l'édition détaillée de l'écran donné. */
+  editScreen(screen: screenTypeModel, index: number): void {
+    this.selectScreen(screen, index);
+    this.isModifyScreen = true;
+  }
+
+  /** Active (ou désactive) le renommage d'un écran et place le focus dans le champ. */
   editNameScreen(screen: screenTypeModel, value: boolean, index: number) {
     this.selectedScreen = screen;
-    if (this.selectedScreen === screen) {
-      this.editNameScreenDisable = value;
+    this.indexSelectedScreen = index;
+    this.editNameScreenDisable = value;
+    this.renamingIndex = value ? -1 : index;
+    if (!value) {
       setTimeout(() => {
-        this.inputs.toArray()[index].nativeElement.focus();
-        this.inputs.toArray()[index].nativeElement.select();
+        const input = this.inputs.find(ref => ref.nativeElement.dataset['index'] === String(index));
+        input?.nativeElement.focus();
+        input?.nativeElement.select();
       }, 0);
     }
   }
 
+  /** Termine le renommage (Entrée, Échap ou perte du focus). */
   exitInputScreen() {
+    const index = this.renamingIndex;
     this.editNameScreenDisable = true;
+    this.renamingIndex = -1;
+    if (index >= 0) {
+      const screen = this.listScreens[index];
+      if (screen && !screen.name.trim()) {
+        screen.name = 'Ecran ' + (index + 1);
+      }
+      this.saveData();
+      setTimeout(() => document.getElementById(`screen-rename-${index}`)?.focus());
+    }
   }
 
-  removeScreen(screen: screenTypeModel) {
+  /**
+   * Supprime un écran après confirmation. Les médias qu'il utilisait sont libérés
+   * (et supprimés seulement si plus aucune évaluation ne les référence).
+   */
+  async removeScreen(screen: screenTypeModel, askConfirmation = true) {
+    if (askConfirmation) {
+      const confirmed = await this.confirmService.confirm({
+        title: `Supprimer l'écran « ${screen.name} » ?`,
+        message: 'Son contenu et ses réglages seront perdus. Cette action ne peut pas être annulée.',
+        confirmLabel: 'Supprimer l\'écran',
+        tone: 'danger',
+      });
+      if (!confirmed) return;
+    }
+
+    const removedIndex = this.listScreens.indexOf(screen);
     if (this.selectedScreen === screen) {
       this.selectedScreen = null;
+      this.indexSelectedScreen = -1;
       this.cellImageUrls = {};
       this.stopSound();
       this.clearInstructionPreview();
@@ -139,6 +214,67 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
     this.saveData();
     this.autoSaveService.autoSave('create-eval');
+    this.announcement = `Écran « ${screen.name} » supprimé.`;
+
+    void this.releaseScreenMedia(screen);
+
+    // Le focus passe à l'écran voisin, ou au bouton d'ajout s'il n'y en a plus.
+    if (this.listScreens.length > 0 && removedIndex >= 0) {
+      const next = Math.min(removedIndex, this.listScreens.length - 1);
+      this.selectScreen(this.listScreens[next], next);
+      setTimeout(() => document.getElementById(`screen-select-${next}`)?.focus());
+    } else {
+      setTimeout(() => document.getElementById('add-screen-heading')?.focus());
+    }
+  }
+
+  /**
+   * Duplique un écran juste après l'original. Chaque média de la copie compte comme une
+   * référence supplémentaire dans IndexedDB.
+   */
+  async duplicateScreen(screen: screenTypeModel, index: number): Promise<void> {
+    let copy: screenTypeModel;
+    try {
+      copy = structuredClone(screen);
+    } catch {
+      // Un fichier en mémoire non clonable : on repart de la version sérialisée.
+      copy = JSON.parse(JSON.stringify(screen));
+    }
+    copy.name = `${screen.name} (copie)`;
+
+    for (const id of this.mediaIdsOf(copy)) {
+      try {
+        await this.media.addReference(id);
+      } catch {
+        // média introuvable : la copie le résoudra comme l'original (par nom de fichier)
+      }
+    }
+
+    this.listScreens.splice(index + 1, 0, copy);
+    this.selectScreen(copy, index + 1);
+    this.saveData();
+    this.autoSaveService.autoSave('create-eval');
+    this.announcement = `Écran « ${copy.name} » créé en position ${index + 2}.`;
+    setTimeout(() => document.getElementById(`screen-select-${index + 1}`)?.focus());
+  }
+
+  /** Déplace un écran d'une position vers le haut (-1) ou le bas (+1) — alternative au glisser-déposer. */
+  moveScreen(index: number, delta: -1 | 1): void {
+    const target = index + delta;
+    if (target < 0 || target >= this.listScreens.length) return;
+    moveItemInArray(this.listScreens, index, target);
+    if (this.indexSelectedScreen === index) {
+      this.indexSelectedScreen = target;
+    } else if (this.indexSelectedScreen === target) {
+      this.indexSelectedScreen = index;
+    }
+    this.saveData();
+    const name = this.listScreens[target].name;
+    this.announcement = `Écran « ${name} » déplacé en position ${target + 1} sur ${this.listScreens.length}.`;
+    setTimeout(() => {
+      const button = document.getElementById(`screen-move-${delta < 0 ? 'up' : 'down'}-${target}`) as HTMLButtonElement | null;
+      (button && !button.disabled ? button : document.getElementById(`screen-select-${target}`))?.focus();
+    });
   }
 
   getNameCurrentScreen() {
@@ -146,13 +282,38 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
   }
 
   getTypeCurrentScreen() {
-    switch (this.selectedScreen?.type) {
+    return this.typeLabel(this.selectedScreen?.type);
+  }
+
+  /** Libellé lisible d'un type d'écran. */
+  typeLabel(type: string | undefined): string {
+    switch (type) {
       case transitionScreenConstModel:
         return 'Écran de transition';
       case instructionScreenConstModel:
         return "Écran d'instruction";
       case stimuliScreenConstModel:
         return 'Écran de stimuli';
+      default:
+        return '';
+    }
+  }
+
+  typeIcon(type: string | undefined): string {
+    return this.screenTypes.find(t => t.type === type)?.icon ?? 'bi-square';
+  }
+
+  /** Résumé court d'un écran pour la liste (ex. « Grille 2 × 3 »). */
+  screenSummary(screen: screenTypeModel): string {
+    const v = screen.values ?? [];
+    switch (screen.type) {
+      case stimuliScreenConstModel:
+        return `Grille ${v[0] ?? 1} × ${v[1] ?? 1}`;
+      case instructionScreenConstModel:
+        if (!v[2]) return 'Sans média';
+        return v[3] === 'Texte' ? 'Texte' : (v[4] ? `${v[3] === 'Video' ? 'Vidéo' : v[3]} : ${v[4]}` : `${v[3] === 'Video' ? 'Vidéo' : v[3]} à choisir`);
+      case transitionScreenConstModel:
+        return v[0] ? `Pause de ${v[1]} s` : 'Pause sans délai';
       default:
         return '';
     }
@@ -167,12 +328,20 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     return Array.from({length: rows * cols}, () => null);
   }
 
+  /** Vrai si au moins une case visible de l'écran sélectionné a un son. */
+  hasSounds(): boolean {
+    if (this.selectedScreen?.type !== stimuliScreenConstModel) return false;
+    return (Object.values(this.selectedScreen.values[12] ?? {}) as any[]).some(cell => cell && !cell.hidden && cell.soundName);
+  }
+
   onModifyScreenChange(event: { screen: screenTypeModel, flag: boolean }){
+    this.listScreens[this.indexSelectedScreen] = event.screen;
     this.saveData();
     this.selectedScreen = event.screen;
-    this.listScreens[this.indexSelectedScreen] = event.screen;
     this.isModifyScreen = event.flag;
     void this.loadScreenPreview(event.screen);
+    const index = this.indexSelectedScreen;
+    setTimeout(() => document.getElementById(`screen-edit-button`)?.focus() ?? document.getElementById(`screen-select-${index}`)?.focus());
   }
 
   /** Prépare l'aperçu de l'écran sélectionné selon son type (stimuli ou instruction). */
@@ -183,7 +352,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
   /**
    * Charge le média (image, vidéo, son) ou le texte de l'écran d'instruction sélectionné
-   * pour l'afficher dans le panneau de prévisualisation de la page de gestion.
+   * pour l'afficher dans le panneau de prévisualisation.
    */
   private async loadInstructionPreview(screen: screenTypeModel): Promise<void> {
     this.clearInstructionPreview();
@@ -205,7 +374,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     const expectedType = type === 'Video' ? 'video' : type === 'Son' ? 'sound' : 'image';
     let file: Blob | undefined = screen.values[5] instanceof Blob ? screen.values[5] : undefined;
     if (!file) {
-      file = await this.resolveCellMediaFile(screen.values[8] || name, expectedType);
+      file = (await this.media.resolve(screen.values[8] || name, expectedType))?.file;
     }
     if (!(file instanceof Blob)) return;
 
@@ -238,7 +407,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     this.stopSound();
     if (screen.type !== stimuliScreenConstModel) return;
 
-    const listScreen = screen.values[12];
+    const listScreen = screen.values[12] ?? {};
     const total = Number(screen.values[0]) * Number(screen.values[1]);
     for (let i = 0; i < total; i++) {
       const cell = listScreen[i];
@@ -246,7 +415,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
       let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
       if (!file && (cell.imageId || cell.imageName)) {
-        file = await this.resolveCellMediaFile(cell.imageId || cell.imageName, 'image');
+        file = (await this.media.resolve(cell.imageId || cell.imageName, 'image'))?.file;
       }
 
       if (file instanceof Blob) {
@@ -288,37 +457,6 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async resolveCellMediaFile(ref: any, expectedType: 'image' | 'sound' | 'video'): Promise<File | undefined> {
-    for (const id of this.getCandidateIds(ref)) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile?.type === expectedType && evalFile.file instanceof Blob) {
-          return evalFile.file instanceof File
-            ? evalFile.file
-            : new File([evalFile.file], this.extractFileNameFromId(id), {type: evalFile.file.type});
-        }
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(ref);
-      const match = allFiles.find((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName);
-      if (match?.file instanceof Blob) {
-        return match.file instanceof File
-          ? match.file
-          : new File([match.file], baseName, {type: match.file.type});
-      }
-    } catch {
-      // ignore: repli best-effort
-    }
-
-    return undefined;
-  }
-
   /**
    * Lance (ou arrête si déjà en cours) la lecture du son de la case prévisualisée.
    * Un seul son joue à la fois : relancer une autre case coupe le précédent.
@@ -337,10 +475,13 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
 
     let file: Blob | undefined = cell.soundFile instanceof Blob ? cell.soundFile : undefined;
     if (!file && (cell.soundId || cell.soundName)) {
-      file = await this.resolveCellMediaFile(cell.soundId || cell.soundName, 'sound');
+      file = (await this.media.resolve(cell.soundId || cell.soundName, 'sound'))?.file;
       if (file) cell.soundFile = file;
     }
-    if (!(file instanceof Blob)) return;
+    if (!(file instanceof Blob)) {
+      this.flashService.show('warning', `Le son « ${cell.soundName} » est introuvable dans le stockage du navigateur.`);
+      return;
+    }
 
     // L'écran a pu changer pendant la résolution asynchrone : on ignore les résultats périmés.
     if (this.selectedScreen !== screen) return;
@@ -400,36 +541,11 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     this.instructionSoundPlaying = false;
   }
 
-  private getCandidateIds(ref: any): string[] {
-    const baseName = this.extractFileNameFromId(ref);
-    if (!baseName) return [];
-
-    const projectName = this.saveService.getEvalName();
-    const cleanName = typeof ref === 'string' ? ref.trim() : baseName;
-    const ids = new Set<string>();
-    ids.add(cleanName);
-    ids.add(baseName);
-    if (projectName) {
-      ids.add(`${projectName}/${cleanName}`);
-      ids.add(`${projectName}/${baseName}`);
-    }
-    return [...ids];
-  }
-
-  private extractFileNameFromId(id: any): string {
-    if (id == null) return '';
-    if (id instanceof File) return id.name || '';
-    const asString = String(id).trim();
-    const parts = asString.split('/');
-    return parts[parts.length - 1] || asString;
-  }
-
-  drop(event: any) {
-    const previousIndex = event.previousIndex;
-    const currentIndex = event.currentIndex;
-    const field = this.listScreens.splice(previousIndex, 1)[0];
-    this.listScreens.splice(currentIndex, 0, field);
-    this.indexSelectedScreen = currentIndex;
+  drop(event: CdkDragDrop<screenTypeModel[]> | {previousIndex: number, currentIndex: number}) {
+    const selected = this.selectedScreen;
+    moveItemInArray(this.listScreens, event.previousIndex, event.currentIndex);
+    this.indexSelectedScreen = selected ? this.listScreens.indexOf(selected) : event.currentIndex;
+    this.saveData();
   }
 
   backToSetupEval() {
@@ -440,5 +556,63 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
   goToDownloadEval() {
     this.saveData()
     void this.router.navigate(['/download-eval']);
+  }
+
+  /** Crée un écran du type demandé à partir du modèle par défaut et des paramètres globaux. */
+  private createScreen(type: ScreenType, name: string): screenTypeModel {
+    const data = this.saveService.dataAuto;
+    switch (type) {
+      case instructionScreenConstModel:
+        return this.updateScreenService.updateInstructionScreen(
+          structuredClone(defaultInstructionScreenModel) as instructionScreenModel, name, data.globalParamsInstructionScreen);
+      case stimuliScreenConstModel:
+        return this.updateScreenService.updateStimuliScreen(
+          structuredClone(defaultStimuliScreenModel) as stimuliScreenModel, name, data.globalParamsStimuliScreen);
+      default:
+        return this.updateScreenService.updateTransitionScreen(
+          structuredClone(defaultTransitionScreenModel) as transitionScreenModel, name, data.globalParamsTransitionScreen);
+    }
+  }
+
+  /** Prochain numéro libre pour le nom par défaut « Ecran N ». */
+  private nextScreenNumber(): number {
+    const used = new Set(this.listScreens.map(s => s.name));
+    let number = Math.max(this.idScreen, this.listScreens.length + 1);
+    while (used.has('Ecran ' + number)) number++;
+    this.idScreen = number + 1;
+    return number;
+  }
+
+  /** Identifiants IndexedDB des médias utilisés par un écran. */
+  private mediaIdsOf(screen: screenTypeModel): string[] {
+    return this.mediaRefsOf(screen).map(ref => ref.id).filter(Boolean);
+  }
+
+  private mediaRefsOf(screen: screenTypeModel): {id: string, name: string, type: 'image' | 'sound' | 'video'}[] {
+    const v = screen.values ?? [];
+    const refs: {id: string, name: string, type: 'image' | 'sound' | 'video'}[] = [];
+    if (screen.type === instructionScreenConstModel && v[3] !== 'Texte' && (v[8] || v[4])) {
+      refs.push({id: v[8] || '', name: v[4] || '', type: v[3] === 'Video' ? 'video' : v[3] === 'Son' ? 'sound' : 'image'});
+    }
+    if (screen.type === stimuliScreenConstModel) {
+      if (v[13] || v[10]) refs.push({id: v[13] || '', name: v[10] || '', type: 'sound'});
+      for (const cell of Object.values(v[12] ?? {}) as any[]) {
+        if (!cell || cell.hidden) continue;
+        if (cell.imageId || cell.imageName) refs.push({id: cell.imageId || '', name: cell.imageName || '', type: 'image'});
+        if (cell.soundId || cell.soundName) refs.push({id: cell.soundId || '', name: cell.soundName || '', type: 'sound'});
+      }
+    }
+    return refs;
+  }
+
+  /** Libère les médias d'un écran supprimé (sans jamais effacer un média encore utilisé). */
+  private async releaseScreenMedia(screen: screenTypeModel): Promise<void> {
+    for (const ref of this.mediaRefsOf(screen)) {
+      try {
+        await this.media.release(ref.id || ref.name, ref.type);
+      } catch (error) {
+        console.warn('Libération de média ignorée :', error);
+      }
+    }
   }
 }

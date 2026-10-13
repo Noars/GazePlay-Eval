@@ -1,32 +1,34 @@
-<nav class="navbar fixed-top bg-body-tertiary shadow-sm py-3 px-3">
-  <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center w-100">
-      <div class="d-flex align-items-center gap-2">
-        <span class="fw-medium fs-5 d-none d-md-inline">Menu</span>
-        <button
-          class="btn btn-outline-secondary navbar-button"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#menu"
-          aria-controls="menu"
-        >
-          <i class="bi bi-list"></i>
-        </button>
-      </div>
-      <div class="position-absolute start-50 translate-middle-x">
-        <span class="mx-auto fw-bold fs-2 clickable-title" (click)="goToHome()">GazePlay Eval</span>
-      </div>
-      <div>
-        <button class="btn btn-outline-secondary navbar-button d-flex align-items-center justify-content-center" (click)="changeTheme()">
-          @if (getTheme() === 'sun') {
-            <img ngSrc="assets/icons/sun.png" alt="Mode clair" width="20" height="20">
-          } @else {
-            <img ngSrc="assets/icons/moon.png" alt="Mode sombre" width="20" height="20">
-          }
-        </button>
-      </div>
-    </div>
-  </div>
-</nav>
+<header class="gp-header">
+  <button type="button"
+          class="gp-btn gp-btn--ghost gp-btn--icon gp-header__menu-button"
+          aria-label="Ouvrir le menu de navigation"
+          aria-haspopup="dialog"
+          (click)="menuRequested.emit()">
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
 
-<app-menu></app-menu>
+  <a class="gp-header__brand" routerLink="/home">
+    <span class="gp-header__logo" aria-hidden="true"><i class="bi bi-eye"></i></span>
+    <span class="gp-header__brand-text">GazePlay Eval</span>
+    <span class="visually-hidden"> — accueil</span>
+  </a>
+
+  <div class="gp-header__actions">
+    @if (showGuideButton()) {
+      <app-icon-guide-popup></app-icon-guide-popup>
+    }
+
+    <button type="button"
+            class="gp-btn gp-btn--ghost gp-btn--icon"
+            [attr.aria-pressed]="isDark()"
+            aria-label="Thème sombre"
+            [title]="isDark() ? 'Passer au thème clair' : 'Passer au thème sombre'"
+            (click)="changeTheme()">
+      <i class="bi" [class.bi-sun]="getTheme() === 'sun'" [class.bi-moon-stars]="getTheme() === 'moon'" aria-hidden="true"></i>
+    </button>
+
+    <a class="gp-btn gp-btn--ghost gp-btn--icon" routerLink="/option" aria-label="Options et accessibilité" title="Options et accessibilité">
+      <i class="bi bi-sliders" aria-hidden="true"></i>
+    </a>
+  </div>
+</header>

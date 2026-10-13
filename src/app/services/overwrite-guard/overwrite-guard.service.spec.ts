@@ -78,7 +78,7 @@ describe('OverwriteGuardService', () => {
 
   it('check → popup, réponse download → génère zip + retourne true', async () => {
     loadServiceSpy.getSlot.and.returnValue({ nomEval: 'TestEval' } as any);
-    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve());
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
     dialogSpy.open.and.returnValue({
       afterClosed: () => of('download')
     } as any);
@@ -91,7 +91,7 @@ describe('OverwriteGuardService', () => {
 
   it('check → popup, réponse overwrite → retourne true sans download', async () => {
     loadServiceSpy.getSlot.and.returnValue({ nomEval: 'TestEval' } as any);
-    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve());
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
     dialogSpy.open.and.returnValue({
       afterClosed: () => of('overwrite')
     } as any);
@@ -104,7 +104,7 @@ describe('OverwriteGuardService', () => {
 
   it('check → popup, réponse null → retourne false', async () => {
     loadServiceSpy.getSlot.and.returnValue({ nomEval: 'TestEval' } as any);
-    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve());
+    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
     dialogSpy.open.and.returnValue({
       afterClosed: () => of(null)
     } as any);

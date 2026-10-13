@@ -1,22 +1,22 @@
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
-import { FlashService } from './flash.service';
-import { OptionService } from '../options/option-service';
+import {FlashService} from './flash.service';
+import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
+import {provideInMemoryPreferences} from '../../core/preferences/testing/in-memory-preferences.store';
 
 describe('FlashService', () => {
   let service: FlashService;
-  let optionsServiceSpy: jasmine.SpyObj<OptionService>;
+  let preferences: UserPreferencesService;
 
   beforeEach(() => {
-    optionsServiceSpy = jasmine.createSpyObj('OptionService', ['getOptions', 'setOptions']);
-
     TestBed.configureTestingModule({
-      providers: [
-        FlashService,
-        { provide: OptionService, useValue: optionsServiceSpy }
-      ]
+      providers: [FlashService, provideInMemoryPreferences()]
     });
-
     service = TestBed.inject(FlashService);
+    preferences = TestBed.inject(UserPreferencesService);
+  });
+
+  afterEach(async () => {
+    await preferences.reset();
   });
 
   it('should create', () => {
@@ -32,27 +32,38 @@ describe('FlashService', () => {
     expect(service.flashs()[0].id).toBe(0);
     expect(service.flashs()[1].message).toBe('Message 2');
     expect(service.flashs()[1].id).toBe(1);
-
-    // expect(service.counter).toBe(2)
   });
 
-  it('Un flash message avec une durée inférieure ou égale à 0 n\'est pas affiché', () => {
+  it('un message d\'information de durée ≤ 0 n\'est pas affiché', () => {
     service.show('info', 'Message jamais affiché', 0);
     service.show('info', 'Autre message jamais affiché', -5);
 
     expect(service.flashs().length).toBe(0);
   });
 
-  it('Un flash message sans durée renseignée s\'affiche avec la durée par défaut', (done) => {
-    service.setDefaultDuration(100);
-    service.show('info', 'Message sans durée');
-
+  it('un message d\'erreur reste affiché au moins 8 secondes, même si les messages sont désactivés', fakeAsync(() => {
+    service.show('error', 'Erreur importante', 0);
     expect(service.flashs().length).toBe(1);
 
-    setTimeout(() => {
-      expect(service.flashs().length).toBe(0);
-      done();
-    }, 500);
+    tick(7999);
+    expect(service.flashs().length).toBe(1);
+    tick(1 + 300);
+    expect(service.flashs().length).toBe(0);
+  }));
+
+  it('sans durée précisée → durée par défaut des préférences', fakeAsync(() => {
+    void preferences.update({messageDuration: 0.1});
+    service.show('info', 'Message sans durée');
+    expect(service.flashs().length).toBe(1);
+
+    tick(100 + 300);
+    expect(service.flashs().length).toBe(0);
+  }));
+
+  it('préférence à 0 → les messages d\'information sont désactivés', () => {
+    void preferences.update({messageDuration: 0});
+    service.show('info', 'Masqué');
+    expect(service.flashs().length).toBe(0);
   });
 
   it('remove → passe fadingOut à true puis supprime après 300ms', fakeAsync(() => {
@@ -60,15 +71,14 @@ describe('FlashService', () => {
     const id = service.flashs()[0].id;
 
     service.remove(id);
-
     expect(service.flashs()[0].fadingOut).toBeTrue();
 
     tick(300);
-
     expect(service.flashs().length).toBe(0);
+    tick(10000);
   }));
 
-  it('remove — plusieurs flashs → seul le flash ciblé passe fadingOut, l\'autre reste intact', fakeAsync(() => {
+  it('remove — plusieurs flashs → seul le flash ciblé disparaît', fakeAsync(() => {
     service.show('info', 'Flash A');
     service.show('info', 'Flash B');
     const idA = service.flashs()[0].id;
@@ -82,42 +92,23 @@ describe('FlashService', () => {
     tick(300);
     expect(service.flashs().some(f => f.id === idB)).toBeTrue();
     expect(service.flashs().some(f => f.id === idA)).toBeFalse();
+    tick(10000);
   }));
 
-  it('setDefaultDuration / getDefaultDuration → stocke en ms, retourne en secondes', () => {
+  it('setDefaultDuration (ms) → enregistré dans les préférences (s) ; getDefaultDuration en secondes', () => {
     service.setDefaultDuration(8000);
-
     expect(service.getDefaultDuration()).toBe(8);
+    expect(preferences.preferences().messageDuration).toBe(8);
   });
 
-  it('constructeur → charge la durée depuis les options', () => {
-    optionsServiceSpy.getOptions.and.returnValue({ flashDuration: 10, fontSize: 12, theme: 'dark' });
+  it("message identique → remplace le précédent au lieu de s'empiler ; 3 notifications au plus", () => {
+    service.show('info', 'Enregistré');
+    service.show('info', 'Enregistré');
+    expect(service.flashs().length).toBe(1);
 
-    service = new FlashService(optionsServiceSpy);
-
-    expect(service.getDefaultDuration()).toBe(10);
-  });
-
-  it('constructeur → ne bloque pas si les options sont corrompues', () => {
-    optionsServiceSpy.getOptions.and.throwError('JSON corrompu');
-    expect(() => new FlashService(optionsServiceSpy)).not.toThrow();
-  });
-
-  it('constructeur — getOptions retourne null → setDefaultDuration non appelé', () => {
-    optionsServiceSpy.getOptions.and.returnValue(null);
-    const s = new FlashService(optionsServiceSpy);
-    expect(s.getDefaultDuration()).toBe(5);
-  });
-
-  it('getTimeout (private) — options non null → retourne flashDuration', () => {
-    optionsServiceSpy.getOptions.and.returnValue({ flashDuration: 7, fontSize: 12, theme: 'dark' });
-    const result = (service as any).getTimeout();
-    expect(result).toBe(7);
-  });
-
-  it('getTimeout (private) — options null → retourne 5000', () => {
-    optionsServiceSpy.getOptions.and.returnValue(null);
-    const result = (service as any).getTimeout();
-    expect(result).toBe(5000);
+    service.show('info', 'A');
+    service.show('info', 'B');
+    service.show('info', 'C');
+    expect(service.flashs().map(f => f.message)).toEqual(['A', 'B', 'C']);
   });
 });

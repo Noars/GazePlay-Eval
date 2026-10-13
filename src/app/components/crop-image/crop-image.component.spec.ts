@@ -96,7 +96,8 @@ describe('CropImageComponent', () => {
     spyOn(component, 'resizeImage').and.returnValue('data:image/png;base64,resized');
     triggerNgOnInit('data:image/png;base64,small', 200, 300);
 
-    expect(component.resizeImage).toHaveBeenCalledWith('data:image/png;base64,small', 200, 300);
+    // L'image déjà chargée est transmise pour éviter de dessiner une image non décodée.
+    expect(component.resizeImage).toHaveBeenCalledWith('data:image/png;base64,small', 200, 300, jasmine.any(Object));
     expect(component.imageToCrop).toBe('data:image/png;base64,resized');
   });
 
@@ -278,10 +279,11 @@ describe('CropImageComponent', () => {
     expect(flashSpy.show).toHaveBeenCalledOnceWith('success', 'Votre image a bien été recadrée.');
   });
 
-  it('validateCrop — croppedImage undefined → close avec undefined', () => {
+  it("validateCrop — aucun recadrage effectué → fermeture sans résultat et message « non modifiée »", () => {
     component.croppedImage = undefined;
     component.validateCrop();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(undefined);
+    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith();
+    expect(flashSpy.show).toHaveBeenCalledOnceWith('info', "L'image n'a pas été modifiée.");
   });
 
   // ─── cancelCrop ───────────────────────────────────────────────────────────
