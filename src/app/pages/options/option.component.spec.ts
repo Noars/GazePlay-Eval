@@ -104,6 +104,30 @@ describe('OptionComponent', () => {
     expect(document.documentElement.getAttribute('data-color-blind')).toBe('false');
   });
 
+  it('souligner tous les liens — Oui/Non appliqué immédiatement au lien de l\'aperçu', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    const label = Array.from(root.querySelectorAll('.gp-setting__label'))
+      .find(el => el.textContent?.trim() === 'Souligner tous les liens');
+    const group = root.querySelector(`[role="radiogroup"][aria-labelledby="${label!.id}"]`)!;
+    const [yes, no] = Array.from(group.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+    const previewLink = root.querySelector('.preview a')!;
+    expect(no.checked).toBeTrue();
+    expect(getComputedStyle(previewLink).textDecorationLine).toBe('none');
+
+    yes.click();
+    await fixture.whenStable();
+    expect(component.prefs().underlineLinks).toBeTrue();
+    expect(store.record?.data.underlineLinks).toBeTrue();
+    expect(getComputedStyle(previewLink).textDecorationLine).toBe('underline');
+
+    no.click();
+    await fixture.whenStable();
+    expect(component.prefs().underlineLinks).toBeFalse();
+    expect(getComputedStyle(previewLink).textDecorationLine).toBe('none');
+  });
+
   it('setFont → change la police', async () => {
     component.setFont('verdana');
     await fixture.whenStable();

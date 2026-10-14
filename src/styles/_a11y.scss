@@ -2,6 +2,8 @@
 // Accessibilité transversale
 // =============================================================================
 
+@use 'selectors' as *;
+
 // --- Focus visible : anneau épais, double (halo + couleur) pour rester visible sur
 // toutes les surfaces, uniquement pour la navigation clavier (:focus-visible).
 :where(a, button, input, select, textarea, summary, [tabindex], [contenteditable]):focus {
@@ -94,7 +96,7 @@
 
   // Liens de texte soulignés ; les liens présentés comme boutons, cartes ou entrées de
   // navigation gardent leur forme (ils sont déjà identifiables par leur bordure).
-  a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card):not(.stepper__step) {
+  #{$text-link} {
     text-decoration: underline;
   }
 

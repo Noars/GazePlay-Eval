@@ -17,6 +17,8 @@
 // aux navigateurs qui ne connaissent pas cette syntaxe.
 // =============================================================================
 
+@use 'selectors' as *;
+
 $cvd: '[data-color-blind="true"]';
 
 @mixin symbol($char) {
@@ -28,7 +30,7 @@ $cvd: '[data-color-blind="true"]';
   // --- Éléments interactifs ≠ texte informatif -----------------------------------
   // Les liens de texte ne se distinguent du texte courant que par leur couleur :
   // on les souligne (mêmes exclusions que le mode contraste renforcé).
-  a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card):not(.stepper__step) {
+  #{$text-link} {
     text-decoration: underline;
     text-underline-offset: 0.15em;
   }

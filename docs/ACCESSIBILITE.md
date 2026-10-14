@@ -33,6 +33,7 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
 | Absence de défilement horizontal à 320 px (WCAG 1.4.10) | Chrome headless, pages Accueil, étapes 1, 2, 4, 5, Sauvegardes, Options. | 0 px de débordement après correction de l'en-tête. |
 | Rendu en thème clair, sombre, contraste renforcé avec texte à 150 % | Captures Chrome headless (1440 px, 1280 px, 390 px). | Mise en page conservée, focus visible. |
 | Mode daltonisme | Tests unitaires (préférence, page Options, notifications) ; Chrome headless sur le build : activation / désactivation depuis la page Options, conservation après rechargement et au relancement du navigateur (IndexedDB réelle), captures des états (encadrés, badges, boutons, champs, notifications, fenêtre modale, étapes, grille de l'éditeur) en clair, sombre et contraste renforcé ; 320 px sans débordement. Contrastes des nouveaux jetons calculés (texte ≥ 4,5:1, indicateurs ≥ 3:1). | OK. Pas encore évalué par des personnes daltoniennes. |
+| Préférence « Souligner tous les liens » | Tests unitaires (`src/app/testing/link-underline.spec.ts` : style calculé des liens dans les deux états, liens-boutons / cartes / navigation / étapes jamais soulignés, soulignement imposé par le contraste renforcé et le mode daltonisme ; page Options : aperçu) ; Chrome headless sur le build : bascule Oui ↔ Non sur l'aperçu, rechargement, toutes les pages (thèmes clair et sombre, 1280 et 375 px), survol et focus clavier. | OK. Liens de texte non soulignés si « Non », soulignés au survol ; anneau de focus conservé. |
 | Comportement des composants accessibles (radiogroup, champ numérique, toggletip, sélecteur de fichier, confirmation) | Tests unitaires `src/app/shared/ui/ui-components.spec.ts`. | OK. |
 
 > Ces contrôles automatisés couvrent une partie seulement des critères WCAG. L'outil axe-core
@@ -60,3 +61,8 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
     deutéranope (ΔE ≈ 25) : leur distinction repose aussi sur les icônes (triangle / octogone / croix) et
     les motifs. Les médias des évaluations (images des stimuli) ne sont pas modifiés.
 11. **Préférences « Taille du texte » + zoom** : combinées, elles peuvent dépasser 400 % ; comportement à observer.
+12. **Liens non soulignés (préférence « Souligner tous les liens » à Non, valeur par défaut)** : dans un
+    paragraphe, le lien ne se distingue du texte que par sa couleur, avec un contraste lien ↔ texte mesuré
+    à 2,02:1 (thème clair) et 1,58:1 (thème sombre), sous les 3:1 attendus par WCAG 1.4.1 (échec F73) ;
+    le soulignement au survol et l'anneau de focus sont présents. Pistes : préférence activée par défaut,
+    ou couleur de lien ajustée. Le contraste renforcé et le mode daltonisme soulignent toujours les liens.

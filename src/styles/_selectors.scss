@@ -1,0 +1,10 @@
+// =============================================================================
+// Sélecteurs partagés (aucune règle CSS émise)
+// =============================================================================
+
+// Liens de texte : tous les liens, sauf ceux présentés comme boutons, cartes, entrées de
+// navigation, marque de l'en-tête ou étapes du parcours, qui ont leur propre forme et
+// restent identifiables sans soulignement. Utilisé par la préférence « Souligner tous les
+// liens » (`_base.scss`), le contraste renforcé (`_a11y.scss`) et le mode daltonisme
+// (`_color-vision.scss`).
+$text-link: 'a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card):not(.stepper__step)';

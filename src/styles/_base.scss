@@ -2,6 +2,8 @@
 // Styles de base : document, typographie, liens, médias
 // =============================================================================
 
+@use 'selectors' as *;
+
 html {
   // La taille de base est fixée par la préférence « Taille du texte » (font-size en %).
   -webkit-text-size-adjust: 100%;
@@ -45,6 +47,10 @@ h4 { font-size: var(--gp-text-lg); }
 
 a {
   color: var(--gp-primary-text);
+  // Bootstrap souligne tous les liens, ce qui rendait la préférence ci-dessous sans effet :
+  // le soulignement des liens de texte est décidé par cette préférence (et, au-delà, par
+  // le contraste renforcé et le mode daltonisme, qui l'imposent).
+  text-decoration: none;
   text-underline-offset: 0.18em;
 
   &:hover {
@@ -52,8 +58,13 @@ a {
   }
 }
 
-// Préférence « Souligner les liens » : tous les liens du contenu sont soulignés.
-[data-underline-links="true"] a:not(.gp-btn):not(.gp-nav__link):not(.gp-action-card):not(.gp-header__brand):not(.btn-section-card) {
+// Survol d'un lien de texte non souligné : soulignement en plus du changement de couleur.
+#{$text-link}:hover {
+  text-decoration: underline;
+}
+
+// Préférence « Souligner tous les liens » : liens de texte soulignés en permanence.
+[data-underline-links="true"] #{$text-link} {
   text-decoration: underline;
 }
 
