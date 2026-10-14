@@ -4,7 +4,6 @@ import {NgTemplateOutlet} from '@angular/common';
 import {filter} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
-import {LoadService} from '../../services/load/load.service';
 
 interface NavItem {
   label: string;
@@ -30,7 +29,6 @@ interface NavItem {
 export class MenuComponent {
   private readonly router = inject(Router);
   private readonly importFlow = inject(ImportFlowService);
-  private readonly loadService = inject(LoadService);
 
   @Input() mode: 'sidebar' | 'drawer' = 'sidebar';
 
@@ -54,11 +52,6 @@ export class MenuComponent {
       filter(event => event instanceof NavigationEnd),
       takeUntilDestroyed(inject(DestroyRef)),
     ).subscribe(() => this.close());
-  }
-
-  /** Vrai si une évaluation est en cours (slot 0 non vide). */
-  hasCurrentEval(): boolean {
-    return this.loadService.getSlot(0) !== null;
   }
 
   open(): void {
@@ -86,25 +79,5 @@ export class MenuComponent {
   async openImportPopup(): Promise<void> {
     this.close();
     await this.importFlow.start();
-  }
-
-  goToAccueil() {
-    this.router.navigate(['/home']);
-  }
-
-  goToSauvegarde() {
-    this.router.navigate(['/sauvegarde']);
-  }
-
-  goToLoadSave() {
-    this.router.navigate(['/load-save']);
-  }
-
-  goToGuide() {
-    this.router.navigate(['/guide']);
-  }
-
-  goToOptions() {
-    this.router.navigate(['/option']);
   }
 }

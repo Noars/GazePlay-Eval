@@ -32,7 +32,6 @@ describe('NavbarComponent', () => {
     }).compileComponents();
 
     router = TestBed.inject(Router);
-    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -79,10 +78,5 @@ describe('NavbarComponent', () => {
   it('bouton d\'aide masqué dans les pages du guide', () => {
     spyOnProperty(router, 'url', 'get').and.returnValue('/guide/creation');
     expect(component.showGuideButton()).toBeFalse();
-  });
-
-  it('goToHome → navigate([\'/home\'])', () => {
-    component.goToHome();
-    expect(router.navigate).toHaveBeenCalledWith(['/home']);
   });
 });

@@ -233,28 +233,6 @@ describe('IndexedDBService', () => {
     expect(result.length).toBe(0);
   });
 
-  it('changeID → renomme l\'id d\'un fichier', async () => {
-    const file = new File(['contenu'], 'test.png', { type: 'image/png' });
-
-    await service.addFile('projet/ancien.png', file, 'image');
-    await service.changeID('projet/ancien.png', 'projet/nouveau.png');
-
-    await expectAsync(service.getFile('projet/ancien.png')).toBeRejected();
-    const result = await service.getFile('projet/nouveau.png');
-    expect(result.id).toBe('projet/nouveau.png');
-  });
-
-  it('changeID → préserve le refCount lors du renommage', async () => {
-    const file = new File(['contenu'], 'test.png', { type: 'image/png' });
-
-    await service.addFile('projet/ancien.png', file, 'image');
-    await service.incrementRef('projet/ancien.png'); // refCount = 2
-    await service.changeID('projet/ancien.png', 'projet/nouveau.png');
-
-    const result = await service.getFile('projet/nouveau.png');
-    expect(result.refCount).toBe(2);
-  });
-
   it('getFilesByProject → retourne uniquement les fichiers du projet', async () => {
     const file1 = new File(['a'], 'a.png', { type: 'image/png' });
     const file2 = new File(['b'], 'b.png', { type: 'image/png' });

@@ -192,53 +192,6 @@ describe('SauvegardeComponent', () => {
     expect(component.hasUnsavedEval).toBeTrue();
   });
 
-  it('Sélectionne une sauvegarde cliquée et déselectionne si recliqué', () => {
-    const slot1: saveModel = {
-      nomEval: 'Eval1',
-      format: 'Csv',
-      infoParticipant: ['Nom', 'Âge'],
-      globalParamsTransitionScreen: [],
-      globalParamsInstructionScreen: [],
-      globalParamsStimuliScreen: [],
-      listScreens: [],
-      step: 0,
-      createdAt: '',
-      version: 1
-    };
-
-    loadServiceSpy.getSlot.and.callFake((index: number) => {
-      if (index === 0) return null;
-      if (index === 1) return slot1;
-      if (index === 2) return null;
-      if (index === 3) return null;
-      return null;
-    });
-
-    fixture.detectChanges();
-
-    component.selectSlot(1);
-    expect(component.selectedSlot).toBe(1);
-
-    component.selectSlot(1);
-    expect(component.selectedSlot).toBeNull();
-  });
-
-  it('Pas de sélection si le slot est vide', () => {
-
-    loadServiceSpy.getSlot.and.callFake((index: number) => {
-      if (index === 0) return null;
-      if (index === 1) return null;
-      if (index === 2) return null;
-      if (index === 3) return null;
-      return null;
-    });
-
-    fixture.detectChanges();
-
-    component.selectSlot(1);
-    expect(component.selectedSlot).toBeNull();
-  });
-
   it('La sauvegarde dans un slot insère des données, rafraîchit la page et affiche un message de succès', async () => {
     const dataToSave: saveModel = {
       nomEval: 'EvalToSave',
@@ -370,19 +323,6 @@ describe('SauvegardeComponent', () => {
     expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0);
     expect(saveServiceSpy.newSaveDataAuto).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
-  });
-
-  it('getSlotAuto → retourne le contenu du slot dynamique (index 0)', () => {
-    const slot0 = { nomEval: 'InProgress', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? slot0 : null);
-    fixture.detectChanges();
-    expect(component.getSlotAuto()).toBe(slot0);
-  });
-
-  it('getSlotAuto → retourne null si le slot dynamique est vide', () => {
-    loadServiceSpy.getSlot.and.returnValue(null);
-    fixture.detectChanges();
-    expect(component.getSlotAuto()).toBeNull();
   });
 
   it('downloadSlot — slot avec données → generateSlotZip + message info', async () => {

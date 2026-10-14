@@ -29,8 +29,6 @@ type Slot = { index: FormatTypeConfig; data: saveModel | null };
 export class SauvegardeComponent implements OnInit {
 
   slots: Slot[] = [];
-  /** Emplacement mis en avant (conservé pour compatibilité ; les actions sont toujours visibles). */
-  selectedSlot: FormatTypeConfig | null = null;
   hasUnsavedEval: boolean = false;
   evalInProgress: boolean | undefined;
   autoSave: saveModel | null = null;
@@ -74,15 +72,6 @@ export class SauvegardeComponent implements OnInit {
     } else {
       this.hasUnsavedEval = false;
     }
-  }
-
-  /**
-   * Sélectionne ou désélectionne un slot.
-   * @param index l'index du slot sélectionné (1, 2, 3).
-   */
-  selectSlot(index: FormatTypeConfig): void {
-    if (this.slots.find(s => s.index === index)?.data === null) return;
-    this.selectedSlot = this.selectedSlot === index ? null : index;
   }
 
   /**
@@ -131,10 +120,6 @@ export class SauvegardeComponent implements OnInit {
     this.refresh();
   }
 
-  getSlotAuto() {
-    return this.loadService.getSlot(0);
-  }
-
   /**
    * Génère et télécharge un fichier `.gpSave` du slot via le *DownloadService*.
    * @param slot le slot désiré (1, 2, 3).
@@ -172,7 +157,6 @@ export class SauvegardeComponent implements OnInit {
         const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? '';
         this.saveService.clearSlot(slot.index);
         this.refresh();
-        this.selectedSlot = null;
         this.flashMessageService.show('success', 'L\'évaluation a été supprimée avec succès.');
         try {
           await this.mediaCleanup.cleanupProject(slotName);

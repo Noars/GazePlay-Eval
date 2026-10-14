@@ -31,15 +31,4 @@ export class LoadService {
       return null;
     }
   }
-
-  /**
-   * Récupère les sauvegardes des trois slots nommés (1, 2, 3) en une seule passe.
-   * Le slot 0 (auto-save) n'est pas inclus dans ce résultat.
-   *
-   * @returns Tuple de trois éléments correspondant aux slots 1, 2 et 3,
-   *          chaque élément étant la sauvegarde du slot ou null si vide ou illisible
-   */
-  getAllSlots(): [saveModel | null, saveModel | null, saveModel | null] {
-    return [this.getSlot(1), this.getSlot(2), this.getSlot(3)];
-  }
 }

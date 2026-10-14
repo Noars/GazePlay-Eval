@@ -94,7 +94,6 @@
   gap: var(--gp-space-2);
   margin-top: auto;
 }
-.slot__actions .gp-btn--ghost,
 .slot__actions .gp-btn--danger-outline,
 .slot__actions .gp-btn--block {
   grid-column: 1/-1;

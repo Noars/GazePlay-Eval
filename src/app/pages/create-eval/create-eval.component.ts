@@ -139,12 +139,6 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     }, 50);
   }
 
-  /** Ajoute un écran puis ouvre directement son édition. */
-  addAndEdit(type: ScreenType): void {
-    this.addScreen(type);
-    this.isModifyScreen = true;
-  }
-
   selectScreen(screen: screenTypeModel, index: number) {
     this.selectedScreen = screen;
     this.indexSelectedScreen = index;

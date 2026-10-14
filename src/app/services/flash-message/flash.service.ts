@@ -26,14 +26,6 @@ export class FlashService {
   }
 
   /**
-   * Modifie la durée par défaut des notifications (enregistrée dans les préférences).
-   * @param durationMs durée en millisecondes.
-   */
-  setDefaultDuration(durationMs: number): void {
-    void this.preferences.update({messageDuration: durationMs / 1000});
-  }
-
-  /**
    * Affiche une notification.
    * @param type le type de notification (info, warning, success, error).
    * @param message le contenu de la notification.

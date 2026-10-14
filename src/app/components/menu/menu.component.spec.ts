@@ -1,16 +1,13 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideRouter, Router} from '@angular/router';
+import {provideRouter} from '@angular/router';
 import {signal, WritableSignal} from '@angular/core';
 import {MenuComponent} from './menu.component';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
-import {LoadService} from '../../services/load/load.service';
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
   let fixture: ComponentFixture<MenuComponent>;
   let importFlowSpy: jasmine.SpyObj<ImportFlowService>;
-  let loadServiceSpy: jasmine.SpyObj<LoadService>;
-  let router: Router;
   let importing: WritableSignal<boolean>;
 
   async function create(mode: 'sidebar' | 'drawer'): Promise<void> {
@@ -25,20 +22,14 @@ describe('MenuComponent', () => {
     importing = signal(false);
     importFlowSpy = jasmine.createSpyObj('ImportFlowService', ['start'], {importing});
     importFlowSpy.start.and.returnValue(Promise.resolve(false));
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.returnValue(null);
 
     await TestBed.configureTestingModule({
       imports: [MenuComponent],
       providers: [
         provideRouter([]),
         {provide: ImportFlowService, useValue: importFlowSpy},
-        {provide: LoadService, useValue: loadServiceSpy},
       ]
     }).compileComponents();
-
-    router = TestBed.inject(Router);
-    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
   });
 
   it('devrait être créé', async () => {
@@ -105,27 +96,5 @@ describe('MenuComponent', () => {
 
     expect(dialog.open).toBeFalse();
     expect(importFlowSpy.start).toHaveBeenCalled();
-  });
-
-  const routes: [keyof MenuComponent, string][] = [
-    ['goToAccueil', '/home'],
-    ['goToSauvegarde', '/sauvegarde'],
-    ['goToLoadSave', '/load-save'],
-    ['goToGuide', '/guide'],
-    ['goToOptions', '/option'],
-  ];
-  for (const [method, route] of routes) {
-    it(`${String(method)} → navigue vers ${route}`, async () => {
-      await create('sidebar');
-      (component[method] as () => void)();
-      expect(router.navigate).toHaveBeenCalledWith([route]);
-    });
-  }
-
-  it('hasCurrentEval → vrai si le slot 0 contient une évaluation', async () => {
-    await create('sidebar');
-    expect(component.hasCurrentEval()).toBeFalse();
-    loadServiceSpy.getSlot.and.returnValue({nomEval: 'X'} as any);
-    expect(component.hasCurrentEval()).toBeTrue();
   });
 });

@@ -167,18 +167,6 @@ export class IndexedDBService {
   }
 
   /**
-   * Remplace l'identifiant d'un fichier de l'IDB.
-   * @param oldID l'ancien identifiant.
-   * @param newID le nouvel identifiant.
-   */
-  async changeID(oldID: string, newID: string): Promise<void> {
-    const evalFile = await this.getFile(oldID);
-    await this.deleteFile(oldID);
-    const entry: EvalFile = {...evalFile, id: newID, lastEdit: new Date()};
-    await this.run('readwrite', store => store.add(entry));
-  }
-
-  /**
    * Renvoie tous les fichiers dont l'identifiant commence par `"<projectName>/"`.
    * @param projectName le nom du projet.
    */

@@ -111,11 +111,6 @@ describe('CreateEvalComponent', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it('addAndEdit → ajoute puis ouvre l\'éditeur', () => {
-    component.addAndEdit('stimuli');
-    expect(component.isModifyScreen).toBeTrue();
-  });
-
   // ─── Suppression ──────────────────────────────────────────────────────────
 
   it('removeScreen → demande confirmation puis retire l\'écran', async () => {

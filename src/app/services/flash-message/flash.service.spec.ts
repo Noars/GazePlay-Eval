@@ -95,10 +95,9 @@ describe('FlashService', () => {
     tick(10000);
   }));
 
-  it('setDefaultDuration (ms) → enregistré dans les préférences (s) ; getDefaultDuration en secondes', () => {
-    service.setDefaultDuration(8000);
+  it('getDefaultDuration → durée des préférences, en secondes', async () => {
+    await preferences.update({messageDuration: 8});
     expect(service.getDefaultDuration()).toBe(8);
-    expect(preferences.preferences().messageDuration).toBe(8);
   });
 
   it("message identique → remplace le précédent au lieu de s'empiler ; 3 notifications au plus", () => {

@@ -43,8 +43,4 @@ export class NavbarComponent {
   showGuideButton(): boolean {
     return !this.router.url.includes('/guide');
   }
-
-  goToHome(): void {
-    this.router.navigate(['/home']);
-  }
 }
