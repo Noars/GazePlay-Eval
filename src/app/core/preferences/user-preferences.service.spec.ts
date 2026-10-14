@@ -150,6 +150,43 @@ describe('UserPreferencesService', () => {
     expect(cache).toEqual(jasmine.objectContaining({theme: 'dark', textScale: 130, contrast: 'standard'}));
   });
 
+  it('mode daltonisme → appliqué au document, enregistré et retrouvé après rechargement', async () => {
+    setup();
+    await service.init();
+    expect(root.getAttribute('data-color-blind')).toBe('false');
+
+    await service.update({colorBlindMode: true});
+
+    expect(root.getAttribute('data-color-blind')).toBe('true');
+    expect(store.record?.data.colorBlindMode).toBeTrue();
+    expect(JSON.parse(localStorage.getItem(FIRST_PAINT_CACHE_KEY)!).colorBlindMode).toBeTrue();
+
+    // Rechargement simulé : nouvelle instance du service sur le même stockage.
+    const persisted = store;
+    root.setAttribute('data-color-blind', 'false');
+    TestBed.resetTestingModule();
+    setup(persisted);
+    await service.init();
+
+    expect(service.preferences().colorBlindMode).toBeTrue();
+    expect(root.getAttribute('data-color-blind')).toBe('true');
+
+    await service.update({colorBlindMode: false});
+    expect(root.getAttribute('data-color-blind')).toBe('false');
+    expect(store.record?.data.colorBlindMode).toBeFalse();
+  });
+
+  it('enregistrement antérieur sans mode daltonisme → désactivé, autres réglages conservés, rien réécrit', async () => {
+    const {colorBlindMode, ...older} = DEFAULT_PREFERENCES;
+    setup(new InMemoryPreferencesStore({data: {...older, contrast: 'high'} as any}));
+
+    await service.init();
+
+    expect(service.preferences().colorBlindMode).toBeFalse();
+    expect(service.preferences().contrast).toBe('high');
+    expect(store.saves.length).toBe(0);
+  });
+
   it('init est idempotent', async () => {
     setup();
     const first = service.init();
@@ -170,6 +207,12 @@ describe('Modèle des préférences', () => {
     expect(prefs.lineHeight).toBe(2.5);
     expect(prefs.letterSpacing).toBe(0);
     expect(prefs.messageDuration).toBe(30);
+  });
+
+  it('normalizePreferences — mode daltonisme : seul un booléen est accepté', () => {
+    expect(normalizePreferences({colorBlindMode: true}).colorBlindMode).toBeTrue();
+    expect(normalizePreferences({colorBlindMode: 'true'}).colorBlindMode).toBeFalse();
+    expect(normalizePreferences({}).colorBlindMode).toBeFalse();
   });
 
   it('readLegacyPreferences — ignore les valeurs illisibles', () => {

@@ -2,8 +2,10 @@
 // Feuille de style globale de GazePlay Eval
 // -----------------------------------------------------------------------------
 // Ordre : jetons → pont Bootstrap → base → structure → composants → Material →
-// accessibilité (en dernier pour que le focus et la réduction des animations
-// priment). Bootstrap (CSS précompilé) est chargé avant ce fichier via angular.json.
+// accessibilité (pour que le focus et la réduction des animations priment) → mode
+// daltonisme (après le contraste renforcé, dont il complète les bordures ; il ne
+// définit ni focus ni animation). Bootstrap (CSS précompilé) est chargé avant ce
+// fichier via angular.json.
 // =============================================================================
 
 @use 'styles/tokens';
@@ -13,3 +15,4 @@
 @use 'styles/components';
 @use 'styles/material';
 @use 'styles/a11y';
+@use 'styles/color-vision';

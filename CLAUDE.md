@@ -11,7 +11,7 @@ Pile : Angular 21 (standalone, `@if`/`@for`, signals, zone.js, routage par hash)
 - Routes : `src/app/app.routes.ts` (chaque route a un `title` ; `**` → page introuvable). Parcours `info-eval → info-participant → setup-eval → create-eval → download-eval` (`shared/stepRoute.model.ts`).
 - `core/` : `storage/app-database.ts` (ouverture + migrations IDB), `preferences/` (modèle, store, service, application au DOM), `media/` (`MediaLibraryService` : résolution/ajout/libération ; `MediaCleanupService` : nettoyage sûr ; `media-references.ts`), `a11y/` (titre, focus après navigation).
 - `pages/`, `components/` (dont `modify-screen` = éditeur, `config-stimuli` = panneau de case), `services/` (save, load, auto-save, download, load-zip, import-flow, overwrite-guard, update-screens, flash), `shared/` (modèles), `shared/ui/` (composants de formulaire accessibles : `choice-setting`, `number-setting`, `help-tip`, `file-picker`, `confirm-dialog`).
-- Styles : `src/styles.scss` + `src/styles/` (jetons `--gp-*`, pont Bootstrap, base, structure, composants `.gp-*`, Material, accessibilité). Couleurs uniquement via les jetons (thèmes clair/sombre/contraste renforcé).
+- Styles : `src/styles.scss` + `src/styles/` (jetons `--gp-*`, pont Bootstrap, base, structure, composants `.gp-*`, Material, accessibilité, mode daltonisme `_color-vision.scss`). Couleurs uniquement via les jetons (thèmes clair/sombre/contraste renforcé).
 - État : `SaveService.dataAuto` (mutable) ; `AutoSaveService` sauvegarde à chaque étape du parcours.
 
 ## Conventions

@@ -228,3 +228,82 @@
   --gp-cell-border: #ffffff;
   --gp-shadow-lg: 0 0 0 2px #ffffff;
 }
+
+// =============================================================================
+// Mode daltonisme ([data-color-blind="true"], combinable avec les thèmes ci-dessus)
+// -----------------------------------------------------------------------------
+// Problème corrigé : en palette standard, succès (vert) et erreur (rouge) ont une
+// luminosité proche et deviennent presque identiques pour les personnes
+// protanopes/deutéranopes (≈ 99 % des daltonismes). Les états sont donc remappés
+// sur l'axe bleu ↔ rouge cramoisi ↔ ambre, perçu par toutes les formes de
+// dichromatie :
+//   - succès        → bleu-cyan (distinct du bleu indigo « primaire ») ;
+//   - erreur        → rouge cramoisi (garde une composante bleue, s'éloigne de l'ambre) ;
+//   - avertissement → ambre plus jaune (s'éloigne du rouge) ;
+//   - information   → neutre (ardoise), pour ne pas être confondue avec le succès ;
+//   - accent (case source dans l'éditeur) → orange.
+// Valeurs choisies par simulation (Machado 2009) et calcul de contraste : texte
+// ≥ 4,5:1 sur la surface, bordures/indicateurs ≥ 3:1. La couleur n'est jamais le
+// seul indice : `_color-vision.scss` et les composants ajoutent symboles et motifs.
+//
+// Spécificité : chaque variante (sombre, contraste renforcé) redéfinit le même jeu
+// de jetons avec un sélecteur plus spécifique, pour qu'aucune valeur du thème clair
+// ne « fuie » dans le thème sombre.
+// =============================================================================
+
+[data-color-blind="true"] {
+  --gp-success: #005f99;
+  --gp-success-subtle: #e3f1fa;
+  --gp-success-border: #93c3e3;
+  --gp-warning: #7a5a00;
+  --gp-warning-strong: #a87800;
+  --gp-warning-subtle: #fff6d6;
+  --gp-warning-border: #e6c869;
+  --gp-danger: #a8133f;
+  --gp-danger-hover: #860f32;
+  --gp-on-danger: #ffffff;
+  --gp-danger-subtle: #fcebf0;
+  --gp-danger-border: #eaa5b8;
+  --gp-info: #4b5268;
+  --gp-info-subtle: #eef0f5;
+  --gp-info-border: #c3c8d6;
+  --gp-accent: #a34700;
+  --gp-accent-subtle: #fdeee2;
+}
+
+[data-bs-theme="dark"][data-color-blind="true"] {
+  --gp-success: #5ccff5;
+  --gp-success-subtle: #0d2a38;
+  --gp-success-border: #1f5f7a;
+  --gp-warning: #f4c561;
+  --gp-warning-strong: #f4c561;
+  --gp-warning-subtle: #2c2210;
+  --gp-warning-border: #6b5222;
+  --gp-danger: #ff8a9e;
+  --gp-danger-hover: #ffadbb;
+  --gp-on-danger: #1b0a0e;
+  --gp-danger-subtle: #3a1520;
+  --gp-danger-border: #7a2e40;
+  --gp-info: #aab1c8;
+  --gp-info-subtle: #1f2438;
+  --gp-info-border: #3a4160;
+  --gp-accent: #ffaa5c;
+  --gp-accent-subtle: #33210f;
+}
+
+[data-contrast="high"][data-color-blind="true"] {
+  --gp-success: #004a7a;
+  --gp-warning: #5c3800;
+  --gp-danger: #8a0030;
+  --gp-info: #1a1a1a;
+  --gp-accent: #8a3a00;
+}
+
+[data-bs-theme="dark"][data-contrast="high"][data-color-blind="true"] {
+  --gp-success: #7fe0ff;
+  --gp-warning: #ffd36b;
+  --gp-danger: #ffa3b4;
+  --gp-on-danger: #000000;
+  --gp-info: #f0f0f0;
+  --gp-accent: #ffb870;
+}

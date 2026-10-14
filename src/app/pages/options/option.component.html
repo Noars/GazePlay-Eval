@@ -48,6 +48,10 @@
                             [options]="contrastOptions"
                             [ngModel]="prefs().contrast"
                             (ngModelChange)="set('contrast', $event)"></app-choice-setting>
+        <app-choice-setting label="Mode daltonisme"
+                            hint="Utilise des couleurs plus faciles à distinguer pour les états (réussite, erreur, avertissement) et les complète par des symboles, des motifs et des liens soulignés."
+                            [ngModel]="prefs().colorBlindMode"
+                            (ngModelChange)="set('colorBlindMode', $event)"></app-choice-setting>
         <app-choice-setting label="Animations"
                             hint="Réduit les transitions et les mouvements à l'écran."
                             [options]="motionOptions"

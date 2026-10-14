@@ -285,7 +285,7 @@
 
         @if (modeHint) {
           <div class="mode-hint" [class.mode-hint--danger]="deleteMode">
-            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            <i class="bi" [class.bi-info-circle]="!deleteMode" [class.bi-trash3]="deleteMode" aria-hidden="true"></i>
             <span>{{ modeHint }}</span>
             <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm ms-auto" (click)="resetGridModes()">Quitter le mode</button>
           </div>
@@ -306,7 +306,7 @@
 
         @if (pendingDeleteCells !== null) {
           <div class="gp-callout gp-callout--danger confirm-bar" role="alert">
-            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
             <div class="gp-callout__body">
               <p>Supprimer {{ pendingDeleteCells.length }} case(s) contenant des médias ? Vous pourrez annuler tant que vous restez dans cet écran.</p>
               <div class="gp-btn-group">

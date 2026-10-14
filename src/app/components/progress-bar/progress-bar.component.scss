@@ -158,3 +158,10 @@ a.stepper__step:hover {
     display: none;
   }
 }
+
+// --- Mode daltonisme : en palette adaptée, « terminée » (bleu-cyan) et « en cours »
+// (indigo) sont deux bleus ; l'étape en cours reçoit un anneau en plus de sa couleur
+// (les étapes terminées gardent leur coche).
+:host-context([data-color-blind="true"]) .is-current .stepper__marker {
+  box-shadow: 0 0 0 2px var(--gp-surface), 0 0 0 4px var(--gp-primary);
+}

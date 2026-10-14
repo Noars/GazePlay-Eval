@@ -88,7 +88,7 @@ export class OptionComponent {
   async resetPreferences(): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Rétablir l\'affichage par défaut ?',
-      message: 'Le thème, la police, la taille du texte, les espacements et la durée des messages reprendront leurs valeurs par défaut.',
+      message: 'Le thème, le contraste, le mode daltonisme, la police, la taille du texte, les espacements et la durée des messages reprendront leurs valeurs par défaut.',
       confirmLabel: 'Rétablir',
     });
     if (!confirmed) return;

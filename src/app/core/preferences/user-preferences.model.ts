@@ -36,6 +36,13 @@ export interface UserPreferences {
   motion: MotionPreference;
   /** Soulignement systématique des liens. */
   underlineLinks: boolean;
+  /**
+   * Mode daltonisme : palette d'états distinguable par les personnes daltoniennes et
+   * indicateurs non colorimétriques (symboles, motifs, soulignements). Champ ajouté sans
+   * changer `PREFERENCES_SCHEMA_VERSION` : absent d'un ancien enregistrement, il prend sa
+   * valeur par défaut via {@link normalizePreferences}.
+   */
+  colorBlindMode: boolean;
   /** Durée d'affichage des notifications, en secondes (0 = désactivées). */
   messageDuration: number;
 }
@@ -51,6 +58,7 @@ export const DEFAULT_PREFERENCES: Readonly<UserPreferences> = Object.freeze({
   lineHeight: 1.5,
   motion: 'system',
   underlineLinks: false,
+  colorBlindMode: false,
   messageDuration: 5,
 });
 
@@ -154,6 +162,7 @@ export function normalizePreferences(raw: unknown): UserPreferences {
     lineHeight: clampNumber(source['lineHeight'], PREFERENCE_LIMITS.lineHeight, d.lineHeight),
     motion: pick(source['motion'], ['system', 'reduce'] as const, d.motion),
     underlineLinks: typeof source['underlineLinks'] === 'boolean' ? source['underlineLinks'] : d.underlineLinks,
+    colorBlindMode: typeof source['colorBlindMode'] === 'boolean' ? source['colorBlindMode'] : d.colorBlindMode,
     messageDuration: clampNumber(source['messageDuration'], PREFERENCE_LIMITS.messageDuration, d.messageDuration),
   };
 }

@@ -79,6 +79,31 @@ describe('OptionComponent', () => {
     expect(store.record?.data.contrast).toBe('high');
   });
 
+  it('mode daltonisme — réglage proposé, activable et désactivable', async () => {
+    // ngModel écrit sa valeur de façon asynchrone : on attend avant de lire l'état des radios.
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    const label = Array.from(root.querySelectorAll('.gp-setting__label'))
+      .find(el => el.textContent?.trim() === 'Mode daltonisme');
+    expect(label).withContext('libellé du réglage').toBeTruthy();
+
+    const group = root.querySelector(`[role="radiogroup"][aria-labelledby="${label!.id}"]`)!;
+    const [yes, no] = Array.from(group.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+    expect(no.checked).toBeTrue();
+
+    yes.click();
+    await fixture.whenStable();
+    expect(component.prefs().colorBlindMode).toBeTrue();
+    expect(document.documentElement.getAttribute('data-color-blind')).toBe('true');
+    expect(store.record?.data.colorBlindMode).toBeTrue();
+
+    no.click();
+    await fixture.whenStable();
+    expect(component.prefs().colorBlindMode).toBeFalse();
+    expect(document.documentElement.getAttribute('data-color-blind')).toBe('false');
+  });
+
   it('setFont → change la police', async () => {
     component.setFont('verdana');
     await fixture.whenStable();

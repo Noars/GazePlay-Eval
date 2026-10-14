@@ -151,7 +151,7 @@ export class GuidePopupComponent implements OnChanges {
       sections: [
         {
           title: "Apparence",
-          body: "Choisissez un thème clair, sombre ou celui de votre système, et activez le contraste renforcé si besoin.",
+          body: "Choisissez un thème clair, sombre ou celui de votre système, et activez si besoin le contraste renforcé ou le mode daltonisme (couleurs distinguables complétées par des symboles).",
         },
         {
           title: "Lecture",
