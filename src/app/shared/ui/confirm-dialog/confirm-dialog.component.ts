@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, Injectable} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {firstValueFrom} from 'rxjs';
+import {TranslatePipe} from '../../../core/i18n/translate.pipe';
 
 export interface ConfirmDialogData {
   title: string;
@@ -20,6 +21,7 @@ export interface ConfirmDialogData {
 @Component({
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmDialogComponent {

@@ -1,9 +1,9 @@
 <div class="gp-page gp-page--narrow">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <span class="gp-page-header__eyebrow">Étape 1 sur 5</span>
-      <h1 class="gp-page-header__title">Informations de l'évaluation</h1>
-      <p class="gp-page-header__lead">Donnez un nom à votre évaluation et choisissez le format des résultats.</p>
+      <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 1} }}</span>
+      <h1 class="gp-page-header__title">{{ 'infoEval.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'infoEval.lead' | t }}</p>
     </div>
   </header>
 
@@ -11,20 +11,17 @@
     <div class="gp-card__body gp-stack">
       <div class="gp-field">
         <label for="evalName" class="gp-field__label">
-          Nom de l'évaluation
-          <app-help-tip topic="nom de l'évaluation" [text]="tooltipEvalName"></app-help-tip>
+          {{ 'infoEval.name.label' | t }}
+          <app-help-tip [topic]="'infoEval.name.topic' | t" [text]="'infoEval.name.tooltip' | t"></app-help-tip>
         </label>
-        <p class="gp-field__hint" id="evalNameHint">
-          Utilisé pour les fichiers exportés et pour retrouver l'évaluation dans GazePlay.
-          Sans nom, l'évaluation s'appellera « Nouvelle Evaluation ».
-        </p>
+        <p class="gp-field__hint" id="evalNameHint">{{ 'infoEval.name.hint' | t }}</p>
         <input #nameInput
                type="text"
                class="form-control"
                id="evalName"
                name="evalName"
                autocomplete="off"
-               placeholder="Ex. : Reconnaissance des couleurs"
+               [placeholder]="'infoEval.name.placeholder' | t"
                [attr.aria-invalid]="nameError ? 'true' : null"
                [attr.aria-describedby]="nameError ? 'evalNameHint evalNameError' : 'evalNameHint'"
                [ngModel]="evaluationName"
@@ -38,10 +35,10 @@
 
       <fieldset class="gp-field">
         <legend class="gp-field__label">
-          Format des résultats
-          <app-help-tip topic="format des résultats" [text]="tooltipEvalType"></app-help-tip>
+          {{ 'infoEval.format.label' | t }}
+          <app-help-tip [topic]="'infoEval.format.topic' | t" [text]="'infoEval.format.tooltip' | t"></app-help-tip>
         </legend>
-        <p class="gp-field__hint">Format des fichiers de résultats produits par GazePlay-Learning après chaque passation.</p>
+        <p class="gp-field__hint">{{ 'infoEval.format.hint' | t }}</p>
         <div class="gp-choice-grid">
           @for (format of formats; track format.value) {
             <label class="gp-choice">
@@ -52,8 +49,8 @@
                      [checked]="resultType === format.value"
                      (change)="onFormatChange(format.value)">
               <span class="gp-choice__body">
-                <span class="gp-choice__title">{{ format.label }}</span>
-                <span class="gp-choice__desc">{{ format.description }}</span>
+                <span class="gp-choice__title">{{ format.label | t }}</span>
+                <span class="gp-choice__desc">{{ format.description | t }}</span>
               </span>
             </label>
           }
@@ -65,7 +62,7 @@
       <div class="gp-actions mt-0 pt-0 border-0">
         <div class="gp-actions__end">
           <button type="submit" class="gp-btn gp-btn--primary">
-            Suivant : participant
+            {{ 'infoEval.next' | t }}
             <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
         </div>

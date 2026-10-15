@@ -1,3 +1,61 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="guide-home">
+  <div class="card mb-4" style="margin-top: 25px">
+    <div class="card-header">
+      <h1 class="card-title">GazePlay-Eval user guide</h1>
+    </div>
+    <div class="card-body">
+      <p class="guide-content-title mb-4 text-center">
+        Welcome to the GazePlay-Eval user guide!
+      </p>
+      <p>
+        This page helps you get to know the different parts of the site,
+        such as the save system or creating an assessment from start to finish.
+      </p>
+      <p class="guide-content-sub">
+        You can browse the different sections of the guide using the buttons below.
+      </p>
+
+      <div class="guide-nav-card mb-4">
+        <div class="guide-nav-card-header text-center">Navigation</div>
+        <div class="guide-nav-card-body">
+          <p class="text-muted mb-3">Go straight to the section you are interested in:</p>
+          <div class="d-flex flex-wrap gap-3">
+
+            <a class="btn-section-card" routerLink="/guide/creation">
+              <i class="bi bi-plus-circle fs-4 mb-2"></i>
+              <span class="btn-section-title">Guide - Creation</span>
+              <span class="btn-section-desc">Create and configure your assessments step by step.</span>
+            </a>
+
+            <a class="btn-section-card" routerLink="sauvegardes">
+              <i class="bi bi-floppy fs-4 mb-2"></i>
+              <span class="btn-section-title">Guide - Saving and loading</span>
+              <span class="btn-section-desc">Manage and load your saved assessments.</span>
+            </a>
+
+            <a class="btn-section-card" routerLink="/option">
+              <i class="bi bi-book fs-4 mb-2"></i>
+              <span class="btn-section-title">Options and accessibility</span>
+              <span class="btn-section-desc">Adjust the language, theme, font and text size.</span>
+            </a>
+
+            <a class="btn-section-card" routerLink="imports">
+              <i class="bi bi-file-zip fs-4 mb-2"></i>
+              <span class="btn-section-title">Guide - Import</span>
+              <span class="btn-section-desc">Import a ZIP file into the application.</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+      <a class="gp-btn" routerLink="/home"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to home</a>
+    </div>
+  </div>
+</div>
+} @else {
 <div class="guide-home">
   <div class="card mb-4" style="margin-top: 25px">
     <div class="card-header">
@@ -53,3 +111,4 @@
     </div>
   </div>
 </div>
+}

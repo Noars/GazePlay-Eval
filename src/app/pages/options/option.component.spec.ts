@@ -128,6 +128,36 @@ describe('OptionComponent', () => {
     expect(getComputedStyle(previewLink).textDecorationLine).toBe('none');
   });
 
+  it('langue — choix Français / English, l\'anglais traduit la page immédiatement et est enregistré', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    const label = Array.from(root.querySelectorAll('.gp-setting__label'))
+      .find(el => el.textContent?.trim() === 'Langue de l\'interface');
+    expect(label).withContext('libellé du réglage').toBeTruthy();
+
+    const group = root.querySelector(`[role="radiogroup"][aria-labelledby="${label!.id}"]`)!;
+    const [fr, en] = Array.from(group.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+    const optionLabel = (input: HTMLInputElement) => root.querySelector<HTMLLabelElement>(`label[for="${input.id}"]`)!;
+    expect(optionLabel(fr).textContent?.trim()).toBe('Français');
+    expect(optionLabel(en).textContent?.trim()).toBe('English');
+    expect(optionLabel(en).getAttribute('lang')).toBe('en');
+    expect(fr.checked).toBeTrue();
+
+    en.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.prefs().language).toBe('en');
+    expect(store.record?.data.language).toBe('en');
+    expect(document.documentElement.getAttribute('lang')).toBe('en');
+    expect(root.querySelector('h1')?.textContent?.trim()).toBe('Options and accessibility');
+
+    await component.set('language', 'fr');
+    fixture.detectChanges();
+    expect(root.querySelector('h1')?.textContent?.trim()).toBe('Options et accessibilité');
+  });
+
   it('setFont → change la police', async () => {
     component.setFont('verdana');
     await fixture.whenStable();

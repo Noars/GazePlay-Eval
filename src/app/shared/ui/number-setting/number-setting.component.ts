@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {uniqueId} from '../unique-id';
+import {I18nService} from '../../../core/i18n/i18n.service';
 
 /**
  * Ligne de réglage numérique (« Combien de temps ? [10] secondes »), compatible `ngModel`.
@@ -32,6 +33,7 @@ import {uniqueId} from '../unique-id';
 })
 export class NumberSettingComponent implements ControlValueAccessor, AfterViewInit {
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly i18n = inject(I18nService);
 
   @ViewChild('input', {static: true}) private input!: ElementRef<HTMLInputElement>;
 
@@ -99,13 +101,13 @@ export class NumberSettingComponent implements ControlValueAccessor, AfterViewIn
   /** Message d'erreur à afficher, ou chaîne vide si la valeur est acceptable. */
   protected get error(): string {
     if (this.value === null || Number.isNaN(this.value)) {
-      return 'Veuillez saisir un nombre.';
+      return this.i18n.t('ui.number.nan');
     }
     if (this.min !== null && this.value < this.min) {
-      return `La valeur minimale est ${this.min}.`;
+      return this.i18n.t('ui.number.min', {min: this.min});
     }
     if (this.max !== null && this.value > this.max) {
-      return `La valeur maximale est ${this.max}.`;
+      return this.i18n.t('ui.number.max', {max: this.max});
     }
     return '';
   }

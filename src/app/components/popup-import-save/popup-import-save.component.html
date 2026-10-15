@@ -2,15 +2,15 @@
   <div class="gp-dialog__header">
     <span class="gp-dialog__icon" aria-hidden="true"><i class="bi bi-box-arrow-in-down"></i></span>
     <div>
-      <h2 class="gp-dialog__title" id="import-title">Importer une évaluation</h2>
-      <p class="gp-dialog__subtitle">Fichier <code>.gpSave</code> ou <code>.zip</code> exporté depuis GazePlay Eval.</p>
+      <h2 class="gp-dialog__title" id="import-title">{{ 'import.title' | t }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'import.subtitle.before' | t }}<code>.gpSave</code>{{ 'import.subtitle.or' | t }}<code>.zip</code>{{ 'import.subtitle.after' | t }}</p>
     </div>
   </div>
 
   <div class="gp-dialog__body">
     <!-- Fichier -->
     <div class="gp-field">
-      <span class="gp-field__label" id="import-file-label">1. Fichier à importer</span>
+      <span class="gp-field__label" id="import-file-label">{{ 'import.file' | t }}</span>
       <div class="dropzone"
            [class.dropzone--active]="isDragging"
            [class.dropzone--filled]="zipFileName !== ''"
@@ -20,11 +20,11 @@
         <i class="bi dropzone__icon" [class.bi-file-earmark-zip]="zipFileName" [class.bi-cloud-arrow-up]="!zipFileName" aria-hidden="true"></i>
         <span class="dropzone__text">
           @if (isDragging) {
-            Relâchez pour importer
+            {{ 'import.drop' | t }}
           } @else if (zipFileName) {
             <strong>{{ zipFileName }}</strong>
           } @else {
-            Glissez un fichier ici, ou
+            {{ 'import.dragHere' | t }}
           }
         </span>
         <input #fileInput
@@ -35,29 +35,29 @@
                aria-labelledby="import-file-label import-file-button"
                (change)="onZipSelected($event)">
         <label for="import-file" id="import-file-button" class="gp-btn gp-btn--secondary gp-btn--sm dropzone__button">
-          {{ zipFileName ? 'Choisir un autre fichier' : 'Parcourir…' }}
+          {{ (zipFileName ? 'import.chooseOther' : 'import.browse') | t }}
         </label>
       </div>
     </div>
 
     <!-- Mode -->
     <fieldset class="gp-field plain-fieldset">
-      <legend class="gp-field__label">2. Que voulez-vous faire ?</legend>
+      <legend class="gp-field__label">{{ 'import.what' | t }}</legend>
       <div class="gp-choice-grid">
         <label class="gp-choice">
           <input class="gp-choice__input" type="radio" name="import-mode" value="consult"
                  [checked]="mode === 'consult'" (change)="mode = 'consult'; selectedSlot = null">
           <span class="gp-choice__body">
-            <span class="gp-choice__title"><i class="bi bi-eye" aria-hidden="true"></i> Ouvrir</span>
-            <span class="gp-choice__desc">Ouvrir l'évaluation sans l'enregistrer dans un emplacement.</span>
+            <span class="gp-choice__title"><i class="bi bi-eye" aria-hidden="true"></i> {{ 'import.open' | t }}</span>
+            <span class="gp-choice__desc">{{ 'import.open.desc' | t }}</span>
           </span>
         </label>
         <label class="gp-choice">
           <input class="gp-choice__input" type="radio" name="import-mode" value="save"
                  [checked]="mode === 'save'" (change)="mode = 'save'; selectedSlot = null">
           <span class="gp-choice__body">
-            <span class="gp-choice__title"><i class="bi bi-floppy" aria-hidden="true"></i> Ouvrir et sauvegarder</span>
-            <span class="gp-choice__desc">L'enregistrer aussi dans l'un des trois emplacements.</span>
+            <span class="gp-choice__title"><i class="bi bi-floppy" aria-hidden="true"></i> {{ 'import.openSave' | t }}</span>
+            <span class="gp-choice__desc">{{ 'import.openSave.desc' | t }}</span>
           </span>
         </label>
       </div>
@@ -66,7 +66,7 @@
     <!-- Emplacement -->
     @if (mode === 'save') {
       <fieldset class="gp-field plain-fieldset">
-        <legend class="gp-field__label">3. Emplacement de sauvegarde</legend>
+        <legend class="gp-field__label">{{ 'import.slot' | t }}</legend>
         <div class="slot-options">
           @for (slot of data.slots; track slot.index) {
             <label class="gp-choice">
@@ -76,12 +76,12 @@
                      (change)="selectedSlot = slot.index">
               <span class="gp-choice__body slot-option">
                 <span class="gp-choice__title">
-                  Emplacement {{ slot.index }}
+                  {{ 'saves.slot' | t: {n: slot.index} }}
                   @if (!slot.empty) {
-                    <span class="gp-badge gp-badge--warning">Sera remplacé</span>
+                    <span class="gp-badge gp-badge--warning">{{ 'import.willReplace' | t }}</span>
                   }
                 </span>
-                <span class="gp-choice__desc">{{ slot.empty ? 'Libre' : slot.name }}</span>
+                <span class="gp-choice__desc">{{ slot.empty ? ('import.free' | t) : slot.name }}</span>
               </span>
             </label>
           }
@@ -92,8 +92,7 @@
         <div class="gp-callout gp-callout--warning" role="status">
           <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
           <div class="gp-callout__body">
-            <p>L'évaluation « {{ selectedSlotData?.name }} » de cet emplacement sera <strong>remplacée</strong>.
-              Vous pourrez la télécharger avant de confirmer.</p>
+            <p>{{ 'import.replaceWarning.before' | t: {name: selectedSlotData?.name ?? ''} }}<strong>{{ 'import.replaceWarning.strong' | t }}</strong>{{ 'import.replaceWarning.after' | t }}</p>
           </div>
         </div>
       }
@@ -105,14 +104,14 @@
   </div>
 
   <div class="gp-dialog__footer">
-    <button type="button" class="gp-btn" (click)="cancel()">Annuler</button>
+    <button type="button" class="gp-btn" (click)="cancel()">{{ 'common.cancel' | t }}</button>
     <button type="button"
             class="gp-btn gp-btn--primary"
             [attr.aria-disabled]="!canConfirm()"
             [attr.aria-describedby]="canConfirm() ? null : 'import-missing'"
             (click)="confirm()">
       <i class="bi bi-check-lg" aria-hidden="true"></i>
-      {{ mode === 'save' ? 'Importer et sauvegarder' : 'Ouvrir l\'évaluation' }}
+      {{ (mode === 'save' ? 'import.confirmSave' : 'import.confirmOpen') | t }}
     </button>
   </div>
 </div>

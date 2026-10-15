@@ -9,12 +9,13 @@ Pile : Angular 21 (standalone, `@if`/`@for`, signals, zone.js, routage par hash)
 ## Architecture [actuel]
 - Entrée : `src/main.ts` → `src/app/app.ts` (lien d'évitement, en-tête, navigation latérale/tiroir, étapes, `main#main-content`). Un initialiseur charge les préférences (IndexedDB) avant le premier rendu. Au rechargement : `/home` puis `AutoSaveService.tryResume()`.
 - Routes : `src/app/app.routes.ts` (chaque route a un `title` ; `**` → page introuvable). Parcours `info-eval → info-participant → setup-eval → create-eval → download-eval` (`shared/stepRoute.model.ts`).
-- `core/` : `storage/app-database.ts` (ouverture + migrations IDB), `preferences/` (modèle, store, service, application au DOM), `media/` (`MediaLibraryService` : résolution/ajout/libération ; `MediaCleanupService` : nettoyage sûr ; `media-references.ts`), `a11y/` (titre, focus après navigation).
+- `core/` : `storage/app-database.ts` (ouverture + migrations IDB), `preferences/` (modèle, store, service, application au DOM), `i18n/` (`I18nService` + pipe `t`, dictionnaires `locales/fr.ts` (référence) et `locales/en.ts`), `media/` (`MediaLibraryService` : résolution/ajout/libération ; `MediaCleanupService` : nettoyage sûr ; `media-references.ts`), `a11y/` (titre, focus après navigation).
 - `pages/`, `components/` (dont `modify-screen` = éditeur, `config-stimuli` = panneau de case), `services/` (save, load, auto-save, download, load-zip, import-flow, overwrite-guard, update-screens, flash), `shared/` (modèles), `shared/ui/` (composants de formulaire accessibles : `choice-setting`, `number-setting`, `help-tip`, `file-picker`, `confirm-dialog`).
 - Styles : `src/styles.scss` + `src/styles/` (jetons `--gp-*`, pont Bootstrap, base, structure, composants `.gp-*`, Material, accessibilité, mode daltonisme `_color-vision.scss`). Couleurs uniquement via les jetons (thèmes clair/sombre/contraste renforcé).
 - État : `SaveService.dataAuto` (mutable) ; `AutoSaveService` sauvegarde à chaque étape du parcours.
 
 ## Conventions
+- Interface bilingue (français par défaut, anglais) : aucun texte affiché en dur, passer par le pipe `t` ou `I18nService.t` et ajouter la clé dans `fr.ts` **et** `en.ts` (le compilateur et `i18n.spec.ts` vérifient la parité). Les guides ont un bloc par langue. Ne jamais traduire les valeurs enregistrées/exportées.
 - Composants standalone ; nouveaux fichiers de style en `.scss`. Certains composants gardent un `.css` (contenu réécrit) : n'y utiliser **que du CSS plat** (pas d'imbrication Sass).
 - Réutiliser les classes `.gp-*` et les composants `shared/ui` plutôt que de nouveaux styles locaux.
 - `.editorconfig` : 2 espaces, quotes simples en TS. Pas de linter/formateur.
@@ -50,7 +51,7 @@ Pile : Angular 21 (standalone, `@if`/`@for`, signals, zone.js, routage par hash)
 - **Interdit sans analyse de compatibilité préalable et tests d'aller-retour** : modifier libellés, clés JSON, index de `values[]` ou structure des archives.
 
 ## Préférences, responsive, accessibilité
-- Préférences : locales (aucun serveur ni synchronisation), défauts si rien n'est enregistré, enregistrées à chaque modification, erreurs affichées (`UserPreferencesService.saveError`). Polices distantes chargées seulement si choisies.
+- Préférences : locales (aucun serveur ni synchronisation), défauts si rien n'est enregistré, enregistrées à chaque modification, erreurs affichées (`UserPreferencesService.saveError`). Polices distantes chargées seulement si choisies. La langue (`language`) en fait partie ; « Rétablir l'affichage par défaut » la conserve.
 - Responsive : aucune largeur minimale ; vérifié sans débordement à 320 px.
 - Accessibilité : **cible** WCAG 2.2 AA, non déclarée conforme. État, vérifications faites et écarts : `docs/ACCESSIBILITE.md` (à tenir à jour).
 

@@ -1,20 +1,19 @@
 <div class="gp-page">
   <section class="hero" aria-labelledby="home-title">
     <div class="hero__text">
-      <span class="gp-page-header__eyebrow">Création d'évaluations pour GazePlay</span>
-      <h1 id="home-title" class="hero__title">Concevez vos évaluations, écran par écran</h1>
+      <span class="gp-page-header__eyebrow">{{ 'home.eyebrow' | t }}</span>
+      <h1 id="home-title" class="hero__title">{{ 'home.title' | t }}</h1>
       <p class="hero__lead">
-        Composez des écrans de transition, d'instruction et de stimuli, puis exportez-les pour
-        les utiliser dans <strong>GazePlay-Learning</strong>. Nous vous guidons pas à pas.
+        {{ 'home.lead.before' | t }}<strong>GazePlay-Learning</strong>{{ 'home.lead.after' | t }}
       </p>
       <div class="gp-btn-group hero__actions">
         <button type="button" class="gp-btn gp-btn--primary gp-btn--lg" (click)="goToInfoEval()">
           <i class="bi bi-plus-lg" aria-hidden="true"></i>
-          Nouvelle évaluation
+          {{ 'home.new' | t }}
         </button>
         <a class="gp-btn gp-btn--lg" routerLink="/guide">
           <i class="bi bi-book" aria-hidden="true"></i>
-          Lire le guide
+          {{ 'home.readGuide' | t }}
         </a>
       </div>
     </div>
@@ -23,21 +22,21 @@
       <div class="gp-card resume-card">
         <div class="gp-card__body">
           <p class="resume-card__eyebrow">
-            <i class="bi bi-clock-history" aria-hidden="true"></i> Évaluation en cours
+            <i class="bi bi-clock-history" aria-hidden="true"></i> {{ 'home.current' | t }}
           </p>
-          <h2 class="resume-card__title gp-truncate">{{ currentEval.nomEval || 'Évaluation sans nom' }}</h2>
+          <h2 class="resume-card__title gp-truncate">{{ currentEval.nomEval || ('home.unnamed' | t) }}</h2>
           <dl class="gp-meta resume-card__meta">
             @if (currentStepLabel()) {
-              <dt>Étape</dt>
+              <dt>{{ 'home.step' | t }}</dt>
               <dd>{{ currentStepLabel() }}</dd>
             }
-            <dt>Écrans</dt>
+            <dt>{{ 'home.screens' | t }}</dt>
             <dd>{{ currentEval.listScreens.length || 0 }}</dd>
-            <dt>Modifiée le</dt>
-            <dd>{{ currentEval.createdAt | date:'dd/MM/yyyy à HH:mm' }}</dd>
+            <dt>{{ 'home.modifiedOn' | t }}</dt>
+            <dd>{{ currentEval.createdAt | date:('home.dateFormat' | t) }}</dd>
           </dl>
           <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" (click)="goToLastStep()">
-            Reprendre cette évaluation
+            {{ 'home.resume' | t }}
             <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
         </div>
@@ -46,27 +45,27 @@
   </section>
 
   <section class="home-section" aria-labelledby="quick-title">
-    <h2 id="quick-title" class="home-section__title">Vos évaluations</h2>
+    <h2 id="quick-title" class="home-section__title">{{ 'home.yourEvals' | t }}</h2>
     <div class="gp-grid">
       <a class="gp-action-card" routerLink="/sauvegarde">
         <span class="gp-action-card__icon" aria-hidden="true"><i class="bi bi-floppy"></i></span>
         <span>
-          <span class="gp-action-card__title">Mes sauvegardes</span>
-          <span class="gp-action-card__desc">Enregistrez l'évaluation en cours dans l'un des trois emplacements.</span>
+          <span class="gp-action-card__title">{{ 'home.saves.title' | t }}</span>
+          <span class="gp-action-card__desc">{{ 'home.saves.desc' | t }}</span>
         </span>
       </a>
       <a class="gp-action-card" routerLink="/load-save">
         <span class="gp-action-card__icon" aria-hidden="true"><i class="bi bi-folder2-open"></i></span>
         <span>
-          <span class="gp-action-card__title">Charger</span>
-          <span class="gp-action-card__desc">Reprenez une évaluation enregistrée dans ce navigateur.</span>
+          <span class="gp-action-card__title">{{ 'home.load.title' | t }}</span>
+          <span class="gp-action-card__desc">{{ 'home.load.desc' | t }}</span>
         </span>
       </a>
       <button type="button" class="gp-action-card" (click)="openImport()">
         <span class="gp-action-card__icon" aria-hidden="true"><i class="bi bi-box-arrow-in-down"></i></span>
         <span>
-          <span class="gp-action-card__title">Importer un fichier</span>
-          <span class="gp-action-card__desc">Ouvrez un fichier <code>.gpSave</code> ou <code>.zip</code> exporté précédemment.</span>
+          <span class="gp-action-card__title">{{ 'home.import.title' | t }}</span>
+          <span class="gp-action-card__desc">{{ 'home.import.desc.before' | t }}<code>.gpSave</code>{{ 'home.import.desc.or' | t }}<code>.zip</code>{{ 'home.import.desc.after' | t }}</span>
         </span>
       </button>
     </div>
@@ -76,18 +75,17 @@
     <div class="gp-card">
       <div class="gp-card__body prepare">
         <div>
-          <h2 id="prepare-title" class="home-section__title">Avant de commencer</h2>
-          <p class="gp-muted mb-0">Préparez ces éléments : ils vous seront demandés au fil des étapes.</p>
+          <h2 id="prepare-title" class="home-section__title">{{ 'home.prepare.title' | t }}</h2>
+          <p class="gp-muted mb-0">{{ 'home.prepare.lead' | t }}</p>
         </div>
         <ul class="prepare__list">
-          <li><i class="bi bi-tag" aria-hidden="true"></i> Le nom de votre évaluation</li>
-          <li><i class="bi bi-person-vcard" aria-hidden="true"></i> Les informations à recueillir sur la personne évaluée</li>
-          <li><i class="bi bi-images" aria-hidden="true"></i> Les images, vidéos, sons ou textes à intégrer</li>
+          <li><i class="bi bi-tag" aria-hidden="true"></i> {{ 'home.prepare.name' | t }}</li>
+          <li><i class="bi bi-person-vcard" aria-hidden="true"></i> {{ 'home.prepare.participant' | t }}</li>
+          <li><i class="bi bi-images" aria-hidden="true"></i> {{ 'home.prepare.media' | t }}</li>
         </ul>
         <p class="prepare__privacy">
           <i class="bi bi-shield-lock" aria-hidden="true"></i>
-          Tout reste sur cet appareil : vos évaluations et vos médias sont enregistrés dans le
-          navigateur, sans envoi vers un serveur.
+          {{ 'home.prepare.privacy' | t }}
         </p>
       </div>
     </div>

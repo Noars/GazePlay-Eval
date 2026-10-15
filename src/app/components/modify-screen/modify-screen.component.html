@@ -1,18 +1,18 @@
 <div class="gp-page gp-page--wide editor" [class.editor--stimuli]="screenToModify.type === stimuliScreenConstModel">
   <header class="gp-page-header editor__header">
     <div class="gp-page-header__text">
-      <span class="gp-page-header__eyebrow">Étape 4 sur 5 · Modification d'un écran</span>
-      <h1 class="gp-page-header__title gp-truncate">{{ screenToModify.name || 'Écran sans nom' }}</h1>
+      <span class="gp-page-header__eyebrow">{{ 'editor.eyebrow' | t }}</span>
+      <h1 class="gp-page-header__title gp-truncate">{{ screenToModify.name || ('createEval.unnamed' | t) }}</h1>
     </div>
     <button type="button" class="gp-btn gp-btn--primary" (click)="backToScreenList()">
       <i class="bi bi-check2" aria-hidden="true"></i>
-      Terminer et revenir à la liste
+      {{ 'editor.finish' | t }}
     </button>
   </header>
 
   <!-- Type d'écran -->
   <div class="type-picker" role="radiogroup" aria-labelledby="type-picker-label">
-    <span class="type-picker__label" id="type-picker-label">Type d'écran</span>
+    <span class="type-picker__label" id="type-picker-label">{{ 'editor.screenType' | t }}</span>
     <div class="gp-segmented">
       @for (kind of screenKinds; track kind.type) {
         <span class="gp-segmented__option">
@@ -21,7 +21,7 @@
                  [checked]="screenToModify.type === kind.type"
                  (change)="requestTypeChange(kind.type)">
           <label class="gp-segmented__label" [for]="'screen-type-' + kind.type">
-            <i class="bi" [class]="kind.icon" aria-hidden="true"></i>{{ kind.label }}
+            <i class="bi" [class]="kind.icon" aria-hidden="true"></i>{{ kind.label | t }}
           </label>
         </span>
       }
@@ -32,14 +32,11 @@
     <div class="gp-callout gp-callout--warning mb-4" role="alert" id="duration-warning" tabindex="-1">
       <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
       <div class="gp-callout__body">
-        <strong class="gp-callout__title">Le média dure plus longtemps que l'écran</strong>
-        <p>
-          Le fichier dure {{ fileDuration | number:'1.0-1' }} s, mais l'écran passe au suivant après
-          {{ screenToModify.values[1] }} s : la fin du média ne sera pas vue.
-        </p>
+        <strong class="gp-callout__title">{{ 'editor.duration.title' | t }}</strong>
+        <p>{{ 'editor.duration.body' | t: {duration: (fileDuration | number:'1.0-1') ?? '', delay: screenToModify.values[1]} }}</p>
         <div class="gp-btn-group">
-          <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" (click)="showWarningMessage = false">Ajuster le délai</button>
-          <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="backToScreenList()">Terminer quand même</button>
+          <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" (click)="showWarningMessage = false">{{ 'editor.duration.adjust' | t }}</button>
+          <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="backToScreenList()">{{ 'editor.duration.finishAnyway' | t }}</button>
         </div>
       </div>
     </div>
@@ -49,7 +46,7 @@
   @if (screenToModify.type === transitionScreenConstModel) {
     <section class="gp-card editor__form" aria-labelledby="transition-title">
       <div class="gp-card__header">
-        <h2 class="gp-card__title" id="transition-title">Réglages de la transition</h2>
+        <h2 class="gp-card__title" id="transition-title">{{ 'editor.transition.title' | t }}</h2>
       </div>
       <div class="gp-card__body">
         <app-global-transition-screen [globalTransitionScreenInfos]="screenToModify.values"></app-global-transition-screen>
@@ -62,36 +59,36 @@
     <div class="instruction-layout">
       <section class="gp-card" aria-labelledby="instruction-title">
         <div class="gp-card__header">
-          <h2 class="gp-card__title" id="instruction-title">Réglages de la consigne</h2>
+          <h2 class="gp-card__title" id="instruction-title">{{ 'editor.instruction.title' | t }}</h2>
         </div>
         <div class="gp-card__body">
           <!-- [0] délai ? [1] durée [2] média ? [3] type [4] fichier/texte [6] bouton ? [7] fixation -->
-          <h3 class="gp-subheading">Passage à l'écran suivant</h3>
-          <app-choice-setting label="Passer automatiquement à l'écran suivant après un délai ?"
+          <h3 class="gp-subheading">{{ 'screen.next.heading' | t }}</h3>
+          <app-choice-setting [label]="'screen.next.auto' | t"
                               [(ngModel)]="screenToModify.values[0]"></app-choice-setting>
           @if (screenToModify.values[0]) {
-            <app-number-setting label="Délai avant l'écran suivant" unit="secondes" [min]="0.1" step="0.1"
+            <app-number-setting [label]="'screen.next.delay' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                                 [(ngModel)]="screenToModify.values[1]"></app-number-setting>
           }
 
-          <h3 class="gp-subheading">Média</h3>
-          <app-choice-setting label="Ajouter une image, une vidéo, un texte ou un son ?"
+          <h3 class="gp-subheading">{{ 'screen.media.heading' | t }}</h3>
+          <app-choice-setting [label]="'screen.media.add' | t"
                               [(ngModel)]="screenToModify.values[2]">
-            <app-help-tip slot="label-addon" topic="stockage des fichiers" [text]="tooltipFileSave"></app-help-tip>
+            <app-help-tip slot="label-addon" [topic]="'editor.fileStorage.topic' | t" [text]="'editor.fileStorage.tooltip' | t"></app-help-tip>
           </app-choice-setting>
           @if (screenToModify.values[2]) {
-            <app-choice-setting label="Type de média"
+            <app-choice-setting [label]="'editor.mediaType' | t"
                                 [options]="mediaTypeOptions"
                                 [ngModel]="screenToModify.values[3]"
                                 (ngModelChange)="changeTypeFile($event)"></app-choice-setting>
           }
 
-          <h3 class="gp-subheading">Bouton de lancement</h3>
-          <app-choice-setting label="Ajouter un bouton pour lancer l'évaluation ?"
-                              hint="Le participant fixe le bouton du regard pour démarrer."
+          <h3 class="gp-subheading">{{ 'screen.startButton.heading' | t }}</h3>
+          <app-choice-setting [label]="'screen.startButton.add' | t"
+                              [hint]="'screen.startButton.hint' | t"
                               [(ngModel)]="screenToModify.values[6]"></app-choice-setting>
           @if (screenToModify.values[6]) {
-            <app-number-setting label="Durée de fixation du bouton" unit="secondes" [min]="0.1" step="0.1"
+            <app-number-setting [label]="'screen.startButton.duration' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                                 [(ngModel)]="screenToModify.values[7]"></app-number-setting>
           }
         </div>
@@ -99,31 +96,31 @@
 
       <section class="gp-card" aria-labelledby="instruction-media-title">
         <div class="gp-card__header">
-          <h2 class="gp-card__title" id="instruction-media-title">Contenu</h2>
+          <h2 class="gp-card__title" id="instruction-media-title">{{ 'editor.content' | t }}</h2>
         </div>
         <div class="gp-card__body gp-stack gp-stack--sm">
           @if (!screenToModify.values[2]) {
             <div class="gp-empty">
               <i class="bi bi-eye-slash" aria-hidden="true"></i>
-              <p class="mb-0">Cet écran n'affiche aucun média. Activez « Ajouter une image, une vidéo, un texte ou un son » pour en choisir un.</p>
+              <p class="mb-0">{{ 'editor.noMedia' | t }}</p>
             </div>
           } @else if (typeFile === 'Texte') {
             <div class="gp-field">
-              <label class="gp-field__label" for="instruction-text">Texte de la consigne</label>
+              <label class="gp-field__label" for="instruction-text">{{ 'editor.text.label' | t }}</label>
               <textarea id="instruction-text" class="form-control" rows="5"
-                        placeholder="Écrivez la consigne affichée au participant"
+                        [placeholder]="'editor.text.placeholder' | t"
                         [ngModel]="textToRead" (ngModelChange)="getText($event)"></textarea>
             </div>
             <div>
               <button type="button" class="gp-btn gp-btn--secondary" (click)="playText()" [disabled]="!textToRead">
                 <i class="bi bi-volume-up" aria-hidden="true"></i>
-                Écouter le texte
+                {{ 'editor.text.listen' | t }}
               </button>
             </div>
           } @else {
-            @let mediaLabel = typeFile === 'Video' ? 'vidéo' : typeFile === 'Son' ? 'son' : 'image';
+            @let mediaKind = typeFile === 'Video' ? 'video' : typeFile === 'Son' ? 'sound' : 'image';
             <div class="gp-btn-group">
-              <app-file-picker [label]="'Choisir ' + (typeFile === 'Son' ? 'un ' : 'une ') + mediaLabel"
+              <app-file-picker [label]="(mediaKind === 'video' ? 'editor.choose.video' : mediaKind === 'sound' ? 'editor.choose.sound' : 'editor.choose.image') | t"
                                [accept]="typeFile === 'Video' ? 'video/*' : typeFile === 'Son' ? 'audio/*' : 'image/*'"
                                [fileName]="screenToModify.values[4]"
                                (fileSelected)="getInstructionFile($event)"></app-file-picker>
@@ -131,7 +128,7 @@
                       [disabled]="!haveInstructionFile"
                       (click)="typeFile === 'Son' ? deleteSoundInstruction() : deleteImageInstruction()">
                 <i class="bi bi-trash3" aria-hidden="true"></i>
-                Retirer {{ typeFile === 'Son' ? 'le' : 'la' }} {{ mediaLabel }}
+                {{ (mediaKind === 'video' ? 'editor.remove.video' : mediaKind === 'sound' ? 'editor.remove.sound' : 'editor.remove.image') | t }}
               </button>
             </div>
 
@@ -139,7 +136,7 @@
               <div class="gp-callout gp-callout--warning">
                 <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
                 <div class="gp-callout__body">
-                  <p>Le fichier « {{ screenToModify.values[4] }} » est introuvable dans le stockage du navigateur. Choisissez-le à nouveau.</p>
+                  <p>{{ 'editor.fileMissing' | t: {name: screenToModify.values[4]} }}</p>
                 </div>
               </div>
             }
@@ -147,11 +144,11 @@
             @if (haveInstructionFile) {
               <div class="media-preview">
                 @if (typeFile === 'Image') {
-                  <img [src]="instructionFile" [alt]="'Aperçu de ' + screenToModify.values[4]" class="media-preview__item">
+                  <img [src]="instructionFile" [alt]="'editor.preview.of' | t: {name: screenToModify.values[4]}" class="media-preview__item">
                 } @else if (typeFile === 'Video') {
-                  <video [src]="instructionFile" controls class="media-preview__item" [attr.aria-label]="'Vidéo ' + screenToModify.values[4]"></video>
+                  <video [src]="instructionFile" controls class="media-preview__item" [attr.aria-label]="'editor.preview.video' | t: {name: screenToModify.values[4]}"></video>
                 } @else if (typeFile === 'Son') {
-                  <audio controls [src]="instructionFile" [attr.aria-label]="'Son ' + screenToModify.values[4]"></audio>
+                  <audio controls [src]="instructionFile" [attr.aria-label]="'editor.preview.sound' | t: {name: screenToModify.values[4]}"></audio>
                 }
               </div>
             }
@@ -167,65 +164,65 @@
       <!-- Réglages de l'écran -->
       <section class="gp-card stimuli-layout__settings" aria-labelledby="stimuli-settings-title">
         <div class="gp-card__header">
-          <h2 class="gp-card__title" id="stimuli-settings-title">Réglages de l'écran</h2>
+          <h2 class="gp-card__title" id="stimuli-settings-title">{{ 'editor.stimuli.settings' | t }}</h2>
         </div>
         <div class="gp-card__body">
           <!-- [0] lignes [1] colonnes [2] délai ? [3] durée [4] fixation [5] choix [6] nombre
                [7] aléatoire [8] cacher [9] son ? [10] nom du son [12] cases [13] id du son -->
-          <h3 class="gp-subheading">Grille</h3>
-          <app-number-setting label="Nombre de lignes" [min]="1" step="1"
+          <h3 class="gp-subheading">{{ 'editor.grid' | t }}</h3>
+          <app-number-setting [label]="'screen.grid.rows' | t" [min]="1" step="1"
                               [(ngModel)]="screenToModify.values[0]" (ngModelChange)="checkStimuliCells()"></app-number-setting>
-          <app-number-setting label="Nombre de colonnes" [min]="1" step="1"
+          <app-number-setting [label]="'screen.grid.columns' | t" [min]="1" step="1"
                               [(ngModel)]="screenToModify.values[1]" (ngModelChange)="checkStimuliCells()"></app-number-setting>
 
-          <h3 class="gp-subheading">Passage à l'écran suivant</h3>
-          <app-choice-setting label="Limiter le temps passé sur l'écran ?"
+          <h3 class="gp-subheading">{{ 'screen.next.heading' | t }}</h3>
+          <app-choice-setting [label]="'editor.limitTime' | t"
                               [(ngModel)]="screenToModify.values[2]"></app-choice-setting>
           @if (screenToModify.values[2]) {
-            <app-number-setting label="Temps maximum" unit="secondes" [min]="0.1" step="0.1"
+            <app-number-setting [label]="'screen.maxTime.value' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                                 [(ngModel)]="screenToModify.values[3]"></app-number-setting>
           }
 
-          <h3 class="gp-subheading">Fixation et sélection</h3>
-          <app-number-setting label="Durée de fixation pour valider" unit="secondes" [min]="0.1" step="0.1"
+          <h3 class="gp-subheading">{{ 'editor.fixationSelection' | t }}</h3>
+          <app-number-setting [label]="'editor.fixationValidate' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                               [(ngModel)]="screenToModify.values[4]"></app-number-setting>
-          <app-number-setting label="Nombre de stimuli à sélectionner"
+          <app-number-setting [label]="'editor.selectCount' | t"
                               [min]="1" [max]="rows * cols" step="1"
                               [(ngModel)]="screenToModify.values[6]">
-            <app-help-tip slot="label-addon" topic="nombre de stimuli" [text]="tooltipMaxSelection"></app-help-tip>
+            <app-help-tip slot="label-addon" [topic]="'editor.selectCount.topic' | t" [text]="'editor.selectCount.tooltip' | t"></app-help-tip>
           </app-number-setting>
-          <app-choice-setting label="Cases prises en compte"
+          <app-choice-setting [label]="'editor.selectionChoice' | t"
                               [options]="selectionChoiceOptions"
                               [(ngModel)]="screenToModify.values[5]">
-            <app-help-tip slot="label-addon" topic="choix de sélection" [text]="tooltipSelectionChoice"></app-help-tip>
+            <app-help-tip slot="label-addon" [topic]="'editor.selectionChoice.topic' | t" [text]="'editor.selectionChoice.tooltip' | t"></app-help-tip>
           </app-choice-setting>
 
-          <h3 class="gp-subheading">Comportement</h3>
-          <app-choice-setting label="Position des stimuli aléatoire ?"
+          <h3 class="gp-subheading">{{ 'editor.behaviour' | t }}</h3>
+          <app-choice-setting [label]="'editor.randomPosition' | t"
                               [(ngModel)]="screenToModify.values[7]"></app-choice-setting>
-          <app-choice-setting label="Cacher les stimuli après sélection ?"
+          <app-choice-setting [label]="'editor.hideAfter' | t"
                               [(ngModel)]="screenToModify.values[8]"></app-choice-setting>
 
-          <h3 class="gp-subheading">Son de l'écran</h3>
-          <app-choice-setting label="Jouer un son ?"
+          <h3 class="gp-subheading">{{ 'editor.screenSound' | t }}</h3>
+          <app-choice-setting [label]="'editor.playSound' | t"
                               [(ngModel)]="screenToModify.values[9]">
-            <app-help-tip slot="label-addon" topic="stockage des fichiers" [text]="tooltipFileSave"></app-help-tip>
+            <app-help-tip slot="label-addon" [topic]="'editor.fileStorage.topic' | t" [text]="'editor.fileStorage.tooltip' | t"></app-help-tip>
           </app-choice-setting>
           @if (screenToModify.values[9]) {
             <div class="sound-block">
               <div class="gp-btn-group">
-                <app-file-picker label="Choisir un son" accept="audio/*"
+                <app-file-picker [label]="'editor.choose.sound' | t" accept="audio/*"
                                  [fileName]="screenToModify.values[10]"
                                  (fileSelected)="getStimuliSoundFile($event)"></app-file-picker>
                 <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--icon"
                         [disabled]="!haveStimuliSoundFile"
-                        aria-label="Retirer le son de l'écran" title="Retirer le son"
+                        [attr.aria-label]="'editor.removeScreenSound' | t" [title]="'editor.remove.sound' | t"
                         (click)="deleteSoundStimuli()">
                   <i class="bi bi-trash3" aria-hidden="true"></i>
                 </button>
               </div>
               @if (haveStimuliSoundFile) {
-                <audio controls [attr.src]="stimuliFile" [attr.aria-label]="'Son ' + screenToModify.values[10]"></audio>
+                <audio controls [attr.src]="stimuliFile" [attr.aria-label]="'editor.preview.sound' | t: {name: screenToModify.values[10]}"></audio>
               }
             </div>
           }
@@ -236,7 +233,7 @@
       <section class="gp-card stimuli-layout__canvas" aria-labelledby="grid-title">
         <div class="gp-card__header canvas-header">
           <h2 class="gp-card__title" id="grid-title">
-            Grille <span class="gp-muted gp-text-sm">({{ rows }} × {{ cols }})</span>
+            {{ 'editor.grid' | t }} <span class="gp-muted gp-text-sm">({{ rows }} × {{ cols }})</span>
           </h2>
           <button type="button" class="gp-btn gp-btn--sm"
                   [class.gp-btn--secondary]="!visualizationMode"
@@ -244,40 +241,40 @@
                   [attr.aria-pressed]="visualizationMode"
                   (click)="toggleVisualizationMode()">
             <i class="bi bi-eye" aria-hidden="true"></i>
-            Visualiser
+            {{ 'editor.visualize' | t }}
           </button>
         </div>
 
-        <div class="toolbar" role="toolbar" aria-label="Outils de la grille" aria-controls="stimuli-grid">
+        <div class="toolbar" role="toolbar" [attr.aria-label]="'editor.toolbar' | t" aria-controls="stimuli-grid">
           <button type="button" class="toolbar__button" [attr.aria-pressed]="duplicateMode"
                   [disabled]="visualizationMode || multiSelectMode" (click)="toggleDuplicateMode()">
-            <i class="bi bi-copy" aria-hidden="true"></i><span>Dupliquer</span>
+            <i class="bi bi-copy" aria-hidden="true"></i><span>{{ 'editor.tool.duplicate' | t }}</span>
           </button>
           <button type="button" class="toolbar__button" [attr.aria-pressed]="swapMode"
                   [disabled]="visualizationMode || multiSelectMode" (click)="toggleSwapMode()">
-            <i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>Échanger</span>
+            <i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>{{ 'editor.tool.swap' | t }}</span>
           </button>
           <button type="button" class="toolbar__button" [attr.aria-pressed]="multiSelectMode"
                   [disabled]="visualizationMode" (click)="toggleMultiSelectMode()">
-            <i class="bi bi-ui-checks-grid" aria-hidden="true"></i><span>Sélection multiple</span>
+            <i class="bi bi-ui-checks-grid" aria-hidden="true"></i><span>{{ 'editor.tool.multi' | t }}</span>
           </button>
           <button type="button" class="toolbar__button toolbar__button--danger"
                   [attr.aria-pressed]="multiSelectMode ? null : deleteMode"
                   [disabled]="visualizationMode || (multiSelectMode && selectedCells.size === 0)"
                   (click)="onDeleteClick()">
             <i class="bi bi-trash3" aria-hidden="true"></i>
-            <span>{{ multiSelectMode ? 'Supprimer la sélection' : 'Supprimer' }}</span>
+            <span>{{ (multiSelectMode ? 'editor.tool.deleteSelection' : 'editor.tool.delete') | t }}</span>
           </button>
           <span class="toolbar__separator" aria-hidden="true"></span>
           <button type="button" class="toolbar__button" [disabled]="visualizationMode || !canUndo" (click)="undo()">
-            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Annuler</span>
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>{{ 'editor.tool.undo' | t }}</span>
           </button>
           <span class="toolbar__separator" aria-hidden="true"></span>
-          <button type="button" class="toolbar__button toolbar__button--icon" aria-label="Réduire l'aperçu" title="Réduire l'aperçu"
+          <button type="button" class="toolbar__button toolbar__button--icon" [attr.aria-label]="'editor.zoomOut' | t" [title]="'editor.zoomOut' | t"
                   (click)="zoomOut()" [disabled]="!canZoomOut">
             <i class="bi bi-zoom-out" aria-hidden="true"></i>
           </button>
-          <button type="button" class="toolbar__button toolbar__button--icon" aria-label="Agrandir l'aperçu" title="Agrandir l'aperçu"
+          <button type="button" class="toolbar__button toolbar__button--icon" [attr.aria-label]="'editor.zoomIn' | t" [title]="'editor.zoomIn' | t"
                   (click)="zoomIn()" [disabled]="!canZoomIn">
             <i class="bi bi-zoom-in" aria-hidden="true"></i>
           </button>
@@ -287,7 +284,7 @@
           <div class="mode-hint" [class.mode-hint--danger]="deleteMode">
             <i class="bi" [class.bi-info-circle]="!deleteMode" [class.bi-trash3]="deleteMode" aria-hidden="true"></i>
             <span>{{ modeHint }}</span>
-            <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm ms-auto" (click)="resetGridModes()">Quitter le mode</button>
+            <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm ms-auto" (click)="resetGridModes()">{{ 'editor.exitMode' | t }}</button>
           </div>
         }
 
@@ -295,10 +292,10 @@
           <div class="gp-callout gp-callout--warning confirm-bar" role="alert">
             <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <div class="gp-callout__body">
-              <p>La case {{ pendingDuplicateTarget + 1 }} contient déjà du contenu. Voulez-vous la remplacer ?</p>
+              <p>{{ 'editor.overwrite.ask' | t: {n: pendingDuplicateTarget + 1} }}</p>
               <div class="gp-btn-group">
-                <button type="button" class="gp-btn gp-btn--primary gp-btn--sm" (click)="confirmOverwrite()">Remplacer</button>
-                <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="cancelOverwrite()">Annuler</button>
+                <button type="button" class="gp-btn gp-btn--primary gp-btn--sm" (click)="confirmOverwrite()">{{ 'editor.overwrite.replace' | t }}</button>
+                <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="cancelOverwrite()">{{ 'common.cancel' | t }}</button>
               </div>
             </div>
           </div>
@@ -308,10 +305,10 @@
           <div class="gp-callout gp-callout--danger confirm-bar" role="alert">
             <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
             <div class="gp-callout__body">
-              <p>Supprimer {{ pendingDeleteCells.length }} case(s) contenant des médias ? Vous pourrez annuler tant que vous restez dans cet écran.</p>
+              <p>{{ 'editor.deleteCells.ask' | t: {count: pendingDeleteCells.length} }}</p>
               <div class="gp-btn-group">
-                <button type="button" class="gp-btn gp-btn--danger gp-btn--sm" (click)="confirmDelete()">Supprimer</button>
-                <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="cancelDelete()">Annuler</button>
+                <button type="button" class="gp-btn gp-btn--danger gp-btn--sm" (click)="confirmDelete()">{{ 'editor.tool.delete' | t }}</button>
+                <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm" (click)="cancelDelete()">{{ 'common.cancel' | t }}</button>
               </div>
             </div>
           </div>
@@ -321,7 +318,7 @@
           <div class="grid"
                id="stimuli-grid"
                role="group"
-               [attr.aria-label]="'Grille de ' + rows + ' lignes et ' + cols + ' colonnes. Utilisez les flèches pour vous déplacer.'"
+               [attr.aria-label]="'editor.gridLabel' | t: {rows: rows, cols: cols}"
                [class.grid--mode]="anyModeActive()"
                [style.gridTemplateColumns]="'repeat(' + cols + ', ' + cellSize + 'px)'"
                [style.gridAutoRows.px]="cellSize">
@@ -339,7 +336,7 @@
                     @if (!cell?.hidden) {
                       <span class="cell__answer" [class.is-good]="cell?.goodAnswer === true">
                         <i class="bi" [class.bi-check-lg]="cell?.goodAnswer === true" [class.bi-x-lg]="cell?.goodAnswer !== true" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{ cell?.goodAnswer === true ? 'Bonne réponse' : 'Mauvaise réponse' }}</span>
+                        <span class="visually-hidden">{{ (cell?.goodAnswer === true ? 'editor.goodAnswer' : 'editor.wrongAnswer') | t }}</span>
                       </span>
                       @if (cellImageUrls[i]) {
                         <img class="cell__image" [src]="cellImageUrls[i]" [alt]="cell.imageName">
@@ -351,7 +348,7 @@
                       @if (cell?.soundName) {
                         <button type="button" class="cell__sound"
                                 [attr.aria-pressed]="playingSoundCell === i"
-                                [attr.aria-label]="'Écouter ' + cell.soundName"
+                                [attr.aria-label]="'editor.listen' | t: {name: cell.soundName}"
                                 (click)="toggleCellSound(i, $event)">
                           <i class="bi" [class.bi-volume-up-fill]="playingSoundCell !== i" [class.bi-pause-fill]="playingSoundCell === i" aria-hidden="true"></i>
                         </button>
@@ -393,8 +390,8 @@
                                 class="cell-add"
                                 [class]="'cell-add cell-add--' + direction"
                                 tabindex="-1"
-                                [attr.aria-label]="'Ajouter une case ' + (direction === 'top' ? 'au-dessus' : direction === 'bottom' ? 'en dessous' : direction === 'left' ? 'à gauche' : 'à droite') + ' de la case ' + (i + 1)"
-                                [title]="'Ajouter une case ' + (direction === 'top' ? 'au-dessus' : direction === 'bottom' ? 'en dessous' : direction === 'left' ? 'à gauche' : 'à droite')"
+                                [attr.aria-label]="addCellLabel(direction) | t: {n: i + 1}"
+                                [title]="addCellTitle(direction) | t"
                                 (click)="addAdjacent($event, i, $any(direction))">
                           <i class="bi bi-plus" aria-hidden="true"></i>
                         </button>
@@ -410,8 +407,7 @@
         @if (!visualizationMode && !anyModeActive()) {
           <p class="canvas-help gp-muted gp-text-sm">
             <i class="bi bi-keyboard" aria-hidden="true"></i>
-            Sélectionnez une case pour la configurer. Au clavier : flèches pour se déplacer, Entrée pour ouvrir.
-            Les boutons « + » autour d'une case (au survol) ajoutent une case adjacente.
+            {{ 'editor.canvasHelp' | t }}
           </p>
         }
       </section>
@@ -421,13 +417,13 @@
         @if (stimuliOffcanvasReady && activeCellIndex !== null) {
           <app-config-stimuli [data]="dataStimuli" (closed)="closeConfigStimuli()"></app-config-stimuli>
           <div class="adjacent-tools">
-            <p class="adjacent-tools__label" id="adjacent-label">Ajouter une case à côté de celle-ci</p>
+            <p class="adjacent-tools__label" id="adjacent-label">{{ 'editor.adjacent.label' | t }}</p>
             <div class="adjacent-tools__buttons" role="group" aria-labelledby="adjacent-label">
               @for (direction of adjacentDirections; track direction.value) {
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm"
                         [disabled]="!canAddAdjacent(activeCellIndex, direction.value)"
                         (click)="addAdjacentToActive($event, direction.value)">
-                  <i class="bi" [class]="direction.icon" aria-hidden="true"></i>{{ direction.label }}
+                  <i class="bi" [class]="direction.icon" aria-hidden="true"></i>{{ direction.label | t }}
                 </button>
               }
             </div>
@@ -435,8 +431,8 @@
         } @else {
           <div class="gp-empty inspector-empty">
             <i class="bi bi-hand-index" aria-hidden="true"></i>
-            <h2 class="gp-empty__title h6 mb-0" id="configStimuliLabel" tabindex="-1">Aucune case sélectionnée</h2>
-            <p class="mb-0">Choisissez une case dans la grille pour lui associer une image, un son et indiquer s'il s'agit d'une bonne réponse.</p>
+            <h2 class="gp-empty__title h6 mb-0" id="configStimuliLabel" tabindex="-1">{{ 'editor.noCell.title' | t }}</h2>
+            <p class="mb-0">{{ 'editor.noCell.body' | t }}</p>
           </div>
         }
       </aside>
@@ -445,10 +441,10 @@
 
   <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
-  <nav class="gp-actions" aria-label="Fin de la modification">
+  <nav class="gp-actions" [attr.aria-label]="'editor.finishNav' | t">
     <button type="button" class="gp-btn gp-btn--primary" (click)="backToScreenList()">
       <i class="bi bi-check2" aria-hidden="true"></i>
-      Terminer et revenir à la liste
+      {{ 'editor.finish' | t }}
     </button>
   </nav>
 </div>

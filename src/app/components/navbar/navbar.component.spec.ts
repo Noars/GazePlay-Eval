@@ -4,6 +4,7 @@ import {provideRouter, Router} from '@angular/router';
 import {NavbarComponent} from './navbar.component';
 import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
 import {SaveService} from '../../services/save/save.service';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -14,11 +15,16 @@ describe('NavbarComponent', () => {
 
   beforeEach(async () => {
     theme.set('light');
-    preferencesSpy = jasmine.createSpyObj('UserPreferencesService', ['toggleTheme'], {
+    preferencesSpy = jasmine.createSpyObj('UserPreferencesService', ['toggleTheme', 'setLanguage'], {
       resolvedTheme: computed(() => theme()),
     });
     preferencesSpy.toggleTheme.and.callFake(async () => {
       theme.set(theme() === 'light' ? 'dark' : 'light');
+      return true;
+    });
+    // Comme le vrai service : la langue enregistrée est appliquée à l'interface.
+    preferencesSpy.setLanguage.and.callFake(async language => {
+      TestBed.inject(I18nService).setLanguage(language);
       return true;
     });
 
@@ -73,6 +79,27 @@ describe('NavbarComponent', () => {
       const name = control.getAttribute('aria-label') || control.textContent?.trim();
       expect(name).withContext(control.outerHTML).toBeTruthy();
     });
+  });
+
+  it('plus de lien vers les options dans l\'en-tête (elles restent dans le menu)', () => {
+    expect(fixture.nativeElement.querySelector('a[href*="option"]')).toBeNull();
+  });
+
+  it('sélecteur de langue → affiche la langue en cours ; choisir l\'anglais traduit l\'en-tête', async () => {
+    const host: HTMLElement = fixture.nativeElement;
+    const trigger = host.querySelector<HTMLButtonElement>('app-language-menu button[aria-haspopup="menu"]')!;
+    expect(trigger.textContent).toContain('FR');
+
+    trigger.click();
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('[role="menuitemradio"][lang="en"]')!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(preferencesSpy.setLanguage).toHaveBeenCalledWith('en');
+    expect(trigger.textContent).toContain('EN');
+    expect(host.querySelector('.gp-header__menu-button')!.getAttribute('aria-label')).toBe('Open the navigation menu');
+    TestBed.inject(I18nService).setLanguage('fr');
   });
 
   it('bouton d\'aide masqué dans les pages du guide', () => {

@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
 import {NumberSettingComponent} from '../../shared/ui/number-setting/number-setting.component';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Formulaire des paramètres d'un écran de transition.
@@ -11,7 +12,7 @@ import {NumberSettingComponent} from '../../shared/ui/number-setting/number-sett
  */
 @Component({
   selector: 'app-global-transition-screen',
-  imports: [FormsModule, ChoiceSettingComponent, NumberSettingComponent],
+  imports: [FormsModule, ChoiceSettingComponent, NumberSettingComponent, TranslatePipe],
   templateUrl: './global-transition-screen.component.html',
   standalone: true,
   styleUrl: './global-transition-screen.component.css'

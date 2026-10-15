@@ -23,9 +23,9 @@
   <div class="flash flash--{{ mapType(flash.type) }}" [class.fade-out]="flash.fadingOut">
     <i class="bi {{ mapIcon(flash.type) }} flash__icon" aria-hidden="true"></i>
     <p class="flash__message">
-      <span class="flash__type">{{ mapLabel(flash.type) }} : </span>{{ flash.message }}
+      <span class="flash__type">{{ mapLabel(flash.type) | t }}</span>{{ flash.message }}
     </p>
-    <button type="button" class="flash__close" aria-label="Fermer la notification" (click)="flashService.remove(flash.id)">
+    <button type="button" class="flash__close" [attr.aria-label]="'flash.close' | t" (click)="flashService.remove(flash.id)">
       <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
   </div>

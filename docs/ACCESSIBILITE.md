@@ -10,7 +10,7 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
 
 | Domaine | Mesures |
 |---|---|
-| Structure | Repères `header`, `nav`, `main`, `footer` ; un seul `h1` par page ; titre de document unique par page (`app.routes.ts`, `AppTitleStrategy`) ; `lang="fr"`. |
+| Structure | Repères `header`, `nav`, `main`, `footer` ; un seul `h1` par page ; titre de document unique par page (`app.routes.ts`, `AppTitleStrategy`), traduit dans la langue choisie ; `lang` de `<html>` suit la langue de l'interface (`fr` par défaut, `en`). |
 | Navigation clavier | Lien d'évitement « Aller au contenu principal » ; tous les contrôles sont des `button`/`a` natifs ; après chaque navigation, le focus va sur le `h1` de la page (`RouteFocusService`). |
 | Focus | Anneau de 3 px + halo, visible sur toutes les surfaces (`src/styles/_a11y.scss`), couleur dédiée par thème. |
 | Formulaires | Libellés associés (`label for`), groupes de boutons radio nommés (`role="radiogroup"`), aides reliées par `aria-describedby`, erreurs signalées par texte + `aria-invalid` (composants `shared/ui`). |
@@ -24,6 +24,7 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
 | Préférences | Thème, contraste, mode daltonisme, police (dont Atkinson Hyperlegible, Lexend, Verdana), taille du texte (90 → 200 %), interligne, espacement des lettres et des mots (valeurs de WCAG 1.4.12), soulignement des liens, réduction des animations. |
 | Responsive | Aucune largeur minimale imposée ; navigation en tiroir sous 992 px ; éditeur réorganisé en colonnes puis en pile ; cibles tactiles ≥ 24 px (40–44 px pour les actions principales). |
 | Mouvement | `prefers-reduced-motion` respecté, et préférence « Animations réduites » dans l'application. |
+| Langue (WCAG 3.1.1, 3.1.2) | Interface en français (par défaut) ou en anglais : sélecteur de l'en-tête (bouton de menu affichant la langue en cours, « FR » marqué `lang`, nom accessible « FR, langue de l'interface : Français » ; liste `menuitemradio` cochée selon la langue, flèches / Début / Fin, Échap rend le focus au bouton, `LanguageMenuComponent`) et choix « Langue » dans Options. Préférence enregistrée localement (`language`), appliquée à `<html lang>` dès le premier affichage. Les noms de langue sont écrits dans leur propre langue et marqués `lang`. |
 
 ## 2. Vérifié (et comment)
 
@@ -35,6 +36,7 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
 | Mode daltonisme | Tests unitaires (préférence, page Options, notifications) ; Chrome headless sur le build : activation / désactivation depuis la page Options, conservation après rechargement et au relancement du navigateur (IndexedDB réelle), captures des états (encadrés, badges, boutons, champs, notifications, fenêtre modale, étapes, grille de l'éditeur) en clair, sombre et contraste renforcé ; 320 px sans débordement. Contrastes des nouveaux jetons calculés (texte ≥ 4,5:1, indicateurs ≥ 3:1). | OK. Pas encore évalué par des personnes daltoniennes. |
 | Préférence « Souligner tous les liens » | Tests unitaires (`src/app/testing/link-underline.spec.ts` : style calculé des liens dans les deux états, liens-boutons / cartes / navigation / étapes jamais soulignés, soulignement imposé par le contraste renforcé et le mode daltonisme ; page Options : aperçu) ; Chrome headless sur le build : bascule Oui ↔ Non sur l'aperçu, rechargement, toutes les pages (thèmes clair et sombre, 1280 et 375 px), survol et focus clavier. | OK. Liens de texte non soulignés si « Non », soulignés au survol ; anneau de focus conservé. |
 | Comportement des composants accessibles (radiogroup, champ numérique, toggletip, sélecteur de fichier, confirmation) | Tests unitaires `src/app/shared/ui/ui-components.spec.ts`. | OK. |
+| Interface en anglais | Tests automatisés `a11y-pages.spec.ts` (toutes les pages, éditeur de stimuli et en-tête rendus en anglais) ; tests `core/i18n/i18n.spec.ts` (mêmes clés et mêmes paramètres en français et en anglais, titre du document retraduit, composants `OnPush` mis à jour) ; `lang` de `<html>` vérifié par les tests des préférences. | OK. Pas de relecture par un anglophone natif ni de test avec lecteur d'écran en anglais. |
 
 > Ces contrôles automatisés couvrent une partie seulement des critères WCAG. L'outil axe-core
 > n'a pas pu être ajouté (installation de dépendance refusée lors de la refonte).
@@ -60,8 +62,12 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
     daltoniennes (protan, deutan, tritan) à recueillir. Avertissement et erreur restent proches pour un
     deutéranope (ΔE ≈ 25) : leur distinction repose aussi sur les icônes (triangle / octogone / croix) et
     les motifs. Les médias des évaluations (images des stimuli) ne sont pas modifiés.
-11. **Préférences « Taille du texte » + zoom** : combinées, elles peuvent dépasser 400 % ; comportement à observer.
-12. **Liens non soulignés (préférence « Souligner tous les liens » à Non, valeur par défaut)** : dans un
+11. **Interface en anglais** : captures d'écran du guide en français (signalé dans leur texte alternatif) ;
+    vidéo du guide en français ; une notification déjà affichée n'est pas retraduite si la langue change ;
+    les noms par défaut créés pendant l'utilisation (« Ecran 3 » / « Screen 3 ») restent dans la langue du
+    moment, car ce sont des données de l'évaluation.
+12. **Préférences « Taille du texte » + zoom** : combinées, elles peuvent dépasser 400 % ; comportement à observer.
+13. **Liens non soulignés (préférence « Souligner tous les liens » à Non, valeur par défaut)** : dans un
     paragraphe, le lien ne se distingue du texte que par sa couleur, avec un contraste lien ↔ texte mesuré
     à 2,02:1 (thème clair) et 1,58:1 (thème sombre), sous les 3:1 attendus par WCAG 1.4.1 (échec F73) ;
     le soulignement au survol et l'anneau de focus sont présents. Pistes : préférence activée par défaut,

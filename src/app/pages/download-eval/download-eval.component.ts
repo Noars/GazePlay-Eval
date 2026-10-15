@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {DownloadService} from '../../services/download/download.service';
@@ -9,6 +9,8 @@ import {
   stimuliScreenConstModel,
   transitionScreenConstModel
 } from '../../shared/screenModel';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /** Point de vigilance affiché avant l'export (non bloquant). */
 export interface ExportCheck {
@@ -25,12 +27,13 @@ export interface ExportCheck {
  */
 @Component({
   selector: 'app-download-eval',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './download-eval.component.html',
   standalone: true,
   styleUrl: './download-eval.component.css'
 })
 export class DownloadEvalComponent implements OnInit {
+  private readonly i18n = inject(I18nService);
 
   /** Action en cours (affiche un indicateur et désactive les boutons). */
   busy: 'export' | 'download' | null = null;
@@ -51,7 +54,9 @@ export class DownloadEvalComponent implements OnInit {
   }
 
   get format(): string {
-    return this.saveService.dataAuto.format === 'Csv&Xlsx' ? 'CSV et XLSX' : (this.saveService.dataAuto.format ?? '').toUpperCase();
+    return this.saveService.dataAuto.format === 'Csv&Xlsx'
+      ? this.i18n.t('infoEval.format.both')
+      : (this.saveService.dataAuto.format ?? '').toUpperCase();
   }
 
   get participantFields(): string[] {
@@ -74,10 +79,10 @@ export class DownloadEvalComponent implements OnInit {
     this.busy = 'export';
     try {
       await this.downloadService.generateEvalZip(this.saveService);
-      this.flashService.show('success', 'Le fichier .zip pour GazePlay-Learning a été généré.');
+      this.flashService.show('success', this.i18n.t('download.export.success'));
     } catch (error) {
       console.error('Export impossible :', error);
-      this.flashService.show('error', 'L\'export a échoué. Vérifiez que les médias de l\'évaluation sont toujours disponibles, puis réessayez.');
+      this.flashService.show('error', this.i18n.t('download.export.error'));
     } finally {
       this.busy = null;
     }
@@ -93,9 +98,9 @@ export class DownloadEvalComponent implements OnInit {
         version: 1
       });
       if (ok === false) {
-        this.flashService.show('error', 'Le téléchargement du fichier .gpSave a échoué.');
+        this.flashService.show('error', this.i18n.t('download.backup.error'));
       } else {
-        this.flashService.show('success', 'Le fichier .gpSave a été généré.');
+        this.flashService.show('success', this.i18n.t('download.backup.success'));
       }
     } finally {
       this.busy = null;
@@ -110,28 +115,28 @@ export class DownloadEvalComponent implements OnInit {
   computeChecks(screens: screenTypeModel[]): ExportCheck[] {
     const checks: ExportCheck[] = [];
     if (screens.length === 0) {
-      checks.push({level: 'warning', message: 'L\'évaluation ne contient aucun écran.'});
+      checks.push({level: 'warning', message: this.i18n.t('download.check.noScreens')});
     }
     if (!this.saveService.dataAuto.nomEval) {
-      checks.push({level: 'info', message: 'L\'évaluation n\'a pas de nom : les fichiers s\'appelleront « Nouvelle Evaluation ».'});
+      checks.push({level: 'info', message: this.i18n.t('download.check.noName')});
     }
     screens.forEach((screen, index) => {
-      const label = `« ${screen.name || 'Écran ' + (index + 1)} »`;
+      const label = this.i18n.t('download.check.label', {name: screen.name || this.i18n.t('download.check.fallbackName', {n: index + 1})});
       const values = screen.values ?? [];
       if (screen.type === instructionScreenConstModel && values[2] && !values[4]) {
         checks.push({
           level: 'warning',
-          message: `${label} : un média est prévu mais ${values[3] === 'Texte' ? 'aucun texte n\'est saisi' : 'aucun fichier n\'est choisi'}.`,
+          message: this.i18n.t(values[3] === 'Texte' ? 'download.check.noText' : 'download.check.noFile', {label}),
         });
       }
       if (screen.type === stimuliScreenConstModel) {
         const cells = Object.values(values[12] ?? {}) as any[];
         const filled = cells.filter(cell => cell && !cell.hidden && (cell.imageName || cell.soundName));
         if (filled.length === 0) {
-          checks.push({level: 'warning', message: `${label} : aucune case ne contient d'image ou de son.`});
+          checks.push({level: 'warning', message: this.i18n.t('download.check.emptyCells', {label})});
         }
         if (values[9] && !values[10]) {
-          checks.push({level: 'warning', message: `${label} : le son de l'écran est activé mais aucun fichier n'est choisi.`});
+          checks.push({level: 'warning', message: this.i18n.t('download.check.noScreenSound', {label})});
         }
       }
     });

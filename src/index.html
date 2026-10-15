@@ -10,7 +10,7 @@
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <script>
     // Applique les préférences d'affichage avant le premier rendu pour éviter un flash
-    // (thème, contraste, mode daltonisme, taille du texte). Source de vérité : IndexedDB, chargée ensuite
+    // (thème, contraste, mode daltonisme, taille du texte, langue). Source de vérité : IndexedDB, chargée ensuite
     // par UserPreferencesService ; ceci n'est qu'un instantané (voir preferences-dom.ts).
     (function () {
       var root = document.documentElement;
@@ -28,6 +28,7 @@
       root.setAttribute('data-contrast', prefs.contrast === 'high' ? 'high' : 'standard');
       root.setAttribute('data-motion', prefs.motion === 'reduce' ? 'reduce' : 'system');
       root.setAttribute('data-color-blind', prefs.colorBlindMode === true ? 'true' : 'false');
+      root.setAttribute('lang', prefs.language === 'en' ? 'en' : 'fr');
       root.style.colorScheme = theme;
       if (typeof prefs.textScale === 'number' && prefs.textScale >= 80 && prefs.textScale <= 200) {
         root.style.fontSize = prefs.textScale + '%';
@@ -37,6 +38,6 @@
 </head>
 <body>
   <app-root></app-root>
-  <noscript>GazePlay Eval nécessite JavaScript pour fonctionner.</noscript>
+  <noscript>GazePlay Eval nécessite JavaScript pour fonctionner. <span lang="en">GazePlay Eval requires JavaScript to run.</span></noscript>
 </body>
 </html>

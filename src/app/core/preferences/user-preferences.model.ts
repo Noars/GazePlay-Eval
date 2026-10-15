@@ -15,6 +15,9 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 export type ContrastPreference = 'standard' | 'high';
 export type MotionPreference = 'system' | 'reduce';
 export type FontPreference = 'system' | 'atkinson' | 'lexend' | 'verdana' | 'roboto';
+/** Langue de l'interface (le français reste la langue par défaut). */
+export type LanguagePreference = 'fr' | 'en';
+export const LANGUAGES: readonly LanguagePreference[] = ['fr', 'en'];
 
 export interface UserPreferences {
   schemaVersion: number;
@@ -45,6 +48,11 @@ export interface UserPreferences {
   colorBlindMode: boolean;
   /** Durée d'affichage des notifications, en secondes (0 = désactivées). */
   messageDuration: number;
+  /**
+   * Langue de l'interface. Champ ajouté sans changer `PREFERENCES_SCHEMA_VERSION` : absent
+   * d'un ancien enregistrement, il prend sa valeur par défaut (`fr`).
+   */
+  language: LanguagePreference;
 }
 
 export const DEFAULT_PREFERENCES: Readonly<UserPreferences> = Object.freeze({
@@ -60,6 +68,7 @@ export const DEFAULT_PREFERENCES: Readonly<UserPreferences> = Object.freeze({
   underlineLinks: false,
   colorBlindMode: false,
   messageDuration: 5,
+  language: 'fr',
 });
 
 /** Valeurs proposées dans l'interface (les valeurs stockées sont bornées, pas limitées à ces listes). */
@@ -164,6 +173,7 @@ export function normalizePreferences(raw: unknown): UserPreferences {
     underlineLinks: typeof source['underlineLinks'] === 'boolean' ? source['underlineLinks'] : d.underlineLinks,
     colorBlindMode: typeof source['colorBlindMode'] === 'boolean' ? source['colorBlindMode'] : d.colorBlindMode,
     messageDuration: clampNumber(source['messageDuration'], PREFERENCE_LIMITS.messageDuration, d.messageDuration),
+    language: pick(source['language'], LANGUAGES, d.language),
   };
 }
 

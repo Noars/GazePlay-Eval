@@ -25,6 +25,7 @@ import {NavbarComponent} from '../components/navbar/navbar.component';
 import {MenuComponent} from '../components/menu/menu.component';
 import {ProgressBarComponent} from '../components/progress-bar/progress-bar.component';
 import {screenTypeModel} from '../shared/screenModel';
+import {I18nService} from '../core/i18n/i18n.service';
 
 /**
  * Vérifications d'accessibilité automatisées sur chaque page et sur les composants de
@@ -139,6 +140,18 @@ describe('Accessibilité (contrôles automatisés)', () => {
     fixture.detectChanges();
     expectAccessible(fixture);
     expect(fixture.nativeElement.querySelector('app-config-stimuli')).not.toBeNull();
+  });
+
+  it('Interface en anglais : aucun problème détecté sur les pages ni sur l\'éditeur de stimuli', async () => {
+    TestBed.inject(I18nService).setLanguage('en');
+    for (const [label, component] of pages) {
+      const fixture = await render(component);
+      expect((fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent)
+        .withContext(`${label} : titre traduit`).not.toMatch(/[éèàç]|Étape|Évaluation/);
+      expectAccessible(fixture);
+    }
+    expectAccessible(await render(ModifyScreenComponent, c => c.screenToModify = structuredClone(screens[1])));
+    expectAccessible(await render(NavbarComponent), {singleH1: false});
   });
 
   it('Structure : en-tête, navigation et étapes', async () => {

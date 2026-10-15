@@ -1,16 +1,25 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {uniqueId} from '../unique-id';
+import {TranslationKey} from '../../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../../core/i18n/translate.pipe';
 
+/**
+ * Choix proposé : `labelKey` (clé de traduction) est prioritaire sur `label` (texte
+ * affiché tel quel, par exemple « 115 % »). Seule `value` est émise et enregistrée.
+ */
 export interface ChoiceOption<T = unknown> {
   value: T;
-  label: string;
+  label?: string;
+  labelKey?: TranslationKey;
+  /** Langue du libellé lorsqu'elle diffère de celle de la page (ex. « English »). */
+  lang?: string;
 }
 
 /** Options Oui / Non utilisées par défaut. */
 export const YES_NO_OPTIONS: ChoiceOption<boolean>[] = [
-  {value: true, label: 'Oui'},
-  {value: false, label: 'Non'},
+  {value: true, labelKey: 'common.yes'},
+  {value: false, labelKey: 'common.no'},
 ];
 
 /**
@@ -26,6 +35,7 @@ export const YES_NO_OPTIONS: ChoiceOption<boolean>[] = [
 @Component({
   selector: 'app-choice-setting',
   templateUrl: './choice-setting.component.html',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: NG_VALUE_ACCESSOR,

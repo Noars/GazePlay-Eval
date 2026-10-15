@@ -17,30 +17,30 @@ import {GuideSauvegardeComponent} from './pages/guide/guide-sauvegarde/guide-sau
 
 /**
  * Routes de l'application (routage par hash : `/#/home`).
- * Chaque route déclare un `title` utilisé pour le titre du document (voir AppTitleStrategy).
+ * Chaque route déclare un `title` : clé de traduction du titre du document (voir AppTitleStrategy).
  */
 export const routes: Routes = [
-  {path: 'home', component: HomeComponent, title: 'Accueil'},
-  {path: 'info-eval', component: InfoEvalComponent, title: 'Étape 1 · Informations de l\'évaluation'},
-  {path: 'info-participant', component: InfoParticipantComponent, title: 'Étape 2 · Informations du participant'},
-  {path: 'setup-eval', component: SetupEvalComponent, title: 'Étape 3 · Mode et paramètres'},
-  {path: 'create-eval', component: CreateEvalComponent, title: 'Étape 4 · Création des écrans'},
-  {path: 'download-eval', component: DownloadEvalComponent, title: 'Étape 5 · Téléchargement et export'},
-  {path: 'sauvegarde', component: SauvegardeComponent, title: 'Mes sauvegardes'},
-  {path: 'load-save', component: LoadSaveComponent, title: 'Charger une évaluation'},
-  {path: 'option', component: OptionComponent, title: 'Options et accessibilité'},
+  {path: 'home', component: HomeComponent, title: 'title.home'},
+  {path: 'info-eval', component: InfoEvalComponent, title: 'title.infoEval'},
+  {path: 'info-participant', component: InfoParticipantComponent, title: 'title.infoParticipant'},
+  {path: 'setup-eval', component: SetupEvalComponent, title: 'title.setupEval'},
+  {path: 'create-eval', component: CreateEvalComponent, title: 'title.createEval'},
+  {path: 'download-eval', component: DownloadEvalComponent, title: 'title.downloadEval'},
+  {path: 'sauvegarde', component: SauvegardeComponent, title: 'title.saves'},
+  {path: 'load-save', component: LoadSaveComponent, title: 'title.load'},
+  {path: 'option', component: OptionComponent, title: 'title.options'},
   {
     path: 'guide',
     component: GuideComponent,
     children: [
-      {path: '', component: GuideHomeComponent, title: 'Guide'},
-      {path: 'creation', component: GuideCreationComponent, title: 'Guide · Création'},
-      {path: 'sauvegardes', component: GuideSauvegardeComponent, title: 'Guide · Sauvegardes'},
-      {path: 'imports', component: GuideImportComponent, title: 'Guide · Importation'},
+      {path: '', component: GuideHomeComponent, title: 'title.guide'},
+      {path: 'creation', component: GuideCreationComponent, title: 'title.guideCreation'},
+      {path: 'sauvegardes', component: GuideSauvegardeComponent, title: 'title.guideSaves'},
+      {path: 'imports', component: GuideImportComponent, title: 'title.guideImport'},
     ]
   },
-  {path: 'no-page', component: NoPage, title: 'Page introuvable'},
+  {path: 'no-page', component: NoPage, title: 'title.notFound'},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   // Toute adresse inconnue mène à la page « introuvable » plutôt qu'à une page blanche.
-  {path: '**', component: NoPage, title: 'Page introuvable'},
+  {path: '**', component: NoPage, title: 'title.notFound'},
 ];

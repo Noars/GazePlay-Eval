@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { LoadService } from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
@@ -7,6 +7,8 @@ import { saveModel } from '../../shared/saveModel';
 import { CommonModule } from '@angular/common';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 
 @Component({
@@ -14,12 +16,12 @@ import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-gu
   templateUrl: './load-save.component.html',
   styleUrl: './load-save.component.css',
   standalone: true,
-  imports: [CommonModule, RouterLink]
+  imports: [CommonModule, RouterLink, TranslatePipe]
 })
 export class LoadSaveComponent implements OnInit {
 
   slots: { index: number; data: saveModel | null }[] = [];
-  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
+  private readonly i18n = inject(I18nService);
 
   constructor(
     private router: Router,
@@ -58,12 +60,12 @@ export class LoadSaveComponent implements OnInit {
   }
 
   /**
-   * Formate une date ISO en date lisible au format français (jj/mm/aaaa).
+   * Formate une date ISO en date lisible dans la langue de l'interface (jj/mm/aaaa en français).
    * @param dateStr date au format ISO 8601
-   * @returns date formatée en français
+   * @returns date formatée
    */
   formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('fr-FR');
+    return new Date(dateStr).toLocaleDateString(this.i18n.language() === 'en' ? 'en-GB' : 'fr-FR');
   }
 
   /**

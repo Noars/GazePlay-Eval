@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, Input, signal} from '@angular/core';
 import {uniqueId} from '../unique-id';
+import {TranslatePipe} from '../../../core/i18n/translate.pipe';
 
 /**
  * Aide contextuelle « ⓘ » (motif *toggletip*).
@@ -12,6 +13,7 @@ import {uniqueId} from '../unique-id';
   selector: 'app-help-tip',
   templateUrl: './help-tip.component.html',
   styleUrl: './help-tip.component.scss',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HelpTipComponent {

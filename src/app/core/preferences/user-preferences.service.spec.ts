@@ -3,6 +3,7 @@ import {UserPreferencesService} from './user-preferences.service';
 import {InMemoryPreferencesStore, provideInMemoryPreferences} from './testing/in-memory-preferences.store';
 import {DEFAULT_PREFERENCES, normalizePreferences, readLegacyPreferences} from './user-preferences.model';
 import {FIRST_PAINT_CACHE_KEY} from './preferences-dom';
+import {I18nService} from '../i18n/i18n.service';
 
 describe('UserPreferencesService', () => {
   let store: InMemoryPreferencesStore;
@@ -187,6 +188,52 @@ describe('UserPreferencesService', () => {
     expect(store.saves.length).toBe(0);
   });
 
+  it('langue : français par défaut, appliquée à <html lang>, enregistrée et retrouvée après rechargement', async () => {
+    setup();
+    await service.init();
+    expect(service.preferences().language).toBe('fr');
+    expect(root.getAttribute('lang')).toBe('fr');
+
+    await service.setLanguage('en');
+
+    expect(root.getAttribute('lang')).toBe('en');
+    expect(TestBed.inject(I18nService).language()).toBe('en');
+    expect(store.record?.data.language).toBe('en');
+    expect(JSON.parse(localStorage.getItem(FIRST_PAINT_CACHE_KEY)!).language).toBe('en');
+
+    const persisted = store;
+    TestBed.resetTestingModule();
+    setup(persisted);
+    await service.init();
+    expect(service.preferences().language).toBe('en');
+    expect(TestBed.inject(I18nService).language()).toBe('en');
+
+    await service.setLanguage('fr');
+    expect(root.getAttribute('lang')).toBe('fr');
+  });
+
+  it('reset → rétablit l\'affichage mais conserve la langue choisie', async () => {
+    setup();
+    await service.init();
+    await service.update({language: 'en', theme: 'dark', textScale: 150});
+
+    await service.reset();
+
+    expect(service.preferences()).toEqual({...DEFAULT_PREFERENCES, language: 'en'});
+    await service.setLanguage('fr');
+  });
+
+  it('enregistrement antérieur sans langue → français, autres réglages conservés, rien réécrit', async () => {
+    const {language, ...older} = DEFAULT_PREFERENCES;
+    setup(new InMemoryPreferencesStore({data: {...older, theme: 'dark'} as any}));
+
+    await service.init();
+
+    expect(service.preferences().language).toBe('fr');
+    expect(service.preferences().theme).toBe('dark');
+    expect(store.saves.length).toBe(0);
+  });
+
   it('init est idempotent', async () => {
     setup();
     const first = service.init();
@@ -207,6 +254,12 @@ describe('Modèle des préférences', () => {
     expect(prefs.lineHeight).toBe(2.5);
     expect(prefs.letterSpacing).toBe(0);
     expect(prefs.messageDuration).toBe(30);
+  });
+
+  it('normalizePreferences — langue : seules `fr` et `en` sont acceptées', () => {
+    expect(normalizePreferences({language: 'en'}).language).toBe('en');
+    expect(normalizePreferences({language: 'de'}).language).toBe('fr');
+    expect(normalizePreferences({}).language).toBe('fr');
   });
 
   it('normalizePreferences — mode daltonisme : seul un booléen est accepté', () => {

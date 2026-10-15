@@ -4,11 +4,9 @@
   <div class="gp-page gp-page--wide">
     <header class="gp-page-header">
       <div class="gp-page-header__text">
-        <span class="gp-page-header__eyebrow">Étape 4 sur 5</span>
-        <h1 class="gp-page-header__title">Création des écrans</h1>
-        <p class="gp-page-header__lead">
-          Ajoutez les écrans dans l'ordre où le participant les verra, puis modifiez-les un par un.
-        </p>
+        <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 4} }}</span>
+        <h1 class="gp-page-header__title">{{ 'createEval.title' | t }}</h1>
+        <p class="gp-page-header__lead">{{ 'createEval.lead' | t }}</p>
       </div>
     </header>
 
@@ -17,16 +15,16 @@
       <section class="gp-card screens" aria-labelledby="screens-title">
         <div class="gp-card__header">
           <div>
-            <h2 class="gp-card__title" id="screens-title">Écrans</h2>
-            <p class="gp-card__subtitle">{{ listScreens.length }} écran{{ listScreens.length > 1 ? 's' : '' }}</p>
+            <h2 class="gp-card__title" id="screens-title">{{ 'createEval.screens' | t }}</h2>
+            <p class="gp-card__subtitle">{{ (listScreens.length > 1 ? 'createEval.count.other' : 'createEval.count.one') | t: {count: listScreens.length} }}</p>
           </div>
         </div>
 
         @if (listScreens.length === 0) {
           <div class="gp-empty">
             <i class="bi bi-collection" aria-hidden="true"></i>
-            <p class="gp-empty__title mb-0">Aucun écran pour l'instant</p>
-            <p class="mb-0">Commencez par ajouter un écran ci-dessous.</p>
+            <p class="gp-empty__title mb-0">{{ 'createEval.empty.title' | t }}</p>
+            <p class="mb-0">{{ 'createEval.empty.body' | t }}</p>
           </div>
         }
 
@@ -37,14 +35,14 @@
                 [class.is-selected]="screen === selectedScreen"
                 cdkDrag
                 cdkDragLockAxis="y">
-              <span class="screen-item__handle" cdkDragHandle title="Glisser pour déplacer" aria-hidden="true">
+              <span class="screen-item__handle" cdkDragHandle [title]="'createEval.dragHandle' | t" aria-hidden="true">
                 <i class="bi bi-grip-vertical"></i>
               </span>
               <span class="screen-item__index" aria-hidden="true">{{ i + 1 }}</span>
 
               @if (renamingIndex === i) {
                 <div class="screen-item__main">
-                  <label class="visually-hidden" [for]="'screen-name-' + i">Nom de l'écran {{ i + 1 }}</label>
+                  <label class="visually-hidden" [for]="'screen-name-' + i">{{ 'createEval.nameLabel' | t: {n: i + 1} }}</label>
                   <input #listScreenInputText
                          type="text"
                          class="form-control form-control-sm"
@@ -62,7 +60,7 @@
                         [attr.aria-current]="screen === selectedScreen ? 'true' : null"
                         (click)="selectScreen(screen, i)"
                         (dblclick)="editScreen(screen, i)">
-                  <span class="screen-item__name gp-truncate">{{ screen.name || 'Écran sans nom' }}</span>
+                  <span class="screen-item__name gp-truncate">{{ screen.name || ('createEval.unnamed' | t) }}</span>
                   <span class="screen-item__meta">
                     <i class="bi" [class]="typeIcon(screen.type)" aria-hidden="true"></i>
                     {{ typeLabel(screen.type) }} · {{ screenSummary(screen) }}
@@ -73,29 +71,29 @@
               <div class="screen-item__actions">
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
                         [id]="'screen-move-up-' + i" [disabled]="first"
-                        [attr.aria-label]="'Monter ' + screen.name" title="Monter"
+                        [attr.aria-label]="'createEval.moveUp.named' | t: {name: screen.name}" [title]="'createEval.moveUp' | t"
                         (click)="moveScreen(i, -1)">
                   <i class="bi bi-arrow-up" aria-hidden="true"></i>
                 </button>
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
                         [id]="'screen-move-down-' + i" [disabled]="last"
-                        [attr.aria-label]="'Descendre ' + screen.name" title="Descendre"
+                        [attr.aria-label]="'createEval.moveDown.named' | t: {name: screen.name}" [title]="'createEval.moveDown' | t"
                         (click)="moveScreen(i, 1)">
                   <i class="bi bi-arrow-down" aria-hidden="true"></i>
                 </button>
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
                         [id]="'screen-rename-' + i"
-                        [attr.aria-label]="'Renommer ' + screen.name" title="Renommer"
+                        [attr.aria-label]="'createEval.rename.named' | t: {name: screen.name}" [title]="'createEval.rename' | t"
                         (click)="editNameScreen(screen, false, i)">
                   <i class="bi bi-pencil" aria-hidden="true"></i>
                 </button>
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
-                        [attr.aria-label]="'Dupliquer ' + screen.name" title="Dupliquer"
+                        [attr.aria-label]="'createEval.duplicate.named' | t: {name: screen.name}" [title]="'createEval.duplicate' | t"
                         (click)="duplicateScreen(screen, i)">
                   <i class="bi bi-copy" aria-hidden="true"></i>
                 </button>
                 <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm danger-icon"
-                        [attr.aria-label]="'Supprimer ' + screen.name" title="Supprimer"
+                        [attr.aria-label]="'createEval.delete.named' | t: {name: screen.name}" [title]="'createEval.delete' | t"
                         (click)="removeScreen(screen)">
                   <i class="bi bi-trash3" aria-hidden="true"></i>
                 </button>
@@ -105,12 +103,12 @@
         </ol>
 
         <div class="add-screen">
-          <h3 class="add-screen__title" id="add-screen-heading" tabindex="-1">Ajouter un écran</h3>
+          <h3 class="add-screen__title" id="add-screen-heading" tabindex="-1">{{ 'createEval.add' | t }}</h3>
           <div class="add-screen__buttons">
             @for (type of screenTypes; track type.type) {
               <button type="button" class="add-screen__button" (click)="addScreen(type.type)">
                 <i class="bi" [class]="type.icon" aria-hidden="true"></i>
-                <span>{{ type.label }}</span>
+                <span>{{ type.label | t }}</span>
               </button>
             }
           </div>
@@ -130,7 +128,7 @@
             </div>
             <button type="button" id="screen-edit-button" class="gp-btn gp-btn--primary" (click)="isModifyScreen = true">
               <i class="bi bi-pencil-square" aria-hidden="true"></i>
-              Modifier cet écran
+              {{ 'createEval.edit' | t }}
             </button>
           </div>
 
@@ -139,7 +137,7 @@
               @if (selectedScreen.type === stimuliScreenConstModel) {
                 <div class="stimuli-preview"
                      role="img"
-                     [attr.aria-label]="'Aperçu de la grille de ' + selectedScreen.values[0] + ' lignes et ' + selectedScreen.values[1] + ' colonnes'"
+                     [attr.aria-label]="'createEval.preview.grid' | t: {rows: selectedScreen.values[0], cols: selectedScreen.values[1]}"
                      [style.gridTemplateColumns]="'repeat(' + selectedScreen.values[1] + ', ' + cellSize + 'px)'">
                   @for (n of getStimuliCells(); track $index; let i = $index) {
                     <div class="stimuli-preview__cell"
@@ -164,7 +162,7 @@
                 </div>
                 @if (hasSounds()) {
                   <div class="sound-list">
-                    <p class="gp-text-sm gp-muted mb-1">Sons des cases :</p>
+                    <p class="gp-text-sm gp-muted mb-1">{{ 'createEval.preview.sounds' | t }}</p>
                     <div class="gp-btn-group">
                       @for (n of getStimuliCells(); track $index; let i = $index) {
                         @if (selectedScreen.values[12][i]?.soundName && !selectedScreen.values[12][i]?.hidden) {
@@ -172,7 +170,7 @@
                                   [attr.aria-pressed]="playingSoundCell === i"
                                   (click)="toggleCellSound(i)">
                             <i class="bi" [class.bi-volume-up]="playingSoundCell !== i" [class.bi-pause-fill]="playingSoundCell === i" aria-hidden="true"></i>
-                            Case {{ i + 1 }}<span class="visually-hidden"> : {{ selectedScreen.values[12][i].soundName }}</span>
+                            {{ 'createEval.preview.cell' | t: {n: i + 1} }}<span class="visually-hidden"> : {{ selectedScreen.values[12][i].soundName }}</span>
                           </button>
                         }
                       }
@@ -184,24 +182,24 @@
               @if (selectedScreen.type === instructionScreenConstModel) {
                 <div class="instruction-preview">
                   @if (!selectedScreen.values[2]) {
-                    <span class="gp-muted">Cet écran d'instruction n'affiche aucun média.</span>
+                    <span class="gp-muted">{{ 'createEval.preview.noMedia' | t }}</span>
                   } @else if (instructionPreviewType === 'Texte') {
                     @if (instructionPreviewText) {
                       <p class="instruction-preview__text">{{ instructionPreviewText }}</p>
                     } @else {
-                      <span class="gp-muted">Aucun texte saisi.</span>
+                      <span class="gp-muted">{{ 'createEval.preview.noText' | t }}</span>
                     }
                   } @else if (instructionPreviewType === 'Image') {
                     @if (instructionPreviewUrl) {
-                      <img [src]="instructionPreviewUrl" [alt]="'Image de la consigne : ' + selectedScreen.values[4]" class="instruction-preview__media">
+                      <img [src]="instructionPreviewUrl" [alt]="'createEval.preview.imageAlt' | t: {name: selectedScreen.values[4]}" class="instruction-preview__media">
                     } @else {
-                      <span class="gp-muted">Aucune image à afficher.</span>
+                      <span class="gp-muted">{{ 'createEval.preview.noImage' | t }}</span>
                     }
                   } @else if (instructionPreviewType === 'Video') {
                     @if (instructionPreviewUrl) {
-                      <video [src]="instructionPreviewUrl" controls class="instruction-preview__media" [attr.aria-label]="'Vidéo : ' + selectedScreen.values[4]"></video>
+                      <video [src]="instructionPreviewUrl" controls class="instruction-preview__media" [attr.aria-label]="'createEval.preview.videoLabel' | t: {name: selectedScreen.values[4]}"></video>
                     } @else {
-                      <span class="gp-muted">Aucune vidéo à afficher.</span>
+                      <span class="gp-muted">{{ 'createEval.preview.noVideo' | t }}</span>
                     }
                   } @else if (instructionPreviewType === 'Son') {
                     @if (instructionPreviewUrl) {
@@ -210,13 +208,13 @@
                               [attr.aria-pressed]="instructionSoundPlaying"
                               (click)="toggleInstructionSound()">
                         <i class="bi" [class.bi-volume-up]="!instructionSoundPlaying" [class.bi-pause-fill]="instructionSoundPlaying" aria-hidden="true"></i>
-                        {{ instructionSoundPlaying ? 'Arrêter le son' : 'Écouter le son' }}
+                        {{ (instructionSoundPlaying ? 'createEval.preview.stopSound' : 'createEval.preview.playSound') | t }}
                       </button>
                     } @else {
-                      <span class="gp-muted">Aucun son à écouter.</span>
+                      <span class="gp-muted">{{ 'createEval.preview.noSound' | t }}</span>
                     }
                   } @else {
-                    <span class="gp-muted">Aucun média à afficher.</span>
+                    <span class="gp-muted">{{ 'createEval.preview.nothing' | t }}</span>
                   }
                 </div>
               }
@@ -225,7 +223,7 @@
                 <div class="transition-preview">
                   @if (selectedScreen.values[2]) {
                     <span class="transition-preview__cross" aria-hidden="true">+</span>
-                    <span class="visually-hidden">Croix de fixation</span>
+                    <span class="visually-hidden">{{ 'createEval.preview.cross' | t }}</span>
                   }
                   <p class="gp-muted mb-0">{{ screenSummary(selectedScreen) }}</p>
                 </div>
@@ -235,8 +233,8 @@
         } @else {
           <div class="gp-empty preview__empty">
             <i class="bi bi-display" aria-hidden="true"></i>
-            <h2 class="gp-empty__title" id="preview-title">Aucun écran sélectionné</h2>
-            <p class="mb-0">Sélectionnez un écran dans la liste pour voir son aperçu.</p>
+            <h2 class="gp-empty__title" id="preview-title">{{ 'createEval.preview.none.title' | t }}</h2>
+            <p class="mb-0">{{ 'createEval.preview.none.body' | t }}</p>
           </div>
         }
       </section>
@@ -244,14 +242,14 @@
 
     <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
-    <nav class="gp-actions" aria-label="Navigation entre les étapes">
+    <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
       <button type="button" class="gp-btn" (click)="backToSetupEval()">
         <i class="bi bi-arrow-left" aria-hidden="true"></i>
-        Précédent
+        {{ 'steps.previous' | t }}
       </button>
       <div class="gp-actions__end">
         <button type="button" class="gp-btn gp-btn--primary" (click)="goToDownloadEval()">
-          Suivant : export
+          {{ 'createEval.next' | t }}
           <i class="bi bi-arrow-right" aria-hidden="true"></i>
         </button>
       </div>

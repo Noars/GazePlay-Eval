@@ -2,27 +2,24 @@
   <div class="gp-dialog__header">
     <span class="gp-dialog__icon gp-dialog__icon--danger" aria-hidden="true"><i class="bi bi-trash3"></i></span>
     <div>
-      <h2 class="gp-dialog__title" id="delete-title">Supprimer « {{ data.slotName }} » ?</h2>
-      <p class="gp-dialog__subtitle">Cette suppression est définitive.</p>
+      <h2 class="gp-dialog__title" id="delete-title">{{ 'deleteSave.title' | t: {name: data.slotName} }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'deleteSave.subtitle' | t }}</p>
     </div>
   </div>
 
   <div class="gp-dialog__body" id="delete-message">
-    <p class="mb-0">
-      L'évaluation sera retirée de cet emplacement. Ses médias seront aussi effacés s'ils ne sont
-      utilisés par aucune autre sauvegarde.
-    </p>
+    <p class="mb-0">{{ 'deleteSave.body' | t }}</p>
     <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" (click)="download()">
       <i class="bi bi-download" aria-hidden="true"></i>
-      Télécharger d'abord une copie (.gpSave)
+      {{ 'deleteSave.downloadFirst' | t }}
     </button>
   </div>
 
   <div class="gp-dialog__footer">
-    <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="cancel()">Annuler</button>
+    <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="cancel()">{{ 'common.cancel' | t }}</button>
     <button type="button" class="gp-btn gp-btn--danger" (click)="delete()">
       <i class="bi bi-trash3" aria-hidden="true"></i>
-      Supprimer définitivement
+      {{ 'deleteSave.confirm' | t }}
     </button>
   </div>
 </div>

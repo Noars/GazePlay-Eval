@@ -1,15 +1,14 @@
 <div class="gp-page">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <h1 class="gp-page-header__title">Mes sauvegardes</h1>
+      <h1 class="gp-page-header__title">{{ 'saves.title' | t }}</h1>
       <p class="gp-page-header__lead">
-        Trois emplacements pour conserver vos évaluations dans ce navigateur. Pour les garder en
-        lieu sûr ou les partager, téléchargez-les au format <code>.gpSave</code>.
+        {{ 'saves.lead.before' | t }}<code>.gpSave</code>{{ 'saves.lead.after' | t }}
       </p>
     </div>
     <button type="button" class="gp-btn gp-btn--primary" (click)="newEval()">
       <i class="bi bi-plus-lg" aria-hidden="true"></i>
-      Nouvelle évaluation
+      {{ 'saves.new' | t }}
     </button>
   </header>
 
@@ -17,30 +16,29 @@
   <section class="gp-card current" aria-labelledby="current-title">
     <div class="gp-card__body current__body">
       <div class="current__text">
-        <h2 class="gp-card__title" id="current-title">Évaluation en cours</h2>
+        <h2 class="gp-card__title" id="current-title">{{ 'saves.current' | t }}</h2>
         @if (autoSave) {
-          <p class="mb-1"><strong>{{ autoSave.nomEval || 'Évaluation sans nom' }}</strong>
-            · modifiée le {{ autoSave.createdAt | date:'dd/MM/yyyy à HH:mm' }}</p>
+          <p class="mb-1"><strong>{{ autoSave.nomEval || ('home.unnamed' | t) }}</strong>{{ 'saves.modifiedOn' | t: {date: (autoSave.createdAt | date:('saves.dateTimeFormat' | t)) ?? ''} }}</p>
           @if (hasUnsavedEval) {
             <p class="current__warning mb-0">
               <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
-              Pas encore enregistrée dans un emplacement : choisissez-en un ci-dessous.
+              {{ 'saves.unsaved' | t }}
             </p>
           } @else if (saveService.activeSlotIndex) {
-            <p class="gp-muted mb-0">Enregistrée automatiquement dans l'emplacement {{ saveService.activeSlotIndex }}.</p>
+            <p class="gp-muted mb-0">{{ 'saves.autoSavedIn' | t: {n: saveService.activeSlotIndex} }}</p>
           }
         } @else {
-          <p class="gp-muted mb-0">Aucune évaluation en cours.</p>
+          <p class="gp-muted mb-0">{{ 'saves.noCurrent' | t }}</p>
         }
       </div>
       <button type="button" class="gp-btn gp-btn--danger-outline" [disabled]="!evalInProgress" (click)="deleteAutoSave()">
         <i class="bi bi-x-circle" aria-hidden="true"></i>
-        {{ evalInProgress ? 'Abandonner les modifications en cours' : 'Pas de modifications en cours' }}
+        {{ (evalInProgress ? 'saves.discard' : 'saves.noChanges') | t }}
       </button>
     </div>
   </section>
 
-  <h2 class="slots-title">Emplacements</h2>
+  <h2 class="slots-title">{{ 'saves.slots' | t }}</h2>
   <ul class="slots">
     @for (slot of slots; track slot.index) {
       <li class="slot gp-card" [class.slot--empty]="slot.data === null" [class.slot--active]="slot.data && saveService.activeSlotIndex === slot.index">
@@ -48,19 +46,19 @@
           <span class="slot__number" aria-hidden="true">{{ slot.index }}</span>
           <div class="slot__title-wrap">
             <h3 class="slot__title gp-truncate">
-              <span class="visually-hidden">Emplacement {{ slot.index }} : </span>
-              {{ slot.data ? (slot.data.nomEval || 'Sans nom') : 'Emplacement libre' }}
+              <span class="visually-hidden">{{ 'saves.slotPrefix' | t: {n: slot.index} }}</span>
+              {{ slot.data ? (slot.data.nomEval || ('saves.unnamed' | t)) : ('saves.freeSlot' | t) }}
             </h3>
             @if (slot.data) {
               <p class="slot__meta">
-                Modifiée le {{ slot.data.createdAt | date:'dd/MM/yyyy' }} · {{ slot.data.listScreens.length || 0 }} écran(s)
+                {{ 'saves.slotMeta' | t: {date: (slot.data.createdAt | date:('saves.dateFormat' | t)) ?? '', count: slot.data.listScreens.length || 0} }}
               </p>
             } @else {
-              <p class="slot__meta">Aucune évaluation enregistrée.</p>
+              <p class="slot__meta">{{ 'saves.slotEmpty' | t }}</p>
             }
           </div>
           @if (slot.data && saveService.activeSlotIndex === slot.index) {
-            <span class="gp-badge gp-badge--primary" [title]="tooltipCurrentEval">En cours</span>
+            <span class="gp-badge gp-badge--primary" [title]="'saves.inProgress.tooltip' | t">{{ 'saves.inProgress' | t }}</span>
           }
         </div>
 
@@ -68,24 +66,24 @@
           @if (slot.data === null) {
             <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" [disabled]="!autoSave" (click)="saveToSlot(slot, autoSave!)">
               <i class="bi bi-floppy" aria-hidden="true"></i>
-              Enregistrer l'évaluation en cours ici
+              {{ 'saves.saveHere' | t }}
             </button>
           } @else {
             <button type="button" class="gp-btn gp-btn--primary" (click)="editSlot(slot.index)">
               <i class="bi bi-pencil" aria-hidden="true"></i>
-              Ouvrir<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+              {{ 'saves.open' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
             </button>
             <button type="button" class="gp-btn gp-btn--secondary" (click)="downloadSlot(slot)">
               <i class="bi bi-download" aria-hidden="true"></i>
-              Télécharger<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+              {{ 'saves.download' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
             </button>
             <button type="button" class="gp-btn gp-btn--block" [disabled]="!autoSave" (click)="saveToSlot(slot)">
               <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-              Remplacer par l'évaluation en cours
+              {{ 'saves.replace' | t }}
             </button>
             <button type="button" class="gp-btn gp-btn--danger-outline" (click)="openDeletePopup(slot)">
               <i class="bi bi-trash3" aria-hidden="true"></i>
-              Supprimer<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+              {{ 'saves.delete' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
             </button>
           }
         </div>
@@ -93,10 +91,10 @@
     }
   </ul>
 
-  <nav class="gp-actions" aria-label="Retour">
+  <nav class="gp-actions" [attr.aria-label]="'saves.back' | t">
     <button type="button" class="gp-btn" (click)="router.navigate(['/home'])">
       <i class="bi bi-arrow-left" aria-hidden="true"></i>
-      Retour à l'accueil
+      {{ 'common.backHome' | t }}
     </button>
   </nav>
 </div>

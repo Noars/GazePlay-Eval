@@ -14,15 +14,18 @@ import {NgComponentOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {GuideSauvegardeComponent} from '../../pages/guide/guide-sauvegarde/guide-sauvegarde.component';
 import {GuideCreationComponent} from '../../pages/guide/guide-creation/guide-creation.component';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
+/** Textes du panneau, sous forme de clés de traduction. */
 interface GuideSection {
-  title: string;
-  body: string;
+  title: TranslationKey;
+  body: TranslationKey;
 }
 
 interface PageGuide {
-  title: string;
-  intro?: string;
+  title: TranslationKey;
+  intro?: TranslationKey;
   sections?: GuideSection[];
 }
 
@@ -36,7 +39,7 @@ interface PageGuide {
 @Component({
   selector: 'app-guide-popup',
   standalone: true,
-  imports: [NgComponentOutlet],
+  imports: [NgComponentOutlet, TranslatePipe],
   templateUrl: './guide-popup-component.html',
   styleUrl: './guide-popup-component.scss',
 })
@@ -57,106 +60,74 @@ export class GuidePopupComponent implements OnChanges {
 
   // Guide affiché par défaut (pas de page dédiée)
   private readonly defaultGuide: PageGuide = {
-    title: 'Aide',
-    intro: "Le guide détaillé de cette page n'est pas encore disponible. Consultez le guide complet depuis le menu « Guide ».",
+    title: 'helpPanel.default.title',
+    intro: 'helpPanel.default.intro',
     sections: [],
   };
 
-  // Titre des différentes parties + contenu
+  // Titre des différentes parties + contenu (clés de traduction)
   private readonly guides: Record<string, PageGuide> = {
     home: {
-      title: "Accueil",
-      intro: "Cette page permet d'accéder aux évaluations, de deux façons différentes : ",
+      title: 'helpPanel.home.title',
+      intro: 'helpPanel.home.intro',
       sections: [
-        {
-          title: "Nouvelle évaluation",
-          body: "Lancez la création d'une évaluation de zéro et laissez-vous guider pas à pas.",
-        },
-        {
-          title: "Reprendre l'évaluation précédente",
-          body: "Si une évaluation est en cours, reprenez-la là où vous vous en étiez arrêté.",
-        },
+        {title: 'helpPanel.home.new.title', body: 'helpPanel.home.new.body'},
+        {title: 'helpPanel.home.resume.title', body: 'helpPanel.home.resume.body'},
       ],
     },
     'info-eval': {
-      title: "Informations de l'évaluation",
-      intro: "Définissez les informations générales de votre évaluation.",
+      title: 'helpPanel.infoEval.title',
+      intro: 'helpPanel.infoEval.intro',
       sections: [
-        {
-          title: "Nom de l'évaluation",
-          body: "Choisissez un nom clair : il identifiera votre évaluation dans GazePlay-Eval.",
-        },
+        {title: 'helpPanel.infoEval.name.title', body: 'helpPanel.infoEval.name.body'},
       ],
     },
     'info-participant': {
-      title: "Informations sur le participant",
-      intro: "Choisissez les informations à renseigner sur la personne évaluée.",
+      title: 'helpPanel.infoParticipant.title',
+      intro: 'helpPanel.infoParticipant.intro',
       sections: [
-        {
-          title: "Champs personnalisés",
-          body: "Sélectionnez le type d'informations que vous souhaitez collecter lors de la passation.",
-        },
+        {title: 'helpPanel.infoParticipant.fields.title', body: 'helpPanel.infoParticipant.fields.body'},
       ],
     },
     'setup-eval': {
-      title: "Configuration de l'évaluation",
-      intro: "Mettez en place la structure de votre évaluation.",
+      title: 'helpPanel.setupEval.title',
+      intro: 'helpPanel.setupEval.intro',
       sections: [
-        {
-          title: "Écrans",
-          body: "Organisez les écrans et leur disposition avant d'ajouter vos contenus.",
-        },
+        {title: 'helpPanel.setupEval.screens.title', body: 'helpPanel.setupEval.screens.body'},
       ],
     },
     'create-eval': {
-      title: "Création des stimuli",
-      intro: "Ajoutez et configurez les stimuli de chaque écran.",
+      title: 'helpPanel.createEval.title',
+      intro: 'helpPanel.createEval.intro',
       sections: [
-        {
-          title: "Médias",
-          body: "Importez les images, sons, vidéos ou textes à présenter dans chaque case.",
-        },
-        {
-          title: "Bonne réponse",
-          body: "Indiquez pour chaque case si elle correspond à la bonne réponse attendue.",
-        },
+        {title: 'helpPanel.createEval.media.title', body: 'helpPanel.createEval.media.body'},
+        {title: 'helpPanel.createEval.answer.title', body: 'helpPanel.createEval.answer.body'},
       ],
     },
     'download-eval': {
-      title: "Téléchargement",
-      intro: "Exportez votre évaluation pour l'utiliser dans GazePlay-Eval.",
+      title: 'helpPanel.downloadEval.title',
+      intro: 'helpPanel.downloadEval.intro',
       sections: [
-        {
-          title: "Export",
-          body: "Téléchargez le fichier de l'évaluation une fois la création terminée.",
-        },
+        {title: 'helpPanel.downloadEval.export.title', body: 'helpPanel.downloadEval.export.body'},
       ],
     },
     sauvegarde: {
-      title: "Sauvegardes",
+      title: 'helpPanel.saves.title',
     },
     'load-save': {
-      title: "Chargement",
-      intro: "Rechargez une évaluation sauvegardée précédemment.",
+      title: 'helpPanel.load.title',
+      intro: 'helpPanel.load.intro',
       sections: [
-        {
-          title: "Charger une sauvegarde",
-          body: "Sélectionnez une sauvegarde existante pour reprendre son édition.",
-        },
+        {title: 'helpPanel.load.slot.title', body: 'helpPanel.load.slot.body'},
       ],
     },
     option: {
-      title: "Options et accessibilité",
-      intro: "Adaptez l'affichage à vos besoins. Chaque réglage est appliqué immédiatement et enregistré sur cet appareil.",
+      title: 'helpPanel.options.title',
+      intro: 'helpPanel.options.intro',
       sections: [
-        {
-          title: "Apparence",
-          body: "Choisissez un thème clair, sombre ou celui de votre système, et activez si besoin le contraste renforcé ou le mode daltonisme (couleurs distinguables complétées par des symboles).",
-        },
-        {
-          title: "Lecture",
-          body: "Modifiez la police, la taille du texte, l'interligne et les espacements pour faciliter la lecture.",
-        },
+        {title: 'helpPanel.options.appearance.title', body: 'helpPanel.options.appearance.body'},
+        {title: 'helpPanel.options.reading.title', body: 'helpPanel.options.reading.body'},
+        {title: 'helpPanel.options.language.title', body: 'helpPanel.options.language.body'},
       ],
     },
   };

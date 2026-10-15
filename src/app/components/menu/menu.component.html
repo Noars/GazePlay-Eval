@@ -1,6 +1,6 @@
 <ng-template #navContent>
-  <nav class="gp-nav" aria-label="Navigation principale">
-    <p class="gp-nav__section" aria-hidden="true">Navigation</p>
+  <nav class="gp-nav" [attr.aria-label]="'nav.label' | t">
+    <p class="gp-nav__section" aria-hidden="true">{{ 'nav.section.navigation' | t }}</p>
     <ul class="gp-nav__list">
       @for (item of navigationItems; track item.route) {
         <li>
@@ -10,13 +10,13 @@
              ariaCurrentWhenActive="page"
              [routerLinkActiveOptions]="{exact: !!item.exact}">
             <i class="bi" [class]="item.icon" aria-hidden="true"></i>
-            <span>{{ item.label }}</span>
+            <span>{{ item.label | t }}</span>
           </a>
         </li>
       }
     </ul>
 
-    <p class="gp-nav__section" aria-hidden="true">Projet</p>
+    <p class="gp-nav__section" aria-hidden="true">{{ 'nav.section.project' | t }}</p>
     <ul class="gp-nav__list">
       @for (item of projectItems; track item.route) {
         <li>
@@ -25,7 +25,7 @@
              routerLinkActive="is-active"
              ariaCurrentWhenActive="page">
             <i class="bi" [class]="item.icon" aria-hidden="true"></i>
-            <span>{{ item.label }}</span>
+            <span>{{ item.label | t }}</span>
           </a>
         </li>
       }
@@ -33,10 +33,10 @@
         <button type="button" class="gp-nav__link" [disabled]="importing()" (click)="openImportPopup()">
           @if (importing()) {
             <span class="gp-spinner" aria-hidden="true"></span>
-            <span>Import en cours…</span>
+            <span>{{ 'nav.importing' | t }}</span>
           } @else {
             <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
-            <span>Importer un fichier</span>
+            <span>{{ 'nav.import' | t }}</span>
           }
         </button>
       </li>
@@ -49,8 +49,8 @@
 } @else {
   <dialog #drawer class="gp-drawer" aria-labelledby="menu-drawer-title" (click)="onDrawerClick($event)">
     <div class="gp-drawer__header">
-      <h2 class="gp-drawer__title" id="menu-drawer-title">Menu</h2>
-      <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon" aria-label="Fermer le menu" (click)="close()">
+      <h2 class="gp-drawer__title" id="menu-drawer-title">{{ 'nav.menu' | t }}</h2>
+      <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon" [attr.aria-label]="'nav.closeMenu' | t" (click)="close()">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
     </div>

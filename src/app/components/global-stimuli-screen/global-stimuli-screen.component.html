@@ -3,30 +3,30 @@
   [0] lignes · [1] colonnes · [2] temps maximum ? · [3] durée maximum · [4] durée de fixation ·
   [5] nombre de stimuli à valider · [6] cacher après sélection ? · [7] position aléatoire ?
 -->
-<h3 class="gp-subheading">Taille de la grille</h3>
-<app-number-setting label="Nombre de lignes" [min]="1" step="1" hint="Minimum 1."
+<h3 class="gp-subheading">{{ 'screen.grid.heading' | t }}</h3>
+<app-number-setting [label]="'screen.grid.rows' | t" [min]="1" step="1" [hint]="'screen.grid.min1' | t"
                     [(ngModel)]="globalStimuliScreenInfos[0]"></app-number-setting>
-<app-number-setting label="Nombre de colonnes" [min]="1" step="1" hint="Minimum 1."
+<app-number-setting [label]="'screen.grid.columns' | t" [min]="1" step="1" [hint]="'screen.grid.min1' | t"
                     [(ngModel)]="globalStimuliScreenInfos[1]"></app-number-setting>
 
-<h3 class="gp-subheading">Temps maximum par écran</h3>
-<app-choice-setting label="Limiter le temps passé sur chaque écran ?"
+<h3 class="gp-subheading">{{ 'screen.maxTime.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.maxTime.limit' | t"
                     [(ngModel)]="globalStimuliScreenInfos[2]"></app-choice-setting>
 @if (globalStimuliScreenInfos[2]) {
-  <app-number-setting label="Temps maximum" unit="secondes" [min]="0.1" step="0.1"
+  <app-number-setting [label]="'screen.maxTime.value' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                       [(ngModel)]="globalStimuliScreenInfos[3]"></app-number-setting>
 }
 
-<h3 class="gp-subheading">Validation</h3>
-<app-number-setting label="Durée de fixation pour valider un stimulus" unit="secondes" [min]="0.1" step="0.1"
+<h3 class="gp-subheading">{{ 'screen.validation.heading' | t }}</h3>
+<app-number-setting [label]="'screen.validation.fixation' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                     [(ngModel)]="globalStimuliScreenInfos[4]"></app-number-setting>
-<app-number-setting label="Nombre de stimuli à valider pour passer à l'écran suivant"
-                    [hint]="'Maximum : ' + maxStimuli + ' (lignes × colonnes).'"
+<app-number-setting [label]="'screen.validation.count' | t"
+                    [hint]="'screen.validation.max' | t: {max: maxStimuli}"
                     [min]="1" [max]="maxStimuli" step="1"
                     [(ngModel)]="globalStimuliScreenInfos[5]"></app-number-setting>
 
-<h3 class="gp-subheading">Comportement des stimuli</h3>
-<app-choice-setting label="Placer les stimuli aléatoirement ?"
+<h3 class="gp-subheading">{{ 'screen.behaviour.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.behaviour.random' | t"
                     [(ngModel)]="globalStimuliScreenInfos[7]"></app-choice-setting>
-<app-choice-setting label="Cacher un stimulus une fois sélectionné ?"
+<app-choice-setting [label]="'screen.behaviour.hide' | t"
                     [(ngModel)]="globalStimuliScreenInfos[6]"></app-choice-setting>

@@ -1,16 +1,19 @@
 import {Component, EventEmitter, inject, Output} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 import {SaveService} from '../../services/save/save.service';
 import {IconGuidePopupComponent} from '../icon-guide-popup/icon-guide-popup-component';
+import {LanguageMenuComponent} from '../language-menu/language-menu.component';
 
 /**
  * En-tête de l'application : accès au menu (petits écrans), marque, aide contextuelle,
- * bascule de thème et options.
+ * bascule de thème et choix de la langue (liste déroulante). Les options restent accessibles
+ * depuis le menu.
  */
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, IconGuidePopupComponent],
+  imports: [RouterLink, IconGuidePopupComponent, LanguageMenuComponent, TranslatePipe],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })

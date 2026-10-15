@@ -7,6 +7,7 @@ import {FlashService} from '../flash-message/flash.service';
 import {LoadService} from '../load/load.service';
 import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 /**
  * Sauvegarde automatique de l'évaluation en cours (slot 0, et emplacement nommé actif).
@@ -23,6 +24,7 @@ export class AutoSaveService implements OnDestroy {
   private readonly flashService = inject(FlashService);
   private readonly loadService = inject(LoadService);
   private readonly mediaCleanup = inject(MediaCleanupService);
+  private readonly i18n = inject(I18nService);
 
   private subscription?: Subscription;
   private isResuming = false; // vrai pendant la restauration d'une session
@@ -59,10 +61,10 @@ export class AutoSaveService implements OnDestroy {
       if (this.saveService.activeSlotIndex !== null) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
-      this.flashService.show('info', 'Vos modifications ont été enregistrées automatiquement.');
+      this.flashService.show('info', this.i18n.t('autoSave.saved'));
     } catch (e) {
       console.error('Sauvegarde automatique impossible :', e);
-      this.flashService.show('error', 'Vos modifications n\'ont pas pu être enregistrées : le stockage du navigateur est peut-être plein.');
+      this.flashService.show('error', this.i18n.t('autoSave.error'));
       return;
     }
 
@@ -91,8 +93,7 @@ export class AutoSaveService implements OnDestroy {
     }
 
     if (save.step === -1) {
-      this.flashService.show("error", "Une erreur s'est produite lors de la tentative de rechargement " +
-        "de l'évaluation. Tentez de la sauvegarder et de l'ouvrir à nouveau.");
+      this.flashService.show('error', this.i18n.t('autoSave.resumeError'));
       return;
     }
 

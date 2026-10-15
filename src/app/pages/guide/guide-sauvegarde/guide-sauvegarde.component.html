@@ -1,3 +1,225 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Saving and loading assessments</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>
+        This page explains how assessments are saved and loaded on the GazePlay-Eval site.
+        The guide is divided into three separate parts:
+      </p>
+
+      <ul>
+        <li>Automatic saving</li>
+        <li>The manual save page</li>
+        <li>The load page</li>
+      </ul>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Part 1 — Automatic saving</h2>
+      <div class="guide-section-body">
+        <p>When you create an <a routerLink="/guide/creation">assessment</a> in GazePlay-Eval,
+          your progress is saved and kept in your browser at each step you complete.
+          This means that even if you reload the page or close the window, your progress is not lost.
+        </p>
+
+        <div class="alert alert-warning fw-semibold w-100 mb-5">
+          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
+          Your progress is not saved after every action! <br> By default, the assessment is saved each time you change
+          page, whether to the previous or the next one. Some additions, such as
+          <a routerLink="/guide/creation">adding screens</a>, also trigger an automatic save of the assessment.
+        </div>
+
+        <p><strong>How do I know whether my assessment has been saved?</strong></p>
+
+        <p>The site provides a simple way to check that your assessment was saved automatically: notifications. If
+          messages are turned on in the <a routerLink="/option">options</a> (which is the default), short-lived messages
+          appear at the bottom of your screen each time the assessment is saved. If saving fails, an error message
+          replaces the confirmation message.
+        </p>
+
+        <div class="guide-section-card mb-3">
+          <h2 class="guide-section-title">Help</h2>
+          <div class="guide-section-body">
+            <p>
+              No notifications appear? You may have turned them off by setting a display time of
+              <code>0 seconds</code> in the site options.
+              If so, you can increase the time in the <a routerLink="/option">options</a> or with the button below.
+            </p>
+
+            <div class="text-center">
+              <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="resetDuration()">
+                Turn notifications back on (3 seconds)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning fw-semibold w-100 mb-5">
+          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
+          Note that automatic saving only covers the last assessment edited. Creating or editing another one overwrites
+          your previous assessment. To keep your previous assessment, save it in a dedicated slot (see the part below).
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Part 2 — The save page</h2>
+      <div class="guide-section-body">
+        <p>In addition to automatic saving, you can also place an assessment in a reserved slot that is available at any
+        time from the <a routerLink="/sauvegarde">save</a> page. This page lets you keep the assessments you created, edit
+          them or download them.
+        </p>
+
+        <img src="assets/guide/images/page-save.png" class="guide-content-image"
+             alt="Picture showing the save page, with two saved assessments (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The save page containing two saved assessments.</p>
+        </div>
+
+        <p>This page has many buttons and visual indicators to help you know when to save and which actions are in
+        progress.</p>
+
+        <p>The main part of the page is the three slots in the middle. These are the assessment save slots.
+          Depending on their state, they can be empty or contain an existing assessment.
+        </p>
+
+        <div class="alert alert-tip fw-semibold w-100 mb-5">
+          <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
+          To respect your browser's storage quotas, the number of assessments saved at the same time is limited to three.
+          Complete assessments can contain a lot of media (images, sounds, videos) and fill up local storage.
+          If you want to keep more assessments, you can always download them and <a routerLink="/guide/imports">
+          import</a> them later.
+        </div>
+
+        <p>When you have just created an assessment and go to this page, a notification tells you that the current
+        assessment has not been saved yet.</p>
+
+        <ul>
+          <li><p>If at least one slot is free: a “Save the current assessment here” button is shown in each slot that can
+            hold the assessment. Clicking it assigns the assessment to that slot. It is kept and available at any time,
+            even if you create another assessment.
+          </p>
+          </li>
+
+          <li><p>If no slot is free: each slot that already holds an assessment shows several buttons to manage it.
+            </p>
+
+            <img src="assets/guide/images/buttons-save.png" class="guide-content-image"
+                 alt="Picture showing the different actions available on a saved assessment (French interface).">
+            <div class="guide-content-image-desc">
+              <p>Buttons for the different actions available on a saved assessment.</p>
+            </div>
+
+            <p>“Replace with the current assessment” overwrites this assessment with the new one, so you can use it to
+            save your new assessment. “Open” lets you edit the existing assessment, “Download” downloads it, and
+            “Delete” deletes it.</p>
+          </li>
+        </ul>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Actions that delete data (such as deleting or replacing an earlier assessment) always ask the user for a second
+          confirmation, to make sure the action was intended.
+        </div>
+
+        <p>The save page also has two other buttons: “Discard current changes” deletes the latest changes, whether they
+          are a new assessment or changes to an assessment that was already saved. “New assessment” creates a new
+          assessment from scratch.
+        </p>
+
+        <p>Finally, to make it easier to spot which saved assessment is being edited, the slot concerned is highlighted
+        and shows an “In progress” badge.</p>
+
+
+        <p>To reach the save page, open the side menu and click “My saves”.
+          If you have trouble reaching the side menu, you can go straight to the save page
+          by clicking <a routerLink="/sauvegarde">here</a>.
+        </p>
+
+        <img src="assets/guide/images/menu-save.png" class="guide-content-image"
+             alt="Picture showing the side menu, with the save tab highlighted by a hover effect (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The save tab in the side menu.</p>
+        </div>
+
+        <p><strong>Do I need to save the assessment again after making changes?</strong></p>
+
+        <p>No, changes made to assessments that are already saved are kept automatically.
+        A highlighted assessment, as shown in the picture, is saved automatically, without the user having to save their
+        changes manually.</p>
+
+        <p><strong>Are assessments kept forever?</strong></p>
+        <p>The short answer is yes. Assessments are kept in your browser's local storage (<i>LocalStorage</i>).
+        This means your data is still there after closing the page, the browser or even turning off your computer.
+        The data is never transferred to a server. However, local storage can be erased in the following cases:</p>
+        <ul>
+          <li>If you use the site in private browsing/incognito mode (data deleted when the window is closed).</li>
+          <li>If you clear your browser's browsing data (completely or specifically for GazePlay-Eval).</li>
+          <li>If you uninstall/reinstall your browser, or reset your computer.</li>
+        </ul>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Local storage is not shared between browsers. For example, assessments made in Firefox will not appear if the
+          site is opened in Google Chrome or Opera GX.
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Part 3 — The assessment load page</h2>
+      <div class="guide-section-body">
+        <p>As its name suggests, the assessment load page lets you load assessments saved earlier.
+        Loading an assessment takes you back to the last step visited before the assessment was saved.
+        </p>
+
+        <img src="assets/guide/images/page-load.png" class="guide-content-image"
+             alt="Picture showing the assessment load page, with two example assessments (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The assessment load page.</p>
+        </div>
+
+        <p>Clicking a slot that contains an assessment loads it so you can pick up where you left off.
+        As on the save page, to make it easier to spot which saved assessment is being edited, the slot concerned shows
+          an “In progress” badge.</p>
+
+        <p>To reach the load page, open the side menu and click “Load”.
+          If you have trouble reaching the side menu, you can go straight to the load page
+          by clicking <a routerLink="/load-save">here</a>.
+        </p>
+
+        <img src="assets/guide/images/menu-load.png" class="guide-content-image"
+             alt="Picture showing the side menu, with the load tab highlighted by a hover effect (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The load tab in the side menu.</p>
+        </div>
+
+        <p><strong>Is there a difference between opening an assessment from the save page and from the load page?</strong></p>
+
+        <p>No, both work the same way: they load a saved assessment and take you back to the last step you viewed. The
+        load page simply lets you resume an assessment more quickly, without going through the save page.</p>
+
+      </div>
+    </div>
+
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a>
+
+  </div>
+</div>
+} @else {
 <div class="card mb-4">
   <div class="card-header">
     <h1 class="card-title">Sauvegarde et Chargement d'évaluation</h1>
@@ -227,3 +449,4 @@
 
   </div>
 </div>
+}

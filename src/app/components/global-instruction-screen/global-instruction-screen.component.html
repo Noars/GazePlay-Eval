@@ -3,28 +3,28 @@
   [0] temps avant écran suivant ? · [1] durée · [2] ajouter un média ? · [3] type de média ·
   [4] bouton de lancement ? · [5] durée de fixation du bouton
 -->
-<h3 class="gp-subheading">Passage à l'écran suivant</h3>
-<app-choice-setting label="Passer automatiquement à l'écran suivant après un délai ?"
+<h3 class="gp-subheading">{{ 'screen.next.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.next.auto' | t"
                     [(ngModel)]="globalInstructionScreenInfos[0]"></app-choice-setting>
 @if (globalInstructionScreenInfos[0]) {
-  <app-number-setting label="Délai avant l'écran suivant" unit="secondes" [min]="0.1" step="0.1"
+  <app-number-setting [label]="'screen.next.delay' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                       [(ngModel)]="globalInstructionScreenInfos[1]"></app-number-setting>
 }
 
-<h3 class="gp-subheading">Média</h3>
-<app-choice-setting label="Ajouter une image, une vidéo, un texte ou un son ?"
+<h3 class="gp-subheading">{{ 'screen.media.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.media.add' | t"
                     [(ngModel)]="globalInstructionScreenInfos[2]"></app-choice-setting>
 @if (globalInstructionScreenInfos[2]) {
-  <app-choice-setting label="Type de média par défaut"
+  <app-choice-setting [label]="'screen.media.defaultType' | t"
                       [options]="mediaTypeOptions"
                       [(ngModel)]="globalInstructionScreenInfos[3]"></app-choice-setting>
 }
 
-<h3 class="gp-subheading">Bouton de lancement</h3>
-<app-choice-setting label="Ajouter un bouton pour lancer l'évaluation ?"
-                    hint="Le participant fixe le bouton du regard pour démarrer."
+<h3 class="gp-subheading">{{ 'screen.startButton.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.startButton.add' | t"
+                    [hint]="'screen.startButton.hint' | t"
                     [(ngModel)]="globalInstructionScreenInfos[4]"></app-choice-setting>
 @if (globalInstructionScreenInfos[4]) {
-  <app-number-setting label="Durée de fixation du bouton" unit="secondes" [min]="0.1" step="0.1"
+  <app-number-setting [label]="'screen.startButton.duration' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
                       [(ngModel)]="globalInstructionScreenInfos[5]"></app-number-setting>
 }

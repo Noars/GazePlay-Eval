@@ -2,6 +2,7 @@ import {Component, inject, Input} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {STEP_TO_ROUTE} from '../../shared/stepRoute.model';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Indicateur des étapes du parcours de création.
@@ -12,7 +13,7 @@ import {STEP_TO_ROUTE} from '../../shared/stepRoute.model';
  */
 @Component({
   selector: 'app-progress-bar',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './progress-bar.component.html',
   standalone: true,
   styleUrl: './progress-bar.component.scss'

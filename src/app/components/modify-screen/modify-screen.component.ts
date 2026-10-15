@@ -35,6 +35,8 @@ import {NumberSettingComponent} from '../../shared/ui/number-setting/number-sett
 import {HelpTipComponent} from '../../shared/ui/help-tip/help-tip.component';
 import {FilePickerComponent} from '../../shared/ui/file-picker/file-picker.component';
 import {INSTRUCTION_MEDIA_OPTIONS} from '../global-instruction-screen/global-instruction-screen.component';
+import {I18nService, TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Opération sur un média, enregistrée pour pouvoir être annulée.
@@ -80,6 +82,7 @@ type ScreenKind = typeof transitionScreenConstModel | typeof instructionScreenCo
     HelpTipComponent,
     FilePickerComponent,
     DecimalPipe,
+    TranslatePipe,
   ],
   templateUrl: './modify-screen.component.html',
   standalone: true,
@@ -92,29 +95,18 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   private readonly media = inject(MediaLibraryService);
   private readonly flashService = inject(FlashService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly i18n = inject(I18nService);
 
-  tooltipFileSave: string = (
-    `Tous les fichiers que vous importez sont enregistrés dans le stockage de votre navigateur.\n\n` +
-    `Vous pouvez donc déplacer ou supprimer les fichiers de votre disque sans risquer d'altérer l'évaluation en cours.`
-  );
-  tooltipSelectionChoice: string = (
-    `Le choix de sélection détermine comment l'application tient compte du type des cases :\n\n` +
-    `• Tout : le type des cases n'est pas compté dans la validation, du moment que le participant sélectionne le nombre requis.\n\n` +
-    `• Bonnes réponses : seules les cases marquées comme bonnes réponses sont comptées.`
-  );
-  tooltipMaxSelection: string = (
-    `Le nombre de stimuli ne peut pas être plus grand que le nombre de lignes multiplié par le nombre de colonnes.`
-  );
-
-  readonly screenKinds: {type: ScreenKind, label: string, icon: string}[] = [
-    {type: instructionScreenConstModel, label: 'Instruction', icon: 'bi-chat-square-text'},
-    {type: stimuliScreenConstModel, label: 'Stimuli', icon: 'bi-grid-3x3-gap'},
-    {type: transitionScreenConstModel, label: 'Transition', icon: 'bi-hourglass-split'},
+  readonly screenKinds: {type: ScreenKind, label: TranslationKey, icon: string}[] = [
+    {type: instructionScreenConstModel, label: 'screenType.instruction', icon: 'bi-chat-square-text'},
+    {type: stimuliScreenConstModel, label: 'screenType.stimuli', icon: 'bi-grid-3x3-gap'},
+    {type: transitionScreenConstModel, label: 'screenType.transition', icon: 'bi-hourglass-split'},
   ];
   readonly mediaTypeOptions = INSTRUCTION_MEDIA_OPTIONS;
+  /** Valeurs `Tout` / `BonneReponse` exportées telles quelles ; seuls les libellés sont traduits. */
   readonly selectionChoiceOptions: ChoiceOption<string>[] = [
-    {value: 'Tout', label: 'Tout'},
-    {value: 'BonneReponse', label: 'Bonnes réponses'},
+    {value: 'Tout', labelKey: 'editor.selectionChoice.all'},
+    {value: 'BonneReponse', labelKey: 'editor.selectionChoice.good'},
   ];
 
   @Input() screenToModify!: screenTypeModel;
@@ -220,9 +212,9 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (type === this.screenToModify.type) return;
     if (this.hasContent()) {
       const confirmed = await this.confirmService.confirm({
-        title: 'Changer le type de cet écran ?',
-        message: 'Le contenu actuel de l\'écran (médias, cases, texte) sera retiré et ses réglages remplacés par les paramètres globaux.',
-        confirmLabel: 'Changer de type',
+        title: this.i18n.t('editor.changeType.title'),
+        message: this.i18n.t('editor.changeType.message'),
+        confirmLabel: this.i18n.t('editor.changeType.confirm'),
         tone: 'warning',
       });
       if (!confirmed) return;
@@ -303,7 +295,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
         id = await this.storeOrReplace(file, mediaType, previousRef);
       } catch (error) {
         console.error('Enregistrement du média impossible :', error);
-        this.flashService.show('error', `Le fichier « ${file.name} » n'a pas pu être enregistré dans le navigateur (stockage plein ?).`);
+        this.flashService.show('error', this.i18n.t('editor.error.fileSave', {name: file.name}));
         return;
       }
 
@@ -337,7 +329,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
         id = await this.storeOrReplace(file, 'sound', previousRef);
       } catch (error) {
         console.error('Enregistrement du son impossible :', error);
-        this.flashService.show('error', `Le son « ${file.name} » n'a pas pu être enregistré dans le navigateur.`);
+        this.flashService.show('error', this.i18n.t('editor.error.soundSave', {name: file.name}));
         return;
       }
 
@@ -529,12 +521,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   playText() {
     if (!this.textToRead?.trim()) return;
     if (typeof window.speechSynthesis === 'undefined') {
-      this.flashService.show('warning', 'La lecture à voix haute n\'est pas disponible dans ce navigateur.');
+      this.flashService.show('warning', this.i18n.t('editor.text.noSpeech'));
       return;
     }
 
     const utterance = new SpeechSynthesisUtterance(this.textToRead);
-    utterance.lang = 'fr-FR';
+    // Le texte est saisi par l'utilisateur : on suppose qu'il est dans la langue de l'interface.
+    utterance.lang = this.i18n.language() === 'en' ? 'en-GB' : 'fr-FR';
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }
@@ -598,14 +591,14 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       } else {
         this.selectedCells.add(cellNumber);
       }
-      this.announce(`${this.selectedCells.size} case(s) sélectionnée(s).`);
+      this.announce(this.i18n.t('editor.announce.selectedCount', {count: this.selectedCells.size}));
       return;
     }
     if (this.swapMode) {
       if (this.swapSourceIndex === null) {
         if (listScreenAll[cellNumber]?.hidden) return;
         this.swapSourceIndex = cellNumber;
-        this.announce(`Case ${cellNumber + 1} choisie. Choisissez la case avec laquelle l'échanger.`);
+        this.announce(this.i18n.t('editor.announce.swapSource', {n: cellNumber + 1}));
         return;
       }
       if (this.swapSourceIndex === cellNumber) {
@@ -614,7 +607,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       }
       this.saveSnapshot();
       this.swapCells(this.swapSourceIndex, cellNumber);
-      this.announce(`Cases ${this.swapSourceIndex + 1} et ${cellNumber + 1} échangées.`);
+      this.announce(this.i18n.t('editor.announce.swapped', {a: this.swapSourceIndex + 1, b: cellNumber + 1}));
       this.swapSourceIndex = null;
       this.swapMode = false;
       return;
@@ -629,7 +622,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
           this.screenToModify.values[1] = Number(this.screenToModify.values[1]) + 1;
           this.checkStimuliCells();
         }
-        this.announce(`Case ${cellNumber + 1} copiée. Choisissez la case de destination.`);
+        this.announce(this.i18n.t('editor.announce.copySource', {n: cellNumber + 1}));
         return;
       }
       const target = listScreenAll[cellNumber];
@@ -641,7 +634,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       }
       this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, cellNumber);
-      this.announce(`Case ${this.duplicateSourceIndex + 1} dupliquée vers la case ${cellNumber + 1}.`);
+      this.announce(this.i18n.t('editor.announce.duplicated', {from: this.duplicateSourceIndex + 1, to: cellNumber + 1}));
       this.duplicateSourceIndex = null;
       this.duplicateMode = false;
       return;
@@ -684,7 +677,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
         if (this.anyModeActive()) {
           event.preventDefault();
           this.resetGridModes();
-          this.announce('Mode désactivé.');
+          this.announce(this.i18n.t('editor.announce.modeOff'));
         }
         return;
       default:
@@ -705,19 +698,22 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     const cell = this.screenToModify.values[12]?.[index];
     const row = Math.floor(index / this.cols) + 1;
     const col = (index % this.cols) + 1;
-    const position = `Case ${index + 1}, ligne ${row}, colonne ${col}`;
+    const t = (key: TranslationKey, params?: Record<string, string | number>) => this.i18n.t(key, params);
+    const position = t('editor.cell.position', {n: index + 1, row, col});
     if (!cell || cell.hidden) {
-      return `${position} : emplacement vide${this.deleteMode || this.multiSelectMode ? '' : ', activer pour y créer une case'}`;
+      return t(this.deleteMode || this.multiSelectMode ? 'editor.cell.empty' : 'editor.cell.emptyCreate', {position});
     }
     const parts: string[] = [];
-    parts.push(cell.imageName ? `image ${cell.imageName}` : 'sans image');
-    if (cell.soundName) parts.push(`son ${cell.soundName}`);
-    parts.push(cell.goodAnswer === true ? 'bonne réponse' : 'mauvaise réponse');
+    parts.push(cell.imageName ? t('editor.cell.image', {name: cell.imageName}) : t('editor.cell.noImage'));
+    if (cell.soundName) parts.push(t('editor.cell.sound', {name: cell.soundName}));
+    parts.push(t(cell.goodAnswer === true ? 'editor.cell.good' : 'editor.cell.wrong'));
     const states: string[] = [];
-    if (this.duplicateSourceIndex === index) states.push('case à dupliquer');
-    if (this.swapSourceIndex === index) states.push('case à échanger');
-    if (this.activeCellIndex === index) states.push('en cours de modification');
-    return `${position} : ${parts.join(', ')}${states.length ? ' — ' + states.join(', ') : ''}`;
+    if (this.duplicateSourceIndex === index) states.push(t('editor.cell.toDuplicate'));
+    if (this.swapSourceIndex === index) states.push(t('editor.cell.toSwap'));
+    if (this.activeCellIndex === index) states.push(t('editor.cell.editing'));
+    return states.length
+      ? t('editor.cell.fullStates', {position, parts: parts.join(', '), states: states.join(', ')})
+      : t('editor.cell.full', {position, parts: parts.join(', ')});
   }
 
   toggleDuplicateMode() {
@@ -730,7 +726,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapSourceIndex = null;
       this.multiSelectMode = false;
       this.selectedCells.clear();
-      this.announce('Mode duplication : choisissez la case à copier.');
+      this.announce(this.i18n.t('editor.announce.duplicateMode'));
     }
   }
 
@@ -745,7 +741,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapMode = false;
       this.swapSourceIndex = null;
       this.deleteMode = false;
-      this.announce('Sélection multiple : choisissez les cases puis utilisez « Supprimer ».');
+      this.announce(this.i18n.t('editor.announce.multiMode'));
     }
   }
 
@@ -758,11 +754,11 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (this.visualizationMode) {
       this.resetGridModes();
       await this.loadCellImages();
-      this.announce('Mode visualisation : les cases affichent leurs images.');
+      this.announce(this.i18n.t('editor.announce.previewMode'));
     } else {
       this.clearCellImageUrls();
       this.stopCellSound();
-      this.announce('Retour au mode modification.');
+      this.announce(this.i18n.t('editor.announce.editMode'));
     }
   }
 
@@ -874,7 +870,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (this.duplicateSourceIndex !== null && this.pendingDuplicateTarget !== null) {
       this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, this.pendingDuplicateTarget);
-      this.announce(`Case ${this.pendingDuplicateTarget + 1} remplacée.`);
+      this.announce(this.i18n.t('editor.announce.replaced', {n: this.pendingDuplicateTarget + 1}));
     }
     this.pendingDuplicateTarget = null;
     this.duplicateSourceIndex = null;
@@ -943,8 +939,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (direction === 'left') targetC = c - 1;
     if (direction === 'right') targetC = c + 1;
 
-    const labels = {top: 'au-dessus', bottom: 'en dessous', left: 'à gauche', right: 'à droite'};
-    this.announce(`Case ajoutée ${labels[direction]} de la case ${cellIndex + 1}.`);
+    this.announce(this.i18n.t(`editor.announce.added.${direction}` as const, {n: cellIndex + 1}));
 
     if (targetR >= 0 && targetR < rows && targetC >= 0 && targetC < cols) {
       const targetIdx = targetR * cols + targetC;
@@ -1004,12 +999,22 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
   }
 
-  readonly adjacentDirections: {value: 'top' | 'bottom' | 'left' | 'right', label: string, icon: string}[] = [
-    {value: 'top', label: 'Au-dessus', icon: 'bi-arrow-up'},
-    {value: 'bottom', label: 'En dessous', icon: 'bi-arrow-down'},
-    {value: 'left', label: 'À gauche', icon: 'bi-arrow-left'},
-    {value: 'right', label: 'À droite', icon: 'bi-arrow-right'},
+  readonly adjacentDirections: {value: 'top' | 'bottom' | 'left' | 'right', label: TranslationKey, icon: string}[] = [
+    {value: 'top', label: 'editor.direction.top', icon: 'bi-arrow-up'},
+    {value: 'bottom', label: 'editor.direction.bottom', icon: 'bi-arrow-down'},
+    {value: 'left', label: 'editor.direction.left', icon: 'bi-arrow-left'},
+    {value: 'right', label: 'editor.direction.right', icon: 'bi-arrow-right'},
   ];
+
+  /** Nom accessible (clé) d'un bouton « + » : « Ajouter une case au-dessus de la case {n} ». */
+  addCellLabel(direction: string): TranslationKey {
+    return `editor.addCell.${direction as 'top' | 'bottom' | 'left' | 'right'}.of` as const;
+  }
+
+  /** Infobulle (clé) d'un bouton « + » : « Ajouter une case au-dessus ». */
+  addCellTitle(direction: string): TranslationKey {
+    return `editor.addCell.${direction as 'top' | 'bottom' | 'left' | 'right'}` as const;
+  }
 
   /**
    * Ajoute une case à côté de la case active (alternative clavier aux boutons « + » de la
@@ -1044,7 +1049,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapSourceIndex = null;
       this.multiSelectMode = false;
       this.selectedCells.clear();
-      this.announce('Mode suppression : choisissez la case à retirer.');
+      this.announce(this.i18n.t('editor.announce.deleteMode'));
     }
   }
 
@@ -1061,7 +1066,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
     // On garde toujours au moins une case visible dans la grille.
     if (toDelete.length >= this.countVisibleCells()) {
-      this.flashService.show('warning', 'Vous devez conserver au moins une case.');
+      this.flashService.show('warning', this.i18n.t('editor.keepOneCell'));
       this.deleteMode = false;
       this.selectedCells.clear();
       return;
@@ -1100,7 +1105,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.clearCellWithIDB(i);
     }
     this.autoShrinkGrid();
-    this.announce(`${indices.length} case(s) supprimée(s). Utilisez « Annuler » pour revenir en arrière.`);
+    this.announce(this.i18n.t('editor.announce.deleted', {count: indices.length}));
     this.selectedCells.clear();
     this.pendingDeleteCells = null;
     this.deleteMode = false;
@@ -1262,7 +1267,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.activeCellIndex = null;
     this.stimuliOffcanvasReady = false;
     this.resetGridModes();
-    this.announce('Dernière action annulée.');
+    this.announce(this.i18n.t('editor.announce.undone'));
     if (this.visualizationMode) {
       void this.loadCellImages();
     }
@@ -1358,7 +1363,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.deleteMode = false;
       this.multiSelectMode = false;
       this.selectedCells.clear();
-      this.announce('Mode échange : choisissez la première case.');
+      this.announce(this.i18n.t('editor.announce.swapMode'));
     }
   }
 
@@ -1393,13 +1398,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   /** Consigne affichée (et annoncée) selon le mode actif de la grille. */
   get modeHint(): string {
     if (this.duplicateMode) {
-      if (this.duplicateSourceIndex === null) return 'Choisissez la case à dupliquer.';
-      if (this.pendingDuplicateTarget === null) return 'Choisissez maintenant la case de destination.';
+      if (this.duplicateSourceIndex === null) return this.i18n.t('editor.hint.duplicateSource');
+      if (this.pendingDuplicateTarget === null) return this.i18n.t('editor.hint.duplicateTarget');
       return '';
     }
-    if (this.deleteMode) return 'Choisissez la case à retirer.';
-    if (this.swapMode) return this.swapSourceIndex === null ? 'Choisissez la première case à échanger.' : 'Choisissez la seconde case.';
-    if (this.multiSelectMode) return `${this.selectedCells.size} case(s) sélectionnée(s) — utilisez « Supprimer » pour les retirer.`;
+    if (this.deleteMode) return this.i18n.t('editor.hint.delete');
+    if (this.swapMode) return this.i18n.t(this.swapSourceIndex === null ? 'editor.hint.swapFirst' : 'editor.hint.swapSecond');
+    if (this.multiSelectMode) return this.i18n.t('editor.hint.multi', {count: this.selectedCells.size});
     return '';
   }
 

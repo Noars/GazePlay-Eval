@@ -3,12 +3,15 @@ import {CropperPosition, ImageCropperComponent} from 'ngx-image-cropper';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormsModule} from '@angular/forms';
 import {FlashService} from '../../services/flash-message/flash.service';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-crop-image',
   imports: [
     ImageCropperComponent,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './crop-image.component.html',
   styleUrl: './crop-image.component.css'
@@ -40,6 +43,7 @@ export class CropImageComponent implements OnInit{
   constructor(
     public dialogRef: MatDialogRef<CropImageComponent>,
     private flashService: FlashService,
+    private i18n: I18nService,
     @Inject(MAT_DIALOG_DATA) public data: {image: File}) {
   }
 
@@ -162,15 +166,15 @@ export class CropImageComponent implements OnInit{
   validateCrop(){
     if (!this.croppedImage) {
       this.dialogRef.close();
-      this.flashService.show("info", "L'image n'a pas été modifiée.");
+      this.flashService.show('info', this.i18n.t('crop.unchanged'));
       return;
     }
     this.dialogRef.close(this.croppedImage);
-    this.flashService.show("success", "Votre image a bien été recadrée.")
+    this.flashService.show('success', this.i18n.t('crop.done'));
   }
 
   cancelCrop(){
     this.dialogRef.close();
-    this.flashService.show("info", "Les proportions de votre image ont été conservées.")
+    this.flashService.show('info', this.i18n.t('crop.cancelled'));
   }
 }

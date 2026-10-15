@@ -2,9 +2,9 @@
   <div class="gp-page gp-page--narrow">
     <header class="gp-page-header">
       <div class="gp-page-header__text">
-        <span class="gp-page-header__eyebrow">Étape 3 sur 5</span>
-        <h1 class="gp-page-header__title">Mode de création</h1>
-        <p class="gp-page-header__lead">Choisissez comment construire les écrans de votre évaluation.</p>
+        <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 3} }}</span>
+        <h1 class="gp-page-header__title">{{ 'setup.title' | t }}</h1>
+        <p class="gp-page-header__lead">{{ 'setup.lead' | t }}</p>
       </div>
     </header>
 
@@ -12,28 +12,24 @@
       <button type="button" class="gp-action-card mode-card" (click)="selectMode('manuel')">
         <span class="gp-action-card__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
         <span>
-          <span class="gp-action-card__title">Manuel <span class="gp-badge gp-badge--primary ms-1">Recommandé</span></span>
-          <span class="gp-action-card__desc">
-            Définissez des paramètres par défaut, puis créez et ajustez chaque écran vous-même.
-          </span>
+          <span class="gp-action-card__title">{{ 'setup.manual' | t }} <span class="gp-badge gp-badge--primary ms-1">{{ 'setup.recommended' | t }}</span></span>
+          <span class="gp-action-card__desc">{{ 'setup.manual.desc' | t }}</span>
         </span>
       </button>
 
       <button type="button" class="gp-action-card mode-card" (click)="selectMode('auto')">
         <span class="gp-action-card__icon" aria-hidden="true"><i class="bi bi-magic"></i></span>
         <span>
-          <span class="gp-action-card__title">Automatique <span class="gp-badge gp-badge--warning ms-1">En développement</span></span>
-          <span class="gp-action-card__desc">
-            Génération automatique des écrans. Cette fonctionnalité n'est pas encore disponible.
-          </span>
+          <span class="gp-action-card__title">{{ 'setup.auto' | t }} <span class="gp-badge gp-badge--warning ms-1">{{ 'setup.inDevelopment' | t }}</span></span>
+          <span class="gp-action-card__desc">{{ 'setup.auto.desc' | t }}</span>
         </span>
       </button>
     </div>
 
-    <nav class="gp-actions" aria-label="Navigation entre les étapes">
+    <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
       <button type="button" class="gp-btn" (click)="backToInfoParticipant()">
         <i class="bi bi-arrow-left" aria-hidden="true"></i>
-        Précédent
+        {{ 'steps.previous' | t }}
       </button>
     </nav>
   </div>

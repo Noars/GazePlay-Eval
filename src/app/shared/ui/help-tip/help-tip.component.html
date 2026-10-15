@@ -2,7 +2,7 @@
         class="help-tip__button"
         [attr.aria-expanded]="open()"
         [attr.aria-controls]="bubbleId"
-        [attr.aria-label]="topic ? 'Aide : ' + topic : 'Afficher l\'aide'"
+        [attr.aria-label]="topic ? ('ui.help.topic' | t: {topic: topic}) : ('ui.help.show' | t)"
         (click)="toggle()">
   <i class="bi bi-info-circle" aria-hidden="true"></i>
 </button>

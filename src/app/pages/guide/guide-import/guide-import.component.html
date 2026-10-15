@@ -1,3 +1,109 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Importing assessments</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>
+        This page explains how importing assessments works on the GazePlay-Eval site.</p>
+
+      <p>
+        There are two ways to open an imported assessment: consultation mode or save mode.
+        You must select one of these modes to import your assessment.
+      </p>
+    </div>
+
+    <div class="alert alert-info fw-semibold w-100 mb-5">
+      <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+      <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+      For the site to import an assessment, it must be in <i>.gpSave</i> format
+      (see the guide page on <a routerLink="/guide/creation">creating assessments</a> for more details).
+    </div>
+
+    <img src="assets/guide/images/popup-import.png" class="guide-content-image"
+         alt="Picture showing the window used to import an assessment, with one part for the opening mode and another
+              for the file to import (French interface).">
+    <div class="guide-content-image-desc">
+      <p>The window used to import an assessment.</p>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Consultation mode (“Open”)</h2>
+      <div class="guide-section-body">
+        <p>Consultation mode loads an assessment without saving it. This option is handy if you want to look at the
+        content of an assessment but do not want to keep it, or if you have no free slot left.</p>
+
+        <div class="alert alert-warning fw-semibold w-100 mb-5">
+          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
+          An assessment loaded in consultation mode is lost if you leave the site or reload the page.
+          Remember to save it or download the new <code>.gpSave</code> file if you want to keep your changes!
+        </div>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Save mode (“Open and save”)</h2>
+      <div class="guide-section-body">
+        <p>Save mode places the imported assessment in one of the three slots available on the site. You can then view
+        it right away, come back to it later, or edit it while keeping your changes.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          This mode needs at least one empty slot for the imported assessment.
+            If no slot is available, an existing save will have to be overwritten.
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section-body">
+      <p>
+        Once the assessment is loaded, you are taken back to the last page viewed in that assessment.
+      </p>
+    </div>
+
+    <div class="guide-section-body">
+      <p>
+        The window used to import an assessment is a <b>pop-up</b>, which means it can be shown anywhere in the
+        application without leaving the page you are on and possibly losing your progress.
+        To open this pop-up, show the side menu and click “Import a file”.
+      </p>
+    </div>
+
+    <img src="assets/guide/images/menu-import.png" class="guide-content-image"
+         alt="Picture showing the side menu, with the import tab highlighted by a hover effect (French interface).">
+    <div class="guide-content-image-desc">
+      <p>The import tab in the side menu.</p>
+    </div>
+
+    <div class="guide-section-card mb-3">
+      <h2 class="guide-section-title">Help</h2>
+        <div class="guide-section-body">
+          <p>
+            If you cannot open the import pop-up, click the button below.
+            The import window opens directly.
+          </p>
+
+          <div class="text-center">
+            <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="openImportPopup()">
+              Import an assessment
+            </button>
+          </div>
+        </div>
+    </div>
+
+
+
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a>
+
+  </div>
+</div>
+} @else {
 <div class="card mb-4">
   <div class="card-header">
     <h1 class="card-title">Importation d'évaluations</h1>
@@ -104,3 +210,4 @@
 
   </div>
 </div>
+}

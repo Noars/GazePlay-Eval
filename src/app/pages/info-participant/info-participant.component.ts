@@ -5,6 +5,8 @@ import {Router} from '@angular/router';
 import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
 import {HelpTipComponent} from '../../shared/ui/help-tip/help-tip.component';
+import {I18nService, TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Étape 2 : champs d'information sur la personne évaluée (nom, âge…), dans l'ordre où ils
@@ -15,7 +17,7 @@ import {HelpTipComponent} from '../../shared/ui/help-tip/help-tip.component';
  */
 @Component({
   selector: 'app-info-participant',
-  imports: [FormsModule, DragDropModule, HelpTipComponent],
+  imports: [FormsModule, DragDropModule, HelpTipComponent, TranslatePipe],
   templateUrl: './info-participant.component.html',
   standalone: true,
   styleUrl: './info-participant.component.scss'
@@ -24,18 +26,25 @@ export class InfoParticipantComponent implements OnInit{
   @ViewChildren('fieldInput') private fieldInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   infoParticipantList: string[] = saveModelDefault.infoParticipant;
-  tooltipTextData: string = 'Ces informations sont stockées en local sur l’ordinateur que vous utilisez. ' +
-    'Nous n\'y avons pas accès directement, sauf si vous partagez les fichiers avec nous par la suite.\n\n' +
-    'Assurez-vous de la conformité RGPD des données que vous stockez et partagez.';
-  tooltipDragDrop: string = 'Faites glisser un champ par sa poignée, ou utilisez les boutons flèches pour le déplacer.';
 
   /** Message annoncé aux lecteurs d'écran après un déplacement ou une suppression. */
   announcement = '';
 
-  readonly suggestions = ['Nom', 'Prénom', 'Âge', 'Classe', 'Date de naissance'];
+  /**
+   * Suggestions de champs, dans la langue de l'interface : le texte choisi est inséré tel
+   * quel dans l'évaluation (c'est une donnée, il n'est plus traduit ensuite).
+   */
+  private readonly suggestionKeys: TranslationKey[] = [
+    'infoParticipant.suggestion.lastName',
+    'infoParticipant.suggestion.firstName',
+    'infoParticipant.suggestion.age',
+    'infoParticipant.suggestion.class',
+    'infoParticipant.suggestion.birthDate',
+  ];
 
   constructor(private router: Router,
-              private saveService: SaveService) {
+              private saveService: SaveService,
+              private i18n: I18nService) {
   }
 
   ngOnInit(): void {
@@ -67,13 +76,15 @@ export class InfoParticipantComponent implements OnInit{
   /** Suggestions non encore présentes dans la liste. */
   availableSuggestions(): string[] {
     const existing = new Set(this.infoParticipantList.map(field => field.trim().toLowerCase()));
-    return this.suggestions.filter(s => !existing.has(s.toLowerCase()));
+    return this.suggestionKeys
+      .map(key => this.i18n.t(key))
+      .filter(s => !existing.has(s.toLowerCase()));
   }
 
   removeField(index: number) {
-    const label = this.infoParticipantList[index] || `Champ ${index + 1}`;
+    const label = this.infoParticipantList[index] || this.i18n.t('infoParticipant.field.fallback', {n: index + 1});
     this.infoParticipantList.splice(index, 1);
-    this.announcement = `« ${label} » supprimé.`;
+    this.announcement = this.i18n.t('infoParticipant.removed', {label});
     if (this.infoParticipantList.length > 0) {
       this.focusField(Math.min(index, this.infoParticipantList.length - 1));
     }
@@ -91,8 +102,8 @@ export class InfoParticipantComponent implements OnInit{
     const target = index + delta;
     if (target < 0 || target >= this.infoParticipantList.length) return;
     moveItemInArray(this.infoParticipantList, index, target);
-    const label = this.infoParticipantList[target] || `Champ ${index + 1}`;
-    this.announcement = `« ${label} » déplacé en position ${target + 1} sur ${this.infoParticipantList.length}.`;
+    const label = this.infoParticipantList[target] || this.i18n.t('infoParticipant.field.fallback', {n: index + 1});
+    this.announcement = this.i18n.t('infoParticipant.moved', {label, position: target + 1, total: this.infoParticipantList.length});
     setTimeout(() => {
       const button = document.querySelector<HTMLButtonElement>(`[data-move="${buttonClass}-${target}"]`);
       (button && !button.disabled ? button : this.fieldInputs.get(target)?.nativeElement)?.focus();

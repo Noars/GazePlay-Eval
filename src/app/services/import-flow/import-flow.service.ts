@@ -10,6 +10,7 @@ import {SaveService} from '../save/save.service';
 import {OverwriteGuardService} from '../overwrite-guard/overwrite-guard.service';
 import {AutoSaveService} from '../auto-save/auto-save.service';
 import {FlashService} from '../flash-message/flash.service';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 /** Résultat renvoyé par la fenêtre d'import. */
 export interface ImportDialogResult {
@@ -36,6 +37,7 @@ export class ImportFlowService {
   private readonly overwriteGuard = inject(OverwriteGuardService);
   private readonly autoSaveService = inject(AutoSaveService);
   private readonly flashService = inject(FlashService);
+  private readonly i18n = inject(I18nService);
 
   /** Vrai pendant la lecture de l'archive (affichage d'un indicateur de chargement). */
   readonly importing = signal(false);
@@ -77,13 +79,13 @@ export class ImportFlowService {
       }
     } catch (error) {
       console.error('Import impossible :', error);
-      this.flashService.show('error', 'Le fichier n\'a pas pu être importé. Vérifiez qu\'il s\'agit bien d\'un fichier .gpSave ou .zip exporté par GazePlay Eval.');
+      this.flashService.show('error', this.i18n.t('import.error'));
       return false;
     } finally {
       this.importing.set(false);
     }
 
-    this.flashService.show('success', `L'évaluation « ${this.saveService.getEvalName()} » a été importée.`);
+    this.flashService.show('success', this.i18n.t('import.success', {name: this.saveService.getEvalName()}));
     await this.router.navigate(['/home']);
     this.autoSaveService.tryResume(true);
     return true;

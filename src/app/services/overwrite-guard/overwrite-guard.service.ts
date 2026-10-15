@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {firstValueFrom} from 'rxjs';
 import {LoadService} from '../load/load.service';
@@ -6,17 +6,11 @@ import {DownloadService} from '../download/download.service';
 import {SaveService} from '../save/save.service';
 import {PopupOverwriteSaveComponent} from '../../components/popup-overwrite-save/popup-overwrite-save.component';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
-
-// Labels affichés dans la popup pour identifier le slot menacé
-const SLOT_LABELS: Record<number, string> = {
-  0: 'Sauvegarde automatique',
-  1: 'Emplacement 1',
-  2: 'Emplacement 2',
-  3: 'Emplacement 3',
-};
+import {I18nService} from '../../core/i18n/i18n.service';
 
 @Injectable({providedIn: 'root'})
 export class OverwriteGuardService {
+  private readonly i18n = inject(I18nService);
 
   constructor(
     private dialog: MatDialog,
@@ -57,7 +51,7 @@ export class OverwriteGuardService {
     // Le slot contient une évaluation non liée : on demande à l'utilisateur quoi faire
     const result = await firstValueFrom(
       this.dialog.open(PopupOverwriteSaveComponent, {
-        data: {save: existing, slotLabel: SLOT_LABELS[slotIndex] ?? `Emplacement ${slotIndex}`},
+        data: {save: existing, slotLabel: this.slotLabel(slotIndex)},
         disableClose: true,
         panelClass: 'gp-dialog-panel',
         autoFocus: '.js-cancel',
@@ -103,5 +97,10 @@ export class OverwriteGuardService {
       if (slot && slot.nomEval === nomEval) return i;
     }
     return null;
+  }
+
+  /** Libellé affiché dans la fenêtre pour identifier l'emplacement menacé. */
+  private slotLabel(slotIndex: number): string {
+    return slotIndex === 0 ? this.i18n.t('saves.autoSlot') : this.i18n.t('saves.slot', {n: slotIndex});
   }
 }

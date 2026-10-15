@@ -9,7 +9,7 @@
        role="separator"
        tabindex="0"
        aria-orientation="vertical"
-       aria-label="Largeur du panneau d'aide (flèches gauche et droite)"
+       [attr.aria-label]="'helpPanel.resize' | t"
        [attr.aria-valuenow]="panelWidth"
        aria-valuemin="280"
        [attr.aria-valuemax]="maxWidth"
@@ -18,12 +18,12 @@
 
   <div class="gp-drawer__header guide-popup-header">
     <h2 class="gp-drawer__title guide-popup-title" id="guide-popup-title">
-      <i class="bi bi-question-circle me-2" aria-hidden="true"></i>{{ currentGuide.title }}
+      <i class="bi bi-question-circle me-2" aria-hidden="true"></i>{{ currentGuide.title | t }}
     </h2>
     <button type="button"
             class="gp-btn gp-btn--ghost gp-btn--icon"
-            aria-label="Fermer l'aide"
-            title="Fermer l'aide"
+            [attr.aria-label]="'helpPanel.close' | t"
+            [title]="'helpPanel.close' | t"
             (click)="close()">
       <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
@@ -35,18 +35,18 @@
         <ng-container *ngComponentOutlet="currentGuideComponent; inputs: currentGuideInputs"></ng-container>
       } @else {
         @if (currentGuide.intro) {
-          <p class="guide-content-sub">{{ currentGuide.intro }}</p>
+          <p class="guide-content-sub">{{ currentGuide.intro | t }}</p>
         }
 
         @for (section of currentGuide.sections; track section.title) {
           <section class="guide-section-card">
-            <h3 class="guide-section-title">{{ section.title }}</h3>
-            <p class="guide-section-body">{{ section.body }}</p>
+            <h3 class="guide-section-title">{{ section.title | t }}</h3>
+            <p class="guide-section-body">{{ section.body | t }}</p>
           </section>
         } @empty {
           <div class="gp-empty">
             <i class="bi bi-book" aria-hidden="true"></i>
-            <a class="gp-btn gp-btn--secondary" href="#/guide" (click)="close()">Ouvrir le guide complet</a>
+            <a class="gp-btn gp-btn--secondary" href="#/guide" (click)="close()">{{ 'helpPanel.openFullGuide' | t }}</a>
           </div>
         }
       }

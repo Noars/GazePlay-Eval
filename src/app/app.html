@@ -1,5 +1,5 @@
 <div class="gp-app">
-  <a class="gp-skip-link" href="#main-content" (click)="skipToContent($event)">Aller au contenu principal</a>
+  <a class="gp-skip-link" href="#main-content" (click)="skipToContent($event)">{{ 'app.skipLink' | t }}</a>
 
   <app-navbar (menuRequested)="openMenu()"></app-navbar>
 
@@ -7,9 +7,8 @@
     <div class="gp-callout gp-callout--warning app-banner" role="alert">
       <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
       <div class="gp-callout__body">
-        <strong class="gp-callout__title">Mise à jour du stockage en attente</strong>
-        GazePlay Eval est ouvert dans un autre onglet avec une version précédente. Fermez cet
-        onglet pour que vos préférences et vos médias soient à nouveau accessibles.
+        <strong class="gp-callout__title">{{ 'app.upgradeBlocked.title' | t }}</strong>
+        {{ 'app.upgradeBlocked.body' | t }}
       </div>
     </div>
   }
@@ -21,7 +20,7 @@
 
     <div class="gp-shell__content">
       @if (currentStepIndex >= 0) {
-        <app-progress-bar [steps]="steps" [currentStepIndex]="currentStepIndex"></app-progress-bar>
+        <app-progress-bar [steps]="steps()" [currentStepIndex]="currentStepIndex"></app-progress-bar>
       }
 
       <main id="main-content" class="gp-shell__main" tabindex="-1">
@@ -29,10 +28,10 @@
       </main>
 
       <footer class="gp-footer">
-        <span>© 2026 GazePlay Eval · Vos données restent sur cet appareil.</span>
+        <span>{{ 'app.footer.privacy' | t }}</span>
         <a href="https://github.com/Noars/GazePlay-Eval" target="_blank" rel="noopener noreferrer">
           <i class="bi bi-github" aria-hidden="true"></i>
-          Code source sur GitHub<span class="visually-hidden"> (nouvel onglet)</span>
+          {{ 'app.footer.source' | t }}<span class="visually-hidden">{{ 'common.newTab' | t }}</span>
         </a>
       </footer>
     </div>

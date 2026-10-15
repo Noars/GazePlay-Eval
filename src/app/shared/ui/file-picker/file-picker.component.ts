@@ -1,5 +1,6 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild} from '@angular/core';
 import {uniqueId} from '../unique-id';
+import {I18nService} from '../../../core/i18n/i18n.service';
 
 /**
  * Bouton de sélection de fichier accessible.
@@ -15,6 +16,8 @@ import {uniqueId} from '../unique-id';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilePickerComponent {
+  private readonly i18n = inject(I18nService);
+
   /** Libellé du bouton lorsqu'aucun fichier n'est choisi (ex. « Choisir une image »). */
   @Input({required: true}) label = '';
   /** Types acceptés (attribut `accept`). */
@@ -32,7 +35,7 @@ export class FilePickerComponent {
   protected readonly inputId = uniqueId('file');
 
   protected get accessibleName(): string {
-    return this.fileName ? `${this.label} (fichier actuel : ${this.fileName})` : this.label;
+    return this.fileName ? this.i18n.t('ui.file.current', {label: this.label, file: this.fileName}) : this.label;
   }
 
   protected onChange(): void {

@@ -2,13 +2,13 @@
   <div class="gp-card">
     <div class="gp-card__body gp-empty">
       <i class="bi bi-signpost-split" aria-hidden="true"></i>
-      <h1 class="gp-empty__title">Page introuvable</h1>
-      <p>Cette page n'existe pas ou n'est pas encore disponible.</p>
+      <h1 class="gp-empty__title">{{ 'notFound.title' | t }}</h1>
+      <p>{{ 'notFound.body' | t }}</p>
       <div class="gp-btn-group justify-content-center">
         <button type="button" class="gp-btn gp-btn--primary" (click)="router.navigate(['/home'])">
-          <i class="bi bi-house" aria-hidden="true"></i> Retour à l'accueil
+          <i class="bi bi-house" aria-hidden="true"></i> {{ 'common.backHome' | t }}
         </button>
-        <a class="gp-btn gp-btn--ghost" routerLink="/guide">Consulter le guide</a>
+        <a class="gp-btn gp-btn--ghost" routerLink="/guide">{{ 'notFound.guide' | t }}</a>
       </div>
     </div>
   </div>

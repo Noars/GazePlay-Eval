@@ -1,12 +1,9 @@
 <div class="gp-page gp-page--narrow">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <span class="gp-page-header__eyebrow">Étape 2 sur 5</span>
-      <h1 class="gp-page-header__title">Informations du participant</h1>
-      <p class="gp-page-header__lead">
-        Définissez les champs à compléter sur la personne évaluée lors de chaque passation dans
-        GazePlay-Learning (par exemple : nom, prénom, âge).
-      </p>
+      <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 2} }}</span>
+      <h1 class="gp-page-header__title">{{ 'infoParticipant.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'infoParticipant.lead' | t }}</p>
     </div>
   </header>
 
@@ -14,8 +11,8 @@
     <i class="bi bi-shield-lock" aria-hidden="true"></i>
     <div class="gp-callout__body">
       <p>
-        Ajoutez un champ par type d'information. Ces données restent stockées localement sur l'ordinateur utilisé.
-        <app-help-tip topic="protection des données" [text]="tooltipTextData"></app-help-tip>
+        {{ 'infoParticipant.privacy' | t }}
+        <app-help-tip [topic]="'infoParticipant.privacy.topic' | t" [text]="'infoParticipant.privacy.tooltip' | t"></app-help-tip>
       </p>
     </div>
   </div>
@@ -23,11 +20,10 @@
   <section class="gp-card" aria-labelledby="fields-title">
     <div class="gp-card__header">
       <div>
-        <h2 class="gp-card__title" id="fields-title">Champs à renseigner</h2>
+        <h2 class="gp-card__title" id="fields-title">{{ 'infoParticipant.fields.title' | t }}</h2>
         <p class="gp-card__subtitle">
-          {{ infoParticipantList.length }} champ{{ infoParticipantList.length > 1 ? 's' : '' }} ·
-          réorganisez-les par glisser-déposer ou avec les flèches
-          <app-help-tip topic="réorganiser les champs" [text]="tooltipDragDrop"></app-help-tip>
+          {{ (infoParticipantList.length > 1 ? 'infoParticipant.fields.count.other' : 'infoParticipant.fields.count.one') | t: {count: infoParticipantList.length} }}{{ 'infoParticipant.fields.reorder' | t }}
+          <app-help-tip [topic]="'infoParticipant.reorder.topic' | t" [text]="'infoParticipant.reorder.tooltip' | t"></app-help-tip>
         </p>
       </div>
     </div>
@@ -36,31 +32,31 @@
       @if (infoParticipantList.length === 0) {
         <div class="gp-empty">
           <i class="bi bi-person-vcard" aria-hidden="true"></i>
-          <p class="gp-empty__title mb-0">Aucun champ pour le moment</p>
-          <p class="mb-0">Ajoutez un champ ou choisissez une suggestion ci-dessous.</p>
+          <p class="gp-empty__title mb-0">{{ 'infoParticipant.empty.title' | t }}</p>
+          <p class="mb-0">{{ 'infoParticipant.empty.body' | t }}</p>
         </div>
       }
 
       <ol class="field-list" cdkDropList (cdkDropListDropped)="drop($event)">
         @for (field of infoParticipantList; let i = $index; let first = $first; let last = $last; track i) {
           <li class="field-item" cdkDrag cdkDragLockAxis="y">
-            <span class="field-item__handle" cdkDragHandle title="Glisser pour déplacer" aria-hidden="true">
+            <span class="field-item__handle" cdkDragHandle [title]="'infoParticipant.dragHandle' | t" aria-hidden="true">
               <i class="bi bi-grip-vertical"></i>
             </span>
-            <label class="visually-hidden" [for]="'participant-field-' + i">Intitulé du champ {{ i + 1 }}</label>
+            <label class="visually-hidden" [for]="'participant-field-' + i">{{ 'infoParticipant.field.label' | t: {n: i + 1} }}</label>
             <input #fieldInput
                    type="text"
                    class="form-control field-item__input"
                    [id]="'participant-field-' + i"
                    [name]="'participant-field-' + i"
-                   placeholder="Intitulé du champ (ex. : Prénom)"
+                   [placeholder]="'infoParticipant.field.placeholder' | t"
                    [(ngModel)]="infoParticipantList[i]">
             <div class="field-item__actions">
               <button type="button"
                       class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
                       [attr.data-move]="'up-' + i"
                       [disabled]="first"
-                      [attr.aria-label]="'Monter le champ ' + (field || (i + 1))"
+                      [attr.aria-label]="'infoParticipant.field.up' | t: {name: field || (i + 1)}"
                       (click)="moveField(i, -1, 'up')">
                 <i class="bi bi-arrow-up" aria-hidden="true"></i>
               </button>
@@ -68,13 +64,13 @@
                       class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
                       [attr.data-move]="'down-' + i"
                       [disabled]="last"
-                      [attr.aria-label]="'Descendre le champ ' + (field || (i + 1))"
+                      [attr.aria-label]="'infoParticipant.field.down' | t: {name: field || (i + 1)}"
                       (click)="moveField(i, 1, 'down')">
                 <i class="bi bi-arrow-down" aria-hidden="true"></i>
               </button>
               <button type="button"
                       class="gp-btn gp-btn--danger-outline gp-btn--icon gp-btn--sm"
-                      [attr.aria-label]="'Supprimer le champ ' + (field || (i + 1))"
+                      [attr.aria-label]="'infoParticipant.field.remove' | t: {name: field || (i + 1)}"
                       (click)="removeField(i)">
                 <i class="bi bi-trash3" aria-hidden="true"></i>
               </button>
@@ -86,11 +82,11 @@
       <div class="add-row">
         <button type="button" class="gp-btn gp-btn--secondary" (click)="addField()">
           <i class="bi bi-plus-lg" aria-hidden="true"></i>
-          Ajouter un champ
+          {{ 'infoParticipant.add' | t }}
         </button>
         @if (availableSuggestions().length) {
           <div class="suggestions" role="group" aria-labelledby="suggestions-label">
-            <span id="suggestions-label" class="gp-muted gp-text-sm">Suggestions :</span>
+            <span id="suggestions-label" class="gp-muted gp-text-sm">{{ 'infoParticipant.suggestions' | t }}</span>
             @for (suggestion of availableSuggestions(); track suggestion) {
               <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm suggestion" (click)="addField(suggestion)">
                 <i class="bi bi-plus" aria-hidden="true"></i>{{ suggestion }}
@@ -104,14 +100,14 @@
 
   <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
-  <nav class="gp-actions" aria-label="Navigation entre les étapes">
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
     <button type="button" (click)="backToInfoEval()" class="gp-btn">
       <i class="bi bi-arrow-left" aria-hidden="true"></i>
-      Précédent
+      {{ 'steps.previous' | t }}
     </button>
     <div class="gp-actions__end">
       <button type="button" (click)="goToCreateEval()" class="gp-btn gp-btn--primary">
-        Suivant : mode et paramètres
+        {{ 'infoParticipant.next' | t }}
         <i class="bi bi-arrow-right" aria-hidden="true"></i>
       </button>
     </div>

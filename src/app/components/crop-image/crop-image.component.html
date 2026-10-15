@@ -2,8 +2,8 @@
   <div class="gp-dialog__header">
     <span class="gp-dialog__icon" aria-hidden="true"><i class="bi bi-crop"></i></span>
     <div>
-      <h2 class="gp-dialog__title" id="crop-title">Recadrer l'image</h2>
-      <p class="gp-dialog__subtitle">Déplacez le cadre ou ses poignées, ou saisissez les dimensions en pixels.</p>
+      <h2 class="gp-dialog__title" id="crop-title">{{ 'crop.title' | t }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'crop.subtitle' | t }}</p>
     </div>
   </div>
 
@@ -22,13 +22,13 @@
           (imageCropped)="imageCropped($event)">
         </image-cropper>
       } @else {
-        <p class="gp-muted" role="status"><span class="gp-spinner" aria-hidden="true"></span> Chargement de l'image…</p>
+        <p class="gp-muted" role="status"><span class="gp-spinner" aria-hidden="true"></span> {{ 'crop.loading' | t }}</p>
       }
     </div>
 
     <div class="crop-sizes">
       <div class="gp-field">
-        <label class="gp-field__label" for="crop-width">Largeur</label>
+        <label class="gp-field__label" for="crop-width">{{ 'crop.width' | t }}</label>
         <span class="gp-input-unit">
           <input id="crop-width" type="number" class="form-control" min="1"
                  [max]="imageMaxWidth - cropWidthX1"
@@ -38,7 +38,7 @@
         </span>
       </div>
       <div class="gp-field">
-        <label class="gp-field__label" for="crop-height">Hauteur</label>
+        <label class="gp-field__label" for="crop-height">{{ 'crop.height' | t }}</label>
         <span class="gp-input-unit">
           <input id="crop-height" type="number" class="form-control" min="1"
                  [max]="imageMaxHeight - cropHeightY1"
@@ -51,10 +51,10 @@
   </div>
 
   <div class="gp-dialog__footer">
-    <button type="button" class="gp-btn gp-btn--ghost" (click)="cancelCrop()">Annuler</button>
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="cancelCrop()">{{ 'common.cancel' | t }}</button>
     <button type="button" class="gp-btn gp-btn--primary" (click)="validateCrop()">
       <i class="bi bi-check-lg" aria-hidden="true"></i>
-      Recadrer l'image
+      {{ 'crop.title' | t }}
     </button>
   </div>
 </div>

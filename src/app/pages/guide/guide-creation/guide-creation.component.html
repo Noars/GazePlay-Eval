@@ -1,3 +1,326 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Creating an assessment</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>This page gives guidance and tips for the whole process of creating an assessment. The guide is divided into
+      several parts, each linked to one of the assessment pages. In order, you will find:
+      </p>
+
+      <ul>
+        <li>The assessment information</li>
+        <li>The participant information</li>
+        <li>The assessment mode and its global settings</li>
+        <li>Creating the assessment screens</li>
+        <li>Downloading the assessment</li>
+      </ul>
+
+
+      <div class="guide-section-card mb-3">
+        <h2 class="guide-section-title">Help</h2>
+        <div class="guide-section-body">
+          <p>
+            If needed, you can also watch a complete video of the assessment creation process, along with a demonstration
+            of other features such as saving, loading and importing. The video is in French.
+          </p>
+
+          <div class="text-center">
+            <iframe class="guide-video"
+                    title="Video: full demonstration of GazePlay Eval (creation, saving, loading and import), in French"
+                    src="https://www.youtube-nocookie.com/embed/2Nl7yLddWd8?controls=1"
+                    loading="lazy"
+                    allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </div>
+
+      <p>Throughout the creation of your assessment, a progress bar is shown at the top of the page.</p>
+
+      <img src="assets/guide/images/progressbar.png" class="guide-content-image"
+           alt="Picture showing the progress bar while creating an assessment (French interface).">
+      <div class="guide-content-image-desc">
+        <p>The progress bar while creating an assessment.</p>
+      </div>
+
+      <p>This progress bar shows the steps already completed (in green), the current step (in blue) and the following
+      steps (in grey). You can always move forward or back using the navigation buttons at the bottom of each page.</p>
+
+      <p>To reach the assessment creation page, open the side menu and click “Home”.
+        If you have trouble reaching the side menu, you can go straight to the page by clicking <a routerLink="/home">here</a>.
+      </p>
+
+      <img src="assets/guide/images/menu-home.png" class="guide-content-image"
+           alt="Picture showing the side menu, with the home tab highlighted by a hover effect (French interface).">
+      <div class="guide-content-image-desc">
+        <p>The home tab in the side menu.</p>
+      </div>
+
+      <p>On some pages, you will also find
+        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt="">
+        icons about technical points. Activate them to get additional explanations and tips.
+      </p>
+
+    </div>
+
+    <div class="guide-section-card mb-3" [id]="'info-eval'">
+      <h2 class="guide-section-title">Part 1 — Assessment information</h2>
+      <div class="guide-section-body">
+        <p>The first part of the assessment creation process consists of filling in general information, such as its
+        name. This name is then used for the <a routerLink="/guide/sauvegardes">save</a>
+          and <a routerLink="/guide/sauvegardes">load</a> slots.
+        </p>
+
+        <p>You are then asked to choose a format for the assessment results. When the assessment is taken in the
+        GazePlay-Learning application, the participant's results are stored in a spreadsheet. If you are not familiar
+        with the different formats, keep the default value (“CSV and XLSX”).</p>
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3" [id]="'info-participant'">
+      <h2 class="guide-section-title">Part 2 — Participant information</h2>
+      <div class="guide-section-body">
+        <p>This optional part lets you add a list of fields (“Last name”, “First name”, “Age”, ...). When you give the
+          assessment to someone from GazePlay Learning, these fields are shown so that you can fill them in with the
+          participant's data. The <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span> handle
+          on the left of each item lets you move it in the list (the arrow buttons do the same with the keyboard).
+          The red button on the right of each item deletes it.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          No data is ever sent to a server. Nobody can access it unless you share your assessments later.
+          Always make sure the data you enter complies with the GDPR.
+        </div>
+
+        <img src="assets/guide/images/info-user.png" class="guide-content-image"
+             alt="Picture showing a list of information fields, with fields for the name and the age (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The participant information fields that will be filled in with GazePlay-Learning.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3" [id]="'setup-eval'">
+      <h2 class="guide-section-title">Part 3 — Assessment mode and global settings</h2>
+      <div class="guide-section-body">
+        <p>The next page has two stages. First, choose the assessment creation mode. Manual mode lets you create each
+          screen by hand, starting from global settings. Automatic mode generates the assessment from media and
+          pre-filled settings.
+        </p>
+
+        <div class="alert alert-tip fw-semibold w-100 mb-5">
+          <i class="bi bi-lightbulb me-2" style="color: #8b5cf6;"></i>
+          Automatic mode is not fully implemented yet. Selecting it has no effect on the creation of the assessment.
+          We therefore recommend choosing manual mode.
+        </div>
+
+        <p>Once the mode is selected, you can enter default settings for the different screen types. These settings are
+        used as initial values for every newly created screen. For all screen types, durations are in seconds, to the
+        nearest tenth of a second.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Most interactive elements in assessments (buttons, areas to select, fixation crosses) need a gaze fixation
+          time to work properly. This time is in seconds.
+        </div>
+
+        <p><strong>Instruction screens</strong></p>
+
+        <p>Instruction screens give information to the person being assessed. This can be a text instruction or a media
+        file. A button to look at can also be shown to move to the next screen. In the global settings of these screens,
+        you can already set the instruction format (a text, an image, a sound or a video).</p>
+
+        <p><strong>Stimulus screens</strong></p>
+
+        <p>Stimulus screens create grids of images, possibly with sounds, for assessments. Because they are more complex
+        than the two other screen types, they need more settings: the number of rows, the number of columns and the
+        minimum number of expected correct answers.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          The number of correct answers to select cannot be less than zero, and cannot exceed the number of rows
+          multiplied by the number of columns. Otherwise, the person being assessed could not validate the stimulus screen.
+        </div>
+
+        <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
+             alt="Picture showing a grid of cells of a stimulus screen, with a toolbar above it (French interface).">
+        <div class="guide-content-image-desc">
+          <p>A stimulus screen grid, with three rows and two columns set in the settings.</p>
+        </div>
+
+        <p><strong>Transition screens</strong></p>
+
+        <p>Transition screens act as a buffer between other screen types (instruction, stimuli). You can set how long the
+          transition screen is shown. This type of screen lets the previous information sink in before new information
+          arrives, and brings the participant's gaze to the centre of the screen with the fixation cross, if it is shown.
+        </p>
+
+        <p><strong>Are existing screens affected if the default settings are changed?</strong></p>
+
+        <p>No, only screens created after the default settings were changed get the new values.
+        In general, once a screen is created, its values can only be changed by editing that screen directly
+        (see the next part).</p>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3" [id]="'create-eval'">
+      <h2 class="guide-section-title">Part 4 — Creating the assessment screens</h2>
+      <div class="guide-section-body">
+        <p>Once the global settings are filled in, you can create the set of screens that make up your assessment,
+          using the following page:
+        </p>
+
+        <img src="assets/guide/images/screen-creation.png" class="guide-content-image"
+             alt="Picture showing a list of assessment screens (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The screen creation page of an assessment.</p>
+        </div>
+
+        <p>This page has two distinct parts.</p>
+        <ul>
+          <li><p>The first one, on the left, lets you create and organise the list of screens. The “Add a screen” buttons
+          add new screens to the existing list. As on the participant information page, you can reorder the list with the
+          <span class="cdk-drag-handle bg-secondary-subtle cursor-move"> ☰ </span> handle or the arrow buttons. The
+          buttons next to each screen name let you rename, duplicate or delete it. Be careful: deleting a screen is
+          permanent, so make sure you pick the right screen.</p>
+          </li>
+
+          <li><p>The right part of the page shows a preview of the selected screen and lets you edit it with the
+          “Edit this screen” button.</p>
+          </li>
+        </ul>
+
+        <p>After clicking the edit button, you will find options laid out like the default settings. Newly created
+        screens also start with the values defined in these global settings. To change the screen type, use the
+        “Screen type” choice at the top of the page.</p>
+
+        <p><strong>Transition screens</strong></p>
+
+        <p>Transition screen settings are the same as the global settings. You can customise them for a specific screen
+          or keep the values defined earlier.
+        </p>
+
+        <p><strong>Instruction screens</strong></p>
+
+        <p>Depending on the global options chosen, you may be able to attach a media file to this screen: an image,
+        a sound or a video.</p>
+
+        <img src="assets/guide/images/media-upload.png" class="guide-content-image"
+             alt="Picture showing an area of the options used to import an image, with disabled action buttons (French interface).">
+        <div class="guide-content-image-desc">
+          <p>Media file import area.</p>
+        </div>
+
+        <p>Use the “Choose…” button to open your file explorer and pick the file of your choice.
+        <br>When media is imported into a screen, you can preview it (or listen to it, for a sound) and remove it with
+        the red button next to the import button.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          Like assessments, imported media files are stored in your browser. This means the original files can be
+          freely moved, changed, renamed or deleted without affecting the assessments that use them.
+        </div>
+
+        <p><strong>Stimulus screens</strong></p>
+
+        <p>Stimulus screens create grids of sounds or images for assessments. Because they are more complex than the two
+          other screen types, they have more settings: the number of rows, the number of columns and the minimum number
+          of expected correct answers.</p>
+
+        <div class="alert alert-info fw-semibold w-100 mb-5">
+          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
+          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
+          The number of correct answers to select cannot be less than zero, and cannot exceed the number of rows
+          multiplied by the number of columns. Otherwise, the person being assessed could not validate the stimulus screen.
+        </div>
+
+        <img src="assets/guide/images/stimuli-grid.png" class="guide-content-image"
+             alt="Picture showing a grid of cells of a stimulus screen, with a toolbar above it (French interface).">
+        <div class="guide-content-image-desc">
+          <p>A stimulus screen grid, with three rows and two columns set in the settings.</p>
+        </div>
+
+        <p>Clicking one of the grid cells lets you customise it: you can change the answer type (correct or wrong) and
+        add an image, or a sound that is played when the person being assessed looks at this cell.</p>
+
+        <img src="assets/guide/images/stimuli-file.png" class="guide-content-image"
+             alt="Picture showing the settings of a cell of a stimulus grid. It contains a picture of an apple and is marked as a correct answer (French interface).">
+        <div class="guide-content-image-desc">
+          <p>The settings of a stimulus screen cell.</p>
+        </div>
+
+        <p>This panel has other buttons too. If the image you used is too large or off-centre, you can crop it with the
+        “Crop” button. You can also listen to a preview when a sound is added to the cell. Finally, at the bottom of the
+        panel, “Clear the cell” removes all the files (image and/or sound) added to this cell, and “Done” closes the
+        panel.</p>
+
+        <p>Although every cell of the stimulus grid can be managed by setting the number of rows and columns, this is not
+        ideal in the long run, especially if you need to change your grid later. That is why a toolbar is available above
+        the grid preview. It performs a set of actions on your cells without changing the number of rows or columns, and
+        without having to fill in the cell's value and attachments again.</p>
+
+        <img src="assets/guide/images/stimuli-add.png" class="guide-content-image"
+             alt="Picture showing a grid of stimulus cells with the toolbar. New cells can also be added by clicking an empty space (French interface).">
+        <div class="guide-content-image-desc">
+          <p>Using the toolbar to create new cells.</p>
+        </div>
+
+        <p>First, you can add new cells in two ways: by clicking an empty slot, or by clicking one of the small “+”
+        buttons. These appear when you hover over a cell with the mouse, as in the picture above (with the keyboard, use
+        the “Add a cell next to this one” buttons of the cell panel). The toolbar also lets you perform other actions.
+        The list below describes each button, from left to right:</p>
+
+        <ul>
+          <li>Duplicate: copies a cell and pastes it in another slot (if that slot is another cell, it is overwritten).
+          The new cell has the same settings and attached files as the original.</li>
+          <li>Swap: swaps two cells, or moves an existing cell to an empty slot.</li>
+          <li>Multiple selection: selects several cells at once to delete them.</li>
+          <li>Delete: deletes a cell.</li>
+          <li>Undo: undoes the last action. You can go back through the most recent actions.</li>
+          <li>Preview: quickly shows the content of each grid cell. The grid cannot be edited while this mode is on;
+            press the preview button again to leave it.</li>
+          <li>Zoom in and zoom out buttons: enlarge or shrink the preview area, useful for wide grids.</li>
+        </ul>
+
+        <p>When all the screens of your assessment are created and it is complete, the “Next” button at the bottom right
+        takes you to the download page.</p>
+
+      </div>
+    </div>
+
+    <div class="guide-section-card mb-3" [id]="'download-eval'">
+      <h2 class="guide-section-title">Part 5 — Downloading the assessment</h2>
+      <div class="guide-section-body">
+        <p>Once the assessment screens are created, the last page lets you download the assessment in two different
+        formats:
+        </p>
+
+        <ul>
+          <li>A <code>.gpSave</code> file with the “Download the .gpSave” button. This file can be imported into this site
+          again to make changes to the assessment in the future.</li>
+          <li>A <code>.zip</code> file with the “Export the .zip” button, which lets you use your assessment with the
+          GazePlay Learning software.</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a>
+
+  </div>
+</div>
+} @else {
 <div class="card mb-4">
   <div class="card-header">
     <h1 class="card-title">Création d'évaluation</h1>
@@ -316,3 +639,4 @@
 
   </div>
 </div>
+}

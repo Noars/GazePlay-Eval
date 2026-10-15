@@ -4,6 +4,8 @@ import {SaveService} from '../../services/save/save.service';
 import {formatTypeModel, saveModelDefault} from '../../shared/saveModel';
 import {Router} from '@angular/router';
 import {HelpTipComponent} from '../../shared/ui/help-tip/help-tip.component';
+import {I18nService, TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /** Caractères interdits dans un nom de fichier (le nom sert de dossier dans les archives exportées). */
 const FORBIDDEN_NAME_CHARACTERS = /[\\/:*?"<>|]/;
@@ -16,7 +18,7 @@ const FORBIDDEN_NAME_CHARACTERS = /[\\/:*?"<>|]/;
  */
 @Component({
   selector: 'app-info-eval',
-  imports: [FormsModule, HelpTipComponent],
+  imports: [FormsModule, HelpTipComponent, TranslatePipe],
   templateUrl: './info-eval.component.html',
   standalone: true,
   styleUrl: './info-eval.component.scss'
@@ -26,20 +28,18 @@ export class InfoEvalComponent implements OnInit{
 
   evaluationName: string = saveModelDefault.nomEval;
   resultType: formatTypeModel = saveModelDefault.format;
-  tooltipEvalName: string = 'Ce nom apparaîtra dans le nom des fichiers de résultats, ainsi que dans GazePlay afin que vous puissiez sélectionner cette évaluation parmi celles que vous aurez déjà créées.';
-  tooltipEvalType: string = 'Les résultats enregistrés en XLSX et CSV seront lisibles dans un tableur.';
 
-  /** Formats proposés ; `value` est la valeur enregistrée dans les fichiers. */
-  readonly formats: {value: formatTypeModel, label: string, description: string}[] = [
-    {value: 'Csv&Xlsx', label: 'CSV et XLSX', description: 'Recommandé : les deux formats, lisibles par tous les tableurs.'},
-    {value: 'Csv', label: 'CSV', description: 'Fichier texte universel, léger.'},
-    {value: 'Xlsx', label: 'XLSX', description: 'Classeur Excel / LibreOffice.'},
+  /** Formats proposés ; `value` est la valeur enregistrée dans les fichiers (non traduite). */
+  readonly formats: {value: formatTypeModel, label: TranslationKey, description: TranslationKey}[] = [
+    {value: 'Csv&Xlsx', label: 'infoEval.format.both', description: 'infoEval.format.both.desc'},
+    {value: 'Csv', label: 'infoEval.format.csv', description: 'infoEval.format.csv.desc'},
+    {value: 'Xlsx', label: 'infoEval.format.xlsx', description: 'infoEval.format.xlsx.desc'},
   ];
 
   /** Vrai après une tentative de passage à l'étape suivante (affiche les erreurs). */
   submitted = false;
 
-  constructor(private router: Router, private saveService: SaveService) {
+  constructor(private router: Router, private saveService: SaveService, private i18n: I18nService) {
   }
 
   ngOnInit(): void {
@@ -49,7 +49,7 @@ export class InfoEvalComponent implements OnInit{
   /** Message d'erreur du nom, ou chaîne vide s'il est valide. */
   get nameError(): string {
     if (FORBIDDEN_NAME_CHARACTERS.test(this.evaluationName ?? '')) {
-      return 'Le nom ne peut pas contenir les caractères \\ / : * ? " < > |';
+      return this.i18n.t('infoEval.name.forbidden');
     }
     return '';
   }

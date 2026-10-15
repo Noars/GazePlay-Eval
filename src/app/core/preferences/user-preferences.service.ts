@@ -1,6 +1,7 @@
 import {computed, DestroyRef, DOCUMENT, inject, Injectable, signal} from '@angular/core';
 import {
   DEFAULT_PREFERENCES,
+  LanguagePreference,
   normalizePreferences,
   readLegacyPreferences,
   UserPreferences,
@@ -8,6 +9,7 @@ import {
 import {PREFERENCES_STORE} from './preferences.store';
 import {applyPreferencesToDocument, resolveTheme, ResolvedTheme, writeFirstPaintCache} from './preferences-dom';
 import {StorageNoticeService} from '../storage/storage-notice.service';
+import {I18nService} from '../i18n/i18n.service';
 
 /**
  * État de la persistance des préférences :
@@ -39,6 +41,7 @@ export class UserPreferencesService {
   private readonly store = inject(PREFERENCES_STORE);
   private readonly document = inject(DOCUMENT);
   private readonly notices = inject(StorageNoticeService);
+  private readonly i18n = inject(I18nService);
 
   private readonly state = signal<UserPreferences>({...DEFAULT_PREFERENCES});
   private readonly systemPrefersDark = signal(false);
@@ -82,9 +85,17 @@ export class UserPreferencesService {
     return this.persist(next);
   }
 
-  /** Rétablit toutes les valeurs par défaut et les enregistre. */
+  /**
+   * Rétablit les valeurs d'affichage par défaut et les enregistre. La langue choisie est
+   * conservée : rétablir l'affichage ne doit pas changer la langue de l'interface.
+   */
   reset(): Promise<boolean> {
-    return this.update({...DEFAULT_PREFERENCES});
+    return this.update({...DEFAULT_PREFERENCES, language: this.state().language});
+  }
+
+  /** Change la langue de l'interface et l'enregistre. */
+  setLanguage(language: LanguagePreference): Promise<boolean> {
+    return this.update({language});
   }
 
   /** Bascule entre thème clair et sombre (à partir du thème actuellement affiché). */
@@ -132,7 +143,7 @@ export class UserPreferencesService {
   private persist(preferences: UserPreferences): Promise<boolean> {
     const write = this.writeQueue.then(async () => {
       if (this.storageStatus() === 'unavailable') {
-        this.saveError.set('Vos préférences ne peuvent pas être enregistrées sur cet appareil : elles seront perdues à la fermeture de la page.');
+        this.saveError.set(this.i18n.t('preferences.error.unavailable'));
         return false;
       }
       try {
@@ -141,7 +152,7 @@ export class UserPreferencesService {
         return true;
       } catch (error) {
         console.error('Préférences : échec de l\'enregistrement.', error);
-        this.saveError.set('Vos préférences n\'ont pas pu être enregistrées. Elles restent actives jusqu\'à la fermeture de la page.');
+        this.saveError.set(this.i18n.t('preferences.error.saveFailed'));
         return false;
       }
     });
@@ -150,6 +161,7 @@ export class UserPreferencesService {
   }
 
   private apply(): void {
+    this.i18n.setLanguage(this.state().language);
     applyPreferencesToDocument(this.state(), this.systemPrefersDark(), this.document);
     writeFirstPaintCache(this.state(), this.localStorage());
   }

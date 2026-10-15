@@ -1,18 +1,18 @@
 <div class="inspector" id="configStimuli">
   <div class="inspector__header">
     <h2 class="inspector__title" id="configStimuliLabel" tabindex="-1">
-      Case {{ data.cell + 1 }}
+      {{ 'cell.title' | t: {n: data.cell + 1} }}
       @if (data.cols) {
-        <span class="inspector__position">ligne {{ (data.cell - data.cell % data.cols) / data.cols + 1 }}, colonne {{ data.cell % data.cols + 1 }}</span>
+        <span class="inspector__position">{{ 'cell.position' | t: {row: (data.cell - data.cell % data.cols) / data.cols + 1, col: data.cell % data.cols + 1} }}</span>
       }
     </h2>
-    <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm" aria-label="Fermer le panneau de la case" (click)="finish()">
+    <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm" [attr.aria-label]="'cell.close' | t" (click)="finish()">
       <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
   </div>
 
   <div class="inspector__body">
-    <app-choice-setting label="Réponse"
+    <app-choice-setting [label]="'cell.answer' | t"
                         [stacked]="true"
                         [options]="answerOptions"
                         [ngModel]="cell.goodAnswer === true"
@@ -20,59 +20,59 @@
 
     <!-- Image -->
     <section class="inspector__section" aria-labelledby="cell-image-title">
-      <h3 class="inspector__section-title" id="cell-image-title"><i class="bi bi-image" aria-hidden="true"></i> Image</h3>
+      <h3 class="inspector__section-title" id="cell-image-title"><i class="bi bi-image" aria-hidden="true"></i> {{ 'cell.image' | t }}</h3>
       @if (previewImage) {
         <div class="inspector__preview">
-          <img [src]="previewImage" [alt]="'Aperçu de ' + cell.imageName">
+          <img [src]="previewImage" [alt]="'editor.preview.of' | t: {name: cell.imageName}">
         </div>
       } @else if (missingImage) {
         <p class="inspector__warning">
           <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
-          « {{ cell.imageName }} » est introuvable. Choisissez l'image à nouveau.
+          {{ 'cell.imageMissing' | t: {name: cell.imageName} }}
         </p>
       }
       <div class="inspector__actions">
-        <app-file-picker label="Choisir une image" accept="image/*"
+        <app-file-picker [label]="'editor.choose.image' | t" accept="image/*"
                          [fileName]="cell.imageName || ''"
                          [disabled]="busy !== null"
                          (fileSelected)="getImageFile($event)"></app-file-picker>
         @if (previewImage) {
           <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" [disabled]="busy !== null" (click)="cropImage()">
-            <i class="bi bi-crop" aria-hidden="true"></i> Recadrer
+            <i class="bi bi-crop" aria-hidden="true"></i> {{ 'cell.crop' | t }}
           </button>
         }
         <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--sm"
                 [disabled]="!cell.imageName || busy !== null" (click)="deleteImage()">
-          <i class="bi bi-trash3" aria-hidden="true"></i> Retirer l'image
+          <i class="bi bi-trash3" aria-hidden="true"></i> {{ 'editor.remove.image' | t }}
         </button>
       </div>
     </section>
 
     <!-- Son -->
     <section class="inspector__section" aria-labelledby="cell-sound-title">
-      <h3 class="inspector__section-title" id="cell-sound-title"><i class="bi bi-music-note-beamed" aria-hidden="true"></i> Son</h3>
+      <h3 class="inspector__section-title" id="cell-sound-title"><i class="bi bi-music-note-beamed" aria-hidden="true"></i> {{ 'cell.sound' | t }}</h3>
       @if (previewSound) {
-        <audio controls [attr.src]="previewSound" [attr.aria-label]="'Son ' + cell.soundName"></audio>
+        <audio controls [attr.src]="previewSound" [attr.aria-label]="'editor.preview.sound' | t: {name: cell.soundName}"></audio>
       } @else if (missingSound) {
         <p class="inspector__warning">
           <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
-          « {{ cell.soundName }} » est introuvable. Choisissez le son à nouveau.
+          {{ 'cell.soundMissing' | t: {name: cell.soundName} }}
         </p>
       }
       <div class="inspector__actions">
-        <app-file-picker label="Choisir un son" accept="audio/*"
+        <app-file-picker [label]="'editor.choose.sound' | t" accept="audio/*"
                          [fileName]="cell.soundName || ''"
                          [disabled]="busy !== null"
                          (fileSelected)="getSoundFile($event)"></app-file-picker>
         <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--sm"
                 [disabled]="!cell.soundName || busy !== null" (click)="deleteSound()">
-          <i class="bi bi-trash3" aria-hidden="true"></i> Retirer le son
+          <i class="bi bi-trash3" aria-hidden="true"></i> {{ 'editor.remove.sound' | t }}
         </button>
       </div>
     </section>
 
     @if (busy) {
-      <p class="gp-muted gp-text-sm" role="status"><span class="gp-spinner" aria-hidden="true"></span> Enregistrement du fichier…</p>
+      <p class="gp-muted gp-text-sm" role="status"><span class="gp-spinner" aria-hidden="true"></span> {{ 'cell.saving' | t }}</p>
     }
   </div>
 
@@ -80,10 +80,10 @@
     <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm"
             [disabled]="(!previewImage && !previewSound && !cell.imageName && !cell.soundName) || busy !== null"
             (click)="deleteCell()">
-      Vider la case
+      {{ 'cell.clear' | t }}
     </button>
     <button type="button" class="gp-btn gp-btn--primary gp-btn--sm" (click)="finish()">
-      <i class="bi bi-check2" aria-hidden="true"></i> Terminer
+      <i class="bi bi-check2" aria-hidden="true"></i> {{ 'cell.finish' | t }}
     </button>
   </div>
 </div>

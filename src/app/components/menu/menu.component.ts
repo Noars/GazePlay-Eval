@@ -4,9 +4,11 @@ import {NgTemplateOutlet} from '@angular/common';
 import {filter} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 interface NavItem {
-  label: string;
+  label: TranslationKey;
   icon: string;
   route: string;
   exact?: boolean;
@@ -21,7 +23,7 @@ interface NavItem {
  */
 @Component({
   selector: 'app-menu',
-  imports: [RouterLink, RouterLinkActive, NgTemplateOutlet],
+  imports: [RouterLink, RouterLinkActive, NgTemplateOutlet, TranslatePipe],
   templateUrl: './menu.component.html',
   standalone: true,
   styleUrl: './menu.component.scss'
@@ -35,14 +37,14 @@ export class MenuComponent {
   @ViewChild('drawer') private drawer?: ElementRef<HTMLDialogElement>;
 
   readonly navigationItems: NavItem[] = [
-    {label: 'Accueil', icon: 'bi-house', route: '/home', exact: true},
-    {label: 'Guide', icon: 'bi-book', route: '/guide'},
-    {label: 'Options', icon: 'bi-sliders', route: '/option'},
+    {label: 'nav.home', icon: 'bi-house', route: '/home', exact: true},
+    {label: 'nav.guide', icon: 'bi-book', route: '/guide'},
+    {label: 'nav.options', icon: 'bi-sliders', route: '/option'},
   ];
 
   readonly projectItems: NavItem[] = [
-    {label: 'Mes sauvegardes', icon: 'bi-floppy', route: '/sauvegarde'},
-    {label: 'Charger', icon: 'bi-folder2-open', route: '/load-save'},
+    {label: 'nav.saves', icon: 'bi-floppy', route: '/sauvegarde'},
+    {label: 'nav.load', icon: 'bi-folder2-open', route: '/load-save'},
   ];
 
   readonly importing = this.importFlow.importing;

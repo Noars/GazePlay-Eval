@@ -5,6 +5,7 @@ import {Subject} from 'rxjs';
 import {App} from './app';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
 import {RouteFocusService} from './core/a11y/route-focus.service';
+import {TranslatePipe} from './core/i18n/translate.pipe';
 
 describe('App', () => {
   let component: App;
@@ -32,8 +33,9 @@ describe('App', () => {
         {provide: RouteFocusService, useValue: routeFocusSpy},
       ]
     })
-      // Les composants enfants (en-tête, menu…) ont leurs propres tests : on les neutralise ici.
-      .overrideComponent(App, {set: {imports: [RouterOutlet], schemas: [NO_ERRORS_SCHEMA]}})
+      // Les composants enfants (en-tête, menu…) ont leurs propres tests : on les neutralise ici
+      // (le pipe de traduction reste nécessaire au gabarit).
+      .overrideComponent(App, {set: {imports: [RouterOutlet, TranslatePipe], schemas: [NO_ERRORS_SCHEMA]}})
       .compileComponents();
 
     fixture = TestBed.createComponent(App);

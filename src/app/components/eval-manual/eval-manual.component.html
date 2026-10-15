@@ -1,12 +1,9 @@
 <div class="gp-page gp-page--narrow">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <span class="gp-page-header__eyebrow">Étape 3 sur 5 · Mode manuel</span>
-      <h1 class="gp-page-header__title">Paramètres globaux des écrans</h1>
-      <p class="gp-page-header__lead">
-        Ces réglages pré-remplissent chaque nouvel écran. Vous pourrez toujours les modifier
-        écran par écran à l'étape suivante.
-      </p>
+      <span class="gp-page-header__eyebrow">{{ 'setup.manual.eyebrow' | t }}</span>
+      <h1 class="gp-page-header__title">{{ 'setup.manual.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'setup.manual.lead' | t }}</p>
     </div>
   </header>
 
@@ -21,8 +18,8 @@
                 (click)="toggleAccordion(section.id)">
           <span class="gp-disclosure__icon" aria-hidden="true"><i class="bi" [class]="section.icon"></i></span>
           <span>
-            {{ section.title }}
-            <span class="gp-disclosure__summary">{{ section.summary }}</span>
+            {{ section.title | t }}
+            <span class="gp-disclosure__summary">{{ section.summary | t }}</span>
           </span>
           <i class="bi bi-chevron-down gp-disclosure__chevron" aria-hidden="true"></i>
         </button>
@@ -47,14 +44,14 @@
     </section>
   }
 
-  <nav class="gp-actions" aria-label="Navigation entre les étapes">
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
     <button type="button" class="gp-btn gp-btn--ghost" (click)="backToEvalChoice()">
       <i class="bi bi-arrow-left" aria-hidden="true"></i>
-      Changer de mode
+      {{ 'setup.changeMode' | t }}
     </button>
     <div class="gp-actions__end">
       <button type="button" class="gp-btn gp-btn--primary" (click)="startCreateEvalManual()">
-        Suivant : créer les écrans
+        {{ 'setup.manual.next' | t }}
         <i class="bi bi-arrow-right" aria-hidden="true"></i>
       </button>
     </div>

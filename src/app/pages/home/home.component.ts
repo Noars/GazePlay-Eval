@@ -7,6 +7,9 @@ import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {LoadService} from '../../services/load/load.service';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
 import {saveModel} from '../../shared/saveModel';
+import {STEP_LABEL_KEYS} from '../../shared/stepRoute.model';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Page d'accueil : démarrer une nouvelle évaluation, reprendre l'évaluation en cours,
@@ -14,7 +17,7 @@ import {saveModel} from '../../shared/saveModel';
  */
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, TranslatePipe],
   templateUrl: './home.component.html',
   standalone: true,
   styleUrl: './home.component.scss'
@@ -26,14 +29,7 @@ export class HomeComponent implements OnInit {
   protected readonly loadService = inject(LoadService);
   private readonly overwriteGuard = inject(OverwriteGuardService);
   private readonly importFlow = inject(ImportFlowService);
-
-  readonly stepLabels = [
-    'Informations de l\'évaluation',
-    'Informations du participant',
-    'Mode et paramètres',
-    'Création des écrans',
-    'Téléchargement et export',
-  ];
+  private readonly i18n = inject(I18nService);
 
   /** Évaluation en cours (slot 0), lue à l'affichage de la page. */
   currentEval: saveModel | null = null;
@@ -59,6 +55,7 @@ export class HomeComponent implements OnInit {
   /** Libellé de l'étape où l'utilisateur s'est arrêté. */
   currentStepLabel(): string {
     const step = this.currentEval?.step ?? -1;
-    return this.stepLabels[step] ?? '';
+    const key = STEP_LABEL_KEYS[step];
+    return key ? this.i18n.t(key) : '';
   }
 }

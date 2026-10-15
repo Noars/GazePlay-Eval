@@ -15,14 +15,14 @@
   </div>
   <div class="gp-dialog__footer">
     <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="close(false)">
-      {{ data.cancelLabel ?? 'Annuler' }}
+      {{ data.cancelLabel ?? ('common.cancel' | t) }}
     </button>
     <button type="button"
             class="gp-btn js-confirm"
             [class.gp-btn--danger]="data.tone === 'danger'"
             [class.gp-btn--primary]="data.tone !== 'danger'"
             (click)="close(true)">
-      {{ data.confirmLabel ?? 'Confirmer' }}
+      {{ data.confirmLabel ?? ('ui.confirm' | t) }}
     </button>
   </div>
 </div>

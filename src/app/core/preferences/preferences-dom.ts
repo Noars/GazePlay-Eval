@@ -13,6 +13,7 @@ import {getFontDefinition, UserPreferences} from './user-preferences.model';
  *  - `data-motion`          : `system` | `reduce` ;
  *  - `data-underline-links` : `true` | `false` ;
  *  - `data-color-blind`     : `true` | `false` (mode daltonisme, voir `src/styles/_color-vision.scss`) ;
+ *  - `lang`                 : `fr` | `en` (langue de l'interface, lue par les lecteurs d'écran) ;
  *  - variables `--gp-font-family`, `--gp-letter-spacing`, `--gp-word-spacing`,
  *    `--gp-line-height` et `font-size` de `<html>` (taille du texte).
  */
@@ -43,6 +44,7 @@ export function applyPreferencesToDocument(
   root.setAttribute('data-motion', preferences.motion);
   root.setAttribute('data-underline-links', String(preferences.underlineLinks));
   root.setAttribute('data-color-blind', String(preferences.colorBlindMode));
+  root.setAttribute('lang', preferences.language);
   root.style.colorScheme = theme;
 
   root.style.fontSize = `${preferences.textScale}%`;
@@ -86,6 +88,7 @@ export function writeFirstPaintCache(preferences: UserPreferences, storage: Stor
       textScale: preferences.textScale,
       motion: preferences.motion,
       colorBlindMode: preferences.colorBlindMode,
+      language: preferences.language,
     }));
   } catch {
     // Sans cache, le seul effet est un éventuel changement de thème visible au chargement.

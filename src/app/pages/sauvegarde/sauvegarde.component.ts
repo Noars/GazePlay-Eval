@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {PopupDeleteSaveComponent} from '../../components/popup-delete-save/popup-delete-save.component';
 import {LoadService} from '../../services/load/load.service';
@@ -13,6 +13,8 @@ import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-gu
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 type Slot = { index: FormatTypeConfig; data: saveModel | null };
 
@@ -22,7 +24,7 @@ type Slot = { index: FormatTypeConfig; data: saveModel | null };
  */
 @Component({
   selector: 'app-sauvegarde',
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './sauvegarde.component.html',
   styleUrl: './sauvegarde.component.css'
 })
@@ -32,7 +34,7 @@ export class SauvegardeComponent implements OnInit {
   hasUnsavedEval: boolean = false;
   evalInProgress: boolean | undefined;
   autoSave: saveModel | null = null;
-  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
+  private readonly i18n = inject(I18nService);
 
   constructor(
     private dialog: MatDialog,
@@ -53,7 +55,7 @@ export class SauvegardeComponent implements OnInit {
   ngOnInit(): void {
     this.refresh();
     if (this.hasUnsavedEval) {
-      this.flashMessageService.show('warning', 'Vous avez une évaluation qui n\'a pas encore été sauvegardée. Pensez à l\'enregistrer pour ne pas la perdre !');
+      this.flashMessageService.show('warning', this.i18n.t('saves.unsavedWarning'));
     }
   }
 
@@ -113,10 +115,10 @@ export class SauvegardeComponent implements OnInit {
       this.saveService.saveToSlot(slot.index, data);
     } catch (error) {
       console.error('Sauvegarde impossible :', error);
-      this.flashMessageService.show('error', 'L\'évaluation n\'a pas pu être sauvegardée : le stockage du navigateur est peut-être plein.');
+      this.flashMessageService.show('error', this.i18n.t('saves.saveError'));
       return;
     }
-    this.flashMessageService.show('success', 'Votre évaluation a été sauvegardée avec succès.');
+    this.flashMessageService.show('success', this.i18n.t('saves.saveSuccess'));
     this.refresh();
   }
 
@@ -126,14 +128,14 @@ export class SauvegardeComponent implements OnInit {
    */
   async downloadSlot(slot: Slot): Promise<void> {
     if (!slot.data) {
-      this.flashMessageService.show('error', 'L\'évaluation n\'a pas pu être téléchargée car elle ne contient aucune donnée.');
+      this.flashMessageService.show('error', this.i18n.t('saves.downloadEmpty'));
       return;
     }
     const ok = await this.downloadService.generateSlotZip(slot.data);
     if (ok === false) {
-      this.flashMessageService.show('error', 'Le téléchargement de l\'évaluation a échoué.');
+      this.flashMessageService.show('error', this.i18n.t('saves.downloadError'));
     } else {
-      this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
+      this.flashMessageService.show('info', this.i18n.t('saves.downloaded'));
     }
   }
 
@@ -144,7 +146,7 @@ export class SauvegardeComponent implements OnInit {
    */
   openDeletePopup(slot: Slot): void {
     const dialogRef = this.dialog.open(PopupDeleteSaveComponent, {
-      data: {slotName: slot.data?.nomEval || `Emplacement ${slot.index}`},
+      data: {slotName: slot.data?.nomEval || this.i18n.t('saves.slot', {n: slot.index})},
       disableClose: true,
       panelClass: 'gp-dialog-panel',
       autoFocus: '.js-cancel',
@@ -157,7 +159,7 @@ export class SauvegardeComponent implements OnInit {
         const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? '';
         this.saveService.clearSlot(slot.index);
         this.refresh();
-        this.flashMessageService.show('success', 'L\'évaluation a été supprimée avec succès.');
+        this.flashMessageService.show('success', this.i18n.t('saves.deleted'));
         try {
           await this.mediaCleanup.cleanupProject(slotName);
         } catch (error) {
@@ -186,19 +188,19 @@ export class SauvegardeComponent implements OnInit {
   async deleteAutoSave(): Promise<void> {
     if (!this.evalInProgress) return;
     const confirmed = await this.confirmService.confirm({
-      title: 'Abandonner l\'évaluation en cours ?',
+      title: this.i18n.t('saves.discard.title'),
       message: [
-        'Les modifications qui n\'ont pas été enregistrées dans un emplacement seront définitivement perdues.',
-        'Vos emplacements de sauvegarde ne sont pas modifiés.',
+        this.i18n.t('saves.discard.message1'),
+        this.i18n.t('saves.discard.message2'),
       ],
-      confirmLabel: 'Abandonner les modifications',
+      confirmLabel: this.i18n.t('saves.discard.confirm'),
       tone: 'danger',
     });
     if (!confirmed) return;
 
     this.saveService.clearSlot(0);
     this.saveService.setActiveSlot(null);
-    this.flashMessageService.show('success', 'Les dernières modifications ont été supprimées avec succès.');
+    this.flashMessageService.show('success', this.i18n.t('saves.discarded'));
     this.refresh();
   }
 }

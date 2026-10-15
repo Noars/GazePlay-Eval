@@ -23,7 +23,7 @@
                  [disabled]="disabled"
                  (change)="select(option)"
                  (blur)="touch()">
-          <label class="gp-segmented__label" [for]="optionId(i)">{{ option.label }}</label>
+          <label class="gp-segmented__label" [for]="optionId(i)" [attr.lang]="option.lang ?? null">{{ option.labelKey ? (option.labelKey | t) : option.label }}</label>
         </span>
       }
     </div>

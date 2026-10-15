@@ -1,7 +1,7 @@
 <header class="gp-header">
   <button type="button"
           class="gp-btn gp-btn--ghost gp-btn--icon gp-header__menu-button"
-          aria-label="Ouvrir le menu de navigation"
+          [attr.aria-label]="'header.openMenu' | t"
           aria-haspopup="dialog"
           (click)="menuRequested.emit()">
     <i class="bi bi-list" aria-hidden="true"></i>
@@ -10,7 +10,7 @@
   <a class="gp-header__brand" routerLink="/home">
     <span class="gp-header__logo" aria-hidden="true"><i class="bi bi-eye"></i></span>
     <span class="gp-header__brand-text">GazePlay Eval</span>
-    <span class="visually-hidden"> — accueil</span>
+    <span class="visually-hidden">{{ 'header.homeSuffix' | t }}</span>
   </a>
 
   <div class="gp-header__actions">
@@ -21,14 +21,12 @@
     <button type="button"
             class="gp-btn gp-btn--ghost gp-btn--icon"
             [attr.aria-pressed]="isDark()"
-            aria-label="Thème sombre"
-            [title]="isDark() ? 'Passer au thème clair' : 'Passer au thème sombre'"
+            [attr.aria-label]="'header.darkTheme' | t"
+            [title]="(isDark() ? 'header.toLight' : 'header.toDark') | t"
             (click)="changeTheme()">
       <i class="bi" [class.bi-sun]="getTheme() === 'sun'" [class.bi-moon-stars]="getTheme() === 'moon'" aria-hidden="true"></i>
     </button>
 
-    <a class="gp-btn gp-btn--ghost gp-btn--icon" routerLink="/option" aria-label="Options et accessibilité" title="Options et accessibilité">
-      <i class="bi bi-sliders" aria-hidden="true"></i>
-    </a>
+    <app-language-menu></app-language-menu>
   </div>
 </header>

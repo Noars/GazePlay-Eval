@@ -1,12 +1,12 @@
 <div class="gp-page">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <h1 class="gp-page-header__title">Charger une évaluation</h1>
-      <p class="gp-page-header__lead">Choisissez un emplacement pour reprendre l'évaluation qui y est enregistrée.</p>
+      <h1 class="gp-page-header__title">{{ 'load.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'load.lead' | t }}</p>
     </div>
     <a class="gp-btn gp-btn--ghost" routerLink="/sauvegarde">
       <i class="bi bi-floppy" aria-hidden="true"></i>
-      Gérer les sauvegardes
+      {{ 'load.manage' | t }}
     </a>
   </header>
 
@@ -15,30 +15,30 @@
       <li>
         @if (slot.data === null) {
           <div class="load-card load-card--empty">
-            <span class="load-card__number">Emplacement {{ slot.index }}</span>
-            <span class="load-card__title">Vide</span>
+            <span class="load-card__number">{{ 'saves.slot' | t: {n: slot.index} }}</span>
+            <span class="load-card__title">{{ 'load.empty' | t }}</span>
           </div>
         } @else {
           <button type="button" class="load-card" (click)="loadSlot(slot.index)">
             <span class="load-card__number">
-              Emplacement {{ slot.index }}
+              {{ 'saves.slot' | t: {n: slot.index} }}
               @if (saveService.activeSlotIndex === slot.index) {
-                <span class="gp-badge gp-badge--primary ms-1" [title]="tooltipCurrentEval">En cours</span>
+                <span class="gp-badge gp-badge--primary ms-1" [title]="'saves.inProgress.tooltip' | t">{{ 'saves.inProgress' | t }}</span>
               }
             </span>
-            <span class="load-card__title gp-truncate">{{ slot.data.nomEval || 'Sans nom' }}</span>
-            <span class="load-card__meta">Modifiée le {{ formatDate(slot.data.createdAt) }} · {{ slot.data.listScreens.length || 0 }} écran(s)</span>
-            <span class="load-card__cta"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Charger</span>
+            <span class="load-card__title gp-truncate">{{ slot.data.nomEval || ('saves.unnamed' | t) }}</span>
+            <span class="load-card__meta">{{ 'saves.slotMeta' | t: {date: formatDate(slot.data.createdAt), count: slot.data.listScreens.length || 0} }}</span>
+            <span class="load-card__cta"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> {{ 'load.load' | t }}</span>
           </button>
         }
       </li>
     }
   </ul>
 
-  <nav class="gp-actions" aria-label="Retour">
+  <nav class="gp-actions" [attr.aria-label]="'saves.back' | t">
     <button type="button" class="gp-btn" (click)="goBack()">
       <i class="bi bi-arrow-left" aria-hidden="true"></i>
-      Retour à l'accueil
+      {{ 'common.backHome' | t }}
     </button>
   </nav>
 </div>

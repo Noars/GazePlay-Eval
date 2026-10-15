@@ -4,7 +4,7 @@
 <button type="button"
         class="scroll-bottom-button gp-btn gp-btn--secondary gp-btn--icon"
         (click)="scrollToBottom()"
-        aria-label="Aller en bas de la page"
-        title="Aller en bas de la page">
+        [attr.aria-label]="'guide.scrollBottom' | t"
+        [title]="'guide.scrollBottom' | t">
   <i class="bi bi-arrow-down" aria-hidden="true"></i>
 </button>

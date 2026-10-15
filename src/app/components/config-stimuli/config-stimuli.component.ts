@@ -8,7 +8,9 @@ import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaLibraryService, MediaType} from '../../core/media/media-library.service';
 import {FilePickerComponent} from '../../shared/ui/file-picker/file-picker.component';
-import {ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
+import {ChoiceOption, ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Panneau de configuration d'une case de la grille de stimuli : réponse attendue, image
@@ -19,7 +21,7 @@ import {ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-sett
  */
 @Component({
   selector: 'app-config-stimuli',
-  imports: [FormsModule, FilePickerComponent, ChoiceSettingComponent],
+  imports: [FormsModule, FilePickerComponent, ChoiceSettingComponent, TranslatePipe],
   templateUrl: './config-stimuli.component.html',
   standalone: true,
   styleUrl: './config-stimuli.component.css'
@@ -29,6 +31,7 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
   private readonly media = inject(MediaLibraryService);
   private readonly saveAutoService = inject(AutoSaveService);
   private readonly flashService = inject(FlashService);
+  private readonly i18n = inject(I18nService);
 
   @Input() data!: {
     cell: number,
@@ -48,9 +51,9 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
   missingImage = false;
   missingSound = false;
 
-  readonly answerOptions = [
-    {value: true, label: 'Bonne réponse'},
-    {value: false, label: 'Mauvaise réponse'},
+  readonly answerOptions: ChoiceOption<boolean>[] = [
+    {value: true, labelKey: 'editor.goodAnswer'},
+    {value: false, labelKey: 'editor.wrongAnswer'},
   ];
 
   get cell(): stimuliScreenValues & {hidden?: boolean} {
@@ -198,7 +201,7 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
       this.saveAutoService.autoSave('stimuli');
     } catch (error) {
       console.error('Recadrage non enregistré :', error);
-      this.flashService.show('error', 'L\'image recadrée n\'a pas pu être enregistrée.');
+      this.flashService.show('error', this.i18n.t('cell.cropError'));
     } finally {
       this.busy = null;
     }
@@ -237,7 +240,7 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
       }
     } catch (error) {
       console.error('Enregistrement du média impossible :', error);
-      this.flashService.show('error', `Le fichier « ${file.name} » n'a pas pu être enregistré dans le navigateur (stockage plein ?).`);
+      this.flashService.show('error', this.i18n.t('editor.error.fileSave', {name: file.name}));
     } finally {
       this.busy = null;
     }

@@ -1,30 +1,30 @@
 <div class="gp-page">
   <header class="gp-page-header">
     <div class="gp-page-header__text">
-      <span class="gp-page-header__eyebrow">Étape 5 sur 5</span>
-      <h1 class="gp-page-header__title">Téléchargement et export</h1>
-      <p class="gp-page-header__lead">Vérifiez le récapitulatif, puis récupérez votre évaluation.</p>
+      <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 5} }}</span>
+      <h1 class="gp-page-header__title">{{ 'download.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'download.lead' | t }}</p>
     </div>
   </header>
 
   <div class="download-layout">
     <section class="gp-card" aria-labelledby="summary-title">
       <div class="gp-card__header">
-        <h2 class="gp-card__title" id="summary-title">Récapitulatif</h2>
+        <h2 class="gp-card__title" id="summary-title">{{ 'download.summary' | t }}</h2>
       </div>
       <div class="gp-card__body gp-stack gp-stack--sm">
         <dl class="gp-meta summary">
-          <dt>Nom</dt>
+          <dt>{{ 'download.name' | t }}</dt>
           <dd>{{ evalName }}</dd>
-          <dt>Format des résultats</dt>
+          <dt>{{ 'download.format' | t }}</dt>
           <dd>{{ format }}</dd>
-          <dt>Champs participant</dt>
-          <dd>{{ participantFields.length ? participantFields.join(', ') : 'Aucun' }}</dd>
-          <dt>Écrans</dt>
+          <dt>{{ 'download.participantFields' | t }}</dt>
+          <dd>{{ participantFields.length ? participantFields.join(', ') : ('download.none' | t) }}</dd>
+          <dt>{{ 'download.screens' | t }}</dt>
           <dd>
-            {{ screenCounts.total }} au total
+            {{ 'download.screens.total' | t: {count: screenCounts.total} }}
             <span class="gp-muted">
-              ({{ screenCounts.instruction }} instruction, {{ screenCounts.stimuli }} stimuli, {{ screenCounts.transition }} transition)
+              {{ 'download.screens.detail' | t: {instruction: screenCounts.instruction, stimuli: screenCounts.stimuli, transition: screenCounts.transition} }}
             </span>
           </dd>
         </dl>
@@ -33,19 +33,19 @@
           <div class="gp-callout gp-callout--warning">
             <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <div class="gp-callout__body">
-              <strong class="gp-callout__title">Points à vérifier ({{ checks.length }})</strong>
+              <strong class="gp-callout__title">{{ 'download.checks.title' | t: {count: checks.length} }}</strong>
               <ul class="checks">
                 @for (check of checks; track $index) {
                   <li>{{ check.message }}</li>
                 }
               </ul>
-              <p class="gp-text-sm">Ces points n'empêchent pas l'export.</p>
+              <p class="gp-text-sm">{{ 'download.checks.notBlocking' | t }}</p>
             </div>
           </div>
         } @else {
           <div class="gp-callout gp-callout--success">
             <i class="bi bi-check-circle" aria-hidden="true"></i>
-            <div class="gp-callout__body"><p>Aucun problème détecté.</p></div>
+            <div class="gp-callout__body"><p>{{ 'download.checks.none' | t }}</p></div>
           </div>
         }
       </div>
@@ -55,16 +55,15 @@
       <section class="gp-card export-card" aria-labelledby="export-title">
         <div class="gp-card__body">
           <span class="export-card__icon" aria-hidden="true"><i class="bi bi-send"></i></span>
-          <h2 class="gp-card__title" id="export-title">Exporter pour GazePlay-Learning</h2>
+          <h2 class="gp-card__title" id="export-title">{{ 'download.export.title' | t }}</h2>
           <p class="gp-muted">
-            Fichier <code>.zip</code> contenant les écrans et les médias, à ouvrir dans
-            <a href="https://gazeplay.github.io/GazePlay/fr" target="_blank" rel="noopener noreferrer">GazePlay-Learning<span class="visually-hidden"> (nouvel onglet)</span></a>.
+            {{ 'download.export.before' | t }}<code>.zip</code>{{ 'download.export.middle' | t }}<a [href]="'download.export.url' | t" target="_blank" rel="noopener noreferrer">GazePlay-Learning<span class="visually-hidden">{{ 'common.newTab' | t }}</span></a>{{ 'download.export.after' | t }}
           </p>
           <button type="button" class="gp-btn gp-btn--primary gp-btn--block" [disabled]="busy !== null" (click)="goExport()">
             @if (busy === 'export') {
-              <span class="gp-spinner" aria-hidden="true"></span> Génération en cours…
+              <span class="gp-spinner" aria-hidden="true"></span> {{ 'download.generating' | t }}
             } @else {
-              <i class="bi bi-file-earmark-zip" aria-hidden="true"></i> Exporter le .zip
+              <i class="bi bi-file-earmark-zip" aria-hidden="true"></i> {{ 'download.export.button' | t }}
             }
           </button>
         </div>
@@ -73,16 +72,15 @@
       <section class="gp-card export-card" aria-labelledby="backup-title">
         <div class="gp-card__body">
           <span class="export-card__icon export-card__icon--neutral" aria-hidden="true"><i class="bi bi-floppy"></i></span>
-          <h2 class="gp-card__title" id="backup-title">Télécharger une sauvegarde</h2>
+          <h2 class="gp-card__title" id="backup-title">{{ 'download.backup.title' | t }}</h2>
           <p class="gp-muted">
-            Fichier <code>.gpSave</code> à conserver sur votre ordinateur et à réimporter plus tard
-            dans GazePlay Eval pour modifier l'évaluation.
+            {{ 'download.backup.before' | t }}<code>.gpSave</code>{{ 'download.backup.after' | t }}
           </p>
           <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" [disabled]="busy !== null" (click)="goDownload()">
             @if (busy === 'download') {
-              <span class="gp-spinner" aria-hidden="true"></span> Génération en cours…
+              <span class="gp-spinner" aria-hidden="true"></span> {{ 'download.generating' | t }}
             } @else {
-              <i class="bi bi-download" aria-hidden="true"></i> Télécharger le .gpSave
+              <i class="bi bi-download" aria-hidden="true"></i> {{ 'download.backup.button' | t }}
             }
           </button>
         </div>
@@ -90,12 +88,12 @@
     </div>
   </div>
 
-  <p class="visually-hidden" aria-live="polite">{{ busy ? 'Génération du fichier en cours.' : '' }}</p>
+  <p class="visually-hidden" aria-live="polite">{{ busy ? ('download.busy' | t) : '' }}</p>
 
-  <nav class="gp-actions" aria-label="Navigation entre les étapes">
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
     <button type="button" class="gp-btn" (click)="backToCreateEval()">
       <i class="bi bi-arrow-left" aria-hidden="true"></i>
-      Précédent : écrans
+      {{ 'download.previous' | t }}
     </button>
   </nav>
 </div>

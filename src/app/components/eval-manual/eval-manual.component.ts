@@ -7,10 +7,12 @@ import {saveModelDefault} from '../../shared/saveModel';
 import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
 import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent, GlobalStimuliScreenComponent],
+  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent, GlobalStimuliScreenComponent, TranslatePipe],
   templateUrl: './eval-manual.component.html',
   standalone: true,
   styleUrl: './eval-manual.component.css'
@@ -25,10 +27,10 @@ export class EvalManualComponent implements OnInit{
   openAccordion: string | null = null;
 
   /** Sections repliables, une par type d'écran. */
-  readonly sections = [
-    {id: 'transition', title: 'Écrans de transition', icon: 'bi-hourglass-split', summary: 'Délai et croix de fixation entre deux écrans.'},
-    {id: 'instruction', title: "Écrans d'instruction", icon: 'bi-chat-square-text', summary: 'Consigne : média, délai et bouton de lancement.'},
-    {id: 'stimuli', title: 'Écrans de stimuli', icon: 'bi-grid-3x3-gap', summary: 'Grille, temps maximum et règles de validation.'},
+  readonly sections: {id: string, title: TranslationKey, icon: string, summary: TranslationKey}[] = [
+    {id: 'transition', title: 'setup.section.transition', icon: 'bi-hourglass-split', summary: 'setup.section.transition.summary'},
+    {id: 'instruction', title: 'setup.section.instruction', icon: 'bi-chat-square-text', summary: 'setup.section.instruction.summary'},
+    {id: 'stimuli', title: 'setup.section.stimuli', icon: 'bi-grid-3x3-gap', summary: 'setup.section.stimuli.summary'},
   ];
 
   constructor(private router: Router,

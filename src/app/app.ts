@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, ViewChild} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {filter} from 'rxjs';
 import {NavbarComponent} from './components/navbar/navbar.component';
@@ -8,14 +8,16 @@ import {MenuComponent} from './components/menu/menu.component';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
 import {RouteFocusService} from './core/a11y/route-focus.service';
 import {StorageNoticeService} from './core/storage/storage-notice.service';
-import {STEP_TO_ROUTE} from './shared/stepRoute.model';
+import {STEP_LABEL_KEYS, STEP_TO_ROUTE} from './shared/stepRoute.model';
+import {I18nService} from './core/i18n/i18n.service';
+import {TranslatePipe} from './core/i18n/translate.pipe';
 
 /**
  * Composant racine : structure de l'application (en-tête, navigation, contenu, pied de page).
  */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent, MenuComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent, MenuComponent, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -24,18 +26,14 @@ export class App implements OnInit {
   private readonly autoSaveService = inject(AutoSaveService);
   private readonly routeFocus = inject(RouteFocusService);
   protected readonly storageNotices = inject(StorageNoticeService);
+  private readonly i18n = inject(I18nService);
 
   @ViewChild('drawerMenu') private drawerMenu?: MenuComponent;
 
   protected title = 'GazePlay-Eval';
 
-  readonly steps = [
-    'Informations de l\'évaluation',
-    'Informations du participant',
-    'Mode et paramètres',
-    'Création des écrans',
-    'Téléchargement et export',
-  ];
+  /** Libellés des étapes, dans la langue courante. */
+  readonly steps = computed(() => STEP_LABEL_KEYS.map(key => this.i18n.t(key)));
 
   /** Étape du parcours affichée (0 à 4), ou -1 hors du parcours de création. */
   currentStepIndex = -1;

@@ -1,12 +1,12 @@
-<nav class="stepper" aria-label="Étapes de création de l'évaluation">
+<nav class="stepper" [attr.aria-label]="'steps.label' | t">
   <p class="stepper__eval">
-    <span class="stepper__eval-label">Évaluation</span>
+    <span class="stepper__eval-label">{{ 'steps.evaluation' | t }}</span>
     <strong class="gp-truncate">{{ getEvalName() }}</strong>
   </p>
 
   <!-- Version compacte (petits écrans) -->
   <div class="stepper__compact">
-    <span class="stepper__compact-count">Étape {{ currentStepIndex + 1 }} sur {{ steps.length }}</span>
+    <span class="stepper__compact-count">{{ 'steps.counter' | t: {current: currentStepIndex + 1, total: steps.length} }}</span>
     <span class="stepper__compact-label">{{ steps[currentStepIndex] }}</span>
     <span class="stepper__track" aria-hidden="true"><span class="stepper__fill" [style.width.%]="progressPercent"></span></span>
   </div>
@@ -20,14 +20,14 @@
           <a class="stepper__step" [routerLink]="routeFor(i)">
             <span class="stepper__marker" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
             <span class="stepper__label">{{ step }}</span>
-            <span class="visually-hidden"> (terminée)</span>
+            <span class="visually-hidden">{{ 'steps.done' | t }}</span>
           </a>
         } @else {
           <span class="stepper__step" [attr.aria-current]="i === currentStepIndex ? 'step' : null">
             <span class="stepper__marker" aria-hidden="true">{{ i + 1 }}</span>
             <span class="stepper__label">{{ step }}</span>
             @if (i > currentStepIndex) {
-              <span class="visually-hidden"> (à venir)</span>
+              <span class="visually-hidden">{{ 'steps.upcoming' | t }}</span>
             }
           </span>
         }
