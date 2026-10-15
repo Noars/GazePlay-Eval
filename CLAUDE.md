@@ -25,7 +25,7 @@ Pile : Angular 21 (standalone, `@if`/`@for`, signals, zone.js, routage par hash)
 
 ## Commandes
 **Vérification ordinaire** (n'écrivent que des artefacts : `dist/`, `.angular/`, `coverage/`) :
-- `npx ng test --watch=false --no-progress --browsers=ChromeHeadless` — exécutée après le nettoyage technique d'octobre 2026 : 651/651 tests réussis (commande de la CI `.github/workflows/karmaTests.yml`).
+- `npx ng test --watch=false --no-progress --browsers=ChromeHeadless` — exécutée après le nettoyage technique d'octobre 2026 : 651/651 tests réussis. La CI `.github/workflows/karmaTests.yml` (PR, push sur `master`) enchaîne `npm ci`, `npm run build`, cette commande de test et `npm audit --omit=dev --audit-level=critical`.
 - `npm run build` — exécutée : build de production réussi, sans avertissement de budget.
 - `npm start` (`ng serve`, http://localhost:4200/#/…) ; `npm test` = mode watch ; `git status` / `git diff` / `git log`.
 

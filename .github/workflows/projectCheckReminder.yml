@@ -6,37 +6,55 @@ on:
     - cron: '0 8 1 8 *'  # 1er août à 08:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   create-reminder:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TITLE: Vérification semestrielle des dépendances
 
     steps:
-      - name: Récupérer la date du jour
-        id: date
-        run: echo "today=$(date +'%d/%m/%Y')" >> "$GITHUB_OUTPUT"
+      - name: Vérifier qu'aucun rappel n'est déjà ouvert
+        id: existing
+        run: |
+          count=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq 'length')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
 
-      - name: Générer le contenu dynamique
+      - name: Créer les libellés s'ils n'existent pas
+        if: steps.existing.outputs.count == '0'
+        run: |
+          gh label create maintenance --color 0e8a16 --description "Maintenance du projet" 2>/dev/null || true
+          gh label create dependencies --color 0366d6 --description "Mise à jour des dépendances" 2>/dev/null || true
+
+      - name: Créer l'issue de rappel
+        if: steps.existing.outputs.count == '0'
         run: |
           cat > issue.md <<EOF
           ## Rappel semestriel : vérification des dépendances
-          
-          Rappel généré automatiquement le **$TODAY**
-          
-          ### Vérifications à faire :
-          - Vérification si mise à jour d'angular cli latest
-          - Vérification si mise à jour de Bootstrap
-          - Vérification si mise à jour de Karma Jasmin
-          - Vérification si mise à jour des dependencies
-          - Vérification si mise à jour des devDependencies
-          - Vérification si mise à jour des workflows GitHub Actions
-          EOF
-        env:
-          TODAY: ${{ steps.date.outputs.today }}
 
-      - name: Créer une issue de rappel
-        uses: peter-evans/create-issue-from-file@v5
-        with:
-          title: Vérification semestrielle des dépendances
-          content-filepath: issue.md
-          labels: maintenance, dependencies
-          token: ${{ secrets.GITHUB_TOKEN }}
+          Rappel généré automatiquement le **$(date +'%d/%m/%Y')**
+
+          ### Vérifications à faire :
+          - [ ] Résultat de \`npm audit\` et de \`npm audit --omit=dev\` (dépendances livrées)
+          - [ ] Mise à jour d'Angular (\`npx ng update\`) : core, CLI, CDK et Material
+          - [ ] Mise à jour de Bootstrap et Bootstrap Icons
+          - [ ] Mise à jour de Karma et Jasmine
+          - [ ] Mise à jour des autres dependencies et devDependencies (\`npm outdated\`)
+          - [ ] Version de Node.js utilisée par la CI (compatibilité Angular, fin de support)
+          - [ ] Versions (et SHA épinglés) des actions GitHub dans \`.github/workflows/\`
+          - [ ] Après mise à jour : \`npm run build\` et tests Karma verts, aller-retour .zip / .gpSave vérifié
+          EOF
+          gh issue create --title "$TITLE" --body-file issue.md --label maintenance --label dependencies
+
+      - name: Rappel déjà ouvert
+        if: steps.existing.outputs.count != '0'
+        run: |
+          echo "Une issue « $TITLE » est déjà ouverte : aucune nouvelle issue créée." >> "$GITHUB_STEP_SUMMARY"
