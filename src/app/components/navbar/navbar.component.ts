@@ -29,9 +29,9 @@ export class NavbarComponent {
     void this.preferences.toggleTheme();
   }
 
-  /** Icône à afficher : soleil en thème sombre (pour revenir au clair), lune sinon. */
+  /** Icône du thème actuel : lune en thème sombre, soleil en thème clair. */
   getTheme(): 'sun' | 'moon' {
-    return this.preferences.resolvedTheme() === 'dark' ? 'sun' : 'moon';
+    return this.preferences.resolvedTheme() === 'dark' ? 'moon' : 'sun';
   }
 
   isDark(): boolean {

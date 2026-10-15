@@ -47,10 +47,30 @@ describe('NavbarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('getTheme → \'sun\' en thème sombre, \'moon\' sinon', () => {
-    expect(component.getTheme()).toEqual('moon');
-    component.changeTheme();
+  it('getTheme → icône du thème actuel : \'sun\' en thème clair, \'moon\' en thème sombre', () => {
     expect(component.getTheme()).toEqual('sun');
+    component.changeTheme();
+    expect(component.getTheme()).toEqual('moon');
+  });
+
+  it('le bouton affiche l\'icône du thème actuel et garde un nom accessible décrivant l\'action', async () => {
+    fixture.detectChanges();
+    const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('button[aria-pressed]');
+    const icon = () => button().querySelector('i')!;
+
+    expect(icon().classList).toContain('bi-sun');
+    expect(icon().classList).not.toContain('bi-moon-stars');
+    expect(button().getAttribute('aria-pressed')).toBe('false');
+    expect(button().title).toBe('Passer au thème sombre');
+
+    component.changeTheme();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(icon().classList).toContain('bi-moon-stars');
+    expect(icon().classList).not.toContain('bi-sun');
+    expect(button().getAttribute('aria-pressed')).toBe('true');
+    expect(button().title).toBe('Passer au thème clair');
   });
 
   it('changeTheme → délègue aux préférences', () => {
