@@ -14,6 +14,8 @@ import {GuideHomeComponent} from './pages/guide/guide-home/guide-home.component'
 import {GuideCreationComponent} from './pages/guide/guide-creation/guide-creation.component';
 import {GuideImportComponent} from './pages/guide/guide-import/guide-import.component';
 import {GuideSauvegardeComponent} from './pages/guide/guide-sauvegarde/guide-sauvegarde.component';
+import {GuideOptionsComponent} from './pages/guide/guide-options/guide-options.component';
+import {GuideDepannageComponent} from './pages/guide/guide-depannage/guide-depannage.component';
 
 /**
  * Routes de l'application (routage par hash : `/#/home`).
@@ -37,6 +39,8 @@ export const routes: Routes = [
       {path: 'creation', component: GuideCreationComponent, title: 'title.guideCreation'},
       {path: 'sauvegardes', component: GuideSauvegardeComponent, title: 'title.guideSaves'},
       {path: 'imports', component: GuideImportComponent, title: 'title.guideImport'},
+      {path: 'options', component: GuideOptionsComponent, title: 'title.guideOptions'},
+      {path: 'depannage', component: GuideDepannageComponent, title: 'title.guideHelp'},
     ]
   },
   {path: 'no-page', component: NoPage, title: 'title.notFound'},

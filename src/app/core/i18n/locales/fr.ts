@@ -78,6 +78,8 @@ export const FR = {
   'title.guideCreation': 'Guide · Création',
   'title.guideSaves': 'Guide · Sauvegardes',
   'title.guideImport': 'Guide · Importation',
+  'title.guideOptions': 'Guide · Options et accessibilité',
+  'title.guideHelp': 'Guide · Dépannage',
   'title.notFound': 'Page introuvable',
   'notFound.title': 'Page introuvable',
   'notFound.body': 'Cette page n\'existe pas ou n\'est pas encore disponible.',
@@ -712,6 +714,18 @@ export const FR = {
   // Recadrage (suite)
   'crop.done': 'Votre image a bien été recadrée.',
   'crop.cancelled': 'Les proportions de votre image ont été conservées.',
+
+  // Plusieurs onglets
+  'tabs.busySlot.title': 'Emplacement ouvert dans un autre onglet',
+  'tabs.busySlot.message': 'L\'emplacement {n} est en cours de modification dans un autre onglet. Pour ne pas mélanger les modifications, vous pouvez en ouvrir une copie, non liée à cet emplacement : enregistrez-la ensuite dans un emplacement libre pour la conserver.',
+  'tabs.busySlot.openCopy': 'Ouvrir une copie',
+  'tabs.busySlot.importMessage': 'L\'emplacement {n} est en cours de modification dans un autre onglet et ne peut pas être remplacé. Vous pouvez ouvrir l\'évaluation importée sans l\'enregistrer dans un emplacement.',
+  'tabs.busySlot.importOpen': 'Ouvrir sans enregistrer',
+  'tabs.busySlot.blocked': 'L\'emplacement {n} est en cours de modification dans un autre onglet : terminez-y vos modifications ou fermez cet onglet avant de le remplacer ou de le supprimer.',
+  'tabs.notice.duplicated': 'Cet onglet est une copie d\'un autre onglet : son évaluation n\'est plus liée à l\'emplacement {n}. Enregistrez-la dans un emplacement libre pour la conserver.',
+  'tabs.notice.duplicatedNoSlot': 'Cet onglet est une copie d\'un autre onglet : il travaille sur sa propre copie de l\'évaluation.',
+  'tabs.notice.busy': 'L\'évaluation en cours est déjà ouverte dans un autre onglet : cet onglet démarre sans évaluation en cours.',
+  'tabs.notice.slotBusy': 'L\'emplacement {n} est en cours de modification dans un autre onglet : l\'évaluation de cet onglet n\'y est plus liée. Enregistrez-la dans un emplacement libre pour la conserver.',
 
 //@@FR_END
 } as const;

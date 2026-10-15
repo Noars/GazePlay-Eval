@@ -7,7 +7,7 @@ import { saveModel } from '../../shared/saveModel';
 import { FormatTypeConfig } from '../../shared/dataBaseConfig';
 import { Router } from '@angular/router';
 import {DownloadService} from '../../services/download/download.service';
-import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {OverwriteGuardService, sameEvaluation} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
@@ -55,7 +55,18 @@ describe('SauvegardeComponent', () => {
     flashMessageServiceSpy = jasmine.createSpyObj('FlashService', ['show']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     downloadServiceSpy = jasmine.createSpyObj('DownloadService', ['generateSlotZip']);
-    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
+    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService',
+      ['check', 'getUniqueEvalName', 'findSlotHolding', 'reserveForOpening', 'reserveForWriting', 'ensureNotOpenElsewhere']);
+    // Par défaut, aucun autre onglet n'utilise les emplacements.
+    overwriteGuardSpy.reserveForOpening.and.callFake(async (slot: any) => ({mode: 'link', reservation: {slot, release: jasmine.createSpy('release')}}));
+    overwriteGuardSpy.reserveForWriting.and.callFake(async (slot: any) => ({slot, release: jasmine.createSpy('release')}));
+    overwriteGuardSpy.ensureNotOpenElsewhere.and.resolveTo(true);
+    // Même règle que le vrai service : un emplacement « contient » l'évaluation si le contenu est identique.
+    overwriteGuardSpy.findSlotHolding.and.callFake((evaluation: any) =>
+      ([1, 2, 3] as const).find(i => {
+        const slot = loadServiceSpy.getSlot(i);
+        return slot !== null && sameEvaluation(slot, evaluation);
+      }) ?? null);
     mediaCleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['cleanupProject']);
     mediaCleanupSpy.cleanupProject.and.returnValue(Promise.resolve(0));
     confirmSpy = jasmine.createSpyObj('ConfirmService', ['confirm']);
@@ -249,7 +260,7 @@ describe('SauvegardeComponent', () => {
       afterClosed: () => of('delete')
     } as any);
 
-    component.openDeletePopup({ index: 1, data: slotToDelete });
+    await component.openDeletePopup({ index: 1, data: slotToDelete });
     await new Promise(resolve => setTimeout(resolve));
 
     expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(1);
@@ -277,14 +288,14 @@ describe('SauvegardeComponent', () => {
     } as any);
 
     downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
-    component.openDeletePopup({ index: 1, data: slotToDelete });
+    await component.openDeletePopup({ index: 1, data: slotToDelete });
     await new Promise(resolve => setTimeout(resolve));
 
     expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slotToDelete);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('info', 'L\'évaluation a été téléchargée.');
   });
 
-  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', () => {
+  it('en cas de suppression (sans download), supprime le slot, rafraîchit et affiche un message de succès', async () => {
     const slotToDelete: saveModel = {
       nomEval: 'EvalToDelete',
       format: 'Csv',
@@ -307,7 +318,7 @@ describe('SauvegardeComponent', () => {
       afterClosed: () => of('delete')
     } as any);
 
-    component.openDeletePopup({ index: 1, data: slotToDelete });
+    await component.openDeletePopup({ index: 1, data: slotToDelete });
 
     expect(saveServiceSpy.clearSlot).toHaveBeenCalledWith(1);
     expect(flashMessageServiceSpy.show).toHaveBeenCalledWith('success', 'L\'évaluation a été supprimée avec succès.');
@@ -432,11 +443,131 @@ describe('SauvegardeComponent', () => {
     expect(saveServiceSpy.clearSlot).not.toHaveBeenCalled();
   });
 
-  it('ngOnInit — autoSave nomEval vide → hasUnsavedEval false', () => {
-    const emptyAutoSave = { nomEval: '', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+  it('ngOnInit — évaluation en cours sans nom mais avec des écrans → hasUnsavedEval true (le nom vide ne veut pas dire vide)', () => {
+    const unnamed = { nomEval: '', format: 'Csv&Xlsx' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [{name: 'Ecran 1'}] as any, step: 0, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? unnamed : null);
+    fixture.detectChanges();
+    expect(component.hasUnsavedEval).toBeTrue();
+  });
+
+  it('ngOnInit — évaluation en cours réellement vide → hasUnsavedEval false', () => {
+    const emptyAutoSave = { nomEval: '', format: 'Csv&Xlsx' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
     loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? emptyAutoSave : null);
     fixture.detectChanges();
     expect(component.hasUnsavedEval).toBeFalse();
+  });
+
+  it('ngOnInit — emplacement homonyme mais au contenu différent → hasUnsavedEval true (le nom ne suffit pas)', () => {
+    const current = { nomEval: 'MonEval', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    const other = { ...current, infoParticipant: ['Nom'] };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? current : i === 1 ? other : null);
+    fixture.detectChanges();
+    expect(component.hasUnsavedEval).toBeTrue();
+  });
+
+  it('ngOnInit — évaluation liée à un emplacement → hasUnsavedEval false', () => {
+    const current = { nomEval: 'MonEval', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? current : i === 2 ? {...current, listScreens: [{name: 'ancien'}] as any} : null);
+    saveServiceSpy.activeSlotIndex = 2;
+    fixture.detectChanges();
+    expect(component.hasUnsavedEval).toBeFalse();
+  });
+
+  it("saveToSlot — remplacement : la protection est appelée en mode « reçoit l'évaluation en cours »", async () => {
+    const existing = { nomEval: 'Ancienne', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 1, data: existing });
+
+    expect(overwriteGuardSpy.check).toHaveBeenCalledWith(1, {replacingWithCurrent: true});
+  });
+
+  it("saveToSlot — lie ensuite l'évaluation en cours à l'emplacement", async () => {
+    const autoSave = { nomEval: 'Auto', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.getUniqueEvalName.and.returnValue('Auto');
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? autoSave : null);
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 3, data: null });
+
+    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(3, jasmine.objectContaining({slot: 3}));
+    expect(saveServiceSpy.activeSlotIndex).toBe(3);
+  });
+
+  it("saveToSlot — nom rendu unique → l'évaluation en cours est renommée aussi", async () => {
+    const autoSave = { nomEval: 'Eval', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.getUniqueEvalName.and.returnValue('Eval 1');
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? autoSave : null);
+    Object.defineProperty(saveServiceSpy, 'hasLoadedWorkspace', {get: () => true});
+    saveServiceSpy.dataAuto.nomEval = 'Eval';
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 2, data: null });
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(2, jasmine.objectContaining({nomEval: 'Eval 1'}));
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.objectContaining({nomEval: 'Eval 1'}));
+    expect(saveServiceSpy.dataAuto.nomEval).toBe('Eval 1');
+  });
+
+  it("editSlot — relit l'emplacement après la protection (report éventuel de l'évaluation en cours)", async () => {
+    const before = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    const after = { ...before, listScreens: [{name: 'ajouté pendant la reprise'}] as any };
+    let slot1: any = before;
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.callFake(async () => { slot1 = after; return true; });
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(saveServiceSpy.loadIntoWorkspace).toHaveBeenCalledWith(after, 2);
+  });
+
+  it("editSlot — emplacement ouvert dans un autre onglet, « Ouvrir une copie » → chargé sans lien", async () => {
+    const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.reserveForOpening.and.resolveTo({mode: 'copy'});
+    overwriteGuardSpy.check.and.resolveTo(true);
+    fixture.detectChanges();
+
+    await component.editSlot(1);
+
+    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(null, null);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+  });
+
+  it("saveToSlot — emplacement modifié dans un autre onglet → rien n'est écrit", async () => {
+    overwriteGuardSpy.reserveForWriting.and.resolveTo(null);
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 2, data: null });
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+    expect(saveServiceSpy.setActiveSlot).not.toHaveBeenCalled();
+  });
+
+  it("saveToSlot — remplacement annulé → la réservation de l'emplacement est libérée", async () => {
+    const existing = { nomEval: 'Ancienne', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    const release = jasmine.createSpy('release');
+    overwriteGuardSpy.reserveForWriting.and.resolveTo({slot: 1, release});
+    overwriteGuardSpy.check.and.resolveTo(false);
+    fixture.detectChanges();
+
+    await component.saveToSlot({ index: 1, data: existing });
+
+    expect(release).toHaveBeenCalled();
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it("openDeletePopup — emplacement ouvert dans un autre onglet → aucune fenêtre de suppression", async () => {
+    const existing = { nomEval: 'Ancienne', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 0, createdAt: '', version: 1 };
+    overwriteGuardSpy.ensureNotOpenElsewhere.and.resolveTo(false);
+    fixture.detectChanges();
+
+    await component.openDeletePopup({ index: 1, data: existing });
+
+    expect(dialogSpy.open).not.toHaveBeenCalled();
+    expect(saveServiceSpy.clearSlot).not.toHaveBeenCalled();
   });
 
   it('ngOnInit — autoSave correspond à un slot sauvegardé → hasUnsavedEval false', () => {

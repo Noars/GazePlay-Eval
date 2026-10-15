@@ -43,18 +43,33 @@ export class LoadSaveComponent implements OnInit {
 
   /**
    * Charge la sauvegarde d'un slot nommé (1, 2 ou 3) dans le slot de travail (slot 0).
-   * Avertit l'utilisateur si le slot 0 contient une sauvegarde différente qui serait écrasée.
+   * L'évaluation en cours est d'abord protégée : reportée dans son emplacement si elle est liée,
+   * sinon la fenêtre de confirmation s'affiche si elle serait perdue.
    * @param slotIndex index du slot à charger : 1, 2 ou 3
    */
   async loadSlot(slotIndex: number): Promise<void> {
-    const save = this.loadService.getSlot(slotIndex as FormatTypeConfig);
-    if (!save) return;
+    const index = slotIndex as FormatTypeConfig;
+    if (!this.loadService.getSlot(index)) return;
 
-    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+    // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).
+    const opening = await this.overwriteGuard.reserveForOpening(index);
+    if (!opening) return;
+    const reservation = opening.mode === 'link' ? opening.reservation : null;
+
+    if (!await this.overwriteGuard.check(0)) {
+      reservation?.release();
+      return;
+    }
+    // relu après la vérification : l'évaluation en cours vient peut-être d'y être reportée
+    const save = this.loadService.getSlot(index);
+    if (!save) {
+      reservation?.release();
+      return;
+    }
 
     const step = save.step >= 0 ? save.step : 3; // fallback sur create-eval si le step n'a pas été enregistré
     this.saveService.loadIntoWorkspace(save, step);
-    this.saveService.setActiveSlot(slotIndex as FormatTypeConfig);
+    this.saveService.setActiveSlot(reservation ? index : null, reservation);
     this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume(true);
   }

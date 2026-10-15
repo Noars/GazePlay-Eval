@@ -4,6 +4,7 @@ import {LoadService} from '../../services/load/load.service';
 import {SaveService} from '../../services/save/save.service';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {collectMediaReferences, emptyReferences, isReferenced, MediaReferences} from './media-references';
+import {TabSessionService} from '../tab/tab-session.service';
 
 /**
  * Suppression **prudente** des médias IndexedDB.
@@ -11,14 +12,16 @@ import {collectMediaReferences, emptyReferences, isReferenced, MediaReferences} 
  * Avant cette classe, supprimer un emplacement ou renommer une évaluation appelait
  * `deleteFileByProject(nom)`, qui effaçait tous les médias du projet même s'ils étaient
  * encore utilisés par l'évaluation en cours ou par un autre emplacement portant le même
- * nom. Ici, un média n'est supprimé que si **aucune** évaluation connue (emplacements 0 à 3
- * et évaluation de travail) ne le référence, ni par identifiant ni par nom de fichier.
+ * nom. Ici, un média n'est supprimé que si **aucune** évaluation connue (emplacements 0 à 3,
+ * évaluation de travail, et évaluations des autres onglets) ne le référence, ni par identifiant
+ * ni par nom de fichier.
  */
 @Injectable({providedIn: 'root'})
 export class MediaCleanupService {
   private readonly idb = inject(IndexedDBService);
   private readonly loadService = inject(LoadService);
   private readonly saveService = inject(SaveService);
+  private readonly tabSession = inject(TabSessionService);
 
   /** Inventaire des médias utilisés par toutes les évaluations connues. */
   collectAllReferences(): MediaReferences {
@@ -27,6 +30,10 @@ export class MediaCleanupService {
       collectMediaReferences(this.loadService.getSlot(slot), refs);
     }
     collectMediaReferences(this.saveService.dataAuto, refs);
+    // Médias des évaluations ouvertes dans les autres onglets (chacun a son propre slot 0).
+    for (const evaluation of this.tabSession.otherTabsEvaluations()) {
+      collectMediaReferences(evaluation, refs);
+    }
     return refs;
   }
 

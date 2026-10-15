@@ -58,7 +58,8 @@ export class AutoSaveService implements OnDestroy {
     try {
       this.saveService.dataAuto.step = ROUTE_TO_STEP[pageActuelle];
       this.saveService.saveToSlot(0, this.saveService.dataAuto);
-      if (this.saveService.activeSlotIndex !== null) {
+      // Un modèle vide (page ouverte sans reprise) n'est jamais recopié dans un emplacement.
+      if (this.saveService.activeSlotIndex !== null && this.saveService.hasLoadedWorkspace) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
       this.flashService.show('info', this.i18n.t('autoSave.saved'));

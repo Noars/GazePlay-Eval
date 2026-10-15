@@ -1,11 +1,12 @@
 import {RouterLink} from '@angular/router';
+import {GuideTocComponent} from '../guide-toc/guide-toc.component';
 import {Component, inject, Input, OnChanges} from '@angular/core';
 import {I18nService} from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-guide-creation',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, GuideTocComponent],
   templateUrl: './guide-creation.component.html',
   styleUrl: '../guide.component.css'
 })

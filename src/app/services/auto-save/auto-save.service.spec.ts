@@ -25,7 +25,8 @@ describe('AutoSaveService', () => {
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
     saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveToSlot', 'loadIntoWorkspace'], {
-      dataAuto: { ...saveModelDefault, nomEval: 'TestEval', step: 0 }
+      dataAuto: { ...saveModelDefault, nomEval: 'TestEval', step: 0 },
+      hasLoadedWorkspace: true
     });
     saveServiceSpy.loadIntoWorkspace.and.callFake((save: any) => Object.assign(saveServiceSpy.dataAuto, save));
     saveServiceSpy.activeSlotIndex = null;
@@ -149,6 +150,15 @@ describe('AutoSaveService', () => {
     service.autoSave('stimuli');
     expect(saveServiceSpy.dataAuto.step).toBe(3);
     expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, saveServiceSpy.dataAuto);
+  });
+
+  it("autoSave — emplacement actif mais évaluation jamais chargée (page ouverte sans reprise) → l'emplacement n'est pas écrasé", () => {
+    saveServiceSpy.activeSlotIndex = 2;
+    (Object.getOwnPropertyDescriptor(saveServiceSpy, 'hasLoadedWorkspace')!.get as jasmine.Spy).and.returnValue(false);
+
+    service.autoSave('/info-participant');
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalledWith(2, jasmine.anything());
   });
 
   it('autoSave — emplacement actif → sauvegardé aussi dans cet emplacement', () => {

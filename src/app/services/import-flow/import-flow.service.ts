@@ -11,6 +11,7 @@ import {OverwriteGuardService} from '../overwrite-guard/overwrite-guard.service'
 import {AutoSaveService} from '../auto-save/auto-save.service';
 import {FlashService} from '../flash-message/flash.service';
 import {I18nService} from '../../core/i18n/i18n.service';
+import {SlotReservation} from '../../core/tab/tab-session.service';
 
 /** Résultat renvoyé par la fenêtre d'import. */
 export interface ImportDialogResult {
@@ -58,13 +59,29 @@ export class ImportFlowService {
     );
     if (!result) return false;
 
-    if (!await this.overwriteGuard.check(0)) return false;
+    // Emplacement cible ouvert dans un autre onglet : ouverture sans enregistrement proposée.
+    let reservation: SlotReservation | null = null;
+    let mode = result.mode;
+    if (mode === 'save' && result.slotIndex !== null) {
+      const reserved = await this.overwriteGuard.reserveForImport(result.slotIndex as FormatTypeConfig);
+      if (reserved === null) return false;
+      if (reserved === 'open') mode = 'consult';
+      else reservation = reserved;
+    }
+
+    if (!await this.overwriteGuard.check(0)) {
+      reservation?.release();
+      return false;
+    }
 
     this.importing.set(true);
     try {
-      if (result.mode === 'save' && result.slotIndex !== null) {
+      if (mode === 'save' && result.slotIndex !== null) {
         const slotIndex = result.slotIndex as FormatTypeConfig;
-        if (!await this.overwriteGuard.check(slotIndex)) return false;
+        if (!await this.overwriteGuard.check(slotIndex)) {
+          reservation?.release();
+          return false;
+        }
         await this.loadZipService.loadZipToSlot(result.zipFile, slotIndex);
         const uniqueName = this.overwriteGuard.getUniqueEvalName(this.saveService.dataAuto.nomEval, slotIndex);
         if (uniqueName !== this.saveService.dataAuto.nomEval) {
@@ -72,12 +89,13 @@ export class ImportFlowService {
           this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
           this.saveService.saveToSlot(0, this.saveService.dataAuto);
         }
-        this.saveService.setActiveSlot(slotIndex);
+        this.saveService.setActiveSlot(slotIndex, reservation);
       } else {
         await this.loadZipService.loadZip(result.zipFile);
         this.saveService.setActiveSlot(null);
       }
     } catch (error) {
+      reservation?.release();
       console.error('Import impossible :', error);
       this.flashService.show('error', this.i18n.t('import.error'));
       return false;

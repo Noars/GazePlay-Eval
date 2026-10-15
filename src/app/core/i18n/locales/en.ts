@@ -77,6 +77,8 @@ export const EN: Record<TranslationKey, string> = {
   'title.guideCreation': 'Guide · Creation',
   'title.guideSaves': 'Guide · Saves',
   'title.guideImport': 'Guide · Import',
+  'title.guideOptions': 'Guide · Options and accessibility',
+  'title.guideHelp': 'Guide · Troubleshooting',
   'title.notFound': 'Page not found',
   'notFound.title': 'Page not found',
   'notFound.body': 'This page does not exist or is not available yet.',
@@ -711,6 +713,18 @@ export const EN: Record<TranslationKey, string> = {
   // Recadrage (suite)
   'crop.done': 'Your image has been cropped.',
   'crop.cancelled': 'Your image proportions have been kept.',
+
+  // Plusieurs onglets
+  'tabs.busySlot.title': 'Slot open in another tab',
+  'tabs.busySlot.message': 'Slot {n} is being edited in another tab. To avoid mixing changes, you can open a copy that is not linked to this slot, then save it in a free slot to keep it.',
+  'tabs.busySlot.openCopy': 'Open a copy',
+  'tabs.busySlot.importMessage': 'Slot {n} is being edited in another tab and cannot be replaced. You can open the imported assessment without saving it in a slot.',
+  'tabs.busySlot.importOpen': 'Open without saving',
+  'tabs.busySlot.blocked': 'Slot {n} is being edited in another tab: finish your changes there or close that tab before replacing or deleting it.',
+  'tabs.notice.duplicated': 'This tab is a copy of another tab: its assessment is no longer linked to slot {n}. Save it in a free slot to keep it.',
+  'tabs.notice.duplicatedNoSlot': 'This tab is a copy of another tab: it works on its own copy of the assessment.',
+  'tabs.notice.busy': 'The assessment in progress is already open in another tab: this tab starts without an assessment in progress.',
+  'tabs.notice.slotBusy': 'Slot {n} is being edited in another tab: this tab\'s assessment is no longer linked to it. Save it in a free slot to keep it.',
 
 //@@EN_END
 };

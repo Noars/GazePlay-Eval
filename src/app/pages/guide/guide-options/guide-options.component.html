@@ -1,0 +1,277 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Options and accessibility</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>The <a routerLink="/option">Options</a> page (menu <strong>Options</strong>) adapts the display to your needs.
+        Each setting applies immediately and is saved <strong>on this device only</strong>, for this browser. The
+        <strong>Preview</strong> block at the top of the page shows the result.</p>
+
+      <app-guide-toc title="On this page" page="/guide/options" [items]="[
+        {id: 'language', label: 'Language'},
+        {id: 'appearance', label: 'Appearance'},
+        {id: 'reading', label: 'Reading comfort'},
+        {id: 'notifications', label: 'Notifications'},
+        {id: 'media-storage', label: 'Media storage'},
+        {id: 'reset', label: 'Restoring the default display'},
+        {id: 'keyboard', label: 'Keyboard navigation and accessibility'}
+      ]"></app-guide-toc>
+    </div>
+
+    <figure class="guide-figure">
+      <img src="assets/guide/images/en/options-page.png" width="744" height="1037" loading="lazy"
+           alt="Top of the Options and accessibility page: the Preview block, the Language section with the interface language, and the Appearance section with the Theme, Contrast, Colour-blind mode and Animations settings.">
+      <figcaption>
+        The top of the Options page: preview, language and appearance.
+        <a class="guide-figure__zoom" href="assets/guide/images/en/options-page.png" target="_blank" rel="noopener">View full size (new tab)</a>
+      </figcaption>
+    </figure>
+
+    <section class="guide-section-card" id="language" aria-labelledby="language-title">
+      <h2 class="guide-section-title" id="language-title">Language</h2>
+      <div class="guide-section-body">
+        <p><strong>Interface language</strong>: French (default) or English. The language button in the header
+          (<code>FR</code> / <code>EN</code>) does the same from any page. The values exported to GazePlay-Learning do not
+          change with the language.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="appearance" aria-labelledby="appearance-title">
+      <h2 class="guide-section-title" id="appearance-title">Appearance</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Theme</strong>: <strong>System</strong> (follows the light or dark setting of your device),
+            <strong>Light</strong> or <strong>Dark</strong>. The sun / moon button in the header switches between light
+            and dark.</li>
+          <li><strong>Contrast</strong>: <strong>Standard</strong> or <strong>High</strong> (stronger colours and thicker borders).</li>
+          <li><strong>Colour-blind mode</strong>: colours that are easier to tell apart for states (success, error,
+            warning), completed by symbols, patterns and underlined links.</li>
+          <li><strong>Animations</strong>: <strong>Same as system</strong> or <strong>Reduced</strong> (fewer transitions
+            and movements).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="reading" aria-labelledby="reading-title">
+      <h2 class="guide-section-title" id="reading-title">Reading comfort</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Font</strong>: System font, Atkinson Hyperlegible (designed for people with low vision), Lexend,
+            Verdana or Roboto. Atkinson Hyperlegible, Lexend and Roboto are downloaded from Google Fonts only when you
+            select them.</li>
+          <li><strong>Text size</strong>: from 90 % to 200 %, in addition to your browser zoom.</li>
+          <li><strong>Line height</strong>: Normal, Relaxed or Very relaxed.</li>
+          <li><strong>Letter spacing</strong> and <strong>Word spacing</strong>: Normal, Wide or Very wide.</li>
+          <li><strong>Underline all links</strong>: makes links easier to spot without relying on colour.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="notifications" aria-labelledby="notifications-title">
+      <h2 class="guide-section-title" id="notifications-title">Notifications</h2>
+      <div class="guide-section-body">
+        <p><strong>Message display time</strong>: from 0 to 30 seconds (5 seconds by default). The messages appear at
+          the bottom right of the screen and can be closed with their cross. At <code>0</code>, information messages
+          (such as “Your changes have been saved automatically.”) are turned off; errors are always shown.
+          <strong>Test</strong> shows a sample message.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-storage" aria-labelledby="media-storage-title">
+      <h2 class="guide-section-title" id="media-storage-title">Media storage</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Free up space</strong> › <strong>Clean up</strong>: deletes the images, sounds and videos that are no
+            longer used by any assessment. Your assessments are not affected.</li>
+          <li><strong>Delete all files</strong> › <strong>Delete all</strong>: erases <em>all</em> media stored in this
+            browser, after confirmation.</li>
+        </ul>
+        <div class="gp-callout gp-callout--danger">
+          <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Warning: “Delete all” cannot be undone</strong>
+            <p>Your saved assessments are kept, but they lose their images, sounds and videos: you will have to add them
+              again or import a <code>.gpSave</code> file again. Download your assessments as <code>.gpSave</code>
+              beforehand if you want to keep them complete.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="reset" aria-labelledby="reset-title">
+      <h2 class="guide-section-title" id="reset-title">Restoring the default display</h2>
+      <div class="guide-section-body">
+        <p><strong>Restore default display</strong>, at the bottom of the page, resets (after confirmation) the theme,
+          contrast, colour-blind mode, font, text size, spacing and message duration. The chosen language is kept. Your
+          assessments are not affected.</p>
+        <p>If your preferences cannot be saved (for example in some private browsing modes), a message tells you: they
+          then stay active until the page is closed.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="keyboard" aria-labelledby="keyboard-title">
+      <h2 class="guide-section-title" id="keyboard-title">Keyboard navigation and accessibility</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li>The application is designed to be used with the keyboard: <kbd>Tab</kbd> and <kbd>Shift</kbd> +
+            <kbd>Tab</kbd> move from one element to the next, <kbd>Enter</kbd> or <kbd>Space</kbd> activate them.</li>
+          <li>The first press on <kbd>Tab</kbd> shows the <strong>Skip to main content</strong> link, which goes past the
+            header and the menu.</li>
+          <li>Every drag-and-drop action has a button alternative: <strong>Move up</strong> / <strong>Move down</strong>
+            for participant fields and screens, panel buttons and toolbar for the grid cells.</li>
+          <li>In a stimulus grid, the arrow keys move from cell to cell and <kbd>Enter</kbd> opens the selected cell.</li>
+          <li>The help panel and the menu close with <kbd>Esc</kbd>; windows close with their <strong>Cancel</strong>
+            button.</li>
+        </ul>
+        <p>GazePlay-Eval aims at level AA of the WCAG 2.2 accessibility guidelines, without claiming full compliance. To
+          report a problem, use the <strong>Source code on GitHub</strong> link at the bottom of each page.</p>
+      </div>
+    </section>
+
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a></p>
+
+  </div>
+</div>
+} @else {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Options et accessibilité</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>La page <a routerLink="/option">Options</a> (menu <strong>Options</strong>) adapte l'affichage à vos besoins.
+        Chaque réglage s'applique immédiatement et est enregistré <strong>sur cet appareil uniquement</strong>, pour ce
+        navigateur. Le bloc <strong>Aperçu</strong>, en haut de la page, montre le résultat.</p>
+
+      <app-guide-toc title="Sur cette page" page="/guide/options" [items]="[
+        {id: 'language', label: 'Langue'},
+        {id: 'appearance', label: 'Apparence'},
+        {id: 'reading', label: 'Confort de lecture'},
+        {id: 'notifications', label: 'Notifications'},
+        {id: 'media-storage', label: 'Stockage des médias'},
+        {id: 'reset', label: 'Rétablir l\'affichage par défaut'},
+        {id: 'keyboard', label: 'Navigation au clavier et accessibilité'}
+      ]"></app-guide-toc>
+    </div>
+
+    <figure class="guide-figure">
+      <img src="assets/guide/images/fr/options-page.png" width="744" height="1058" loading="lazy"
+           alt="Haut de la page Options et accessibilité : le bloc Aperçu, la section Langue avec la langue de l'interface, et la section Apparence avec les réglages Thème, Contraste, Mode daltonisme et Animations.">
+      <figcaption>
+        Le haut de la page Options : aperçu, langue et apparence.
+        <a class="guide-figure__zoom" href="assets/guide/images/fr/options-page.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
+      </figcaption>
+    </figure>
+
+    <section class="guide-section-card" id="language" aria-labelledby="language-title">
+      <h2 class="guide-section-title" id="language-title">Langue</h2>
+      <div class="guide-section-body">
+        <p><strong>Langue de l'interface</strong> : français (par défaut) ou anglais. Le bouton de langue de l'en-tête
+          (<code>FR</code> / <code>EN</code>) fait la même chose depuis n'importe quelle page. Les valeurs exportées vers
+          GazePlay-Learning ne changent pas avec la langue.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="appearance" aria-labelledby="appearance-title">
+      <h2 class="guide-section-title" id="appearance-title">Apparence</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Thème</strong> : <strong>Système</strong> (suit le réglage clair ou sombre de votre appareil),
+            <strong>Clair</strong> ou <strong>Sombre</strong>. Le bouton soleil / lune de l'en-tête bascule entre clair et sombre.</li>
+          <li><strong>Contraste</strong> : <strong>Standard</strong> ou <strong>Renforcé</strong> (couleurs plus franches
+            et bordures épaisses).</li>
+          <li><strong>Mode daltonisme</strong> : des couleurs plus faciles à distinguer pour les états (réussite, erreur,
+            avertissement), complétées par des symboles, des motifs et des liens soulignés.</li>
+          <li><strong>Animations</strong> : <strong>Comme le système</strong> ou <strong>Réduites</strong> (moins de
+            transitions et de mouvements).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="reading" aria-labelledby="reading-title">
+      <h2 class="guide-section-title" id="reading-title">Confort de lecture</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Police</strong> : Police du système, Atkinson Hyperlegible (conçue pour les personnes malvoyantes),
+            Lexend, Verdana ou Roboto. Atkinson Hyperlegible, Lexend et Roboto sont téléchargées depuis Google Fonts
+            seulement quand vous les choisissez.</li>
+          <li><strong>Taille du texte</strong> : de 90 % à 200 %, en plus du zoom de votre navigateur.</li>
+          <li><strong>Interligne</strong> : Normal, Aéré ou Très aéré.</li>
+          <li><strong>Espacement des lettres</strong> et <strong>Espacement des mots</strong> : Normal, Large ou Très large.</li>
+          <li><strong>Souligner tous les liens</strong> : facilite le repérage des liens sans s'appuyer sur la couleur.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="notifications" aria-labelledby="notifications-title">
+      <h2 class="guide-section-title" id="notifications-title">Notifications</h2>
+      <div class="guide-section-body">
+        <p><strong>Durée d'affichage des messages</strong> : de 0 à 30 secondes (5 secondes par défaut). Les messages
+          apparaissent en bas à droite de l'écran et se ferment avec leur croix. À <code>0</code>, les messages
+          d'information (comme « Vos modifications ont été enregistrées automatiquement. ») sont désactivés ; les erreurs
+          restent toujours affichées. <strong>Tester</strong> affiche un message d'exemple.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-storage" aria-labelledby="media-storage-title">
+      <h2 class="guide-section-title" id="media-storage-title">Stockage des médias</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>Libérer de l'espace</strong> › <strong>Nettoyer</strong> : supprime les images, sons et vidéos qui
+            ne sont plus utilisés par aucune évaluation. Vos évaluations ne sont pas touchées.</li>
+          <li><strong>Supprimer tous les fichiers</strong> › <strong>Tout supprimer</strong> : efface <em>tous</em> les
+            médias enregistrés dans ce navigateur, après confirmation.</li>
+        </ul>
+        <div class="gp-callout gp-callout--danger">
+          <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Attention : « Tout supprimer » est irréversible</strong>
+            <p>Vos évaluations sauvegardées sont conservées, mais perdent leurs images, sons et vidéos : il faudra les
+              ajouter à nouveau ou réimporter un fichier <code>.gpSave</code>. Téléchargez vos évaluations en
+              <code>.gpSave</code> avant, si vous voulez les garder complètes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="reset" aria-labelledby="reset-title">
+      <h2 class="guide-section-title" id="reset-title">Rétablir l'affichage par défaut</h2>
+      <div class="guide-section-body">
+        <p><strong>Rétablir l'affichage par défaut</strong>, en bas de la page, remet (après confirmation) le thème, le
+          contraste, le mode daltonisme, la police, la taille du texte, les espacements et la durée des messages à leurs
+          valeurs par défaut. La langue choisie est conservée. Vos évaluations ne sont pas touchées.</p>
+        <p>Si vos préférences ne peuvent pas être enregistrées (par exemple dans certains modes de navigation privée), un
+          message vous en informe : elles restent alors actives jusqu'à la fermeture de la page.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="keyboard" aria-labelledby="keyboard-title">
+      <h2 class="guide-section-title" id="keyboard-title">Navigation au clavier et accessibilité</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li>L'application est conçue pour s'utiliser au clavier : <kbd>Tab</kbd> et <kbd>Maj</kbd> + <kbd>Tab</kbd>
+            passent d'un élément à l'autre, <kbd>Entrée</kbd> ou <kbd>Espace</kbd> les activent.</li>
+          <li>Le premier appui sur <kbd>Tab</kbd> fait apparaître le lien <strong>Aller au contenu principal</strong>, qui
+            évite l'en-tête et le menu.</li>
+          <li>Chaque glisser-déposer a une alternative par boutons : <strong>Monter</strong> / <strong>Descendre</strong>
+            pour les champs du participant et les écrans, boutons du panneau et barre d'outils pour les cases de la grille.</li>
+          <li>Dans une grille de stimuli, les flèches passent d'une case à l'autre et <kbd>Entrée</kbd> ouvre la case
+            sélectionnée.</li>
+          <li>Le panneau d'aide et le menu se ferment avec <kbd>Échap</kbd> ; les fenêtres se ferment avec leur bouton
+            <strong>Annuler</strong>.</li>
+        </ul>
+        <p>GazePlay-Eval vise le niveau AA des règles d'accessibilité WCAG 2.2, sans se déclarer entièrement conforme.
+          Pour signaler un problème, utilisez le lien <strong>Code source sur GitHub</strong> en bas de chaque page.</p>
+      </div>
+    </section>
+
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a></p>
+
+  </div>
+</div>
+}

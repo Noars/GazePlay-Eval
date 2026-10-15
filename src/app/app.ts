@@ -11,6 +11,8 @@ import {StorageNoticeService} from './core/storage/storage-notice.service';
 import {STEP_LABEL_KEYS, STEP_TO_ROUTE} from './shared/stepRoute.model';
 import {I18nService} from './core/i18n/i18n.service';
 import {TranslatePipe} from './core/i18n/translate.pipe';
+import {TabSessionService} from './core/tab/tab-session.service';
+import {FlashService} from './services/flash-message/flash.service';
 
 /**
  * Composant racine : structure de l'application (en-tête, navigation, contenu, pied de page).
@@ -27,6 +29,8 @@ export class App implements OnInit {
   private readonly routeFocus = inject(RouteFocusService);
   protected readonly storageNotices = inject(StorageNoticeService);
   private readonly i18n = inject(I18nService);
+  private readonly tabSession = inject(TabSessionService);
+  private readonly flash = inject(FlashService);
 
   @ViewChild('drawerMenu') private drawerMenu?: MenuComponent;
 
@@ -51,6 +55,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.autoSaveService.init(); // sauvegarde automatique à chaque étape
     this.routeFocus.start();     // focus sur le titre de la page après chaque navigation
+    this.showTabNotice();
 
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isReload = nav?.type === 'reload';
@@ -61,6 +66,25 @@ export class App implements OnInit {
       this.router.navigate(['/home']).then(() => {
         this.autoSaveService.tryResume(false);
       });
+    }
+  }
+
+  /**
+   * Message de démarrage de l'onglet (voir TabSessionService) : onglet dupliqué, évaluation
+   * déjà ouverte dans un autre onglet, ou emplacement lié repris par un autre onglet.
+   */
+  private showTabNotice(): void {
+    const notice = this.tabSession.notice;
+    if (!notice) return;
+    this.tabSession.notice = null;
+    if (notice.kind === 'duplicated') {
+      this.flash.show('warning', notice.slot !== null
+        ? this.i18n.t('tabs.notice.duplicated', {n: notice.slot})
+        : this.i18n.t('tabs.notice.duplicatedNoSlot'));
+    } else if (notice.kind === 'slotBusy') {
+      this.flash.show('warning', this.i18n.t('tabs.notice.slotBusy', {n: notice.slot}));
+    } else {
+      this.flash.show('info', this.i18n.t('tabs.notice.busy'));
     }
   }
 

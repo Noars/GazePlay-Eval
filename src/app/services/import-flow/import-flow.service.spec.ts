@@ -43,7 +43,9 @@ describe('ImportFlowService', () => {
       listScreens: [], step: 0,
     };
     saveServiceSpy.getEvalName.and.callFake(() => saveServiceSpy.dataAuto.nomEval);
-    guardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
+    guardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName', 'reserveForImport']);
+    // Par défaut, l'emplacement cible n'est ouvert dans aucun autre onglet.
+    guardSpy.reserveForImport.and.callFake(async (slot: any) => ({slot, release: jasmine.createSpy('release')}));
     guardSpy.check.and.returnValue(Promise.resolve(true));
     guardSpy.getUniqueEvalName.and.callFake((name: string) => name);
     autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
@@ -122,8 +124,40 @@ describe('ImportFlowService', () => {
 
     expect(loadZipSpy.loadZipToSlot).toHaveBeenCalledWith(zipFile, 2);
     expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
-    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(2);
+    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(2, jasmine.objectContaining({slot: 2}));
     expect(autoSaveSpy.tryResume).toHaveBeenCalledWith(true);
+  });
+
+  it("mode sauvegarde, emplacement ouvert dans un autre onglet, « Ouvrir sans enregistrer » → import sans emplacement", async () => {
+    dialogReturns({mode: 'save', zipFile, slotIndex: 2});
+    guardSpy.reserveForImport.and.resolveTo('open');
+
+    await service.start();
+
+    expect(loadZipSpy.loadZipToSlot).not.toHaveBeenCalled();
+    expect(loadZipSpy.loadZip).toHaveBeenCalledWith(zipFile);
+    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(null);
+    expect(guardSpy.check).not.toHaveBeenCalledWith(2);
+  });
+
+  it("mode sauvegarde, emplacement ouvert dans un autre onglet, annulation → rien n'est importé", async () => {
+    dialogReturns({mode: 'save', zipFile, slotIndex: 2});
+    guardSpy.reserveForImport.and.resolveTo(null);
+
+    expect(await service.start()).toBeFalse();
+    expect(loadZipSpy.loadZipToSlot).not.toHaveBeenCalled();
+    expect(loadZipSpy.loadZip).not.toHaveBeenCalled();
+    expect(guardSpy.check).not.toHaveBeenCalled();
+  });
+
+  it("mode sauvegarde, évaluation en cours protégée et annulée → la réservation de l'emplacement est libérée", async () => {
+    dialogReturns({mode: 'save', zipFile, slotIndex: 2});
+    const release = jasmine.createSpy('release');
+    guardSpy.reserveForImport.and.resolveTo({slot: 2, release});
+    guardSpy.check.and.resolveTo(false);
+
+    expect(await service.start()).toBeFalse();
+    expect(release).toHaveBeenCalled();
   });
 
   it('mode sauvegarde → nom déjà utilisé → renommé et réenregistré (emplacement + slot 0)', async () => {

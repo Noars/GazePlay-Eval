@@ -9,7 +9,7 @@ import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {Router} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
-import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {isEmptyEvaluation, OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
@@ -68,9 +68,12 @@ export class SauvegardeComponent implements OnInit {
       data: this.loadService.getSlot(i)
     }));
 
-    if (this.autoSave !== null && this.autoSave.nomEval !== '') {
-      const alreadySaved = this.slots.some(s => s.data?.nomEval === this.autoSave!.nomEval);
-      this.hasUnsavedEval = !alreadySaved;
+    // « En lieu sûr » : liée à un emplacement, ou identique au contenu de l'un d'eux
+    // (un emplacement homonyme mais différent ne compte pas).
+    if (this.autoSave !== null && !isEmptyEvaluation(this.autoSave)) {
+      const linked = this.saveService.activeSlotIndex !== null
+        && this.slots.some(s => s.index === this.saveService.activeSlotIndex && s.data !== null);
+      this.hasUnsavedEval = !linked && this.overwriteGuard.findSlotHolding(this.autoSave) === null;
     } else {
       this.hasUnsavedEval = false;
     }
@@ -81,25 +84,45 @@ export class SauvegardeComponent implements OnInit {
    * @param index l'index du slot sélectionné (1, 2, 3).
    */
   async editSlot(index: FormatTypeConfig): Promise<void> {
-    const save = this.loadService.getSlot(index);
-    if (!save) return;
+    if (!this.loadService.getSlot(index)) return;
 
-    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+    // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).
+    const opening = await this.overwriteGuard.reserveForOpening(index);
+    if (!opening) return;
+    const reservation = opening.mode === 'link' ? opening.reservation : null;
+
+    if (!await this.overwriteGuard.check(0)) {
+      reservation?.release();
+      return;
+    }
+    // relu après la vérification : l'évaluation en cours vient peut-être d'y être reportée
+    const save = this.loadService.getSlot(index);
+    if (!save) {
+      reservation?.release();
+      return;
+    }
 
     const step = save.step >= 0 ? save.step : 3;
     this.saveService.loadIntoWorkspace(save, step);
-    this.saveService.setActiveSlot(index);
+    this.saveService.setActiveSlot(reservation ? index : null, reservation);
     this.saveService.saveToSlot(0, this.saveService.dataAuto); // Sauvegarde dans le slot dynamique
     this.autoSaveService.tryResume(true);
   }
 
   /**
    * Enregistre l'évaluation en cours (ou `dataToSave`) dans un emplacement, avec un nom
-   * unique parmi les emplacements nommés.
+   * unique parmi les emplacements nommés, puis lie l'évaluation en cours à cet emplacement :
+   * ses modifications suivantes y seront reportées automatiquement.
    */
   async saveToSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
+    // Un emplacement modifié dans un autre onglet ne peut pas recevoir l'évaluation de celui-ci.
+    const reservation = await this.overwriteGuard.reserveForWriting(slot.index);
+    if (!reservation) return;
     if (slot.data !== null) {
-      if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
+      if (!await this.overwriteGuard.check(slot.index, {replacingWithCurrent: true})) {
+        reservation.release();
+        return;
+      }
     }
 
     // on lit depuis le slot dynamique si pas de données passées
@@ -107,13 +130,21 @@ export class SauvegardeComponent implements OnInit {
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
     const uniqueName = this.overwriteGuard.getUniqueEvalName(data.nomEval, slot.index);
-    if (uniqueName !== data.nomEval) {
+    const renamed = uniqueName !== data.nomEval;
+    if (renamed) {
       data.nomEval = uniqueName;
     }
 
     try {
       this.saveService.saveToSlot(slot.index, data);
+      if (renamed) {
+        // l'évaluation en cours prend le même nom, sinon le prochain report le défairait
+        this.saveService.saveToSlot(0, data);
+        if (this.saveService.hasLoadedWorkspace) this.saveService.dataAuto.nomEval = uniqueName;
+      }
+      this.saveService.setActiveSlot(slot.index, reservation);
     } catch (error) {
+      reservation.release();
       console.error('Sauvegarde impossible :', error);
       this.flashMessageService.show('error', this.i18n.t('saves.saveError'));
       return;
@@ -144,7 +175,9 @@ export class SauvegardeComponent implements OnInit {
    * supprimés que s'ils ne sont plus utilisés par aucune autre sauvegarde.
    * @param slot contient l'index du slot et sa donnée.
    */
-  openDeletePopup(slot: Slot): void {
+  async openDeletePopup(slot: Slot): Promise<void> {
+    // Supprimer un emplacement modifié dans un autre onglet : refusé (l'autre onglet le recréerait).
+    if (!await this.overwriteGuard.ensureNotOpenElsewhere(slot.index)) return;
     const dialogRef = this.dialog.open(PopupDeleteSaveComponent, {
       data: {slotName: slot.data?.nomEval || this.i18n.t('saves.slot', {n: slot.index})},
       disableClose: true,

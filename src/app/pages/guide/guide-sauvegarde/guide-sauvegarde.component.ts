@@ -1,4 +1,5 @@
 import {RouterLink} from '@angular/router';
+import {GuideTocComponent} from '../guide-toc/guide-toc.component';
 import {Component, inject} from '@angular/core';
 import {I18nService} from '../../../core/i18n/i18n.service';
 import {FlashService} from '../../../services/flash-message/flash.service';
@@ -11,7 +12,7 @@ import {UserPreferencesService} from '../../../core/preferences/user-preferences
 @Component({
   selector: 'app-guide-sauvegarde',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, GuideTocComponent],
   templateUrl: './guide-sauvegarde.component.html',
   styleUrl: '../guide.component.css'
 })

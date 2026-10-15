@@ -1,0 +1,334 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">FAQ and troubleshooting</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>Find here what to do when a message appears or when something seems to be missing. The messages are quoted
+        as they appear in the application.</p>
+
+      <app-guide-toc title="On this page" page="/guide/depannage" [items]="[
+        {id: 'no-notification', label: 'No message appears after saving'},
+        {id: 'storage-full', label: '“The browser storage may be full”'},
+        {id: 'media-missing', label: 'A file “cannot be found in the browser storage”'},
+        {id: 'eval-missing', label: 'My assessment has disappeared'},
+        {id: 'other-computer', label: 'Using an assessment on another computer'},
+        {id: 'import-failed', label: '“The file could not be imported”'},
+        {id: 'export-failed', label: '“Export failed”'},
+        {id: 'resume-error', label: 'Error when reloading the assessment'},
+        {id: 'storage-update', label: '“Storage update pending”'},
+        {id: 'preferences', label: 'My preferences are not kept'},
+        {id: 'automatic-mode', label: 'Automatic mode does nothing'},
+        {id: 'several-tabs', label: 'Several tabs open'}
+      ]"></app-guide-toc>
+    </div>
+
+    <section class="guide-section-card" id="no-notification" aria-labelledby="no-notification-title">
+      <h2 class="guide-section-title" id="no-notification-title">No message appears after saving</h2>
+      <div class="guide-section-body">
+        <p>The <strong>Message display time</strong> is probably set to <code>0</code> seconds in the
+          <a routerLink="/option">options</a>, which turns off information messages. Set it back to a few seconds (5 by
+          default) and use <strong>Test</strong> to check. Saving still works even when messages are off.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="storage-full" aria-labelledby="storage-full-title">
+      <h2 class="guide-section-title" id="storage-full-title">“The browser storage may be full”</h2>
+      <div class="guide-section-body">
+        <p>Messages such as “Your changes could not be saved: the browser storage may be full.” or “The file “…” could
+          not be saved in the browser (storage full?)” mean that the browser has no more room for this site.</p>
+        <ol class="guide-steps">
+          <li>Download the assessments you want to keep as <code>.gpSave</code> (<a routerLink="/sauvegarde">My saves</a> › <strong>Download</strong>).</li>
+          <li>In <a routerLink="/option">Options</a> › <strong>Media storage</strong>, click <strong>Clean up</strong> to
+            delete the media that are no longer used.</li>
+          <li>If needed, delete the saves you no longer need, and prefer lighter media (shorter videos, smaller images).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-missing" aria-labelledby="media-missing-title">
+      <h2 class="guide-section-title" id="media-missing-title">A file “cannot be found in the browser storage”</h2>
+      <div class="guide-section-body">
+        <p>The assessment still refers to an image, a sound or a video, but the file is no longer in the browser (for
+          example after <strong>Delete all</strong> in the options, or after clearing the browsing data). Choose the file
+          again in the screen or cell concerned, or import a <code>.gpSave</code> of the assessment that contains it.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="eval-missing" aria-labelledby="eval-missing-title">
+      <h2 class="guide-section-title" id="eval-missing-title">My assessment has disappeared</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li>Check that you are using the <strong>same browser</strong> on the <strong>same computer</strong>: each
+            browser has its own storage.</li>
+          <li>In private browsing, the data is deleted when the window is closed.</li>
+          <li>Clearing the browsing data also erases the assessments.</li>
+          <li>The assessment in progress is replaced as soon as you start or open another one: look in
+            <a routerLink="/load-save">Load</a> whether it was stored in a slot.</li>
+        </ul>
+        <p>If you have a <code>.gpSave</code> file of it, <a routerLink="/guide/imports" fragment="import">import it</a>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="other-computer" aria-labelledby="other-computer-title">
+      <h2 class="guide-section-title" id="other-computer-title">Using an assessment on another computer</h2>
+      <div class="guide-section-body">
+        <p>Download its <code>.gpSave</code> file (step 5 or My saves), copy it to the other computer (USB stick,
+          e-mail…), then open GazePlay-Eval there and use <strong>Import a file</strong>. To run the assessment in
+          GazePlay-Learning, use the <code>.zip</code> file from step 5.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="import-failed" aria-labelledby="import-failed-title">
+      <h2 class="guide-section-title" id="import-failed-title">“The file could not be imported”</h2>
+      <div class="guide-section-body">
+        <p>Check that the file is a <code>.gpSave</code> or a <code>.zip</code> <strong>exported by
+          GazePlay-Eval</strong>, that it has not been renamed, unzipped or edited, and that the download finished
+          properly. Then try again with <strong>Import a file</strong>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="export-failed" aria-labelledby="export-failed-title">
+      <h2 class="guide-section-title" id="export-failed-title">“Export failed”</h2>
+      <div class="guide-section-body">
+        <p>The <code>.zip</code> could not be created, often because a media file is missing. Open the screens concerned
+          at step 4: a missing file is reported (“… cannot be found…”). Choose it again, then export again.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="resume-error" aria-labelledby="resume-error-title">
+      <h2 class="guide-section-title" id="resume-error-title">Error when reloading the assessment</h2>
+      <div class="guide-section-body">
+        <p>If the message “An error occurred while trying to reload the assessment. Try saving it and opening it again.”
+          appears, go to <a routerLink="/sauvegarde">My saves</a>, save the assessment in progress in a slot, then open it
+          with <strong>Open</strong>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="storage-update" aria-labelledby="storage-update-title">
+      <h2 class="guide-section-title" id="storage-update-title">“Storage update pending”</h2>
+      <div class="guide-section-body">
+        <p>This banner appears when GazePlay-Eval is also open in another tab with an earlier version. Close that other
+          tab so that your preferences and media become available again.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="preferences" aria-labelledby="preferences-title">
+      <h2 class="guide-section-title" id="preferences-title">My preferences are not kept</h2>
+      <div class="guide-section-body">
+        <p>If the message “Your preferences cannot be saved on this device…” or “Your preferences could not be saved…”
+          appears, the browser refuses storage (for example in some private browsing modes). Your settings stay active
+          until the page is closed. Use a normal window to keep them.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="automatic-mode" aria-labelledby="automatic-mode-title">
+      <h2 class="guide-section-title" id="automatic-mode-title">Automatic mode does nothing</h2>
+      <div class="guide-section-body">
+        <p>That is expected: automatic generation of screens is still in development. Choose <strong>Manual</strong>
+          mode at step 3 (see <a routerLink="/guide/creation" fragment="setup-eval">Creating an assessment</a>).</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="several-tabs" aria-labelledby="several-tabs-title">
+      <h2 class="guide-section-title" id="several-tabs-title">Several tabs open</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>“Slot open in another tab”</strong>: that slot is being edited in another tab. Choose
+            <strong>Open a copy</strong> (not linked to the slot: save it in a free slot to keep it), or finish in the
+            other tab first. Replacing or deleting that slot is refused while the other tab is open.</li>
+          <li><strong>“This tab is a copy of another tab”</strong>: you duplicated a tab. The copy keeps the assessment
+            but is no longer linked to its slot; the original tab keeps the link.</li>
+          <li><strong>“The assessment in progress is already open in another tab”</strong>: a new tab starts without an
+            assessment in progress. Use <strong>New assessment</strong>, <strong>Load</strong> or <strong>Import a
+            file</strong>.</li>
+        </ul>
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Closing the browser</strong>
+            <p>After the browser is closed, only the last assessment modified is picked up again. Save the assessments of
+              your other tabs in a slot, or download them as <code>.gpSave</code>, before closing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a></p>
+
+  </div>
+</div>
+} @else {
+<div class="card mb-4">
+  <div class="card-header">
+    <h1 class="card-title">Questions fréquentes et dépannage</h1>
+  </div>
+  <div class="card-body">
+
+    <div class="guide-section-intro">
+      <p>Retrouvez ici que faire quand un message apparaît ou qu'un élément semble manquer. Les messages sont cités tels
+        qu'ils s'affichent dans l'application.</p>
+
+      <app-guide-toc title="Sur cette page" page="/guide/depannage" [items]="[
+        {id: 'no-notification', label: 'Aucun message n\'apparaît après un enregistrement'},
+        {id: 'storage-full', label: '« Le stockage du navigateur est peut-être plein »'},
+        {id: 'media-missing', label: 'Un fichier est « introuvable dans le stockage du navigateur »'},
+        {id: 'eval-missing', label: 'Mon évaluation a disparu'},
+        {id: 'other-computer', label: 'Utiliser une évaluation sur un autre ordinateur'},
+        {id: 'import-failed', label: '« Le fichier n\'a pas pu être importé »'},
+        {id: 'export-failed', label: '« L\'export a échoué »'},
+        {id: 'resume-error', label: 'Erreur au rechargement de l\'évaluation'},
+        {id: 'storage-update', label: '« Mise à jour du stockage en attente »'},
+        {id: 'preferences', label: 'Mes préférences ne sont pas conservées'},
+        {id: 'automatic-mode', label: 'Le mode automatique ne fait rien'},
+        {id: 'several-tabs', label: 'Plusieurs onglets ouverts'}
+      ]"></app-guide-toc>
+    </div>
+
+    <section class="guide-section-card" id="no-notification" aria-labelledby="no-notification-title">
+      <h2 class="guide-section-title" id="no-notification-title">Aucun message n'apparaît après un enregistrement</h2>
+      <div class="guide-section-body">
+        <p>La <strong>Durée d'affichage des messages</strong> est sans doute réglée sur <code>0</code> seconde dans les
+          <a routerLink="/option">options</a>, ce qui désactive les messages d'information. Remettez quelques secondes
+          (5 par défaut) et utilisez <strong>Tester</strong> pour vérifier. L'enregistrement fonctionne même quand les
+          messages sont désactivés.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="storage-full" aria-labelledby="storage-full-title">
+      <h2 class="guide-section-title" id="storage-full-title">« Le stockage du navigateur est peut-être plein »</h2>
+      <div class="guide-section-body">
+        <p>Des messages comme « Vos modifications n'ont pas pu être enregistrées : le stockage du navigateur est
+          peut-être plein. » ou « Le fichier « … » n'a pas pu être enregistré dans le navigateur (stockage plein ?) »
+          signifient que le navigateur n'a plus de place pour ce site.</p>
+        <ol class="guide-steps">
+          <li>Téléchargez les évaluations à garder au format <code>.gpSave</code> (<a routerLink="/sauvegarde">Mes sauvegardes</a> › <strong>Télécharger</strong>).</li>
+          <li>Dans <a routerLink="/option">Options</a> › <strong>Stockage des médias</strong>, cliquez sur
+            <strong>Nettoyer</strong> pour supprimer les médias qui ne servent plus.</li>
+          <li>Si besoin, supprimez les sauvegardes devenues inutiles et préférez des médias plus légers (vidéos plus
+            courtes, images plus petites).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-missing" aria-labelledby="media-missing-title">
+      <h2 class="guide-section-title" id="media-missing-title">Un fichier est « introuvable dans le stockage du navigateur »</h2>
+      <div class="guide-section-body">
+        <p>L'évaluation fait toujours référence à une image, un son ou une vidéo, mais le fichier n'est plus dans le
+          navigateur (par exemple après <strong>Tout supprimer</strong> dans les options, ou après un effacement des
+          données de navigation). Choisissez à nouveau le fichier dans l'écran ou la case concernée, ou importez un
+          <code>.gpSave</code> de l'évaluation qui le contient.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="eval-missing" aria-labelledby="eval-missing-title">
+      <h2 class="guide-section-title" id="eval-missing-title">Mon évaluation a disparu</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li>Vérifiez que vous utilisez le <strong>même navigateur</strong> sur le <strong>même ordinateur</strong> :
+            chaque navigateur a son propre stockage.</li>
+          <li>En navigation privée, les données sont supprimées à la fermeture de la fenêtre.</li>
+          <li>Effacer les données de navigation efface aussi les évaluations.</li>
+          <li>L'évaluation en cours est remplacée dès que vous en commencez ou en ouvrez une autre : regardez dans
+            <a routerLink="/load-save">Charger</a> si elle avait été rangée dans un emplacement.</li>
+        </ul>
+        <p>Si vous en avez un fichier <code>.gpSave</code>, <a routerLink="/guide/imports" fragment="import">importez-le</a>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="other-computer" aria-labelledby="other-computer-title">
+      <h2 class="guide-section-title" id="other-computer-title">Utiliser une évaluation sur un autre ordinateur</h2>
+      <div class="guide-section-body">
+        <p>Téléchargez son fichier <code>.gpSave</code> (étape 5 ou Mes sauvegardes), copiez-le sur l'autre ordinateur
+          (clé USB, courriel…), puis ouvrez GazePlay-Eval sur celui-ci et utilisez <strong>Importer un fichier</strong>.
+          Pour faire passer l'évaluation dans GazePlay-Learning, utilisez le fichier <code>.zip</code> de l'étape 5.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="import-failed" aria-labelledby="import-failed-title">
+      <h2 class="guide-section-title" id="import-failed-title">« Le fichier n'a pas pu être importé »</h2>
+      <div class="guide-section-body">
+        <p>Vérifiez que le fichier est bien un <code>.gpSave</code> ou un <code>.zip</code> <strong>exporté par
+          GazePlay-Eval</strong>, qu'il n'a été ni renommé, ni décompressé, ni modifié, et que son téléchargement s'est
+          terminé correctement. Réessayez ensuite avec <strong>Importer un fichier</strong>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="export-failed" aria-labelledby="export-failed-title">
+      <h2 class="guide-section-title" id="export-failed-title">« L'export a échoué »</h2>
+      <div class="guide-section-body">
+        <p>Le <code>.zip</code> n'a pas pu être créé, souvent parce qu'un média manque. Ouvrez les écrans concernés à
+          l'étape 4 : un fichier manquant y est signalé (« … est introuvable… »). Choisissez-le à nouveau, puis relancez
+          l'export.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="resume-error" aria-labelledby="resume-error-title">
+      <h2 class="guide-section-title" id="resume-error-title">Erreur au rechargement de l'évaluation</h2>
+      <div class="guide-section-body">
+        <p>Si le message « Une erreur s'est produite lors de la tentative de rechargement de l'évaluation. Tentez de la
+          sauvegarder et de l'ouvrir à nouveau. » apparaît, allez dans <a routerLink="/sauvegarde">Mes sauvegardes</a>,
+          enregistrez l'évaluation en cours dans un emplacement, puis ouvrez-la avec <strong>Ouvrir</strong>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="storage-update" aria-labelledby="storage-update-title">
+      <h2 class="guide-section-title" id="storage-update-title">« Mise à jour du stockage en attente »</h2>
+      <div class="guide-section-body">
+        <p>Ce bandeau apparaît quand GazePlay-Eval est aussi ouvert dans un autre onglet avec une version précédente.
+          Fermez cet autre onglet pour que vos préférences et vos médias soient à nouveau accessibles.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="preferences" aria-labelledby="preferences-title">
+      <h2 class="guide-section-title" id="preferences-title">Mes préférences ne sont pas conservées</h2>
+      <div class="guide-section-body">
+        <p>Si le message « Vos préférences ne peuvent pas être enregistrées sur cet appareil… » ou « Vos préférences
+          n'ont pas pu être enregistrées… » apparaît, le navigateur refuse le stockage (par exemple dans certains modes
+          de navigation privée). Vos réglages restent actifs jusqu'à la fermeture de la page. Utilisez une fenêtre
+          normale pour les conserver.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="automatic-mode" aria-labelledby="automatic-mode-title">
+      <h2 class="guide-section-title" id="automatic-mode-title">Le mode automatique ne fait rien</h2>
+      <div class="guide-section-body">
+        <p>C'est normal : la génération automatique des écrans est encore en développement. Choisissez le mode
+          <strong>Manuel</strong> à l'étape 3 (voir <a routerLink="/guide/creation" fragment="setup-eval">Création d'une évaluation</a>).</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="several-tabs" aria-labelledby="several-tabs-title">
+      <h2 class="guide-section-title" id="several-tabs-title">Plusieurs onglets ouverts</h2>
+      <div class="guide-section-body">
+        <ul class="guide-list">
+          <li><strong>« Emplacement ouvert dans un autre onglet »</strong> : cet emplacement est en cours de modification
+            dans un autre onglet. Choisissez <strong>Ouvrir une copie</strong> (non liée à l'emplacement : enregistrez-la
+            dans un emplacement libre pour la conserver), ou terminez d'abord dans l'autre onglet. Remplacer ou supprimer
+            cet emplacement est refusé tant que l'autre onglet est ouvert.</li>
+          <li><strong>« Cet onglet est une copie d'un autre onglet »</strong> : vous avez dupliqué un onglet. La copie garde
+            l'évaluation mais n'est plus liée à son emplacement ; l'onglet d'origine garde le lien.</li>
+          <li><strong>« L'évaluation en cours est déjà ouverte dans un autre onglet »</strong> : un nouvel onglet démarre
+            sans évaluation en cours. Utilisez <strong>Nouvelle évaluation</strong>, <strong>Charger</strong> ou
+            <strong>Importer un fichier</strong>.</li>
+        </ul>
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Fermeture du navigateur</strong>
+            <p>Après la fermeture du navigateur, seule la dernière évaluation modifiée est reprise. Enregistrez les
+              évaluations de vos autres onglets dans un emplacement, ou téléchargez-les en <code>.gpSave</code>, avant de
+              fermer.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a></p>
+
+  </div>
+</div>
+}

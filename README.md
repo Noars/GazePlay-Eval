@@ -99,8 +99,10 @@ GazePlay-Eval n'utilise aucun serveur pour stocker les données des utilisateurs
   - 1 emplacement pour la sauvegarde automatique, appelé `saveAuto`.
   - `gazeplay-eval.preferences-cache` : un simple instantané (thème, contraste, taille du texte) lu avant le démarrage d'Angular pour éviter un « flash » visuel. La source de vérité des préférences reste l'IDB.
   - les anciennes clés `theme` et `options`, qui ne sont plus écrites mais sont conservées : elles sont reprises une fois lors de la première ouverture de la nouvelle version.
+  - `saveAuto` est la copie de la **dernière** évaluation en cours modifiée, accompagnée de `gazeplay-eval.active-slot` (son emplacement lié) et de `gazeplay-eval.saveAuto-tab` (l'onglet qui l'a écrite). Un nouvel onglet la reprend si cet onglet est fermé.
+  - `gazeplay-eval.tab-media.<onglet>` : les écrans de l'évaluation de chaque onglet, pour que le nettoyage des médias ne supprime jamais un média utilisé dans un autre onglet (conservé 7 jours après la fermeture de l'onglet).
 
-- Le Session Storage contient `gazeplay-eval.active-slot` : l'emplacement (1 à 3) en cours d'édition dans l'onglet, conservé au rechargement.
+- Le Session Storage (propre à chaque onglet, conservé au rechargement) contient l'évaluation en cours de l'onglet (`gazeplay-eval.tab-working`, même format que les sauvegardes), son emplacement lié (`gazeplay-eval.active-slot`) et l'identifiant de l'onglet (`gazeplay-eval.tab-id`). Deux onglets ne partagent donc jamais leur évaluation en cours. Des verrous [Web Locks](https://developer.mozilla.org/fr/docs/Web/API/Web_Locks_API) signalent les onglets ouverts et les emplacements en cours de modification (onglet dupliqué, emplacement ouvert ailleurs).
 
 - L'IDB (base `GazePlayEvalDB`, **version 2**) contient :
   - le store `evalFiles` : toutes les pièces jointes utilisées dans une évaluation (images, sons, vidéos) ;

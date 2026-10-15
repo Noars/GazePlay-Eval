@@ -9,6 +9,7 @@ import {provideRouter, TitleStrategy, withHashLocation, withInMemoryScrolling} f
 
 import {routes} from './app.routes';
 import {UserPreferencesService} from './core/preferences/user-preferences.service';
+import {TabSessionService} from './core/tab/tab-session.service';
 import {AppTitleStrategy} from './core/a11y/app-title.strategy';
 import {PREFERENCES_DB_BLOCKED_HANDLER} from './core/preferences/preferences.store';
 import {StorageNoticeService} from './core/storage/storage-notice.service';
@@ -29,5 +30,7 @@ export const appConfig: ApplicationConfig = {
     },
     // Les préférences d'affichage sont chargées depuis IndexedDB avant le premier rendu.
     provideAppInitializer(() => inject(UserPreferencesService).init()),
+    // État propre à l'onglet (évaluation en cours, lien, doublons) avant le premier affichage.
+    provideAppInitializer(() => inject(TabSessionService).init()),
   ]
 };

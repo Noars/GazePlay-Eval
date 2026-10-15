@@ -1,24 +1,20 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {formatTypeModel, saveModel, saveModelDefault} from '../../shared/saveModel';
 import {FormatTypeConfig, SAVE_SLOT_LIST} from '../../shared/dataBaseConfig';
 import {screenTypeModel} from '../../shared/screenModel';
+import {SlotReservation, TabSessionService} from '../../core/tab/tab-session.service';
 
 /** Évaluation de travail (sans les métadonnées ajoutées à l'écriture). */
 export type WorkingEval = Omit<saveModel, 'createdAt' | 'version'>;
 
 /**
- * Clé sessionStorage de l'emplacement nommé (1-3) actuellement en cours d'édition.
- * sessionStorage est propre à l'onglet et survit au rechargement de la page : un
- * rechargement ne « détache » donc plus l'évaluation de son emplacement.
- */
-const ACTIVE_SLOT_SESSION_KEY = 'gazeplay-eval.active-slot';
-
-/**
- * État de l'évaluation en cours et écriture des sauvegardes localStorage.
+ * État de l'évaluation en cours et écriture des sauvegardes.
  *
- * - `dataAuto` : évaluation de travail, partagée par toutes les pages ;
- * - slot 0 (`saveAuto`) : copie persistante de `dataAuto`, réécrite à chaque étape ;
- * - slots 1-3 (`save1`…`save3`) : sauvegardes nommées.
+ * - `dataAuto` : évaluation de travail, partagée par toutes les pages de l'onglet ;
+ * - slot 0 : évaluation en cours **de cet onglet** (`TabSessionService`, sessionStorage), publiée
+ *   aussi dans `saveAuto` (localStorage) comme dernière évaluation en cours ;
+ * - slots 1-3 (`save1`…`save3`, localStorage) : sauvegardes nommées, partagées par les onglets ;
+ * - `activeSlotIndex` : emplacement lié à l'évaluation de cet onglet.
  *
  * Le format JSON des sauvegardes (`shared/saveModel.ts`) est inchangé.
  */
@@ -29,8 +25,24 @@ export class SaveService {
 
   defaultEvalName: string = "Nouvelle Evaluation";
 
-  /** Emplacement nommé (1-3) lié à l'évaluation en cours, ou `null`. */
-  activeSlotIndex: FormatTypeConfig | null = this.readActiveSlot();
+  private readonly tab = inject(TabSessionService);
+
+  /** Emplacement nommé (1-3) lié à l'évaluation de cet onglet, ou `null`. */
+  get activeSlotIndex(): FormatTypeConfig | null {
+    return this.tab.slot;
+  }
+
+  /** Équivaut à `setActiveSlot` (sans réservation préalable). */
+  set activeSlotIndex(slotIndex: FormatTypeConfig | null) {
+    this.setActiveSlot(slotIndex);
+  }
+
+  /**
+   * Vrai dès que `dataAuto` contient réellement l'évaluation en cours (onglet repris, nouvelle
+   * évaluation, ouverture ou import). Sinon, `dataAuto` n'est qu'un modèle vide : il ne doit
+   * alors jamais être recopié dans un emplacement.
+   */
+  private workspaceLoaded = false;
 
   dataAuto: WorkingEval = {
     nomEval: '',
@@ -43,8 +55,23 @@ export class SaveService {
     step: 0
   };
 
+  constructor() {
+    this.tab.ensureInitialized();
+    // L'onglet a déjà son évaluation (rechargement, doublon, ou reprise au démarrage) : elle est
+    // chargée tout de suite, même si l'on arrive directement sur une étape.
+    if (this.tab.working) {
+      this.loadIntoWorkspace(structuredClone(this.tab.working));
+    }
+  }
+
+  /** Vrai si l'évaluation de travail a été chargée ou créée dans cette page. */
+  get hasLoadedWorkspace(): boolean {
+    return this.workspaceLoaded;
+  }
+
   newSaveDataAuto(){
     this.dataAuto = structuredClone(saveModelDefault);
+    this.workspaceLoaded = true;
     this.setActiveSlot(null);
     this.saveToSlot(0, this.dataAuto);
   }
@@ -67,6 +94,7 @@ export class SaveService {
       listScreens: listScreens,
       step: step
     };
+    this.workspaceLoaded = true;
     this.saveToSlot(0, this.dataAuto);
   }
 
@@ -86,42 +114,56 @@ export class SaveService {
       listScreens: save.listScreens,
       step
     };
+    this.workspaceLoaded = true;
   }
 
   /**
-   * Écrit une sauvegarde dans un emplacement localStorage.
+   * Écrit une sauvegarde : slot 0 = évaluation en cours de l'onglet, 1-3 = emplacements nommés.
    * @throws si le stockage est plein ou indisponible (l'appelant affiche l'erreur).
    */
   saveToSlot(slotIndex: FormatTypeConfig, data:any): void {
-    const slotKey = SAVE_SLOT_LIST[slotIndex];
     const saveData: saveModel = {
       ...data,
       createdAt: new Date().toISOString(),
       version: 1
     };
-    localStorage.setItem(slotKey, JSON.stringify(saveData));
+    if (slotIndex === 0) {
+      this.tab.writeWorking(saveData);
+      return;
+    }
+    localStorage.setItem(SAVE_SLOT_LIST[slotIndex], JSON.stringify(saveData));
   }
 
   clearSlot(slotIndex: FormatTypeConfig): void {
-    const slotKey = SAVE_SLOT_LIST[slotIndex];
-    localStorage.removeItem(slotKey);
-    if (slotIndex !== 0 && this.activeSlotIndex === slotIndex) {
+    if (slotIndex === 0) {
+      this.tab.clearWorking();
+      return;
+    }
+    localStorage.removeItem(SAVE_SLOT_LIST[slotIndex]);
+    if (this.activeSlotIndex === slotIndex) {
       this.setActiveSlot(null);
     }
   }
 
-  /** Lie (ou délie avec `null`) l'évaluation en cours à un emplacement nommé. */
-  setActiveSlot(slotIndex: FormatTypeConfig | null): void {
-    this.activeSlotIndex = slotIndex;
-    try {
-      if (slotIndex === null) {
-        sessionStorage.removeItem(ACTIVE_SLOT_SESSION_KEY);
-      } else {
-        sessionStorage.setItem(ACTIVE_SLOT_SESSION_KEY, String(slotIndex));
-      }
-    } catch {
-      // sessionStorage indisponible : le lien ne sera simplement pas conservé au rechargement.
-    }
+  /**
+   * Lie (ou délie avec `null`) l'évaluation de cet onglet à un emplacement nommé, en adoptant
+   * la réservation obtenue au préalable avec `reserveSlot`.
+   */
+  setActiveSlot(slotIndex: FormatTypeConfig | null, reservation?: SlotReservation | null): void {
+    this.tab.setSlot(slotIndex, reservation);
+  }
+
+  /**
+   * Réserve un emplacement pour cet onglet avant de le lier, sans toucher au lien actuel.
+   * `null` si un autre onglet ouvert est en train de le modifier.
+   */
+  reserveSlot(slotIndex: FormatTypeConfig): Promise<SlotReservation | null> {
+    return this.tab.reserveSlot(slotIndex);
+  }
+
+  /** Vrai si un autre onglet ouvert modifie actuellement cet emplacement. */
+  isSlotOpenElsewhere(slotIndex: FormatTypeConfig): Promise<boolean> {
+    return this.tab.isSlotOpenElsewhere(slotIndex);
   }
 
   getEvalName(){
@@ -129,15 +171,6 @@ export class SaveService {
       return this.dataAuto.nomEval;
     }else {
       return this.defaultEvalName;
-    }
-  }
-
-  private readActiveSlot(): FormatTypeConfig | null {
-    try {
-      const raw = Number(sessionStorage.getItem(ACTIVE_SLOT_SESSION_KEY));
-      return raw === 1 || raw === 2 || raw === 3 ? raw : null;
-    } catch {
-      return null;
     }
   }
 }

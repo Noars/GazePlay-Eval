@@ -2,211 +2,305 @@
 @if (language() === 'en') {
 <div class="card mb-4">
   <div class="card-header">
-    <h1 class="card-title">Importing assessments</h1>
+    <h1 class="card-title">Import and export</h1>
   </div>
   <div class="card-body">
 
     <div class="guide-section-intro">
-      <p>
-        This page explains how importing assessments works on the GazePlay-Eval site.</p>
+      <p>GazePlay-Eval produces two kinds of files: a <code>.zip</code> to use the assessment in GazePlay-Learning, and
+        a <code>.gpSave</code> to keep it or share it and edit it again later. This page explains how to get them and
+        how to import them.</p>
 
-      <p>
-        There are two ways to open an imported assessment: consultation mode or save mode.
-        You must select one of these modes to import your assessment.
-      </p>
+      <app-guide-toc title="On this page" page="/guide/imports" [items]="[
+        {id: 'formats', label: 'The file formats'},
+        {id: 'export', label: 'Exporting an assessment'},
+        {id: 'import', label: 'Importing an assessment'},
+        {id: 'after-import', label: 'After the import'}
+      ]"></app-guide-toc>
     </div>
 
-    <div class="alert alert-info fw-semibold w-100 mb-5">
-      <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-      For the site to import an assessment, it must be in <i>.gpSave</i> format
-      (see the guide page on <a routerLink="/guide/creation">creating assessments</a> for more details).
-    </div>
-
-    <img src="assets/guide/images/popup-import.png" class="guide-content-image"
-         alt="Picture showing the window used to import an assessment, with one part for the opening mode and another
-              for the file to import (French interface).">
-    <div class="guide-content-image-desc">
-      <p>The window used to import an assessment.</p>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Consultation mode (“Open”)</h2>
+    <section class="guide-section-card" id="formats" aria-labelledby="formats-title">
+      <h2 class="guide-section-title" id="formats-title">The file formats</h2>
       <div class="guide-section-body">
-        <p>Consultation mode loads an assessment without saving it. This option is handy if you want to look at the
-        content of an assessment but do not want to keep it, or if you have no free slot left.</p>
+        <div class="guide-table-wrap">
+          <table class="guide-table">
+            <caption class="visually-hidden">Comparison of the .zip and .gpSave formats</caption>
+            <thead>
+              <tr>
+                <th scope="col">Format</th>
+                <th scope="col">What is it for?</th>
+                <th scope="col">Where do I get it?</th>
+                <th scope="col">Can it be imported into GazePlay-Eval?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" data-label="Format"><code>.zip</code></th>
+                <td data-label="What is it for?">Using the assessment in GazePlay-Learning (screens and media).</td>
+                <td data-label="Where do I get it?">Step 5, <strong>Export the .zip</strong>.</td>
+                <td data-label="Can it be imported into GazePlay-Eval?">Yes, but incompletely: the screen names and the global settings are not included (screens are
+                  renamed “Ecran 1”, “Ecran 2”…), nor are the empty slots of the grids.</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Format"><code>.gpSave</code></th>
+                <td data-label="What is it for?">Keeping a complete copy, moving the assessment to another computer or browser, sharing it with a
+                  colleague, editing it later.</td>
+                <td data-label="Where do I get it?">Step 5, <strong>Download the .gpSave</strong>; the <strong>Download</strong> button of a slot in
+                  My saves; or the download offered before replacing or deleting a save.</td>
+                <td data-label="Can it be imported into GazePlay-Eval?">Yes, completely.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Do not rename or edit these files</strong>
+            <p>Only files produced by GazePlay-Eval can be imported. Changing their extension or their content may
+              prevent the import.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="alert alert-warning fw-semibold w-100 mb-5">
-          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
-          An assessment loaded in consultation mode is lost if you leave the site or reload the page.
-          Remember to save it or download the new <code>.gpSave</code> file if you want to keep your changes!
+    <section class="guide-section-card" id="export" aria-labelledby="export-title">
+      <h2 class="guide-section-title" id="export-title">Exporting an assessment</h2>
+      <div class="guide-section-body">
+        <ol class="guide-steps">
+          <li>Go to step 5, <strong>Download and export</strong> (button <strong>Next: export</strong> at step 4).</li>
+          <li>Check the <strong>Summary</strong> and any <strong>Points to check</strong>.</li>
+          <li>Click <strong>Export the .zip</strong> to get the file for GazePlay-Learning, and/or
+            <strong>Download the .gpSave</strong> to keep a backup. The file is saved where your browser stores its downloads.</li>
+        </ol>
+        <p>An assessment already stored in a slot can also be downloaded as <code>.gpSave</code> from
+          <a routerLink="/sauvegarde">My saves</a>, without opening it.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="import" aria-labelledby="import-title">
+      <h2 class="guide-section-title" id="import-title">Importing an assessment</h2>
+      <div class="guide-section-body">
+        <p>The import window can be opened from any page, without leaving it: menu <strong>Import a file</strong>, the
+          <strong>Import a file</strong> shortcut on the home page, or the button below.</p>
+
+        <figure class="guide-figure">
+          <img src="assets/guide/images/en/import-dialog.png" width="832" height="858" loading="lazy"
+               alt="Import an assessment window. 1. File to import: a .gpSave file is selected. 2. What do you want to do?: Open and save is selected. 3. Save slot: slot 1, which already contains an assessment, is selected and marked Will be replaced, with a warning; slots 2 and 3 are free. At the bottom, the Cancel and Import and save buttons.">
+          <figcaption>The import window, with a slot that will be replaced.</figcaption>
+        </figure>
+
+        <ol class="guide-steps">
+          <li><strong>1. File to import</strong>: drag a file onto the area, or click <strong>Browse…</strong>. The
+            <code>.gpSave</code> and <code>.zip</code> files exported by GazePlay-Eval are accepted.</li>
+          <li><strong>2. What do you want to do?</strong>
+            <ul class="guide-list">
+              <li><strong>Open</strong>: opens the assessment without storing it in a slot.</li>
+              <li><strong>Open and save</strong>: also stores it in one of the three slots.</li>
+            </ul>
+          </li>
+          <li><strong>3. Save slot</strong> (only with “Open and save”): choose a <strong>Free</strong> slot, or an
+            occupied one marked <strong>Will be replaced</strong>. A warning then reminds you that the assessment in
+            that slot will be replaced, and you will be able to download it before confirming.</li>
+          <li>Confirm with <strong>Open the assessment</strong> or <strong>Import and save</strong> (or
+            <strong>Cancel</strong>).</li>
+        </ol>
+
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Before importing</strong>
+            <p>The imported assessment replaces the assessment in progress. If it is not stored in a slot, the
+              <strong>Replace an assessment?</strong> window lets you download it first. The same happens for the slot
+              chosen with “Open and save”.</p>
+          </div>
         </div>
 
-      </div>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Save mode (“Open and save”)</h2>
-      <div class="guide-section-body">
-        <p>Save mode places the imported assessment in one of the three slots available on the site. You can then view
-        it right away, come back to it later, or edit it while keeping your changes.</p>
-
-        <div class="alert alert-info fw-semibold w-100 mb-5">
-          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-          This mode needs at least one empty slot for the imported assessment.
-            If no slot is available, an existing save will have to be overwritten.
-        </div>
-      </div>
-    </div>
-
-    <div class="guide-section-body">
-      <p>
-        Once the assessment is loaded, you are taken back to the last page viewed in that assessment.
-      </p>
-    </div>
-
-    <div class="guide-section-body">
-      <p>
-        The window used to import an assessment is a <b>pop-up</b>, which means it can be shown anywhere in the
-        application without leaving the page you are on and possibly losing your progress.
-        To open this pop-up, show the side menu and click “Import a file”.
-      </p>
-    </div>
-
-    <img src="assets/guide/images/menu-import.png" class="guide-content-image"
-         alt="Picture showing the side menu, with the import tab highlighted by a hover effect (French interface).">
-    <div class="guide-content-image-desc">
-      <p>The import tab in the side menu.</p>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Help</h2>
-        <div class="guide-section-body">
-          <p>
-            If you cannot open the import pop-up, click the button below.
-            The import window opens directly.
-          </p>
-
-          <div class="text-center">
-            <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="openImportPopup()">
+        <div class="gp-callout gp-callout--neutral">
+          <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Cannot open the import window?</strong>
+            <p>This button opens it directly.</p>
+            <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm mt-2" (click)="openImportPopup()">
               Import an assessment
             </button>
           </div>
         </div>
-    </div>
+      </div>
+    </section>
 
+    <section class="guide-section-card" id="after-import" aria-labelledby="after-import-title">
+      <h2 class="guide-section-title" id="after-import-title">After the import</h2>
+      <div class="guide-section-body">
+        <p>A message confirms the import (“The assessment “…” has been imported.”) and the assessment opens at step 1,
+          <strong>Assessment information</strong>. It is now the assessment in progress, saved automatically like any
+          other.</p>
+        <ul class="guide-list">
+          <li>With <strong>Open</strong>, it is not in a slot: save it from <a routerLink="/sauvegarde">My saves</a> if
+            you want to keep it, because the next new or opened assessment will replace it.</li>
+          <li>With <strong>Open and save</strong>, it is stored in the chosen slot, which shows the
+            <strong>In progress</strong> badge. If another slot already has the same name, a number is added.</li>
+        </ul>
+        <p>If the file cannot be read, the message “The file could not be imported…” appears: see
+          <a routerLink="/guide/depannage" fragment="import-failed">Troubleshooting</a>.</p>
+      </div>
+    </section>
 
-
-    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a>
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to the guide contents</a></p>
 
   </div>
 </div>
 } @else {
 <div class="card mb-4">
   <div class="card-header">
-    <h1 class="card-title">Importation d'évaluations</h1>
+    <h1 class="card-title">Importation et exportation</h1>
   </div>
   <div class="card-body">
 
     <div class="guide-section-intro">
-      <p>
-        Cette page explique le fonctionnement du système d'importation d'évaluations sur le site GazePlay-Eval.</p>
+      <p>GazePlay-Eval produit deux sortes de fichiers : un <code>.zip</code> pour utiliser l'évaluation dans
+        GazePlay-Learning, et un <code>.gpSave</code> pour la conserver ou la partager et la modifier plus tard. Cette
+        page explique comment les obtenir et comment les importer.</p>
 
-      <p>
-        Il existe deux façons de visualiser une évaluation importée : en mode consultation ou en mode sauvegarde.
-        Il est impératif de sélectionner l’un de ces modes pour pouvoir importer votre évaluation.
-      </p>
+      <app-guide-toc title="Sur cette page" page="/guide/imports" [items]="[
+        {id: 'formats', label: 'Les formats de fichiers'},
+        {id: 'export', label: 'Exporter une évaluation'},
+        {id: 'import', label: 'Importer une évaluation'},
+        {id: 'after-import', label: 'Après l\'importation'}
+      ]"></app-guide-toc>
     </div>
 
-    <div class="alert alert-info fw-semibold w-100 mb-5">
-      <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-      Pour que le site puisse importer l'évaluation, celle-ci doit obligatoirement être au format <i>.gpSave</i>
-      (voir la page de guide sur la <a routerLink="/guide/creation"> création d'évaluations</a> pour plus de détails).
-    </div>
-
-    <img src="assets/guide/images/popup-import.png" class="guide-content-image"
-         alt="Image montrant la Pop-Up pour importer une évaluation. On y voit une partie pour le mode d'ouverture,
-              et une autre pour le fichier à importer.">
-    <div class="guide-content-image-desc">
-      <p>Visualisation de la fenêtre d'importation d'une évaluation.</p>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Mode Consultation</h2>
+    <section class="guide-section-card" id="formats" aria-labelledby="formats-title">
+      <h2 class="guide-section-title" id="formats-title">Les formats de fichiers</h2>
       <div class="guide-section-body">
-        <p>Le mode Consultation permet de charger une évaluation sans la sauvegarder.
-         Cette option peut être pratique si vous souhaitez visualiser le contenu d'une
-        évaluation mais que vous ne voulez pas la conserver ou que vous n'avez plus d'emplacement disponible.</p>
+        <div class="guide-table-wrap">
+          <table class="guide-table">
+            <caption class="visually-hidden">Comparaison des formats .zip et .gpSave</caption>
+            <thead>
+              <tr>
+                <th scope="col">Format</th>
+                <th scope="col">À quoi sert-il ?</th>
+                <th scope="col">Où l'obtenir ?</th>
+                <th scope="col">Peut-on l'importer dans GazePlay-Eval ?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" data-label="Format"><code>.zip</code></th>
+                <td data-label="À quoi sert-il ?">Utiliser l'évaluation dans GazePlay-Learning (écrans et médias).</td>
+                <td data-label="Où l'obtenir ?">Étape 5, <strong>Exporter le .zip</strong>.</td>
+                <td data-label="Peut-on l'importer dans GazePlay-Eval ?">Oui, mais incomplètement : les noms des écrans et les paramètres globaux n'y figurent pas (les écrans
+                  sont renommés « Ecran 1 », « Ecran 2 »…), ni les emplacements vides des grilles.</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Format"><code>.gpSave</code></th>
+                <td data-label="À quoi sert-il ?">Garder une copie complète, déplacer l'évaluation vers un autre ordinateur ou navigateur, la partager
+                  avec un·e collègue, la modifier plus tard.</td>
+                <td data-label="Où l'obtenir ?">Étape 5, <strong>Télécharger le .gpSave</strong> ; le bouton <strong>Télécharger</strong> d'un
+                  emplacement dans Mes sauvegardes ; ou le téléchargement proposé avant de remplacer ou de supprimer une
+                  sauvegarde.</td>
+                <td data-label="Peut-on l'importer dans GazePlay-Eval ?">Oui, complètement.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Ne renommez pas et ne modifiez pas ces fichiers</strong>
+            <p>Seuls les fichiers produits par GazePlay-Eval peuvent être importés. Changer leur extension ou leur
+              contenu peut empêcher l'importation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="alert alert-warning fw-semibold w-100 mb-5">
-          <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="16" height="16" alt="">
-          L'évaluation chargée en mode Consultation sera perdue si vous quittez le site ou rechargez la page.
-          Pensez bien à la sauvegarder ou à télécharger le nouveau fichier <code>.gpsave</code> si vous souhaitez
-          conserver vos modifications !
+    <section class="guide-section-card" id="export" aria-labelledby="export-title">
+      <h2 class="guide-section-title" id="export-title">Exporter une évaluation</h2>
+      <div class="guide-section-body">
+        <ol class="guide-steps">
+          <li>Allez à l'étape 5, <strong>Téléchargement et export</strong> (bouton <strong>Suivant : export</strong> de l'étape 4).</li>
+          <li>Vérifiez le <strong>Récapitulatif</strong> et les éventuels <strong>Points à vérifier</strong>.</li>
+          <li>Cliquez sur <strong>Exporter le .zip</strong> pour obtenir le fichier destiné à GazePlay-Learning, et/ou
+            sur <strong>Télécharger le .gpSave</strong> pour garder une sauvegarde. Le fichier est enregistré là où votre
+            navigateur range ses téléchargements.</li>
+        </ol>
+        <p>Une évaluation déjà rangée dans un emplacement peut aussi être téléchargée en <code>.gpSave</code> depuis
+          <a routerLink="/sauvegarde">Mes sauvegardes</a>, sans l'ouvrir.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="import" aria-labelledby="import-title">
+      <h2 class="guide-section-title" id="import-title">Importer une évaluation</h2>
+      <div class="guide-section-body">
+        <p>La fenêtre d'importation s'ouvre depuis n'importe quelle page, sans la quitter : menu <strong>Importer un
+          fichier</strong>, raccourci <strong>Importer un fichier</strong> de l'accueil, ou bouton ci-dessous.</p>
+
+        <figure class="guide-figure">
+          <img src="assets/guide/images/fr/import-dialog.png" width="832" height="870" loading="lazy"
+               alt="Fenêtre Importer une évaluation. 1. Fichier à importer : un fichier .gpSave est sélectionné. 2. Que voulez-vous faire ? : Ouvrir et sauvegarder est choisi. 3. Emplacement de sauvegarde : l'emplacement 1, qui contient déjà une évaluation, est sélectionné et marqué Sera remplacé, avec un avertissement ; les emplacements 2 et 3 sont libres. En bas, les boutons Annuler et Importer et sauvegarder.">
+          <figcaption>La fenêtre d'importation, avec un emplacement qui sera remplacé.</figcaption>
+        </figure>
+
+        <ol class="guide-steps">
+          <li><strong>1. Fichier à importer</strong> : glissez un fichier dans la zone, ou cliquez sur
+            <strong>Parcourir…</strong>. Les fichiers <code>.gpSave</code> et <code>.zip</code> exportés par
+            GazePlay-Eval sont acceptés.</li>
+          <li><strong>2. Que voulez-vous faire ?</strong>
+            <ul class="guide-list">
+              <li><strong>Ouvrir</strong> : ouvre l'évaluation sans l'enregistrer dans un emplacement.</li>
+              <li><strong>Ouvrir et sauvegarder</strong> : l'enregistre aussi dans l'un des trois emplacements.</li>
+            </ul>
+          </li>
+          <li><strong>3. Emplacement de sauvegarde</strong> (seulement avec « Ouvrir et sauvegarder ») : choisissez un
+            emplacement <strong>Libre</strong>, ou un emplacement occupé marqué <strong>Sera remplacé</strong>. Un
+            avertissement rappelle alors que l'évaluation de cet emplacement sera remplacée, et vous pourrez la
+            télécharger avant de confirmer.</li>
+          <li>Validez avec <strong>Ouvrir l'évaluation</strong> ou <strong>Importer et sauvegarder</strong> (ou
+            <strong>Annuler</strong>).</li>
+        </ol>
+
+        <div class="gp-callout gp-callout--warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Avant d'importer</strong>
+            <p>L'évaluation importée remplace l'évaluation en cours. Si celle-ci n'est pas rangée dans un emplacement, la
+              fenêtre <strong>Remplacer une évaluation ?</strong> vous permet de la télécharger d'abord. Il en va de même
+              pour l'emplacement choisi avec « Ouvrir et sauvegarder ».</p>
+          </div>
         </div>
 
-      </div>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Mode Sauvegarde</h2>
-      <div class="guide-section-body">
-        <p>Le mode Sauvegarde permet de placer l'évaluation importée dans un des trois emplacements disponibles
-        sur le site. Il est donc possible de la consulter dans l'immédiat, de revenir dessus plus tard ou
-        de la modifier tout en conservant les changements apportés.</p>
-
-        <div class="alert alert-info fw-semibold w-100 mb-5">
-          <img class="icon-light me-2" src="assets/icons/info/info-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-2" src="assets/icons/info/info.png" width="16" height="16" alt="">
-          Ce mode nécessite d'avoir au moins un emplacement vide où mettre l'évaluation importée.
-            S'il n'y a pas d'emplacement disponible, il sera nécessaire d'écraser une sauvegarde préexistente.
-        </div>
-      </div>
-    </div>
-
-    <div class="guide-section-body">
-      <p>
-        Une fois l'évaluation chargée, vous serez alors ramené·e à la dernière page consultée lors de cette évaluation.
-      </p>
-    </div>
-
-    <div class="guide-section-body">
-      <p>
-        La fenêtre pour importer une évaluation est une <b>Pop-Up</b>, ce qui signifie qu'elle peut être affichée n'importe où
-        dans l'application sans pour autant quitter la page où vous vous trouvez et perdre potentiellement votre progression.
-        Pour accéder à cette Pop-Up, il vous suffit d'afficher le menu latéral et de cliquer sur "Importer".
-      </p>
-    </div>
-
-    <img src="assets/guide/images/menu-import.png" class="guide-content-image"
-         alt="Image montrant le menu latéral, avec l'onglet d'importation mis en évidence via un effet de survol.">
-    <div class="guide-content-image-desc">
-      <p>Visualisation de l'onglet d'importation dans le menu déroulant.</p>
-    </div>
-
-    <div class="guide-section-card mb-3">
-      <h2 class="guide-section-title">Aide</h2>
-        <div class="guide-section-body">
-          <p>
-            Si vous n'arrivez pas à accéder à la Pop-Up d'importation, vous pouvez cliquer sur le bouton vert ci-dessous.
-            Vous serez automatiquement redirigé·e vers la page correspondante.
-          </p>
-
-          <div class="text-center">
-            <button type="button" class="gp-btn gp-btn--secondary mt-3" (click)="openImportPopup()">
+        <div class="gp-callout gp-callout--neutral">
+          <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Vous n'arrivez pas à ouvrir la fenêtre d'importation ?</strong>
+            <p>Ce bouton l'ouvre directement.</p>
+            <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm mt-2" (click)="openImportPopup()">
               Importer une évaluation
             </button>
           </div>
         </div>
-    </div>
+      </div>
+    </section>
 
+    <section class="guide-section-card" id="after-import" aria-labelledby="after-import-title">
+      <h2 class="guide-section-title" id="after-import-title">Après l'importation</h2>
+      <div class="guide-section-body">
+        <p>Un message confirme l'importation (« L'évaluation « … » a été importée. ») et l'évaluation s'ouvre à
+          l'étape 1, <strong>Informations de l'évaluation</strong>. C'est désormais l'évaluation en cours, enregistrée
+          automatiquement comme les autres.</p>
+        <ul class="guide-list">
+          <li>Avec <strong>Ouvrir</strong>, elle n'est dans aucun emplacement : rangez-la depuis
+            <a routerLink="/sauvegarde">Mes sauvegardes</a> si vous voulez la garder, car la prochaine évaluation créée ou
+            ouverte la remplacera.</li>
+          <li>Avec <strong>Ouvrir et sauvegarder</strong>, elle est rangée dans l'emplacement choisi, qui porte le badge
+            <strong>En cours</strong>. Si un autre emplacement porte déjà le même nom, un numéro est ajouté.</li>
+        </ul>
+        <p>Si le fichier ne peut pas être lu, le message « Le fichier n'a pas pu être importé… » apparaît : voir
+          <a routerLink="/guide/depannage" fragment="import-failed">Dépannage</a>.</p>
+      </div>
+    </section>
 
-
-    <a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a>
+    <p class="mt-4 mb-0"><a class="gp-btn gp-btn--ghost" routerLink="/guide"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour au sommaire du guide</a></p>
 
   </div>
 </div>

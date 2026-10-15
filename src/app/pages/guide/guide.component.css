@@ -174,6 +174,178 @@
   color: var(--gp-text);
 }
 
+/* Sous-titres d'une section */
+.guide-subheading {
+  margin: var(--gp-space-5) 0 var(--gp-space-2);
+  font-size: var(--gp-text-md);
+  font-weight: 700;
+}
+
+.guide-section-body > .guide-subheading:first-child {
+  margin-top: 0;
+}
+
+/* Sommaire « Sur cette page » */
+.guide-toc {
+  margin: var(--gp-space-4) 0 0;
+  padding: var(--gp-space-3) var(--gp-space-4);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface-2);
+}
+
+.guide-toc__title {
+  margin: 0 0 var(--gp-space-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.guide-toc__list {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.guide-toc__list li + li {
+  margin-top: var(--gp-space-1);
+}
+
+/* Sections ciblées par le sommaire : pas de contour au focus programmatique, marge de défilement */
+.guide-section-card[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.guide-section-card {
+  scroll-margin-top: var(--gp-space-6);
+}
+
+/* Étapes numérotées et listes */
+.guide-steps {
+  padding-left: 1.4rem;
+}
+
+.guide-steps > li + li,
+.guide-list > li + li {
+  margin-top: var(--gp-space-2);
+}
+
+/* Captures d'écran */
+.guide-figure {
+  margin: var(--gp-space-4) 0 var(--gp-space-5);
+}
+
+.guide-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
+}
+
+.guide-figure--small img {
+  max-width: min(100%, 26rem);
+}
+
+.guide-figure figcaption {
+  margin-top: var(--gp-space-2);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+  text-align: center;
+}
+
+.guide-figure__zoom {
+  white-space: nowrap;
+}
+
+/* Tableau des formats de fichiers */
+.guide-table-wrap {
+  overflow-x: auto;
+  margin: var(--gp-space-3) 0 var(--gp-space-4);
+}
+
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--gp-text-sm);
+}
+
+.guide-table th,
+.guide-table td {
+  padding: var(--gp-space-2) var(--gp-space-3);
+  border: 1px solid var(--gp-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.guide-table thead th {
+  background: var(--gp-surface-2);
+}
+
+/* Petits écrans : une ligne du tableau devient un bloc, chaque cellule précédée de l'intitulé de sa colonne */
+@media (max-width: 575.98px) {
+  .guide-table,
+  .guide-table tbody,
+  .guide-table tr,
+  .guide-table th,
+  .guide-table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* En-têtes masqués visuellement mais conservés pour les technologies d'assistance */
+  .guide-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .guide-table tr {
+    margin-bottom: var(--gp-space-3);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-md);
+  }
+
+  .guide-table th,
+  .guide-table td {
+    border: 0;
+    border-top: 1px solid var(--gp-border);
+  }
+
+  .guide-table tbody th {
+    border-top: 0;
+    background: var(--gp-surface-2);
+  }
+
+  .guide-table td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--gp-text-muted);
+    font-weight: 700;
+  }
+}
+
+/* Encadrés du système de design dans le texte du guide */
+.guide-section-body .gp-callout,
+.guide-section-intro .gp-callout {
+  margin: var(--gp-space-3) 0 var(--gp-space-4);
+}
+
+/* Questions fréquentes */
+.guide-faq + .guide-faq {
+  margin-top: var(--gp-space-4);
+}
+
+.guide-faq__question {
+  margin: 0 0 var(--gp-space-1);
+  font-size: var(--gp-text-md);
+  font-weight: 700;
+}
+
 .scroll-bottom-button {
   position: fixed;
   bottom: var(--gp-space-4);

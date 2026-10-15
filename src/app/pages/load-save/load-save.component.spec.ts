@@ -42,7 +42,9 @@ describe('LoadSaveComponent', () => {
     loadServiceSpy.getSlot.and.returnValue(null);
 
     autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
-    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
+    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName', 'reserveForOpening']);
+    // Par défaut, aucun autre onglet n'utilise l'emplacement.
+    overwriteGuardSpy.reserveForOpening.and.callFake(async (slot: any) => ({mode: 'link', reservation: {slot, release: jasmine.createSpy('release')}}));
 
     await TestBed.configureTestingModule({
       imports: [LoadSaveComponent],
@@ -162,9 +164,62 @@ describe('LoadSaveComponent', () => {
 
     fixture.detectChanges();
 
-    expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0, slot1.nomEval)
+    expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0)
     expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, component.saveService.dataAuto);
     expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+  });
+
+  it("loadSlot — relit l'emplacement après la protection (report éventuel de l'évaluation en cours)", async () => {
+    const before: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    const after: saveModel = { ...before, listScreens: [{name: 'ajouté pendant la reprise'}] as any };
+    let slot1 = before;
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.callFake(async () => { slot1 = after; return true; });
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(component.saveService.dataAuto.listScreens).toEqual(after.listScreens);
+  });
+
+  it("loadSlot — emplacement ouvert dans un autre onglet, « Ouvrir une copie » → chargé sans lien", async () => {
+    const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.reserveForOpening.and.resolveTo({mode: 'copy'});
+    overwriteGuardSpy.check.and.resolveTo(true);
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(component.saveService.dataAuto.nomEval).toBe('E1');
+    expect(saveServiceSpy.setActiveSlot).toHaveBeenCalledWith(null, null);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
+  });
+
+  it("loadSlot — emplacement ouvert dans un autre onglet, annulation → rien n'est chargé", async () => {
+    const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.reserveForOpening.and.resolveTo(null);
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
+    expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
+  });
+
+  it("loadSlot — protection annulée → la réservation de l'emplacement est libérée", async () => {
+    const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    const release = jasmine.createSpy('release');
+    overwriteGuardSpy.reserveForOpening.and.resolveTo({mode: 'link', reservation: {slot: 1, release}});
+    overwriteGuardSpy.check.and.resolveTo(false);
+    fixture.detectChanges();
+
+    await component.loadSlot(1);
+
+    expect(release).toHaveBeenCalled();
+    expect(saveServiceSpy.setActiveSlot).not.toHaveBeenCalled();
   });
 
   it('goBack → navigue vers /home', () => {
