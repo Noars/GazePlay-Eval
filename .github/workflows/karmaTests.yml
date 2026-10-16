@@ -41,6 +41,11 @@ jobs:
       - name: Tests Karma (ChromeHeadless)
         run: npx ng test --watch=false --no-progress --browsers=ChromeHeadless
 
+      # Bout en bout sur l'application construite (e2e/e2e-smoke.mjs, sans dépendance) :
+      # Chrome et Firefox, préinstallés sur ubuntu-latest, sont exigés ; profils temporaires.
+      - name: Tests de bout en bout (Chrome, Firefox)
+        run: node e2e/e2e-smoke.mjs chrome firefox
+
       # Bloque uniquement les vulnérabilités critiques des dépendances livrées dans l'application ;
       # les autres alertes restent visibles dans le journal et sont traitées lors du rappel semestriel.
       - name: Audit des dépendances de production

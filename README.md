@@ -286,6 +286,14 @@ ng test --code-coverage GazePlay-Eval
 ```
 --> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
 
+### Tests de bout en bout
+
+```bash
+npm run build
+npm run e2e
+```
+--> Sert l'application construite en local et rejoue les parcours principaux (pages, thème, import d'un `.gpSave`, sauvegarde automatique, rechargement, onglets, fichier invalide) dans Chrome, Edge et Firefox s'ils sont installés, avec des profils temporaires : vos sauvegardes ne sont jamais touchées. Aucune dépendance à installer ([e2e/e2e-smoke.mjs](e2e/e2e-smoke.mjs)). Pour un seul navigateur : `node e2e/e2e-smoke.mjs firefox`. Safari n'est pas couvert : à vérifier manuellement.
+
 ## Tâches restantes
 
 Les tâches restantes sont représentés par les Issues dans le projet. Des commentaires sont rajoutés pour apporter plus de contexte ou des propositions de solutions à mettre en place.
