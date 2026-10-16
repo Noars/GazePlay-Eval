@@ -1,5 +1,10 @@
 import {screenTypeModel} from './screenModel';
-export type formatTypeModel = 'Csv' | 'Xsl' | 'Csv&Xlsx';
+/**
+ * Format des résultats. L'interface écrit `'Csv&Xlsx'`, `'Csv'` ou `'Xlsx'` (valeurs exportées
+ * telles quelles vers GazePlay-Learning). `'Xsl'` est conservé pour typer d'éventuelles
+ * anciennes données : il n'est plus proposé.
+ */
+export type formatTypeModel = 'Csv' | 'Xlsx' | 'Csv&Xlsx' | 'Xsl';
 
 export interface saveModel {
   nomEval: string;

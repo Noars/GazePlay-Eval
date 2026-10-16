@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import JSZip from 'jszip';
-import {saveAs} from 'file-saver';
+// Appel par l'objet du module (et non par une fonction importée) : les tests peuvent ainsi
+// remplacer `FileSaver.saveAs` sans déclencher de vrai téléchargement.
+import FileSaver from 'file-saver';
 import {SaveService} from '../save/save.service';
 import {
   instructionScreenConstKey,
@@ -39,7 +41,11 @@ export class DownloadService {
     return f instanceof File || f instanceof Blob;
   }
 
-  async generateEvalZip(saveService: SaveService) {
+  /**
+   * Génère et télécharge le `.zip` destiné à GazePlay-Learning pour l'évaluation en cours.
+   * La promesse se résout une fois l'archive générée (rejette en cas d'erreur).
+   */
+  async generateEvalZip(saveService: SaveService): Promise<void> {
     const zip = new JSZip();
 
     const evalData = saveService.dataAuto.listScreens;
@@ -73,9 +79,8 @@ export class DownloadService {
     zip.file(saveService.getEvalName() + '/evalData.json', JSON.stringify(jsonData, null, 2));
     zip.file(saveService.getEvalName() + '/evalInfo.json', JSON.stringify(this.getInfoEval(saveService), null, 2));
 
-    zip.generateAsync({type: 'blob'}).then(content => {
-      saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
-    });
+    const content = await zip.generateAsync({type: 'blob'});
+    FileSaver.saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
   }
 
   /**
@@ -317,10 +322,11 @@ export class DownloadService {
   }
 
   /**
-   * Génère un fichier ZIP à partir d'une évaluation sauvegardée.
+   * Génère et télécharge le `.gpSave` (archive réimportable) d'une évaluation sauvegardée.
    * @param saveData l'évaluation à convertir en fichier ZIP.
+   * @returns `true` si le fichier a été généré, `false` en cas d'erreur (déjà journalisée).
    */
-  async generateSlotZip(saveData: saveModel): Promise<void> {
+  async generateSlotZip(saveData: saveModel): Promise<boolean> {
     try {
       const zip = new JSZip();
       const evalName = saveData.nomEval || 'GazePlayEvalDefaultName';
@@ -347,9 +353,11 @@ export class DownloadService {
 
 
       const content = await zip.generateAsync({type: 'blob'});
-      saveAs(content, evalName + '-gazeplayEval.gpSave');
+      FileSaver.saveAs(content, evalName + '-gazeplayEval.gpSave');
+      return true;
     } catch (err) {
       console.error('[generateSlotZip] erreur:', err);
+      return false;
     }
   }
 

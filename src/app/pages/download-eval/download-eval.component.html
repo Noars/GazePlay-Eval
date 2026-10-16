@@ -1,31 +1,99 @@
-<div class="d-flex align-items-center justify-content-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 700px;">
-    <div class="card-header">
-      <h2 class="card-title text-center">Téléchargement d'évaluation</h2>
+<div class="gp-page">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 5} }}</span>
+      <h1 class="gp-page-header__title">{{ 'download.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'download.lead' | t }}</p>
     </div>
-    <div class="card-body" style="text-align: -webkit-center;">
-      <div class="card shadow-lg col-11">
-        <div class="card-header bg-secondary text-white fw-semibold">
-          Téléchargement & Exportation
-        </div>
-        <div class="mb-3 mt-3">
+  </header>
 
-          <p style="text-align: left">Votre évaluation est terminée ! Vous pouvez désormais la télécharger pour la conserver dans votre ordinateur au format
-            <code>.gpSave</code>, ou l'exporter en format <code>.zip</code> pour pouvoir l'utiliser sur l'application
-            <a href="https://gazeplay.github.io/GazePlay/fr">GazePlay-Learning</a>.</p>
+  <div class="download-layout">
+    <section class="gp-card" aria-labelledby="summary-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="summary-title">{{ 'download.summary' | t }}</h2>
+      </div>
+      <div class="gp-card__body gp-stack gp-stack--sm">
+        <dl class="gp-meta summary">
+          <dt>{{ 'download.name' | t }}</dt>
+          <dd>{{ evalName }}</dd>
+          <dt>{{ 'download.format' | t }}</dt>
+          <dd>{{ format }}</dd>
+          <dt>{{ 'download.participantFields' | t }}</dt>
+          <dd>{{ participantFields.length ? participantFields.join(', ') : ('download.none' | t) }}</dd>
+          <dt>{{ 'download.screens' | t }}</dt>
+          <dd>
+            {{ 'download.screens.total' | t: {count: screenCounts.total} }}
+            <span class="gp-muted">
+              {{ 'download.screens.detail' | t: {instruction: screenCounts.instruction, stimuli: screenCounts.stimuli, transition: screenCounts.transition} }}
+            </span>
+          </dd>
+        </dl>
 
-          <div class="d-flex justify-content-center mt-4">
-            <button class="btn btn-primary fw-semibold" (click)="goDownload()">Télécharger l'évaluation</button>
-
-            <button class="btn btn-primary fw-semibold" (click)="goExport()">Exporter pour GazePlay-Learning</button>
+        @if (checks.length) {
+          <div class="gp-callout gp-callout--warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <div class="gp-callout__body">
+              <strong class="gp-callout__title">{{ 'download.checks.title' | t: {count: checks.length} }}</strong>
+              <ul class="checks">
+                @for (check of checks; track $index) {
+                  <li>{{ check.message }}</li>
+                }
+              </ul>
+              <p class="gp-text-sm">{{ 'download.checks.notBlocking' | t }}</p>
+            </div>
           </div>
+        } @else {
+          <div class="gp-callout gp-callout--success">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <div class="gp-callout__body"><p>{{ 'download.checks.none' | t }}</p></div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <div class="gp-stack">
+      <section class="gp-card export-card" aria-labelledby="export-title">
+        <div class="gp-card__body">
+          <span class="export-card__icon" aria-hidden="true"><i class="bi bi-send"></i></span>
+          <h2 class="gp-card__title" id="export-title">{{ 'download.export.title' | t }}</h2>
+          <p class="gp-muted">
+            {{ 'download.export.before' | t }}<code>.zip</code>{{ 'download.export.middle' | t }}<a [href]="'download.export.url' | t" target="_blank" rel="noopener noreferrer">GazePlay-Learning<span class="visually-hidden">{{ 'common.newTab' | t }}</span></a>{{ 'download.export.after' | t }}
+          </p>
+          <button type="button" class="gp-btn gp-btn--primary gp-btn--block" [disabled]="busy !== null" (click)="goExport()">
+            @if (busy === 'export') {
+              <span class="gp-spinner" aria-hidden="true"></span> {{ 'download.generating' | t }}
+            } @else {
+              <i class="bi bi-file-earmark-zip" aria-hidden="true"></i> {{ 'download.export.button' | t }}
+            }
+          </button>
         </div>
-      </div>
-      <div class="d-flex justify-content-center w-100">
-        <button class="btn btn-primary mt-3 fw-semibold" (click)="backToCreateEval()">
-          <i class="bi bi-arrow-left me-2"></i> Précédent
-        </button>
-      </div>
+      </section>
+
+      <section class="gp-card export-card" aria-labelledby="backup-title">
+        <div class="gp-card__body">
+          <span class="export-card__icon export-card__icon--neutral" aria-hidden="true"><i class="bi bi-floppy"></i></span>
+          <h2 class="gp-card__title" id="backup-title">{{ 'download.backup.title' | t }}</h2>
+          <p class="gp-muted">
+            {{ 'download.backup.before' | t }}<code>.gpSave</code>{{ 'download.backup.after' | t }}
+          </p>
+          <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" [disabled]="busy !== null" (click)="goDownload()">
+            @if (busy === 'download') {
+              <span class="gp-spinner" aria-hidden="true"></span> {{ 'download.generating' | t }}
+            } @else {
+              <i class="bi bi-download" aria-hidden="true"></i> {{ 'download.backup.button' | t }}
+            }
+          </button>
+        </div>
+      </section>
     </div>
   </div>
+
+  <p class="visually-hidden" aria-live="polite">{{ busy ? ('download.busy' | t) : '' }}</p>
+
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
+    <button type="button" class="gp-btn" (click)="backToCreateEval()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'download.previous' | t }}
+    </button>
+  </nav>
 </div>

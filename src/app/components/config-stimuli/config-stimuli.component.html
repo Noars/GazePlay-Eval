@@ -1,79 +1,89 @@
-<div
-  class="offcanvas offcanvas-start custom-offcanvas"
-  data-bs-backdrop="false"
-  data-bs-scroll="true"
-  tabindex="-1"
-  id="configStimuli"
-  aria-labelledby="configStimuliLabel"
->
-  <div class="offcanvas-header">
-    <h1 class="offcanvas-title" id="configStimuliLabel">Case n° {{ data.cell + 1 }}</h1>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+<div class="inspector" id="configStimuli">
+  <div class="inspector__header">
+    <h2 class="inspector__title" id="configStimuliLabel" tabindex="-1">
+      {{ 'cell.title' | t: {n: data.cell + 1} }}
+      @if (data.cols) {
+        <span class="inspector__position">{{ 'cell.position' | t: {row: (data.cell - data.cell % data.cols) / data.cols + 1, col: data.cell % data.cols + 1} }}</span>
+      }
+    </h2>
+    <button type="button" class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm" [attr.aria-label]="'cell.close' | t" (click)="finish()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
   </div>
 
-  <div class="resize-handle" (mousedown)="startResize($event)"></div>
-
-  <div class="offcanvas-body">
-
-    <!-- Type de réponse -->
-    <div class="section-block">
-      <label class="section-label">Bonne réponse ?</label>
-      <div class="answer-selector">
-        <label class="answer-option" [class.answer-yes]="data.screen[data.cell].goodAnswer === true">
-          <input type="radio" name="goodAnswer" [value]="true" [(ngModel)]="data.screen[this.data.cell].goodAnswer" hidden>
-          Oui
-        </label>
-        <label class="answer-option" [class.answer-no]="data.screen[data.cell].goodAnswer === false">
-          <input type="radio" name="goodAnswer" [value]="false" [(ngModel)]="data.screen[this.data.cell].goodAnswer" hidden>
-          Non
-        </label>
-      </div>
-    </div>
+  <div class="inspector__body">
+    <app-choice-setting [label]="'cell.answer' | t"
+                        [stacked]="true"
+                        [options]="answerOptions"
+                        [ngModel]="cell.goodAnswer === true"
+                        (ngModelChange)="setGoodAnswer($event)"></app-choice-setting>
 
     <!-- Image -->
-    <div class="section-block">
-      <label class="section-label">Image</label>
-      <label class="file-upload-btn">
-        {{ data.screen[data.cell].imageName || 'Choisir une image' }}
-        <input #fileInputImage type="file" accept="image/*" hidden (change)="getImageFile($event)">
-      </label>
+    <section class="inspector__section" aria-labelledby="cell-image-title">
+      <h3 class="inspector__section-title" id="cell-image-title"><i class="bi bi-image" aria-hidden="true"></i> {{ 'cell.image' | t }}</h3>
       @if (previewImage) {
-      <button class="btn-action btn btn-danger fw-semibold" (click)="deleteImage()">Supprimer l'image</button>
-        <div class="media-preview">
-          <img [src]="previewImage" class="img-preview" alt="Aperçu image">
-          <button class="btn-crop" (click)="cropImage()">Recadrer</button>
+        <div class="inspector__preview">
+          <img [src]="previewImage" [alt]="'editor.preview.of' | t: {name: cell.imageName}">
         </div>
-      } @else {
-        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer l'image</button>
+      } @else if (missingImage) {
+        <p class="inspector__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          {{ 'cell.imageMissing' | t: {name: cell.imageName} }}
+        </p>
       }
-    </div>
+      <div class="inspector__actions">
+        <app-file-picker [label]="'editor.choose.image' | t" accept="image/*"
+                         [fileName]="cell.imageName || ''"
+                         [disabled]="busy !== null"
+                         (fileSelected)="getImageFile($event)"></app-file-picker>
+        @if (previewImage) {
+          <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" [disabled]="busy !== null" (click)="cropImage()">
+            <i class="bi bi-crop" aria-hidden="true"></i> {{ 'cell.crop' | t }}
+          </button>
+        }
+        <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--sm"
+                [disabled]="!cell.imageName || busy !== null" (click)="deleteImage()">
+          <i class="bi bi-trash3" aria-hidden="true"></i> {{ 'editor.remove.image' | t }}
+        </button>
+      </div>
+    </section>
 
     <!-- Son -->
-    <div class="section-block">
-      <label class="section-label">Son</label>
-      <label class="file-upload-btn">
-        {{ data.screen[data.cell].soundName || 'Choisir un son' }}
-        <input #fileInputSound type="file" accept="audio/*" hidden (change)="getSoundFile($event)">
-      </label>
+    <section class="inspector__section" aria-labelledby="cell-sound-title">
+      <h3 class="inspector__section-title" id="cell-sound-title"><i class="bi bi-music-note-beamed" aria-hidden="true"></i> {{ 'cell.sound' | t }}</h3>
       @if (previewSound) {
-        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteSound()">Supprimer le son</button>
-        <div class="media-preview">
-          <audio controls [attr.src]="previewSound"></audio>
-        </div>
-      } @else {
-        <button class="btn-action btn btn-outline-danger fw-semibold" disabled>Supprimer le son</button>
+        <audio controls [attr.src]="previewSound" [attr.aria-label]="'editor.preview.sound' | t: {name: cell.soundName}"></audio>
+      } @else if (missingSound) {
+        <p class="inspector__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          {{ 'cell.soundMissing' | t: {name: cell.soundName} }}
+        </p>
       }
-    </div>
+      <div class="inspector__actions">
+        <app-file-picker [label]="'editor.choose.sound' | t" accept="audio/*"
+                         [fileName]="cell.soundName || ''"
+                         [disabled]="busy !== null"
+                         (fileSelected)="getSoundFile($event)"></app-file-picker>
+        <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--sm"
+                [disabled]="!cell.soundName || busy !== null" (click)="deleteSound()">
+          <i class="bi bi-trash3" aria-hidden="true"></i> {{ 'editor.remove.sound' | t }}
+        </button>
+      </div>
+    </section>
 
-    <!-- Actions -->
-    <div class="actions-footer">
-      @if (previewImage || previewSound) {
-        <button class="btn-action btn btn-danger fw-semibold" (click)="deleteCell()">Vider les pièces jointes</button>
-      } @else {
-        <button class="btn-action btn btn-outline-danger fw-semibold">Vider les pièces jointes</button>
-      }
-      <button class="btn-action btn-validate" data-bs-dismiss="offcanvas" (click)="saveProgress()" aria-label="Valider">Valider</button>
-    </div>
+    @if (busy) {
+      <p class="gp-muted gp-text-sm" role="status"><span class="gp-spinner" aria-hidden="true"></span> {{ 'cell.saving' | t }}</p>
+    }
+  </div>
 
+  <div class="inspector__footer">
+    <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm"
+            [disabled]="(!previewImage && !previewSound && !cell.imageName && !cell.soundName) || busy !== null"
+            (click)="deleteCell()">
+      {{ 'cell.clear' | t }}
+    </button>
+    <button type="button" class="gp-btn gp-btn--primary gp-btn--sm" (click)="finish()">
+      <i class="bi bi-check2" aria-hidden="true"></i> {{ 'cell.finish' | t }}
+    </button>
   </div>
 </div>

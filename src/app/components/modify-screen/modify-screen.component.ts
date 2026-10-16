@@ -2,61 +2,119 @@ import {
   Component,
   EventEmitter,
   HostListener,
-  Input, OnDestroy, OnInit,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
   Output,
 } from '@angular/core';
 import {
-  transitionScreenConstModel,
-  transitionScreenModel,
-  defaultTransitionScreenModel,
   defaultInstructionScreenModel,
   defaultStimuliScreenModel,
+  defaultTransitionScreenModel,
   instructionScreenConstModel,
   instructionScreenModel,
   screenTypeModel,
   stimuliScreenConstModel,
-  stimuliScreenModel
+  stimuliScreenModel,
+  transitionScreenConstModel,
+  transitionScreenModel
 } from '../../shared/screenModel';
 import {FormsModule} from '@angular/forms';
+import {DecimalPipe} from '@angular/common';
 import {UpdateScreensService} from '../../services/updateScreens/update-screens.service';
 import {SaveService} from '../../services/save/save.service';
 import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component';
-import {Offcanvas} from 'bootstrap';
-import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {FlashService} from '../../services/flash-message/flash.service';
-import {MatTooltip} from '@angular/material/tooltip';
+import {MediaLibraryService, MediaType} from '../../core/media/media-library.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
+import {ChoiceOption, ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
+import {NumberSettingComponent} from '../../shared/ui/number-setting/number-setting.component';
+import {HelpTipComponent} from '../../shared/ui/help-tip/help-tip.component';
+import {FilePickerComponent} from '../../shared/ui/file-picker/file-picker.component';
+import {INSTRUCTION_MEDIA_OPTIONS} from '../global-instruction-screen/global-instruction-screen.component';
+import {I18nService, TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
+/**
+ * Opération sur un média, enregistrée pour pouvoir être annulée.
+ *  - `acquire` : une référence a été ajoutée immédiatement (duplication) ;
+ *  - `release` : une référence doit être libérée, mais seulement à la sortie de l'éditeur,
+ *    pour qu'une annulation retrouve toujours le fichier.
+ */
+interface MediaJournalEntry {
+  kind: 'acquire' | 'release';
+  ref: string;
+  type: MediaType;
+}
+
+interface GridSnapshot {
+  rows: number;
+  cols: number;
+  cells: { [key: number]: any };
+  /** Longueur du journal des médias au moment de l'instantané. */
+  journalLength: number;
+}
+
+type ScreenKind = typeof transitionScreenConstModel | typeof instructionScreenConstModel | typeof stimuliScreenConstModel;
+
+/** Nombre de cases d'une grille, ou `null` si les dimensions ne sont pas des entiers ≥ 1. */
+function gridCellCount(rows: unknown, cols: unknown): number | null {
+  const r = rows === null || rows === '' ? NaN : Number(rows);
+  const c = cols === null || cols === '' ? NaN : Number(cols);
+  return Number.isInteger(r) && r >= 1 && Number.isInteger(c) && c >= 1 ? r * c : null;
+}
+
+/**
+ * Éditeur d'un écran (transition, instruction ou stimuli).
+ *
+ * Le contenu est modifié directement dans `screenToModify.values` (tableau positionnel,
+ * voir `shared/screenModel.ts` et `CLAUDE.md`) : les index ne doivent pas être décalés.
+ *
+ * Pour les stimuli, l'éditeur gère une grille de cases (`values[12]`) avec des modes
+ * d'édition exclusifs (dupliquer, échanger, sélection multiple, supprimer), un historique
+ * d'annulation de 20 étapes et un mode visualisation. La case active est configurée dans
+ * le panneau `app-config-stimuli`.
+ */
 @Component({
   selector: 'app-modify-screen',
   imports: [
     FormsModule,
     ConfigStimuliComponent,
-    MatTooltip,
+    GlobalTransitionScreenComponent,
+    ChoiceSettingComponent,
+    NumberSettingComponent,
+    HelpTipComponent,
+    FilePickerComponent,
+    DecimalPipe,
+    TranslatePipe,
   ],
   templateUrl: './modify-screen.component.html',
   standalone: true,
   styleUrl: './modify-screen.component.css'
 })
 export class ModifyScreenComponent implements OnInit, OnDestroy {
-  tooltipFileSave: string = (
-    `Tout les fichiers que vous importez dans le site sont sauvés dans le stockage de votre navigateur.
+  private readonly updateScreenService = inject(UpdateScreensService);
+  private readonly saveService = inject(SaveService);
+  private readonly autoSaveService = inject(AutoSaveService);
+  private readonly media = inject(MediaLibraryService);
+  private readonly flashService = inject(FlashService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly i18n = inject(I18nService);
 
-    Vous pouvez donc déplacer ou supprimer les fichiers de votre disque sans risquer d'altérer l'évaluation en cours.`
-  );
-  tooltipSelectionChoice: string = (
-    ` Le choix de sélection détermine comment l'application doit tenir compte du type des cellules de stimuli:
-
-    - Tout :
-    Le type des cellules n'est pas compté dans la validation, du moment que l'utilisateur sélectionne le nombre requis. Le type des cellules reste cependant toujours accessible.
-
-    - Bonnes réponses :
-    Seules les cellules étant considérée comme des bonnes réponses sont comptées dans la validation.`
-  );
-
-  tooltipMaxSelection: string = (
-    `Le nombre de stimuli ne peut pas être plus grand que le nombre de lignes multiplié par le nombre de colonnes.`
-  )
+  readonly screenKinds: {type: ScreenKind, label: TranslationKey, icon: string}[] = [
+    {type: instructionScreenConstModel, label: 'screenType.instruction', icon: 'bi-chat-square-text'},
+    {type: stimuliScreenConstModel, label: 'screenType.stimuli', icon: 'bi-grid-3x3-gap'},
+    {type: transitionScreenConstModel, label: 'screenType.transition', icon: 'bi-hourglass-split'},
+  ];
+  readonly mediaTypeOptions = INSTRUCTION_MEDIA_OPTIONS;
+  /** Valeurs `Tout` / `BonneReponse` exportées telles quelles ; seuls les libellés sont traduits. */
+  readonly selectionChoiceOptions: ChoiceOption<string>[] = [
+    {value: 'Tout', labelKey: 'editor.selectionChoice.all'},
+    {value: 'BonneReponse', labelKey: 'editor.selectionChoice.good'},
+  ];
 
   @Input() screenToModify!: screenTypeModel;
   @Output() selectedScreenChange = new EventEmitter<{ screen: screenTypeModel, flag: boolean }>();
@@ -80,18 +138,21 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     rows: number;
     cols: number;
   }
+  /** Vrai lorsqu'une case est ouverte dans le panneau de configuration. */
   stimuliOffcanvasReady: boolean = false;
   configStimuliOpen: boolean = false;
   activeCellIndex: number | null = null;
+  /** Case qui reçoit le focus clavier dans la grille (navigation aux flèches). */
+  focusedCellIndex = 0;
   duplicateMode: boolean = false;
   deleteMode: boolean = false;
   duplicateSourceIndex: number | null = null;
   pendingDuplicateTarget: number | null = null;
   swapMode: boolean = false;
   swapSourceIndex: number | null = null;
-  cellSize: number = 80;
-  private readonly minCellSize = 40;
-  private readonly maxCellSize = 160;
+  cellSize: number = 88;
+  private readonly minCellSize = 48;
+  private readonly maxCellSize = 168;
   gridMaxHeight: number = 0;
   multiSelectMode: boolean = false;
   visualizationMode: boolean = false;
@@ -102,20 +163,18 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   private currentCellAudioUrl: string | null = null;
   selectedCells: Set<number> = new Set<number>();
   pendingDeleteCells: number[] | null = null;
-  private undoHistory: Array<{ rows: number, cols: number, cells: { [key: number]: any } }> = [];
+  private undoHistory: GridSnapshot[] = [];
   private readonly maxUndoHistory = 20;
-
-  constructor(
-    private updateScreenService: UpdateScreensService,
-    private saveService: SaveService,
-    private autoSaveService: AutoSaveService,
-    private idbService: IndexedDBService,
-    private flashService: FlashService
-  ) {
-  }
+  /** Opérations sur les médias depuis l'ouverture de l'éditeur (voir MediaJournalEntry). */
+  private mediaJournal: MediaJournalEntry[] = [];
+  /** Message lu par les lecteurs d'écran après une action sur la grille. */
+  announcement = '';
 
   ngOnInit(): void {
     this.actualTypeScreen = this.screenToModify.type;
+    if (window.innerWidth < 576) {
+      this.cellSize = 64;
+    }
     void this.initializeMediaState();
     this.updateGridViewport();
   }
@@ -123,12 +182,15 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearCellImageUrls();
     this.stopCellSound();
+    this.setInstructionPreview('');
+    this.setStimuliPreview('');
+    void this.commitMediaJournal();
   }
 
   @HostListener('window:resize')
   updateGridViewport(): void {
-    // Hauteur max de la zone grille basée sur l'écran : ~60% de la hauteur visible.
-    this.gridMaxHeight = Math.max(Math.round(window.innerHeight * 0.6), 240);
+    // Hauteur max de la zone grille basée sur l'écran : ~65 % de la hauteur visible.
+    this.gridMaxHeight = Math.max(Math.round(window.innerHeight * 0.65), 240);
   }
 
   private async initializeMediaState(): Promise<void> {
@@ -136,58 +198,116 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.haveStimuliSoundFile = await this.checkStimuliSoundFileExist();
   }
 
+  // ---------------------------------------------------------------------------
+  // Type d'écran
+  // ---------------------------------------------------------------------------
+
+  /** Vrai si l'écran contient du contenu qui serait perdu en changeant de type. */
+  hasContent(): boolean {
+    const v = this.screenToModify.values ?? [];
+    if (this.screenToModify.type === instructionScreenConstModel) {
+      return !!v[4];
+    }
+    if (this.screenToModify.type === stimuliScreenConstModel) {
+      return !!v[10] || (Object.values(v[12] ?? {}) as any[]).some(cell => cell && (cell.imageName || cell.soundName));
+    }
+    return false;
+  }
+
+  /** Demande un changement de type, avec confirmation si du contenu serait perdu. */
+  async requestTypeChange(type: ScreenKind): Promise<void> {
+    if (type === this.screenToModify.type) return;
+    if (this.hasContent()) {
+      const confirmed = await this.confirmService.confirm({
+        title: this.i18n.t('editor.changeType.title'),
+        message: this.i18n.t('editor.changeType.message'),
+        confirmLabel: this.i18n.t('editor.changeType.confirm'),
+        tone: 'warning',
+      });
+      if (!confirmed) return;
+    }
+    this.queueScreenMediaRelease(this.screenToModify);
+    this.changeTypeScreen(type);
+  }
+
+  /** Remplace l'écran par un écran vierge du type demandé (paramètres globaux appliqués). */
   changeTypeScreen(type: string) {
     this.actualTypeScreen = type;
+    this.resetGridModes();
+    this.undoHistory = [];
+    this.activeCellIndex = null;
+    this.stimuliOffcanvasReady = false;
+    this.clearCellImageUrls();
     switch (type){
-      case transitionScreenConstModel :
+      case transitionScreenConstModel : {
         let newTransitionScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
         newTransitionScreen = this.updateScreenService.updateTransitionScreen(newTransitionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsTransitionScreen);
         this.screenToModify = newTransitionScreen;
         break;
-
-      case instructionScreenConstModel :
+      }
+      case instructionScreenConstModel : {
         let newInstructionScreen: instructionScreenModel = structuredClone(defaultInstructionScreenModel);
         newInstructionScreen = this.updateScreenService.updateInstructionScreen(newInstructionScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsInstructionScreen);
         this.screenToModify = newInstructionScreen;
         void this.refreshInstructionMediaState();
         break;
-
-      case stimuliScreenConstModel :
+      }
+      case stimuliScreenConstModel : {
         let newStimuliScreen: stimuliScreenModel = structuredClone(defaultStimuliScreenModel);
         newStimuliScreen = this.updateScreenService.updateStimuliScreen(newStimuliScreen, this.screenToModify.name, this.saveService.dataAuto.globalParamsStimuliScreen);
         this.screenToModify = newStimuliScreen;
         void this.refreshStimuliSoundState();
         this.checkStimuliCells();
         break;
-
+      }
       default :
         break;
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Écran d'instruction : média ou texte
+  // ---------------------------------------------------------------------------
+
+  /** Change le type de média de l'instruction ; l'ancien média est libéré. */
   changeTypeFile(type: string){
     if (this.screenToModify.type === instructionScreenConstModel){
+      const previousRef = this.screenToModify.values[8] || this.screenToModify.values[4];
+      const previousType = this.getInstructionMediaType();
+      const previousWasFile = this.typeFile !== 'Texte' && !!previousRef;
+
       this.screenToModify.values[3] = type;
       this.screenToModify.values[4] = "";
       this.screenToModify.values[5] = undefined;
       this.screenToModify.values[8] = '';
       this.typeFile = type;
+      this.textToRead = '';
       this.haveInstructionFile = false;
       this.setInstructionPreview('');
+
+      if (previousWasFile) {
+        this.mediaJournal.push({kind: 'release', ref: previousRef, type: previousType});
+      }
     }
   }
 
-  async getInstructionFile(event: Event){
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0 && this.screenToModify.type === instructionScreenConstModel ) {
-      const file = input.files[0];
-      const projectName = this.saveService.getEvalName();
-      const id = `${projectName}/${file.name}`;
-
+  /** Enregistre le média choisi pour l'instruction (remplace et libère le précédent). */
+  async getInstructionFile(event: Event | File){
+    const file = event instanceof File ? event : (event.target as HTMLInputElement)?.files?.[0];
+    if (file && this.screenToModify.type === instructionScreenConstModel) {
+      const previousRef = this.screenToModify.values[8] || this.screenToModify.values[4];
+      const mediaType = this.getInstructionMediaType();
+      let id: string;
       try {
-        await this.idbService.addFile(id, file, this.getInstructionMediaType());
-      } catch {
-        await this.idbService.incrementRef(id);
+        id = await this.storeOrReplace(file, mediaType, previousRef);
+      } catch (error) {
+        console.error('Enregistrement du média impossible :', error);
+        this.flashService.show('error', this.i18n.t('editor.error.fileSave', {name: file.name}));
+        return;
+      }
+
+      if (previousRef && previousRef !== id) {
+        this.mediaJournal.push({kind: 'release', ref: previousRef, type: mediaType});
       }
 
       this.screenToModify.values[4] = file.name;
@@ -198,23 +318,30 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.setInstructionPreview(URL.createObjectURL(file));
       this.getFileDuration(file);
 
-      input.value = '';
-    }else {
+      if (!(event instanceof File) && event.target instanceof HTMLInputElement) {
+        event.target.value = '';
+      }
+    } else {
       this.haveInstructionFile = false;
     }
   }
 
-  async getStimuliSoundFile(event: Event){
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0 && this.screenToModify.type === stimuliScreenConstModel ) {
-      const file = input.files[0];
-      const projectName = this.saveService.getEvalName();
-      const id = `${projectName}/${file.name}`;
-
+  /** Enregistre le son global de l'écran de stimuli (remplace et libère le précédent). */
+  async getStimuliSoundFile(event: Event | File){
+    const file = event instanceof File ? event : (event.target as HTMLInputElement)?.files?.[0];
+    if (file && this.screenToModify.type === stimuliScreenConstModel) {
+      const previousRef = this.screenToModify.values[13] || this.screenToModify.values[10];
+      let id: string;
       try {
-        await this.idbService.addFile(id, file, 'sound');
-      } catch {
-        await this.idbService.incrementRef(id);
+        id = await this.storeOrReplace(file, 'sound', previousRef);
+      } catch (error) {
+        console.error('Enregistrement du son impossible :', error);
+        this.flashService.show('error', this.i18n.t('editor.error.soundSave', {name: file.name}));
+        return;
+      }
+
+      if (previousRef && previousRef !== id) {
+        this.mediaJournal.push({kind: 'release', ref: previousRef, type: 'sound'});
       }
 
       this.screenToModify.values[10] = file.name;
@@ -225,10 +352,25 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.setStimuliPreview(URL.createObjectURL(file));
       this.typeFile = "Son";
 
-      input.value = '';
-    }else {
+      if (!(event instanceof File) && event.target instanceof HTMLInputElement) {
+        event.target.value = '';
+      }
+    } else {
       this.haveStimuliSoundFile = false;
     }
+  }
+
+  /**
+   * Enregistre un fichier choisi par l'utilisateur. S'il porte le même identifiant que le
+   * média actuel, son contenu est remplacé sans ajouter de référence.
+   */
+  private async storeOrReplace(file: File, type: MediaType, previousRef: string | undefined): Promise<string> {
+    const sameId = this.media.idFor(file.name);
+    if (previousRef === sameId) {
+      await this.media.replaceContent(sameId, file, type);
+      return sameId;
+    }
+    return this.media.store(file, type);
   }
 
   async checkInstructionFileExist(): Promise<boolean> {
@@ -241,7 +383,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       }else {
         if (this.screenToModify.values[4] !== ''){
           this.nameFile = this.screenToModify.values[4];
-          const mediaFile = await this.resolveInstructionMediaFile();
+          const mediaFile = await this.media.resolve(this.screenToModify.values[8] || this.screenToModify.values[4], this.getInstructionMediaType());
           if (mediaFile) {
             this.screenToModify.values[5] = mediaFile.file;
             this.screenToModify.values[8] = mediaFile.id;
@@ -262,7 +404,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.typeFile = "Son";
       if (this.screenToModify.values[10] !== ''){
         this.nameFile = this.screenToModify.values[10];
-        const mediaFile = await this.resolveStimuliSoundFile();
+        const mediaFile = await this.media.resolve(this.screenToModify.values[13] || this.screenToModify.values[10], 'sound');
         if (mediaFile) {
           this.screenToModify.values[11] = mediaFile.file;
           this.screenToModify.values[13] = mediaFile.id;
@@ -285,31 +427,18 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.haveStimuliSoundFile = await this.checkStimuliSoundFileExist();
   }
 
+  /** Retire le média (image ou vidéo) de l'instruction. */
   async deleteImageInstruction(): Promise<void> {
-    const imageName = this.screenToModify.values[4];
-    const imageId = this.screenToModify.values[8];
-
-    if (imageId || imageName) {
-      await this.deleteFileFromIDB(imageId || imageName, 'image');
-    }
-
-    this.screenToModify.values[4] = '';
-    this.screenToModify.values[5] = undefined;
-    this.screenToModify.values[8] = '';
-
-    this.haveInstructionFile = false;
-    this.setInstructionPreview('');
-
-    this.autoSaveService.autoSave('instruction');
+    await this.removeInstructionMedia(this.getInstructionMediaType());
   }
 
+  /** Retire le son de l'instruction. */
   async deleteSoundInstruction(): Promise<void> {
-    const soundName = this.screenToModify.values[4];
-    const soundId = this.screenToModify.values[8];
+    await this.removeInstructionMedia('sound');
+  }
 
-    if (soundId || soundName) {
-      await this.deleteFileFromIDB(soundName, 'sound');
-    }
+  private async removeInstructionMedia(type: MediaType): Promise<void> {
+    const ref = this.screenToModify.values[8] || this.screenToModify.values[4];
 
     this.screenToModify.values[4] = '';
     this.screenToModify.values[5] = undefined;
@@ -318,16 +447,15 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.haveInstructionFile = false;
     this.setInstructionPreview('');
 
+    if (ref) {
+      this.mediaJournal.push({kind: 'release', ref, type});
+    }
     this.autoSaveService.autoSave('instruction');
   }
 
+  /** Retire le son global de l'écran de stimuli. */
   async deleteSoundStimuli(): Promise<void> {
-    const soundName = this.screenToModify.values[10];
-    const soundId = this.screenToModify.values[13];
-
-    if (soundId || soundName) {
-      await this.deleteFileFromIDB(soundId || soundName, 'sound');
-    }
+    const ref = this.screenToModify.values[13] || this.screenToModify.values[10];
 
     this.screenToModify.values[10] = '';
     this.screenToModify.values[11] = undefined;
@@ -336,25 +464,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.haveStimuliSoundFile = false;
     this.setStimuliPreview('');
 
+    if (ref) {
+      this.mediaJournal.push({kind: 'release', ref, type: 'sound'});
+    }
     this.autoSaveService.autoSave('stimuli');
   }
 
-  private async deleteFileFromIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<void> {
-    const candidateIds = this.getCandidateIds(fileName);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        await this.idbService.releaseFile(id);
-        return;
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-  }
-
-  private getInstructionMediaType(): 'image' | 'video' | 'sound' {
+  private getInstructionMediaType(): MediaType {
     switch (this.typeFile) {
       case 'Video':
         return 'video';
@@ -363,143 +479,6 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       default:
         return 'image';
     }
-  }
-
-  private async resolveInstructionMediaFile(): Promise<{ file: File, id: string } | undefined> {
-    const expectedType = this.getInstructionMediaType();
-    const mediaId = this.screenToModify.values[8] || this.screenToModify.values[4];
-    const candidateIds = this.getCandidateIds(mediaId);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        if (!(evalFile.file instanceof Blob)) continue;
-
-        if (evalFile.file instanceof File) {
-          return { file: evalFile.file, id };
-        }
-
-        const inferredName = this.extractFileNameFromId(id);
-        return {
-          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
-          id
-        };
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(mediaId);
-      const match = allFiles.find((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      if (match?.file instanceof Blob) {
-        if (match.file instanceof File) {
-          return { file: match.file, id: match.id };
-        }
-        return {
-          file: new File([match.file], baseName, { type: match.file.type }),
-          id: match.id
-        };
-      }
-    } catch {
-      // ignore: fallback best-effort
-    }
-
-    return undefined;
-  }
-
-  private async resolveStimuliSoundFile(): Promise<{ file: File, id: string } | undefined> {
-    const mediaId = this.screenToModify.values[13] || this.screenToModify.values[10];
-    const candidateIds = this.getCandidateIds(mediaId);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== 'sound') continue;
-        if (!(evalFile.file instanceof Blob)) continue;
-
-        if (evalFile.file instanceof File) {
-          return { file: evalFile.file, id };
-        }
-
-        const inferredName = this.extractFileNameFromId(id);
-        return {
-          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
-          id
-        };
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(mediaId);
-      const match = allFiles.find((entry) =>
-        entry.type === 'sound' && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      if (match?.file instanceof Blob) {
-        if (match.file instanceof File) {
-          return { file: match.file, id: match.id };
-        }
-        return {
-          file: new File([match.file], baseName, { type: match.file.type }),
-          id: match.id
-        };
-      }
-    } catch {
-      // ignore: fallback best-effort
-    }
-
-    return undefined;
-  }
-
-  private getCandidateIds(fileName: any): string[] {
-    if (fileName == null) return [];
-
-    let cleanName = '';
-    if (typeof fileName === 'string') {
-      cleanName = fileName.trim();
-    } else if (fileName instanceof File) {
-      cleanName = (fileName.name || '').toString().trim();
-    } else if (typeof fileName === 'object' && fileName.name) {
-      cleanName = String(fileName.name).trim();
-    } else if (typeof fileName === 'object' && fileName.id) {
-      cleanName = String(fileName.id).trim();
-    } else {
-      cleanName = String(fileName).trim();
-    }
-
-    if (!cleanName) return [];
-
-    const projectName = this.saveService.getEvalName();
-    const baseName = this.extractFileNameFromId(cleanName);
-    const ids = new Set<string>();
-
-    ids.add(cleanName);
-    ids.add(baseName);
-
-    if (projectName) {
-      ids.add(`${projectName}/${cleanName}`);
-      ids.add(`${projectName}/${baseName}`);
-    }
-
-    return [...ids];
-  }
-
-  private extractFileNameFromId(id: any): string {
-    if (id == null) return '';
-    if (id instanceof File) return id.name || '';
-    if (typeof id === 'object' && (id.name || id.id)) return String(id.name ?? id.id);
-    const asString = String(id);
-    const parts = asString.split('/');
-    return parts[parts.length - 1] || asString;
   }
 
   private setInstructionPreview(url: string): void {
@@ -524,19 +503,15 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Mesure la durée d'une vidéo ou d'un son (comparée au délai de l'écran en sortie). */
   getFileDuration(fileUser: File){
     if (this.typeFile === 'Video' || this.typeFile === 'Son'){
-     const file = fileUser;
-
+      const file = fileUser;
       const media = document.createElement(file.type.startsWith('audio') ? 'audio' : 'video');
       media.src = URL.createObjectURL(file);
-
       media.preload = 'metadata';
-
       media.onloadedmetadata = () => {
         this.fileDuration = media.duration;
-        console.log('Durée :', this.fileDuration);
-
         URL.revokeObjectURL(media.src);
       };
     }
@@ -549,21 +524,73 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Lit le texte de la consigne avec la synthèse vocale du navigateur. */
   playText() {
-    if (!this.textToRead.trim()) return;
+    if (!this.textToRead?.trim()) return;
+    if (typeof window.speechSynthesis === 'undefined') {
+      this.flashService.show('warning', this.i18n.t('editor.text.noSpeech'));
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(this.textToRead);
-    utterance.lang = 'fr-FR';
+    // Le texte est saisi par l'utilisateur : on suppose qu'il est dans la langue de l'interface.
+    utterance.lang = this.i18n.language() === 'en' ? 'en-GB' : 'fr-FR';
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }
+
+  // ---------------------------------------------------------------------------
+  // Grille de stimuli
+  // ---------------------------------------------------------------------------
 
   get totalCells(): number[] {
     return Array.from({ length: this.screenToModify.values[0] * this.screenToModify.values[1] }, (_, i) => i + 1);
   }
 
+  get rows(): number {
+    return Number(this.screenToModify.values[0]) || 1;
+  }
+
+  get cols(): number {
+    return Number(this.screenToModify.values[1]) || 1;
+  }
+
+  /**
+   * Change le nombre de lignes (`dimension` 0) ou de colonnes (1) saisi dans les réglages.
+   *
+   * La valeur est enregistrée telle quelle (le champ signale lui-même une valeur invalide),
+   * mais une saisie vide ou invalide — par exemple le champ vidé avant de taper un autre
+   * nombre — ne retire aucune case. Une réduction qui retire des cases est annulable
+   * (« Annuler ») et leurs médias ne sont libérés qu'à la sortie de l'éditeur.
+   */
+  setGridSize(dimension: 0 | 1, value: number | null): void {
+    const rows = dimension === 0 ? value : Number(this.screenToModify.values[0]);
+    const cols = dimension === 1 ? value : Number(this.screenToModify.values[1]);
+    const listScreen = this.screenToModify.values[12] ?? {};
+    const total = gridCellCount(rows, cols);
+    const removed = total === null ? [] : Object.keys(listScreen).map(Number)
+      .filter(index => index >= total && listScreen[index] && !listScreen[index].hidden);
+
+    if (removed.length > 0) {
+      this.saveSnapshot(); // dimensions et cases d'avant la réduction
+      for (const index of removed) {
+        this.queueCellMediaRelease(listScreen[index]);
+      }
+    }
+    this.screenToModify.values[dimension] = value;
+    this.checkStimuliCells();
+    if (removed.length > 0) {
+      this.announce(this.i18n.t('editor.announce.gridReduced', {count: removed.length}));
+    }
+  }
+
+  /**
+   * Ajuste le dictionnaire des cases (`values[12]`) au nombre de cases de la grille.
+   * Sans dimensions valides (entiers ≥ 1), les cases sont conservées telles quelles.
+   */
   checkStimuliCells(){
-    let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
+    const numberCells = gridCellCount(this.screenToModify.values[0], this.screenToModify.values[1]);
+    if (numberCells === null) return;
     const listScreen = this.screenToModify.values[12];
     const numberKey = Object.keys(listScreen).length;
     if (numberKey < numberCells){
@@ -584,10 +611,18 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
         }
       }
     }
+    if (this.focusedCellIndex >= numberCells) {
+      this.focusedCellIndex = 0;
+    }
   }
 
+  /**
+   * Action principale sur une case : selon le mode actif, la sélectionne, l'échange, la
+   * duplique, la supprime, ou l'ouvre dans le panneau de configuration.
+   */
   openStimuliData(cellNumber: number) {
     if (this.visualizationMode) return;
+    this.focusedCellIndex = cellNumber;
     const listScreenAll = this.screenToModify.values[12];
     if (this.multiSelectMode) {
       if (listScreenAll[cellNumber]?.hidden) return;
@@ -596,12 +631,14 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       } else {
         this.selectedCells.add(cellNumber);
       }
+      this.announce(this.i18n.t('editor.announce.selectedCount', {count: this.selectedCells.size}));
       return;
     }
     if (this.swapMode) {
       if (this.swapSourceIndex === null) {
         if (listScreenAll[cellNumber]?.hidden) return;
         this.swapSourceIndex = cellNumber;
+        this.announce(this.i18n.t('editor.announce.swapSource', {n: cellNumber + 1}));
         return;
       }
       if (this.swapSourceIndex === cellNumber) {
@@ -610,6 +647,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       }
       this.saveSnapshot();
       this.swapCells(this.swapSourceIndex, cellNumber);
+      this.announce(this.i18n.t('editor.announce.swapped', {a: this.swapSourceIndex + 1, b: cellNumber + 1}));
       this.swapSourceIndex = null;
       this.swapMode = false;
       return;
@@ -624,6 +662,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
           this.screenToModify.values[1] = Number(this.screenToModify.values[1]) + 1;
           this.checkStimuliCells();
         }
+        this.announce(this.i18n.t('editor.announce.copySource', {n: cellNumber + 1}));
         return;
       }
       const target = listScreenAll[cellNumber];
@@ -635,6 +674,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       }
       this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, cellNumber);
+      this.announce(this.i18n.t('editor.announce.duplicated', {from: this.duplicateSourceIndex + 1, to: cellNumber + 1}));
       this.duplicateSourceIndex = null;
       this.duplicateMode = false;
       return;
@@ -646,6 +686,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
     // Clic sur un emplacement vide (masqué) en mode normal : on le matérialise en case.
     if (listScreenAll[cellNumber]?.hidden) {
+      this.saveSnapshot();
       listScreenAll[cellNumber] = this.emptyCell();
     }
     const listScreen = this.screenToModify.values[12];
@@ -657,9 +698,62 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       cols: this.screenToModify.values[1]
     };
     this.stimuliOffcanvasReady = true;
-    setTimeout(() => {
-      this.openOffcanvasStimuli();
-    });
+    this.openOffcanvasStimuli();
+  }
+
+  /** Navigation au clavier dans la grille (flèches, Début, Fin). */
+  onGridKeydown(event: KeyboardEvent, index: number): void {
+    const cols = this.cols;
+    const total = this.rows * cols;
+    let target = index;
+    switch (event.key) {
+      case 'ArrowRight': target = Math.min(total - 1, index + 1); break;
+      case 'ArrowLeft': target = Math.max(0, index - 1); break;
+      case 'ArrowDown': target = index + cols < total ? index + cols : index; break;
+      case 'ArrowUp': target = index - cols >= 0 ? index - cols : index; break;
+      case 'Home': target = Math.floor(index / cols) * cols; break;
+      case 'End': target = Math.floor(index / cols) * cols + cols - 1; break;
+      case 'Escape':
+        if (this.anyModeActive()) {
+          event.preventDefault();
+          this.resetGridModes();
+          this.announce(this.i18n.t('editor.announce.modeOff'));
+        }
+        return;
+      default:
+        return;
+    }
+    event.preventDefault();
+    this.focusCell(target);
+  }
+
+  /** Place le focus clavier sur une case de la grille. */
+  focusCell(index: number): void {
+    this.focusedCellIndex = index;
+    setTimeout(() => document.getElementById(`stimuli-cell-${index}`)?.focus());
+  }
+
+  /** Nom accessible d'une case : position, contenu, réponse attendue et état. */
+  cellLabel(index: number): string {
+    const cell = this.screenToModify.values[12]?.[index];
+    const row = Math.floor(index / this.cols) + 1;
+    const col = (index % this.cols) + 1;
+    const t = (key: TranslationKey, params?: Record<string, string | number>) => this.i18n.t(key, params);
+    const position = t('editor.cell.position', {n: index + 1, row, col});
+    if (!cell || cell.hidden) {
+      return t(this.deleteMode || this.multiSelectMode ? 'editor.cell.empty' : 'editor.cell.emptyCreate', {position});
+    }
+    const parts: string[] = [];
+    parts.push(cell.imageName ? t('editor.cell.image', {name: cell.imageName}) : t('editor.cell.noImage'));
+    if (cell.soundName) parts.push(t('editor.cell.sound', {name: cell.soundName}));
+    parts.push(t(cell.goodAnswer === true ? 'editor.cell.good' : 'editor.cell.wrong'));
+    const states: string[] = [];
+    if (this.duplicateSourceIndex === index) states.push(t('editor.cell.toDuplicate'));
+    if (this.swapSourceIndex === index) states.push(t('editor.cell.toSwap'));
+    if (this.activeCellIndex === index) states.push(t('editor.cell.editing'));
+    return states.length
+      ? t('editor.cell.fullStates', {position, parts: parts.join(', '), states: states.join(', ')})
+      : t('editor.cell.full', {position, parts: parts.join(', ')});
   }
 
   toggleDuplicateMode() {
@@ -672,6 +766,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapSourceIndex = null;
       this.multiSelectMode = false;
       this.selectedCells.clear();
+      this.announce(this.i18n.t('editor.announce.duplicateMode'));
     }
   }
 
@@ -686,6 +781,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapMode = false;
       this.swapSourceIndex = null;
       this.deleteMode = false;
+      this.announce(this.i18n.t('editor.announce.multiMode'));
     }
   }
 
@@ -696,20 +792,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   async toggleVisualizationMode(): Promise<void> {
     this.visualizationMode = !this.visualizationMode;
     if (this.visualizationMode) {
-      // On sort de tous les modes d'édition.
-      this.duplicateMode = false;
-      this.duplicateSourceIndex = null;
-      this.pendingDuplicateTarget = null;
-      this.swapMode = false;
-      this.swapSourceIndex = null;
-      this.deleteMode = false;
-      this.multiSelectMode = false;
-      this.selectedCells.clear();
-      this.pendingDeleteCells = null;
+      this.resetGridModes();
       await this.loadCellImages();
+      this.announce(this.i18n.t('editor.announce.previewMode'));
     } else {
       this.clearCellImageUrls();
       this.stopCellSound();
+      this.announce(this.i18n.t('editor.announce.editMode'));
     }
   }
 
@@ -725,7 +814,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
 
       let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
       if (!file && (cell.imageId || cell.imageName)) {
-        const match = await this.resolveCellMediaFile(cell.imageId || cell.imageName, 'image');
+        const match = await this.media.resolve(cell.imageId || cell.imageName, 'image');
         if (match) {
           cell.imageFile = match.file;
           cell.imageId = match.id;
@@ -747,52 +836,6 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.cellImageUrls = {};
   }
 
-  private async resolveCellMediaFile(ref: any, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
-    const candidateIds = this.getCandidateIds(ref);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        if (!(evalFile.file instanceof Blob)) continue;
-
-        if (evalFile.file instanceof File) {
-          return { file: evalFile.file, id };
-        }
-
-        const inferredName = this.extractFileNameFromId(id);
-        return {
-          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
-          id
-        };
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(ref);
-      const match = allFiles.find((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      if (match?.file instanceof Blob) {
-        if (match.file instanceof File) {
-          return { file: match.file, id: match.id };
-        }
-        return {
-          file: new File([match.file], baseName, { type: match.file.type }),
-          id: match.id
-        };
-      }
-    } catch {
-      // ignore: fallback best-effort
-    }
-
-    return undefined;
-  }
-
   /**
    * Lance (ou arrête si déjà en cours) la lecture du son d'une case en mode visualisation.
    * Un seul son joue à la fois : relancer une autre case coupe le précédent.
@@ -811,7 +854,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
 
     let file: Blob | undefined = cell.soundFile instanceof Blob ? cell.soundFile : undefined;
     if (!file && (cell.soundId || cell.soundName)) {
-      const match = await this.resolveCellMediaFile(cell.soundId || cell.soundName, 'sound');
+      const match = await this.media.resolve(cell.soundId || cell.soundName, 'sound');
       if (match) {
         cell.soundFile = match.file;
         cell.soundId = match.id;
@@ -852,7 +895,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.playingSoundCell = null;
   }
 
-  /** Clic sur la corbeille : en multi-sélection on supprime la sélection, sinon on (dé)active le mode suppression simple. */
+  /** Bouton « Supprimer » : en multi-sélection on supprime la sélection, sinon on (dé)active le mode suppression simple. */
   onDeleteClick() {
     if (this.multiSelectMode) {
       if (this.selectedCells.size > 0) {
@@ -867,6 +910,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (this.duplicateSourceIndex !== null && this.pendingDuplicateTarget !== null) {
       this.saveSnapshot();
       this.duplicateCell(this.duplicateSourceIndex, this.pendingDuplicateTarget);
+      this.announce(this.i18n.t('editor.announce.replaced', {n: this.pendingDuplicateTarget + 1}));
     }
     this.pendingDuplicateTarget = null;
     this.duplicateSourceIndex = null;
@@ -900,10 +944,8 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Compte combien de cases référencent ce fichier (par son nom) dans toute l'évaluation.
-   * Sert à éviter de supprimer de l'IDB un fichier encore utilisé par une case dupliquée.
-   * @param fileName nom du fichier recherché.
-   * @param type 'image' ou 'sound'.
+   * Indique si l'on peut ajouter une case dans une direction : hors de la grille (la grille
+   * s'agrandit) ou sur un emplacement vide.
    */
   canAddAdjacent(cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right'): boolean {
     const rows = Number(this.screenToModify.values[0]);
@@ -921,6 +963,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     return !!this.screenToModify.values[12][targetIdx]?.hidden;
   }
 
+  /** Ajoute une case à côté d'une autre, en agrandissant la grille si nécessaire. */
   addAdjacent(event: Event, cellIndex: number, direction: 'top' | 'bottom' | 'left' | 'right') {
     event.stopPropagation();
     const rows = Number(this.screenToModify.values[0]);
@@ -935,6 +978,8 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (direction === 'bottom') targetR = r + 1;
     if (direction === 'left') targetC = c - 1;
     if (direction === 'right') targetC = c + 1;
+
+    this.announce(this.i18n.t(`editor.announce.added.${direction}` as const, {n: cellIndex + 1}));
 
     if (targetR >= 0 && targetR < rows && targetC >= 0 && targetC < cols) {
       const targetIdx = targetR * cols + targetC;
@@ -994,6 +1039,46 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
   }
 
+  readonly adjacentDirections: {value: 'top' | 'bottom' | 'left' | 'right', label: TranslationKey, icon: string}[] = [
+    {value: 'top', label: 'editor.direction.top', icon: 'bi-arrow-up'},
+    {value: 'bottom', label: 'editor.direction.bottom', icon: 'bi-arrow-down'},
+    {value: 'left', label: 'editor.direction.left', icon: 'bi-arrow-left'},
+    {value: 'right', label: 'editor.direction.right', icon: 'bi-arrow-right'},
+  ];
+
+  /** Nom accessible (clé) d'un bouton « + » : « Ajouter une case au-dessus de la case {n} ». */
+  addCellLabel(direction: string): TranslationKey {
+    return `editor.addCell.${direction as 'top' | 'bottom' | 'left' | 'right'}.of` as const;
+  }
+
+  /** Infobulle (clé) d'un bouton « + » : « Ajouter une case au-dessus ». */
+  addCellTitle(direction: string): TranslationKey {
+    return `editor.addCell.${direction as 'top' | 'bottom' | 'left' | 'right'}` as const;
+  }
+
+  /**
+   * Ajoute une case à côté de la case active (alternative clavier aux boutons « + » de la
+   * grille) puis rouvre le panneau sur la case active, dont l'index a pu changer.
+   */
+  addAdjacentToActive(event: Event, direction: 'top' | 'bottom' | 'left' | 'right'): void {
+    const index = this.activeCellIndex;
+    if (index === null) return;
+    const colsBefore = this.cols;
+    const rowsBefore = this.rows;
+    this.addAdjacent(event, index, direction);
+    // Si la grille s'est agrandie en haut ou à gauche, la case active s'est décalée.
+    const r = Math.floor(index / colsBefore);
+    const c = index % colsBefore;
+    const newRow = this.rows > rowsBefore && direction === 'top' ? r + 1 : r;
+    const newCol = this.cols > colsBefore && direction === 'left' ? c + 1 : c;
+    const newIndex = newRow * this.cols + newCol;
+    if (newIndex !== index) {
+      this.openStimuliData(newIndex);
+    } else {
+      this.dataStimuli = {...this.dataStimuli, rows: this.rows, cols: this.cols};
+    }
+  }
+
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
     if (this.deleteMode) {
@@ -1004,6 +1089,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.swapSourceIndex = null;
       this.multiSelectMode = false;
       this.selectedCells.clear();
+      this.announce(this.i18n.t('editor.announce.deleteMode'));
     }
   }
 
@@ -1020,7 +1106,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
     // On garde toujours au moins une case visible dans la grille.
     if (toDelete.length >= this.countVisibleCells()) {
-      this.flashService.show('warning', 'Vous devez conserver au moins une case.');
+      this.flashService.show('warning', this.i18n.t('editor.keepOneCell'));
       this.deleteMode = false;
       this.selectedCells.clear();
       return;
@@ -1059,35 +1145,28 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.clearCellWithIDB(i);
     }
     this.autoShrinkGrid();
+    this.announce(this.i18n.t('editor.announce.deleted', {count: indices.length}));
     this.selectedCells.clear();
     this.pendingDeleteCells = null;
     this.deleteMode = false;
     this.multiSelectMode = false;
   }
 
-  /** Masque/vide une case et retire ses fichiers de l'IDB s'ils ne sont plus référencés. */
+  /**
+   * Masque/vide une case. Ses médias seront libérés à la sortie de l'éditeur (et pas
+   * avant, pour que « Annuler » puisse les restaurer).
+   */
   private clearCellWithIDB(cellNumber: number) {
     const listScreen = this.screenToModify.values[12];
     const cell = listScreen[cellNumber];
     if (!cell || cell.hidden) return;
 
-    const removedImageName = cell.imageName;
-    const removedSoundName = cell.soundName;
-
-    listScreen[cellNumber] = {
-      imageName: "",
-      imageFile: undefined,
-      soundName: "",
-      soundFile: undefined,
-      goodAnswer: false,
-      hidden: true,
-    };
-
-    if (removedImageName) void this.deleteFileFromIDB(removedImageName, 'image');
-    if (removedSoundName) void this.deleteFileFromIDB(removedSoundName, 'sound');
+    listScreen[cellNumber] = this.hiddenCell();
+    this.queueCellMediaRelease(cell);
 
     if (this.activeCellIndex === cellNumber) {
       this.activeCellIndex = null;
+      this.stimuliOffcanvasReady = false;
     }
   }
 
@@ -1144,10 +1223,22 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  /**
+   * Copie le contenu d'une case vers une autre. Les médias copiés gagnent une référence
+   * (rendue si l'opération est annulée) ; ceux de la case remplacée seront libérés.
+   */
   duplicateCell(sourceIndex: number, targetIndex: number) {
     const listScreen = this.screenToModify.values[12];
     const source = listScreen[sourceIndex];
     if (!source || sourceIndex === targetIndex) return;
+
+    const previous = listScreen[targetIndex];
+    if (previous && !previous.hidden) {
+      const imageRef = previous.imageId || previous.imageName;
+      const soundRef = previous.soundId || previous.soundName;
+      if (imageRef) this.mediaJournal.push({kind: 'release', ref: imageRef, type: 'image'});
+      if (soundRef) this.mediaJournal.push({kind: 'release', ref: soundRef, type: 'sound'});
+    }
 
     listScreen[targetIndex] = structuredClone({
       imageName: source.imageName ?? '',
@@ -1160,8 +1251,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       hidden: false,
     });
 
-    if (source.imageId) void this.idbService.incrementRef(source.imageId);
-    if (source.soundId) void this.idbService.incrementRef(source.soundId);
+    if (source.imageId) this.acquire(source.imageId, 'image');
+    if (source.soundId) this.acquire(source.soundId, 'sound');
+  }
+
+  private acquire(id: string, type: MediaType): void {
+    this.mediaJournal.push({kind: 'acquire', ref: id, type});
+    this.media.addReference(id).catch(error => console.warn('Référence de média non ajoutée :', error));
   }
 
   private saveSnapshot() {
@@ -1174,6 +1270,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       rows: Number(this.screenToModify.values[0]),
       cols: Number(this.screenToModify.values[1]),
       cells: cellsClone,
+      journalLength: this.mediaJournal.length,
     });
     if (this.undoHistory.length > this.maxUndoHistory) {
       this.undoHistory.shift();
@@ -1184,45 +1281,110 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     return this.undoHistory.length > 0;
   }
 
+  /**
+   * Annule la dernière modification de la grille, médias compris : les libérations
+   * différées sont abandonnées et les références ajoutées par une duplication sont rendues.
+   */
   undo() {
     const snapshot = this.undoHistory.pop();
     if (!snapshot) return;
     this.screenToModify.values[0] = snapshot.rows;
     this.screenToModify.values[1] = snapshot.cols;
     this.screenToModify.values[12] = snapshot.cells;
+
+    const undone = this.mediaJournal.splice(snapshot.journalLength);
+    for (const entry of undone) {
+      if (entry.kind === 'acquire') {
+        this.media.release(entry.ref, entry.type).catch(error => console.warn('Référence de média non rendue :', error));
+      }
+    }
+
     this.activeCellIndex = null;
-    this.duplicateMode = false;
-    this.duplicateSourceIndex = null;
-    this.pendingDuplicateTarget = null;
-    this.swapMode = false;
-    this.swapSourceIndex = null;
-    this.deleteMode = false;
-    this.selectedCells.clear();
-    this.pendingDeleteCells = null;
-  }
-
-  openOffcanvasStimuli() {
-    const element = document.getElementById('configStimuli');
-
-    if (element) {
-      const instance = Offcanvas.getOrCreateInstance(element);
-      this.configStimuliOpen = true;
-      element.addEventListener('hidden.bs.offcanvas', () => {
-        this.configStimuliOpen = false;
-        this.activeCellIndex = null;
-      }, { once: true });
-      instance.show();
+    this.stimuliOffcanvasReady = false;
+    this.resetGridModes();
+    this.announce(this.i18n.t('editor.announce.undone'));
+    if (this.visualizationMode) {
+      void this.loadCellImages();
     }
   }
 
+  /**
+   * Applique les libérations de médias différées (sortie de l'éditeur). À partir de là,
+   * l'historique d'annulation n'est plus disponible.
+   */
+  async commitMediaJournal(): Promise<void> {
+    const pending = this.mediaJournal.filter(entry => entry.kind === 'release');
+    this.mediaJournal = [];
+    this.undoHistory = [];
+    for (const entry of pending) {
+      try {
+        await this.media.release(entry.ref, entry.type);
+      } catch (error) {
+        console.warn('Libération de média ignorée :', error);
+      }
+    }
+  }
+
+  /** Libération demandée par le panneau de configuration d'une case, différée comme les autres. */
+  queueMediaRelease(release: {ref: string, type: MediaType}): void {
+    if (release.ref) this.mediaJournal.push({kind: 'release', ref: release.ref, type: release.type});
+  }
+
+  /** Programme la libération (à la sortie de l'éditeur) des médias d'une case retirée. */
+  private queueCellMediaRelease(cell: any): void {
+    if (!cell || cell.hidden) return;
+    const imageRef = cell.imageId || cell.imageName;
+    const soundRef = cell.soundId || cell.soundName;
+    if (imageRef) this.mediaJournal.push({kind: 'release', ref: imageRef, type: 'image'});
+    if (soundRef) this.mediaJournal.push({kind: 'release', ref: soundRef, type: 'sound'});
+  }
+
+  /** Programme la libération de tous les médias d'un écran (changement de type). */
+  private queueScreenMediaRelease(screen: screenTypeModel): void {
+    const v = screen.values ?? [];
+    if (screen.type === instructionScreenConstModel && v[3] !== 'Texte' && (v[8] || v[4])) {
+      this.mediaJournal.push({kind: 'release', ref: v[8] || v[4], type: v[3] === 'Video' ? 'video' : v[3] === 'Son' ? 'sound' : 'image'});
+    }
+    if (screen.type === stimuliScreenConstModel) {
+      if (v[13] || v[10]) this.mediaJournal.push({kind: 'release', ref: v[13] || v[10], type: 'sound'});
+      for (const cell of Object.values(v[12] ?? {}) as any[]) {
+        if (!cell || cell.hidden) continue;
+        if (cell.imageId || cell.imageName) this.mediaJournal.push({kind: 'release', ref: cell.imageId || cell.imageName, type: 'image'});
+        if (cell.soundId || cell.soundName) this.mediaJournal.push({kind: 'release', ref: cell.soundId || cell.soundName, type: 'sound'});
+      }
+    }
+  }
+
+  /** Ouvre la case active dans le panneau de configuration et y place le focus. */
+  openOffcanvasStimuli() {
+    this.configStimuliOpen = true;
+    setTimeout(() => document.getElementById('configStimuliLabel')?.focus());
+  }
+
+  /** Fermeture du panneau de configuration : le focus revient sur la case. */
+  closeConfigStimuli(): void {
+    const index = this.activeCellIndex;
+    this.configStimuliOpen = false;
+    this.activeCellIndex = null;
+    this.stimuliOffcanvasReady = false;
+    if (index !== null) {
+      this.focusCell(index);
+    }
+  }
+
+  /**
+   * Vérifie, pour une instruction vidéo/son, que le média n'est pas plus long que le délai
+   * avant l'écran suivant. Au premier appel un avertissement s'affiche ; un second appel
+   * confirme la sortie.
+   */
   checkFileDurationAndTimeScreen(){
-    console.log(this.fileDuration, this.screenToModify.values[1])
-    if (this.fileDuration > this.screenToModify.values[1]){
+    if (this.screenToModify.values[0] && this.fileDuration > this.screenToModify.values[1]){
       if (this.showWarningMessage){
         this.showWarningMessage = false;
         this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
       }else {
         this.showWarningMessage = true;
+        setTimeout(() => document.getElementById('duration-warning')?.focus());
       }
     }else {
       this.showWarningMessage = false;
@@ -1230,9 +1392,9 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Termine l'édition et revient à la liste des écrans. */
   backToScreenList(){
     if (this.screenToModify.type === instructionScreenConstModel && (this.typeFile === 'Video' || this.typeFile === 'Son')){
-      console.log("check file duration")
       this.checkFileDurationAndTimeScreen();
     }else {
       this.selectedScreenChange.emit({screen: this.screenToModify, flag: false});
@@ -1250,6 +1412,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
       this.deleteMode = false;
       this.multiSelectMode = false;
       this.selectedCells.clear();
+      this.announce(this.i18n.t('editor.announce.swapMode'));
     }
   }
 
@@ -1268,10 +1431,51 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.cellSize = Math.max(this.cellSize - 20, this.minCellSize);
   }
 
+  get canZoomIn(): boolean {
+    return this.cellSize < this.maxCellSize;
+  }
+
+  get canZoomOut(): boolean {
+    return this.cellSize > this.minCellSize;
+  }
+
+  /** Vrai si un mode d'édition de la grille est actif. */
+  anyModeActive(): boolean {
+    return this.duplicateMode || this.swapMode || this.multiSelectMode || this.deleteMode;
+  }
+
+  /** Consigne affichée (et annoncée) selon le mode actif de la grille. */
+  get modeHint(): string {
+    if (this.duplicateMode) {
+      if (this.duplicateSourceIndex === null) return this.i18n.t('editor.hint.duplicateSource');
+      if (this.pendingDuplicateTarget === null) return this.i18n.t('editor.hint.duplicateTarget');
+      return '';
+    }
+    if (this.deleteMode) return this.i18n.t('editor.hint.delete');
+    if (this.swapMode) return this.i18n.t(this.swapSourceIndex === null ? 'editor.hint.swapFirst' : 'editor.hint.swapSecond');
+    if (this.multiSelectMode) return this.i18n.t('editor.hint.multi', {count: this.selectedCells.size});
+    return '';
+  }
+
+  /** Désactive tous les modes d'édition de la grille. */
+  resetGridModes(): void {
+    this.duplicateMode = false;
+    this.duplicateSourceIndex = null;
+    this.pendingDuplicateTarget = null;
+    this.swapMode = false;
+    this.swapSourceIndex = null;
+    this.deleteMode = false;
+    this.multiSelectMode = false;
+    this.selectedCells.clear();
+    this.pendingDeleteCells = null;
+  }
+
+  private announce(message: string): void {
+    this.announcement = message;
+  }
+
   protected readonly instructionScreenConstModel = instructionScreenConstModel;
   protected readonly stimuliScreenConstModel = stimuliScreenConstModel;
   protected readonly transitionScreenConstModel = transitionScreenConstModel;
   protected readonly Number = Number;
 }
-
-

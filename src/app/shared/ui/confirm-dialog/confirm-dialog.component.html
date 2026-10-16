@@ -1,0 +1,28 @@
+<div class="gp-dialog">
+  <div class="gp-dialog__header">
+    <span class="gp-dialog__icon"
+          [class.gp-dialog__icon--danger]="data.tone === 'danger'"
+          [class.gp-dialog__icon--warning]="data.tone === 'warning'"
+          aria-hidden="true">
+      <i class="bi" [class]="icon"></i>
+    </span>
+    <h2 class="gp-dialog__title" id="confirm-dialog-title">{{ data.title }}</h2>
+  </div>
+  <div class="gp-dialog__body" id="confirm-dialog-message">
+    @for (paragraph of paragraphs; track $index) {
+      <p class="mb-0">{{ paragraph }}</p>
+    }
+  </div>
+  <div class="gp-dialog__footer">
+    <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="close(false)">
+      {{ data.cancelLabel ?? ('common.cancel' | t) }}
+    </button>
+    <button type="button"
+            class="gp-btn js-confirm"
+            [class.gp-btn--danger]="data.tone === 'danger'"
+            [class.gp-btn--primary]="data.tone !== 'danger'"
+            (click)="close(true)">
+      {{ data.confirmLabel ?? ('ui.confirm' | t) }}
+    </button>
+  </div>
+</div>

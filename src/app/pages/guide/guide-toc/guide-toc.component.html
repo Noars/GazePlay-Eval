@@ -1,0 +1,10 @@
+<nav class="guide-toc" aria-labelledby="guide-toc-title">
+  <p class="guide-toc__title" id="guide-toc-title">{{ title }}</p>
+  <ol class="guide-toc__list">
+    @for (item of items; track item.id) {
+      <li>
+        <a class="guide-toc__link" [href]="hrefFor(item.id)" (click)="goTo($event, item.id)">{{ item.label }}</a>
+      </li>
+    }
+  </ol>
+</nav>

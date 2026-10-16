@@ -1,134 +1,117 @@
-<!-- popup-import-save.component.html -->
-<div class="popup-container">
-
-  <!-- Header -->
-  <div class="popup-header">
-    <img class="icon-light me-2" src="assets/icons/import/import-dark.png" width="16" height="16" alt="">
-    <img class="icon-dark me-2" src="assets/icons/import/import.png" width="16" height="16" alt="">
-    Importer une évaluation
+<div class="gp-dialog">
+  <div class="gp-dialog__header">
+    <span class="gp-dialog__icon" aria-hidden="true"><i class="bi bi-box-arrow-in-down"></i></span>
+    <div>
+      <h2 class="gp-dialog__title" id="import-title">{{ 'import.title' | t }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'import.subtitle.before' | t }}<code>.gpSave</code>{{ 'import.subtitle.or' | t }}<code>.zip</code>{{ 'import.subtitle.after' | t }}</p>
+    </div>
   </div>
 
-  <!-- Body -->
-  <div class="popup-body">
-
-    <!-- Alerte info -->
-    <div class="popup-alert-info">
-      <img class="icon-light alert-icon-info" src="assets/icons/info/info-dark.png" alt="">
-      <img class="icon-dark alert-icon-info" src="assets/icons/info/info.png" alt="">
-      <span>Sélectionnez un fichier <strong>.gpSave</strong> exporté depuis GazePlayEval et choisissez un mode d'ouverture.</span>
-    </div>
-
-    <!-- Choix du mode -->
-    <div class="section-block">
-      <label class="section-label">
-        <img class="icon-light me-2" src="assets/icons/settings/settings-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark me-2" src="assets/icons/settings/settings.png" width="16" height="16" alt="">
-        Mode d'ouverture
-      </label>
-      <div class="mode-selector">
-        <div class="mode-option"
-             [class.mode-option-selected]="mode === 'consult'"
-             (click)="mode = 'consult'; selectedSlot = null">
-          <div class="d-flex align-items-center gap-3">
-            <img class="icon-light" src="assets/icons/eye/eye-dark.png" width="16" height="16" alt="">
-            <img class="icon-dark" src="assets/icons/eye/eye.png" width="16" height="16" alt="">
-            <div>
-              <div class="fw-semibold">Consultation</div>
-              <div class="mode-desc">Ouvrir sans sauvegarder</div>
-            </div>
-          </div>
-        </div>
-        <div class="mode-option"
-             [class.mode-option-selected]="mode === 'save'"
-             (click)="mode = 'save'; selectedSlot = null">
-          <div class="d-flex align-items-center gap-3">
-            <img class="icon-light" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-            <img class="icon-dark" src="assets/icons/save/save.png" width="16" height="16" alt="">
-            <div>
-              <div class="fw-semibold">Sauvegarder</div>
-              <div class="mode-desc">Importer et sauvegarder dans un emplacement</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sélection fichier zip -->
-    <div class="section-block">
-      <label class="section-label">
-        <img class="icon-light me-2" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark me-2" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
-        Fichier à importer
-      </label>
-      <div class="file-input-wrapper"
-           [class.drag-over]="isDragging"
-           (click)="fileInput.click()"
+  <div class="gp-dialog__body">
+    <!-- Fichier -->
+    <div class="gp-field">
+      <span class="gp-field__label" id="import-file-label">{{ 'import.file' | t }}</span>
+      <div class="dropzone"
+           [class.dropzone--active]="isDragging"
+           [class.dropzone--filled]="zipFileName !== ''"
            (dragover)="onDragOver($event)"
            (dragleave)="onDragLeave($event)"
            (drop)="onDrop($event)">
-        <img class="icon-light file-input-icon" src="assets/icons/import/import-dark.png" alt="">
-        <img class="icon-dark file-input-icon" src="assets/icons/import/import.png" alt="">
-        <span class="file-input-text">
-          {{ isDragging ? 'Relâchez pour importer' : zipFileName !== '' ? zipFileName : 'Glissez un fichier .gpSave ou cliquez pour sélectionner' }}
+        <i class="bi dropzone__icon" [class.bi-file-earmark-zip]="zipFileName" [class.bi-cloud-arrow-up]="!zipFileName" aria-hidden="true"></i>
+        <span class="dropzone__text">
+          @if (isDragging) {
+            {{ 'import.drop' | t }}
+          } @else if (zipFileName) {
+            <strong>{{ zipFileName }}</strong>
+          } @else {
+            {{ 'import.dragHere' | t }}
+          }
         </span>
-        <input #fileInput type="file" accept=".gpSave,.zip" hidden (change)="onZipSelected($event)">
+        <input #fileInput
+               id="import-file"
+               class="visually-hidden"
+               type="file"
+               accept=".gpSave,.zip"
+               aria-labelledby="import-file-label import-file-button"
+               (change)="onZipSelected($event)">
+        <label for="import-file" id="import-file-button" class="gp-btn gp-btn--secondary gp-btn--sm dropzone__button">
+          {{ (zipFileName ? 'import.chooseOther' : 'import.browse') | t }}
+        </label>
       </div>
     </div>
 
-    <!-- Sélection slot (mode sauvegarder uniquement) -->
-    @if (mode === 'save') {
-      <div class="section-block">
-        <label class="section-label">
-          <img class="icon-light me-2" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-2" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
-          Emplacement de sauvegarde
+    <!-- Mode -->
+    <fieldset class="gp-field plain-fieldset">
+      <legend class="gp-field__label">{{ 'import.what' | t }}</legend>
+      <div class="gp-choice-grid">
+        <label class="gp-choice">
+          <input class="gp-choice__input" type="radio" name="import-mode" value="consult"
+                 [checked]="mode === 'consult'" (change)="mode = 'consult'; selectedSlot = null">
+          <span class="gp-choice__body">
+            <span class="gp-choice__title"><i class="bi bi-eye" aria-hidden="true"></i> {{ 'import.open' | t }}</span>
+            <span class="gp-choice__desc">{{ 'import.open.desc' | t }}</span>
+          </span>
         </label>
-        <div class="slots-list">
+        <label class="gp-choice">
+          <input class="gp-choice__input" type="radio" name="import-mode" value="save"
+                 [checked]="mode === 'save'" (change)="mode = 'save'; selectedSlot = null">
+          <span class="gp-choice__body">
+            <span class="gp-choice__title"><i class="bi bi-floppy" aria-hidden="true"></i> {{ 'import.openSave' | t }}</span>
+            <span class="gp-choice__desc">{{ 'import.openSave.desc' | t }}</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Emplacement -->
+    @if (mode === 'save') {
+      <fieldset class="gp-field plain-fieldset">
+        <legend class="gp-field__label">{{ 'import.slot' | t }}</legend>
+        <div class="slot-options">
           @for (slot of data.slots; track slot.index) {
-            <div class="slot-option"
-                 [class.slot-option-selected]="selectedSlot === slot.index"
-                 [class.slot-option-filled]="!slot.empty"
-                 (click)="selectedSlot = slot.index">
-              <div class="d-flex align-items-center gap-3">
-                <img class="icon-light" src="assets/icons/folder/folder-dark.png" width="16" height="16" alt="">
-                <img class="icon-dark" src="assets/icons/folder/folder.png" width="16" height="16" alt="">
-                <span class="fw-semibold">{{ slot.empty ? 'Emplacement vide' : slot.name }}</span>
-              </div>
-              @if (!slot.empty) {
-                <span class="slot-warning-badge">
-                  <img class="icon-light me-1" src="assets/icons/warning/warning-dark.png" width="12" height="12" alt="">
-                  <img class="icon-dark me-1" src="assets/icons/warning/warning.png" width="12" height="12" alt="">
-                  Sera écrasé
+            <label class="gp-choice">
+              <input class="gp-choice__input" type="radio" name="import-slot"
+                     [value]="slot.index"
+                     [checked]="selectedSlot === slot.index"
+                     (change)="selectedSlot = slot.index">
+              <span class="gp-choice__body slot-option">
+                <span class="gp-choice__title">
+                  {{ 'saves.slot' | t: {n: slot.index} }}
+                  @if (!slot.empty) {
+                    <span class="gp-badge gp-badge--warning">{{ 'import.willReplace' | t }}</span>
+                  }
                 </span>
-              }
-            </div>
+                <span class="gp-choice__desc">{{ slot.empty ? ('import.free' | t) : slot.name }}</span>
+              </span>
+            </label>
           }
         </div>
-      </div>
+      </fieldset>
 
       @if (selectedSlot !== null && !selectedSlotData?.empty) {
-        <div class="popup-alert-warning">
-          <img class="icon-light alert-icon-warning" src="assets/icons/warning/warning-dark.png" alt="">
-          <img class="icon-dark alert-icon-warning" src="assets/icons/warning/warning.png" alt="">
-          <span>Attention, l'évaluation existante sera <strong>définitivement remplacée</strong>.</span>
+        <div class="gp-callout gp-callout--warning" role="status">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <p>{{ 'import.replaceWarning.before' | t: {name: selectedSlotData?.name ?? ''} }}<strong>{{ 'import.replaceWarning.strong' | t }}</strong>{{ 'import.replaceWarning.after' | t }}</p>
+          </div>
         </div>
       }
     }
 
-    <!-- Boutons -->
-    <div class="d-flex justify-content-between gap-3 mt-2">
-      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
-        Annuler
-      </button>
-      <button class="btn-confirm fw-semibold flex-grow-1"
-              [disabled]="!canConfirm()"
-              [class.btn-confirm-disabled]="!canConfirm()"
-              (click)="confirm()">
-        <img class="icon-light me-1" src="assets/icons/success/success-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark me-1" src="assets/icons/success/success.png" width="16" height="16" alt="">
-        {{ mode === 'consult' ? 'Ouvrir' : 'Importer' }}
-      </button>
-    </div>
+    @if (!canConfirm()) {
+      <p class="gp-muted gp-text-sm mb-0" id="import-missing">{{ missingRequirement() }}</p>
+    }
+  </div>
 
+  <div class="gp-dialog__footer">
+    <button type="button" class="gp-btn" (click)="cancel()">{{ 'common.cancel' | t }}</button>
+    <button type="button"
+            class="gp-btn gp-btn--primary"
+            [attr.aria-disabled]="!canConfirm()"
+            [attr.aria-describedby]="canConfirm() ? null : 'import-missing'"
+            (click)="confirm()">
+      <i class="bi bi-check-lg" aria-hidden="true"></i>
+      {{ (mode === 'save' ? 'import.confirmSave' : 'import.confirmOpen') | t }}
+    </button>
   </div>
 </div>

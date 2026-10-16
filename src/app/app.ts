@@ -1,88 +1,116 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit, ViewChild} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
-import {NavbarComponent} from './components/navbar/navbar.component';
 import {filter} from 'rxjs';
+import {NavbarComponent} from './components/navbar/navbar.component';
 import {ProgressBarComponent} from './components/progress-bar/progress-bar.component';
 import {FlashComponent} from './components/flash-message/flash.component';
+import {MenuComponent} from './components/menu/menu.component';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
-import {IconGuidePopupComponent} from './components/icon-guide-popup/icon-guide-popup-component';
+import {RouteFocusService} from './core/a11y/route-focus.service';
+import {StorageNoticeService} from './core/storage/storage-notice.service';
+import {STEP_LABEL_KEYS, STEP_TO_ROUTE} from './shared/stepRoute.model';
+import {I18nService} from './core/i18n/i18n.service';
+import {TranslatePipe} from './core/i18n/translate.pipe';
+import {TabSessionService} from './core/tab/tab-session.service';
+import {FlashService} from './services/flash-message/flash.service';
 
+/**
+ * Composant racine : structure de l'application (en-tête, navigation, contenu, pied de page).
+ */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent, IconGuidePopupComponent],
+  imports: [RouterOutlet, NavbarComponent, ProgressBarComponent, FlashComponent, MenuComponent, TranslatePipe],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.scss'
 })
-export class App implements OnInit{
+export class App implements OnInit {
+  protected readonly router = inject(Router);
+  private readonly autoSaveService = inject(AutoSaveService);
+  private readonly routeFocus = inject(RouteFocusService);
+  protected readonly storageNotices = inject(StorageNoticeService);
+  private readonly i18n = inject(I18nService);
+  private readonly tabSession = inject(TabSessionService);
+  private readonly flash = inject(FlashService);
+
+  @ViewChild('drawerMenu') private drawerMenu?: MenuComponent;
+
   protected title = 'GazePlay-Eval';
 
-  private readonly hiddenOnRoutes = [
-    '/guide'
-  ];
+  /** Libellés des étapes, dans la langue courante. */
+  readonly steps = computed(() => STEP_LABEL_KEYS.map(key => this.i18n.t(key)));
 
-  steps = ['Informations Evaluation', 'Informations Participant', 'Modes et Paramètres', 'Création et Modifications', 'Téléchargement et Exportation'];
+  /** Étape du parcours affichée (0 à 4), ou -1 hors du parcours de création. */
   currentStepIndex = -1;
 
-  constructor(protected router: Router, private autoSaveService:AutoSaveService) {
+  constructor() {
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(event => {
-      const url = (event as NavigationEnd).urlAfterRedirects;
-
-      if (url.includes('/info-eval')) {
-        this.currentStepIndex = 0;
-      } else if (url.includes('/info-participant')) {
-        this.currentStepIndex = 1;
-      } else if (url.includes('/setup-eval')) {
-        this.currentStepIndex = 2;
-      } else if (url.includes('/create-eval')) {
-        this.currentStepIndex = 3;
-      } else if (url.includes('/download-eval')) {
-        this.currentStepIndex = 4;
-      } else {
-        this.currentStepIndex = -1;
-      }
+      const path = event.urlAfterRedirects.split('?')[0];
+      const step = Object.entries(STEP_TO_ROUTE).find(([, route]) => route === path);
+      this.currentStepIndex = step ? Number(step[0]) : -1;
     });
   }
 
   ngOnInit(): void {
-    this.autoSaveService.init(); // pour la sauvegarde automatique
+    this.autoSaveService.init(); // sauvegarde automatique à chaque étape
+    this.routeFocus.start();     // focus sur le titre de la page après chaque navigation
+    this.showTabNotice();
 
-    // Pour éviter le bug de scroll en cas de chargement d'évaluation
-    const cleanOverflow = () => {
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
-      document.body.classList.remove('modal-open', 'offcanvas-open');
-      document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(el => el.remove());
-    };
-
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      cleanOverflow();
-      // Re-passe après l'animation de fermeture Bootstrap (~300ms) qui peut reposer overflow:hidden
-      setTimeout(cleanOverflow, 400);
-    });
-
-    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isReload = nav?.type === 'reload';
 
-    // Si on recharge le site, on redirige vers la page d'accueil
-    if (isReload) {
+    // Au rechargement d'une étape du parcours, on repasse par l'accueil puis on ramène
+    // l'utilisateur à l'étape où il s'était arrêté. Sur toute autre page (accueil, options,
+    // guide, sauvegardes…), il y reste : l'évaluation de l'onglet est déjà rechargée par
+    // SaveService, indépendamment de la page affichée.
+    if (isReload && isStepPath(this.reloadedPath())) {
       this.router.navigate(['/home']).then(() => {
-        // On tente de ramener l'utilisateur à sa progression dans l'évaluation.
-        // S'il n'y en a pas, on reste sur la page d'accueil
         this.autoSaveService.tryResume(false);
       });
-      return ;
     }
   }
 
-  // Regarde si la page courante n'est pas dans la liste hiddenOnRoutes
-  // Si oui, le bouton guide est caché
-  protected get showGuideButton(): boolean {
-    return !this.hiddenOnRoutes.some(route =>
-      this.router.url.includes(route)
-    );
+  /** Chemin de la page rechargée, lu dans l'adresse (routage par hash : `#/option?…`). */
+  protected reloadedPath(): string {
+    return globalThis.location?.hash.replace(/^#/, '').split('?')[0] ?? '';
   }
+
+  /**
+   * Message de démarrage de l'onglet (voir TabSessionService) : onglet dupliqué, évaluation
+   * déjà ouverte dans un autre onglet, ou emplacement lié repris par un autre onglet.
+   */
+  private showTabNotice(): void {
+    const notice = this.tabSession.notice;
+    if (!notice) return;
+    this.tabSession.notice = null;
+    if (notice.kind === 'duplicated') {
+      this.flash.show('warning', notice.slot !== null
+        ? this.i18n.t('tabs.notice.duplicated', {n: notice.slot})
+        : this.i18n.t('tabs.notice.duplicatedNoSlot'));
+    } else if (notice.kind === 'slotBusy') {
+      this.flash.show('warning', this.i18n.t('tabs.notice.slotBusy', {n: notice.slot}));
+    } else {
+      this.flash.show('info', this.i18n.t('tabs.notice.busy'));
+    }
+  }
+
+  /** Ouvre la navigation en tiroir (petits écrans). */
+  protected openMenu(): void {
+    this.drawerMenu?.open();
+  }
+
+  /**
+   * Lien d'évitement : avec le routage par hash, un simple `href="#main-content"` serait
+   * interprété comme une route ; on déplace donc le focus manuellement.
+   */
+  protected skipToContent(event: Event): void {
+    event.preventDefault();
+    this.routeFocus.focusMainHeading();
+  }
+}
+
+/** Vrai pour la route d'une étape du parcours de création (`/info-eval` … `/download-eval`). */
+function isStepPath(path: string): boolean {
+  return Object.values(STEP_TO_ROUTE).includes(path);
 }

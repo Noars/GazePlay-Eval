@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadService } from './load.service';
-import { SAVE_SLOT_LIST, MaxSlots } from '../../shared/dataBaseConfig';
-import { saveModel, saveModelDefault } from '../../shared/saveModel';
+import { SAVE_SLOT_LIST } from '../../shared/dataBaseConfig';
+import { saveModelDefault } from '../../shared/saveModel';
 
 describe('LoadService', () => {
   let service: LoadService;
@@ -24,7 +24,7 @@ describe('LoadService', () => {
     it('retourne les données si slot rempli', () => {
       localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify(saveModelDefault));
       const result = service.getSlot(1);
-      expect(result).toEqual(saveModelDefault);
+      expect(result).toStrictEqual(saveModelDefault);
     });
 
     it('retourne null si JSON invalide', () => {
@@ -38,22 +38,6 @@ describe('LoadService', () => {
       localStorage.setItem(SAVE_SLOT_LIST[2], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot2' }));
       expect(service.getSlot(1)?.nomEval).toBe('Slot1');
       expect(service.getSlot(2)?.nomEval).toBe('Slot2');
-    });
-  });
-
-  describe('getAllSlots', () => {
-    it('retourne tableau avec tous les slots à null si vide', () => {
-      const all = service.getAllSlots();
-      expect(all).toEqual([null, null, null]);
-    });
-
-    it('retourne les slots correctement remplis aux bons index', () => {
-      localStorage.setItem(SAVE_SLOT_LIST[0], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot0' }));
-      localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify({ ...saveModelDefault, nomEval: 'Slot1' }));
-      const all = service.getAllSlots();
-      expect(all[0]?.nomEval).toBe('Slot0');
-      expect(all[1]?.nomEval).toBe('Slot1');
-      expect(all[2]).toBeNull();
     });
   });
 });

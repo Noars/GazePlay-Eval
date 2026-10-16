@@ -1,13 +1,43 @@
 <!doctype html>
-<html lang="fr" data-bs-theme="dark">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>GazePlayEval</title>
+  <title>GazePlay Eval</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Créez, configurez et exportez des évaluations pour GazePlay-Learning.">
+  <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <script>
+    // Applique les préférences d'affichage avant le premier rendu pour éviter un flash
+    // (thème, contraste, mode daltonisme, taille du texte, langue). Source de vérité : IndexedDB, chargée ensuite
+    // par UserPreferencesService ; ceci n'est qu'un instantané (voir preferences-dom.ts).
+    (function () {
+      var root = document.documentElement;
+      var prefs = {};
+      try {
+        prefs = JSON.parse(localStorage.getItem('gazeplay-eval.preferences-cache') || '{}') || {};
+        if (!prefs.theme) {
+          var legacyTheme = localStorage.getItem('theme');
+          if (legacyTheme === 'light' || legacyTheme === 'dark') prefs.theme = legacyTheme;
+        }
+      } catch (e) { prefs = {}; }
+      var systemDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var theme = prefs.theme === 'light' || prefs.theme === 'dark' ? prefs.theme : (systemDark ? 'dark' : 'light');
+      root.setAttribute('data-bs-theme', theme);
+      root.setAttribute('data-contrast', prefs.contrast === 'high' ? 'high' : 'standard');
+      root.setAttribute('data-motion', prefs.motion === 'reduce' ? 'reduce' : 'system');
+      root.setAttribute('data-color-blind', prefs.colorBlindMode === true ? 'true' : 'false');
+      root.setAttribute('lang', prefs.language === 'en' ? 'en' : 'fr');
+      root.style.colorScheme = theme;
+      if (typeof prefs.textScale === 'number' && prefs.textScale >= 80 && prefs.textScale <= 200) {
+        root.style.fontSize = prefs.textScale + '%';
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>
+  <noscript>GazePlay Eval nécessite JavaScript pour fonctionner. <span lang="en">GazePlay Eval requires JavaScript to run.</span></noscript>
 </body>
 </html>

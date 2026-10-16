@@ -1,46 +1,60 @@
-<div class="popup-container">
-
-  <!-- Header -->
-  <div class="popup-header">
-    Recadrer l'image
+<div class="gp-dialog">
+  <div class="gp-dialog__header">
+    <span class="gp-dialog__icon" aria-hidden="true"><i class="bi bi-crop"></i></span>
+    <div>
+      <h2 class="gp-dialog__title" id="crop-title">{{ 'crop.title' | t }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'crop.subtitle' | t }}</p>
+    </div>
   </div>
 
-  <!-- Body -->
-  <div class="popup-body">
-
-    <!-- Info -->
-    <div class="popup-alert-info">
-      <span>Utilisez les carrés pour redimensionner votre image.</span>
+  <div class="gp-dialog__body">
+    <div class="cropper-stage">
+      @if (imageToCrop) {
+        <image-cropper
+          #cropper
+          [imageBase64]="imageToCrop"
+          [cropper]="cropperPosition"
+          [maintainAspectRatio]="false"
+          [aspectRatio]="1"
+          [imageQuality]="1"
+          format="png"
+          (cropperChange)="onCropperChange($event)"
+          (imageCropped)="imageCropped($event)">
+        </image-cropper>
+      } @else {
+        <p class="gp-muted" role="status"><span class="gp-spinner" aria-hidden="true"></span> {{ 'crop.loading' | t }}</p>
+      }
     </div>
 
-    <!-- Recadrage -->
-    <div class="section-block">
-      <image-cropper
-        #cropper
-        [imageBase64]="imageToCrop"
-        [cropper]="cropperPosition"
-        [maintainAspectRatio]="false"
-        [aspectRatio]="1"
-        [imageQuality]="1"
-        format="png"
-        (cropperChange)="onCropperChange($event)"
-        (imageCropped)="imageCropped($event)">
-      </image-cropper>
-
-      <div class="mt-2 d-flex gap-3 align-items-center justify-content-center">
-        <label>Hauteur :</label>
-        <input type="number" class="form-control w-25" [max]="imageMaxHeight - cropHeightY1" [(ngModel)]="cropHeightSize" (ngModelChange)="changeHeightCropper($event)">
-        <label>Largeur :</label>
-        <input type="number" class="form-control w-25" [max]="imageMaxWidth - cropWidthX1" [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
+    <div class="crop-sizes">
+      <div class="gp-field">
+        <label class="gp-field__label" for="crop-width">{{ 'crop.width' | t }}</label>
+        <span class="gp-input-unit">
+          <input id="crop-width" type="number" class="form-control" min="1"
+                 [max]="imageMaxWidth - cropWidthX1"
+                 aria-describedby="crop-width-unit"
+                 [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
+          <span class="gp-input-unit__unit" id="crop-width-unit">px</span>
+        </span>
       </div>
-
+      <div class="gp-field">
+        <label class="gp-field__label" for="crop-height">{{ 'crop.height' | t }}</label>
+        <span class="gp-input-unit">
+          <input id="crop-height" type="number" class="form-control" min="1"
+                 [max]="imageMaxHeight - cropHeightY1"
+                 aria-describedby="crop-height-unit"
+                 [(ngModel)]="cropHeightSize" (ngModelChange)="changeHeightCropper($event)">
+          <span class="gp-input-unit__unit" id="crop-height-unit">px</span>
+        </span>
+      </div>
     </div>
+  </div>
 
-    <!-- Boutons -->
-    <div class="d-flex justify-content-between gap-3 mt-2">
-      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancelCrop()">Annuler</button>
-      <button class="btn-confirm fw-semibold flex-grow-1" (click)="validateCrop()">Recadrer l'image</button>
-    </div>
-
+  <div class="gp-dialog__footer">
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="cancelCrop()">{{ 'common.cancel' | t }}</button>
+    <button type="button" class="gp-btn gp-btn--primary" (click)="validateCrop()">
+      <i class="bi bi-check-lg" aria-hidden="true"></i>
+      {{ 'crop.title' | t }}
+    </button>
   </div>
 </div>

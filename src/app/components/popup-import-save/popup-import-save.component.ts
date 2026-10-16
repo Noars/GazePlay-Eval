@@ -1,6 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Popup d'import d'une évaluation depuis un fichier ZIP.
@@ -20,9 +22,10 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './popup-import-save.component.html',
   styleUrl: './popup-import-save.component.css',
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule, TranslatePipe]
 })
 export class PopupImportSaveComponent {
+  private readonly i18n = inject(I18nService);
 
   mode: 'consult' | 'save' | null = null;
   selectedSlot: number | null = null;
@@ -75,6 +78,14 @@ export class PopupImportSaveComponent {
     if (this.mode === null || this.zipFile === null) return false;
     if (this.mode === 'save') return this.selectedSlot !== null;
     return true;
+  }
+
+  /** Explique ce qui manque pour pouvoir confirmer (affiché sous le formulaire). */
+  missingRequirement(): string {
+    if (this.zipFile === null) return this.i18n.t('import.missing.file');
+    if (this.mode === null) return this.i18n.t('import.missing.mode');
+    if (this.mode === 'save' && this.selectedSlot === null) return this.i18n.t('import.missing.slot');
+    return '';
   }
 
   /** L'utilisateur annule la popup sans importer. */

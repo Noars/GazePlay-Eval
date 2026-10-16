@@ -1,135 +1,141 @@
-import {Component, ElementRef, Input, OnChanges, ViewChild} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {Component, EventEmitter, inject, Input, OnChanges, OnDestroy, Output} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {MatDialog} from '@angular/material/dialog';
+import {firstValueFrom} from 'rxjs';
 import {stimuliScreenValues} from '../../shared/screenModel';
 import {CropImageComponent} from '../crop-image/crop-image.component';
-import {MatDialog} from '@angular/material/dialog';
-import { IndexedDBService } from '../../services/indexedDB/indexed-db.service';
-import {SaveService} from '../../services/save/save.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {FlashService} from '../../services/flash-message/flash.service';
+import {MediaLibraryService, MediaType} from '../../core/media/media-library.service';
+import {FilePickerComponent} from '../../shared/ui/file-picker/file-picker.component';
+import {ChoiceOption, ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
+/**
+ * Panneau de configuration d'une case de la grille de stimuli : réponse attendue, image
+ * (avec recadrage) et son.
+ *
+ * Les médias sont enregistrés dans IndexedDB dès leur sélection ; le remplacement ou la
+ * suppression libère l'ancien média (supprimé seulement s'il n'est plus utilisé ailleurs).
+ * Dans l'éditeur, cette libération est confiée au parent par `mediaReleased` : elle n'a lieu
+ * qu'à la sortie de l'éditeur, pour que « Annuler » retrouve toujours le fichier.
+ */
 @Component({
   selector: 'app-config-stimuli',
-  imports: [
-    ReactiveFormsModule,
-    FormsModule
-  ],
+  imports: [FormsModule, FilePickerComponent, ChoiceSettingComponent, TranslatePipe],
   templateUrl: './config-stimuli.component.html',
   standalone: true,
   styleUrl: './config-stimuli.component.css'
 })
-export class ConfigStimuliComponent implements OnChanges{
+export class ConfigStimuliComponent implements OnChanges, OnDestroy {
+  private readonly dialog = inject(MatDialog);
+  private readonly media = inject(MediaLibraryService);
+  private readonly saveAutoService = inject(AutoSaveService);
+  private readonly flashService = inject(FlashService);
+  private readonly i18n = inject(I18nService);
 
   @Input() data!: {
     cell: number,
-    screen: { [key:number]: stimuliScreenValues }
+    screen: { [key: number]: stimuliScreenValues & {hidden?: boolean} },
+    rows?: number,
+    cols?: number,
   };
 
-  @ViewChild('fileInputImage') fileInputImage!: ElementRef<HTMLInputElement>;
-  @ViewChild('fileInputSound') fileInputSound!: ElementRef<HTMLInputElement>;
+  /** Demande de fermeture du panneau (bouton « Terminer »). */
+  @Output() closed = new EventEmitter<void>();
 
-  pageElement: HTMLElement | null = document.getElementById('configStimuli');
-  isResizing = false;
-  previewImage: SafeUrl | string = '';
+  /**
+   * Média retiré de la case. S'il est écouté, le parent se charge de la libération (différée) ;
+   * sinon le média est libéré immédiatement.
+   */
+  @Output() mediaReleased = new EventEmitter<{ref: string, type: MediaType}>();
+
+  previewImage: string = '';
   previewSound: string = '';
+  /** Opération en cours sur un média (désactive les boutons concernés). */
+  busy: 'image' | 'sound' | 'crop' | null = null;
+  /** Vrai si le média référencé est introuvable dans le stockage du navigateur. */
+  missingImage = false;
+  missingSound = false;
 
-  constructor(
-    private dialog: MatDialog,
-    private idbService: IndexedDBService,
-    private saveService: SaveService,
-    private saveAutoService: AutoSaveService,
-    private sanitizer: DomSanitizer){
+  readonly answerOptions: ChoiceOption<boolean>[] = [
+    {value: true, labelKey: 'editor.goodAnswer'},
+    {value: false, labelKey: 'editor.wrongAnswer'},
+  ];
+
+  get cell(): stimuliScreenValues & {hidden?: boolean} {
+    return this.data.screen[this.data.cell];
   }
 
   async ngOnChanges() {
     await this.checkCell();
   }
 
-  async checkCell(): Promise<void> {
-    const cellData = this.data.screen[this.data.cell];
-    const hasUsableImageFile = cellData.imageFile instanceof Blob;
-    const hasUsableSoundFile = cellData.soundFile instanceof Blob;
+  ngOnDestroy(): void {
+    this.setImagePreview(null);
+    this.setSoundPreview(null);
+  }
 
-    // si l'image n'est pas dans la mémoire
-    if (!hasUsableImageFile && (cellData.imageId || cellData.imageName)) {
+  /** Résout les médias de la case depuis IndexedDB et prépare leurs aperçus. */
+  async checkCell(): Promise<void> {
+    const cellData = this.cell;
+    if (!cellData) return;
+
+    if (!(cellData.imageFile instanceof Blob) && (cellData.imageId || cellData.imageName)) {
       cellData.imageFile = undefined;
-      const imageRef = cellData.imageId || cellData.imageName!;
-      const match = await this.findFileInIDB(imageRef, 'image');
+      const match = await this.media.resolve(cellData.imageId || cellData.imageName, 'image');
       if (match) {
         cellData.imageFile = match.file;
         cellData.imageId = match.id;
       }
     }
+    this.missingImage = !!cellData.imageName && !(cellData.imageFile instanceof Blob);
+    this.setImagePreview(cellData.imageFile instanceof Blob ? cellData.imageFile : null);
 
-    if (cellData.imageFile instanceof Blob) {
-      this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(cellData.imageFile));
-    } else {
-      this.previewImage = '';
-    }
-
-    // si le son n'est pas dans la mémoire
-    if (!hasUsableSoundFile && (cellData.soundId || cellData.soundName)) {
+    if (!(cellData.soundFile instanceof Blob) && (cellData.soundId || cellData.soundName)) {
       cellData.soundFile = undefined;
-      const soundRef = cellData.soundId || cellData.soundName!;
-      const match = await this.findFileInIDB(soundRef, 'sound');
+      const match = await this.media.resolve(cellData.soundId || cellData.soundName, 'sound');
       if (match) {
         cellData.soundFile = match.file;
         cellData.soundId = match.id;
       }
     }
+    this.missingSound = !!cellData.soundName && !(cellData.soundFile instanceof Blob);
+    this.setSoundPreview(cellData.soundFile instanceof Blob ? cellData.soundFile : null);
+  }
 
-    if (cellData.soundFile instanceof Blob) {
-      this.previewSound = URL.createObjectURL(cellData.soundFile);
-    } else {
-      this.previewSound = '';
-    }
-
-    if (this.fileInputImage && this.fileInputSound) {
-      this.fileInputImage.nativeElement.value = '';
-      this.fileInputSound.nativeElement.value = '';
-    }
+  setGoodAnswer(value: boolean): void {
+    this.cell.goodAnswer = value;
   }
 
   async deleteImage(): Promise<void> {
-    const cell = this.data.screen[this.data.cell];
-
-    if (cell.imageId || cell.imageName) {
-      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
-    }
-
+    const cell = this.cell;
+    const ref = cell.imageId || cell.imageName;
     cell.imageId = '';
     cell.imageName = '';
     cell.imageFile = undefined;
-
-    this.checkCell();
+    await this.releaseSafely(ref, 'image');
+    await this.checkCell();
     this.saveAutoService.autoSave('stimuli');
   }
 
   async deleteSound(): Promise<void> {
-    const cell = this.data.screen[this.data.cell];
-
-    if (cell.soundId || cell.soundName) {
-      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
-    }
-
+    const cell = this.cell;
+    const ref = cell.soundId || cell.soundName;
     cell.soundId = '';
     cell.soundName = '';
     cell.soundFile = undefined;
-
-    this.checkCell();
+    await this.releaseSafely(ref, 'sound');
+    await this.checkCell();
     this.saveAutoService.autoSave('stimuli');
   }
 
+  /** Retire l'image et le son de la case (la case reste en place). */
   async deleteCell(): Promise<void> {
-    const cell = this.data.screen[this.data.cell];
-
-    if (cell.imageId || cell.imageName) {
-      await this.deleteFileFromIDB(cell.imageId || cell.imageName!, 'image');
-    }
-
-    if (cell.soundId || cell.soundName) {
-      await this.deleteFileFromIDB(cell.soundId || cell.soundName!, 'sound');
-    }
+    const cell = this.cell;
+    const imageRef = cell.imageId || cell.imageName;
+    const soundRef = cell.soundId || cell.soundName;
 
     this.data.screen[this.data.cell] = {
       imageId: '',
@@ -141,7 +147,9 @@ export class ConfigStimuliComponent implements OnChanges{
       goodAnswer: false,
     };
 
-    this.checkCell();
+    await this.releaseSafely(imageRef, 'image');
+    await this.releaseSafely(soundRef, 'sound');
+    await this.checkCell();
     this.saveAutoService.autoSave('stimuli');
   }
 
@@ -149,188 +157,131 @@ export class ConfigStimuliComponent implements OnChanges{
     this.saveAutoService.autoSave('stimuli');
   }
 
-  private async findFileInIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<{ file: File, id: string } | undefined> {
-    const candidateIds = this.getCandidateIds(fileName);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        if (!(evalFile?.file instanceof Blob)) continue;
-
-        if (evalFile.file instanceof File) {
-          return { file: evalFile.file, id };
-        }
-
-        const inferredName = this.extractFileNameFromId(id);
-        return {
-          file: new File([evalFile.file], inferredName, { type: evalFile.file.type }),
-          id
-        };
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
-
-    // Fallback: certaines sauvegardes ont un préfixe de projet différent.
-    // Dans ce cas, on retrouve le média par son nom de fichier et son type.
-    try {
-      const allFiles = await this.idbService.getAllFiles();
-      const baseName = this.extractFileNameFromId(fileName);
-      const match = allFiles.find((entry) =>
-        entry.type === expectedType && this.extractFileNameFromId(entry.id) === baseName
-      );
-
-      if (match?.file instanceof Blob) {
-        if (match.file instanceof File) {
-          return { file: match.file, id: match.id };
-        }
-        return {
-          file: new File([match.file], baseName, { type: match.file.type }),
-          id: match.id
-        };
-      }
-    } catch {
-      // ignore: fallback best-effort
-    }
-
-    return undefined;
+  /** Termine la configuration de la case. */
+  finish(): void {
+    this.saveProgress();
+    this.closed.emit();
   }
 
-  private async deleteFileFromIDB(fileName: string, expectedType: 'image' | 'sound'): Promise<void> {
-    const candidateIds = this.getCandidateIds(fileName);
-
-    for (const id of candidateIds) {
-      try {
-        const evalFile = await this.idbService.getFile(id);
-        if (evalFile.type !== expectedType) continue;
-        await this.idbService.releaseFile(id);
-        return;
-      } catch {
-        // essaie le candidat suivant
-      }
-    }
+  async getImageFile(event: Event | File) {
+    const file = this.fileFrom(event);
+    if (!file) return;
+    await this.replaceMedia(file, 'image');
   }
 
-  private getCandidateIds(fileName: string): string[] {
-    const cleanName = fileName.trim();
-    if (!cleanName) return [];
-
-    const projectName = this.saveService.getEvalName();
-    const baseName = this.extractFileNameFromId(cleanName);
-    const ids = new Set<string>();
-
-    ids.add(cleanName);
-    ids.add(baseName);
-
-    if (projectName) {
-      ids.add(`${projectName}/${cleanName}`);
-      ids.add(`${projectName}/${baseName}`);
-    }
-
-    return [...ids];
+  async getSoundFile(event: Event | File) {
+    const file = this.fileFrom(event);
+    if (!file) return;
+    await this.replaceMedia(file, 'sound');
   }
 
-  private extractFileNameFromId(id: string): string {
-    const parts = id.split('/');
-    return parts[parts.length - 1] || id;
-  }
+  /**
+   * Ouvre l'outil de recadrage. L'image recadrée est enregistrée comme un **nouveau**
+   * fichier (ex. `photo-recadree.png`), pour ne pas modifier l'original éventuellement
+   * utilisé par d'autres cases ; l'ancienne référence est libérée.
+   */
+  async cropImage(): Promise<void> {
+    const original = this.cell.imageFile;
+    if (!(original instanceof Blob)) return;
 
-  async getImageFile(event: Event){
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-    const projectName = this.saveService.getEvalName();
-    const id = `${projectName}/${file.name}`;
-    const cell = this.data.screen[this.data.cell];
-
-    const oldId = cell.imageId;
-    if (oldId && oldId !== id) {
-      await this.deleteFileFromIDB(oldId, 'image');
-    }
-
-    if (!oldId || oldId !== id) {
-      try {
-        await this.idbService.addFile(id, file, 'image');
-      } catch {
-        await this.idbService.incrementRef(id);
-      }
-    }
-
-    cell.imageName = file.name;
-    cell.imageId = id;
-    cell.imageFile = file;
-    this.previewImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
-  }
-
-  async getSoundFile(event: Event){
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-    const projectName = this.saveService.getEvalName();
-    const id = `${projectName}/${file.name}`;
-    const cell = this.data.screen[this.data.cell];
-
-    const oldId = cell.soundId;
-    if (oldId && oldId !== id) {
-      await this.deleteFileFromIDB(oldId, 'sound');
-    }
-
-    if (!oldId || oldId !== id) {
-      try {
-        await this.idbService.addFile(id, file, 'sound');
-      } catch {
-        await this.idbService.incrementRef(id);
-      }
-    }
-
-    cell.soundName = file.name;
-    cell.soundId = id;
-    cell.soundFile = file;
-    this.previewSound = URL.createObjectURL(file);
-  }
-
-  cropImage(){
     const dialogRef = this.dialog.open(CropImageComponent, {
-      data: {
-        image: this.data.screen[this.data.cell].imageFile
-      },
-      panelClass: 'scrollable-dialog', // classe custom pour laisser le scroll
-      disableClose: true, // empêche l'utilisateur de cliquer hors de la popup
+      data: {image: original},
+      panelClass: ['gp-dialog-panel', 'gp-dialog-panel--wide'],
+      disableClose: true,
+      ariaLabelledBy: 'crop-title',
     });
+    const result: File | Blob | null | undefined = await firstValueFrom(dialogRef.afterClosed());
+    if (!result) return;
 
-    dialogRef.afterClosed().subscribe((result: File | null) => {
-      if (result) {
-        this.data.screen[this.data.cell].imageFile = result;
-        this.previewImage =  URL.createObjectURL(result);
-      }
-    });
-  }
+    const baseName = (this.cell.imageName || 'image').replace(/\.[^.]+$/, '');
+    const cropped = new File([result], `${baseName}-recadree.png`, {type: 'image/png'});
 
-  startResize(event: MouseEvent){
-    this.isResizing = true;
-
-    document.addEventListener('mousemove', this.resize);
-    document.addEventListener('mouseup', this.stopResize);
-  }
-
-  resize = (event: MouseEvent) => {
-    if (!this.isResizing) return;
-
-    const newWidth = event.clientX;
-    const el = document.getElementById('configStimuli');
-
-    if (el) {
-      el.style.setProperty('--bs-offcanvas-width', `${newWidth}px`);
+    this.busy = 'crop';
+    try {
+      const previousRef = this.cell.imageId || this.cell.imageName;
+      const stored = await this.media.storeAsNew(cropped, 'image');
+      const file = stored.fileName === cropped.name ? cropped : new File([cropped], stored.fileName, {type: 'image/png'});
+      this.cell.imageName = stored.fileName;
+      this.cell.imageId = stored.id;
+      this.cell.imageFile = file;
+      this.setImagePreview(file);
+      await this.releaseSafely(previousRef, 'image');
+      this.saveAutoService.autoSave('stimuli');
+    } catch (error) {
+      console.error('Recadrage non enregistré :', error);
+      this.flashService.show('error', this.i18n.t('cell.cropError'));
+    } finally {
+      this.busy = null;
     }
-  };
+  }
 
-  stopResize = () => {
-    this.isResizing = false;
+  private async replaceMedia(file: File, type: 'image' | 'sound'): Promise<void> {
+    const cell = this.cell;
+    const previousRef = type === 'image' ? (cell.imageId || cell.imageName) : (cell.soundId || cell.soundName);
+    this.busy = type;
+    try {
+      // Même fichier choisi à nouveau pour cette case : on remplace son contenu sans
+      // ajouter de référence (sinon le compteur augmenterait à chaque nouvelle sélection).
+      const sameId = this.media.idFor(file.name);
+      let id: string;
+      if (previousRef === sameId) {
+        await this.media.replaceContent(sameId, file, type);
+        id = sameId;
+      } else {
+        id = await this.media.store(file, type);
+      }
+      if (type === 'image') {
+        cell.imageName = file.name;
+        cell.imageId = id;
+        cell.imageFile = file;
+        this.missingImage = false;
+        this.setImagePreview(file);
+      } else {
+        cell.soundName = file.name;
+        cell.soundId = id;
+        cell.soundFile = file;
+        this.missingSound = false;
+        this.setSoundPreview(file);
+      }
+      if (previousRef && previousRef !== id) {
+        await this.releaseSafely(previousRef, type);
+      }
+    } catch (error) {
+      console.error('Enregistrement du média impossible :', error);
+      this.flashService.show('error', this.i18n.t('editor.error.fileSave', {name: file.name}));
+    } finally {
+      this.busy = null;
+    }
+  }
 
-    document.removeEventListener('mousemove', this.resize);
-    document.removeEventListener('mouseup', this.stopResize);
-  };
+  private async releaseSafely(ref: string | undefined, type: MediaType): Promise<void> {
+    if (!ref) return;
+    if (this.mediaReleased.observed) {
+      this.mediaReleased.emit({ref, type});
+      return;
+    }
+    try {
+      await this.media.release(ref, type);
+    } catch (error) {
+      console.warn('Libération de média ignorée :', error);
+    }
+  }
+
+  private fileFrom(event: Event | File): File | undefined {
+    if (event instanceof File) return event;
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (input) input.value = '';
+    return file;
+  }
+
+  private setImagePreview(file: Blob | null): void {
+    if (this.previewImage) URL.revokeObjectURL(this.previewImage);
+    this.previewImage = file ? URL.createObjectURL(file) : '';
+  }
+
+  private setSoundPreview(file: Blob | null): void {
+    if (this.previewSound) URL.revokeObjectURL(this.previewSound);
+    this.previewSound = file ? URL.createObjectURL(file) : '';
+  }
 }

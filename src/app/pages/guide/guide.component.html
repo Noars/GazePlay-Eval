@@ -1,13 +1,10 @@
-<div class="d-flex justify-content-center p-4">
-  <div style="width:100%; max-width:800px">
-    <router-outlet></router-outlet>
-  </div>
-  <button
-    type="button"
-    class="scroll-bottom-button btn btn-primary rounded-circle shadow"
-    (click)="scrollToBottom()"
-    aria-label="Aller en bas de la page"
-  >
-    ↓
-  </button>
+<div class="gp-page gp-page--narrow">
+  <router-outlet></router-outlet>
 </div>
+<button type="button"
+        class="scroll-bottom-button gp-btn gp-btn--secondary gp-btn--icon"
+        (click)="scrollToBottom()"
+        [attr.aria-label]="'guide.scrollBottom' | t"
+        [title]="'guide.scrollBottom' | t">
+  <i class="bi bi-arrow-down" aria-hidden="true"></i>
+</button>

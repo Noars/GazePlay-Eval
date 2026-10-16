@@ -3,12 +3,15 @@ import {CropperPosition, ImageCropperComponent} from 'ngx-image-cropper';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {FormsModule} from '@angular/forms';
 import {FlashService} from '../../services/flash-message/flash.service';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-crop-image',
   imports: [
     ImageCropperComponent,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './crop-image.component.html',
   styleUrl: './crop-image.component.css'
@@ -40,6 +43,7 @@ export class CropImageComponent implements OnInit{
   constructor(
     public dialogRef: MatDialogRef<CropImageComponent>,
     private flashService: FlashService,
+    private i18n: I18nService,
     @Inject(MAT_DIALOG_DATA) public data: {image: File}) {
   }
 
@@ -56,7 +60,7 @@ export class CropImageComponent implements OnInit{
         const imageHeight = img.height;
 
         if (imageWidth < 500 || imageHeight < 500) {
-          this.imageToCrop = this.resizeImage(base64, imageWidth, imageHeight);
+          this.imageToCrop = this.resizeImage(base64, imageWidth, imageHeight, img);
         } else {
           this.imageToCrop = base64;
           this.cropperPosition = {
@@ -74,7 +78,12 @@ export class CropImageComponent implements OnInit{
     reader.readAsDataURL(file);
   }
 
-  resizeImage(base64: string, width: number, height: number): string {
+  /**
+   * Agrandit une petite image (côté < 500 px) pour faciliter le recadrage.
+   * @param loadedImage image déjà chargée à dessiner (sinon chargée depuis `base64`,
+   *        ce qui peut produire un canevas vide si l'image n'est pas encore décodée).
+   */
+  resizeImage(base64: string, width: number, height: number, loadedImage?: HTMLImageElement): string {
     const canvas = document.createElement('canvas');
 
     let newWidth: number;
@@ -92,8 +101,11 @@ export class CropImageComponent implements OnInit{
     canvas.height = newHeight;
 
     const ctx = canvas.getContext('2d')!;
-    const img = new Image();
-    img.src = base64;
+    let img = loadedImage;
+    if (!img) {
+      img = new Image();
+      img.src = base64;
+    }
 
     ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
@@ -152,13 +164,17 @@ export class CropImageComponent implements OnInit{
   }
 
   validateCrop(){
-    console.log('Cropped image:', this.croppedImage);
+    if (!this.croppedImage) {
+      this.dialogRef.close();
+      this.flashService.show('info', this.i18n.t('crop.unchanged'));
+      return;
+    }
     this.dialogRef.close(this.croppedImage);
-    this.flashService.show("success", "Votre image a bien été recadrée.")
+    this.flashService.show('success', this.i18n.t('crop.done'));
   }
 
   cancelCrop(){
     this.dialogRef.close();
-    this.flashService.show("info", "Les proportions de votre image ont été conservées.")
+    this.flashService.show('info', this.i18n.t('crop.cancelled'));
   }
 }

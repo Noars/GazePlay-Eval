@@ -1,92 +1,205 @@
-<div class="d-flex justify-content-center p-4">
-  <div style="width:100%; max-width:700px">
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <h1 class="gp-page-header__title">{{ 'options.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'options.lead' | t }}</p>
+    </div>
+  </header>
 
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title text-center">Options </h2>
+  @if (preferencesService.saveError()) {
+    <div class="gp-callout gp-callout--warning mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <div class="gp-callout__body"><p>{{ preferencesService.saveError() }}</p></div>
+    </div>
+  }
+
+  <div class="gp-stack">
+    <!-- Aperçu -->
+    <section class="gp-card preview" aria-labelledby="preview-title">
+      <div class="gp-card__body">
+        <h2 class="preview__title" id="preview-title">{{ 'options.preview.title' | t }}</h2>
+        <p class="mb-2">
+          {{ 'options.preview.before' | t }}<a href="#/guide">{{ 'options.preview.link' | t }}</a>{{ 'options.preview.after' | t }}
+        </p>
+        <div class="gp-btn-group">
+          <span class="gp-btn gp-btn--primary gp-btn--sm" aria-hidden="true">{{ 'options.preview.primary' | t }}</span>
+          <span class="gp-btn gp-btn--secondary gp-btn--sm" aria-hidden="true">{{ 'options.preview.secondary' | t }}</span>
+        </div>
       </div>
-      <div class="card-body">
+    </section>
 
-        <div class="card inner-card mt-3">
-          <div class="card-header inner-card-header">Notifications</div>
-          <div class="inner-card-body">
+    <!-- Langue -->
+    <section class="gp-card" aria-labelledby="language-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="language-title"><i class="bi bi-translate me-2" aria-hidden="true"></i>{{ 'options.language.title' | t }}</h2>
+      </div>
+      <div class="gp-card__body">
+        <app-choice-setting [label]="'options.language.label' | t"
+                            [hint]="'options.language.hint' | t"
+                            [options]="languageOptions"
+                            [ngModel]="prefs().language"
+                            (ngModelChange)="set('language', $event)"></app-choice-setting>
+      </div>
+    </section>
 
-            <div class="param-section-title">Affichage des messages</div>
-            <div class="param-row">
-              <span class="param-label">Durée d'affichage des messages</span>
-              <div class="param-control">
-                <div class="input-group w-auto">
-                  <input type="number"
-                         class="form-control"
-                         min="0"
-                         max="30"
-                         step="0.5"
-                         [(ngModel)]="options.flashDuration">
-                  <span class="input-group-text">secondes</span>
-                </div>
-              </div>
-            </div>
+    <!-- Apparence -->
+    <section class="gp-card" aria-labelledby="appearance-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="appearance-title"><i class="bi bi-palette me-2" aria-hidden="true"></i>{{ 'options.appearance.title' | t }}</h2>
+      </div>
+      <div class="gp-card__body">
+        <app-choice-setting [label]="'options.theme.label' | t"
+                            [hint]="'options.theme.hint' | t"
+                            [options]="themeOptions"
+                            [ngModel]="prefs().theme"
+                            (ngModelChange)="set('theme', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.contrast.label' | t"
+                            [hint]="'options.contrast.hint' | t"
+                            [options]="contrastOptions"
+                            [ngModel]="prefs().contrast"
+                            (ngModelChange)="set('contrast', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.colorBlind.label' | t"
+                            [hint]="'options.colorBlind.hint' | t"
+                            [ngModel]="prefs().colorBlindMode"
+                            (ngModelChange)="set('colorBlindMode', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.motion.label' | t"
+                            [hint]="'options.motion.hint' | t"
+                            [options]="motionOptions"
+                            [ngModel]="prefs().motion"
+                            (ngModelChange)="set('motion', $event)"></app-choice-setting>
+      </div>
+    </section>
 
-            @if (options.flashDuration === 0) {
-              <div class="alert alert-warning py-1 px-3 mb-2" style="font-size: 0.8rem;">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Une durée de 0 seconde désactive les messages.
-              </div>
-
-              <div class="param-row">
-                <span class="param-label">Aperçu</span>
-                <div class="param-control">
-                  <button class="btn btn-secondary btn-sm disabled">
-                    Tester
-                  </button>
-                </div>
-              </div>
-
-            } @else {
-              <div class="param-row">
-                <span class="param-label">Aperçu</span>
-                <div class="param-control">
-                  <button class="btn btn-secondary btn-sm"
-                          (click)="flashService.show('info', 'Ceci est un message de test !', options.flashDuration * 1000)">
-                    Tester
-                  </button>
-                </div>
-              </div>
-            }
-
-
-
+    <!-- Lecture -->
+    <section class="gp-card" aria-labelledby="reading-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="reading-title"><i class="bi bi-fonts me-2" aria-hidden="true"></i>{{ 'options.reading.title' | t }}</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="font-select">{{ 'options.font.label' | t }}</label>
+            <p class="gp-setting__hint" id="font-hint">
+              {{ fontDescriptionKey(selectedFont().id) | t }}
+              @if (selectedFont().remoteStylesheet) {
+                <br><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>
+                {{ 'options.font.remote' | t }}
+              }
+            </p>
+          </div>
+          <div class="gp-setting__control">
+            <select id="font-select" class="form-select font-select" aria-describedby="font-hint"
+                    [ngModel]="prefs().font" (ngModelChange)="setFont($event)">
+              @for (font of fonts; track font.id) {
+                <option [value]="font.id">{{ font.id === 'system' ? ('options.font.system.label' | t) : font.label }}</option>
+              }
+            </select>
           </div>
         </div>
 
-        <div class="card inner-card mt-3">
-          <div class="card-header inner-card-header">Stockage</div>
-          <div class="inner-card-body">
-
-            <div class="param-section-title">Stockage des pièces jointes (en cours de développement)</div>
-            <div class="param-row justify-content-center">
-              <div class="param-control min-w-0">
-                <button class="btn btn-danger btn-sm"
-                        (click)="this.emptyDB()">
-                  Supprimer tous les fichiers
-                </button>
-              </div>
-            </div>
-
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="text-scale">{{ 'options.textScale.label' | t }}</label>
+            <p class="gp-setting__hint">{{ 'options.textScale.hint' | t }}</p>
+          </div>
+          <div class="gp-setting__control">
+            <select id="text-scale" class="form-select"
+                    [ngModel]="prefs().textScale" (ngModelChange)="set('textScale', +$event)">
+              @for (option of textScaleOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
           </div>
         </div>
 
+        <app-choice-setting [label]="'options.lineHeight.label' | t"
+                            [options]="lineHeightOptions"
+                            [ngModel]="prefs().lineHeight"
+                            (ngModelChange)="set('lineHeight', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.letterSpacing.label' | t"
+                            [options]="letterSpacingOptions"
+                            [ngModel]="prefs().letterSpacing"
+                            (ngModelChange)="set('letterSpacing', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.wordSpacing.label' | t"
+                            [options]="wordSpacingOptions"
+                            [ngModel]="prefs().wordSpacing"
+                            (ngModelChange)="set('wordSpacing', $event)"></app-choice-setting>
+        <app-choice-setting [label]="'options.underline.label' | t"
+                            [hint]="'options.underline.hint' | t"
+                            [ngModel]="prefs().underlineLinks"
+                            (ngModelChange)="set('underlineLinks', $event)"></app-choice-setting>
       </div>
-    </div>
+    </section>
 
-    <div class="d-flex justify-content-between mt-4">
-      <button class="btn btn-primary" (click)="goBack()">
-        ← Retour
-      </button>
-      <button class="btn btn-success fw-semibold" (click)="saveDuration()">
-        Sauvegarder
-      </button>
-    </div>
+    <!-- Notifications -->
+    <section class="gp-card" aria-labelledby="notifications-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="notifications-title"><i class="bi bi-bell me-2" aria-hidden="true"></i>{{ 'options.notifications.title' | t }}</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <label class="gp-setting__label" for="message-duration">{{ 'options.duration.label' | t }}</label>
+            <p class="gp-setting__hint" id="message-duration-hint">{{ 'options.duration.hint' | t }}</p>
+          </div>
+          <div class="gp-setting__control">
+            <span class="gp-input-unit">
+              <input id="message-duration" class="form-control" type="number" min="0" max="30" step="0.5"
+                     aria-describedby="message-duration-hint message-duration-unit"
+                     [ngModel]="prefs().messageDuration" (ngModelChange)="setMessageDuration($event)">
+              <span class="gp-input-unit__unit" id="message-duration-unit">{{ 'options.duration.unit' | t }}</span>
+            </span>
+            <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm"
+                    [disabled]="prefs().messageDuration === 0" (click)="testMessage()">
+              {{ 'options.duration.test' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Stockage -->
+    <section class="gp-card" aria-labelledby="storage-title">
+      <div class="gp-card__header">
+        <h2 class="gp-card__title" id="storage-title"><i class="bi bi-hdd me-2" aria-hidden="true"></i>{{ 'options.storage.title' | t }}</h2>
+      </div>
+      <div class="gp-card__body">
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <p class="gp-setting__label">{{ 'options.cleanup.label' | t }}</p>
+            <p class="gp-setting__hint">{{ 'options.cleanup.hint' | t }}</p>
+          </div>
+          <div class="gp-setting__control">
+            <button type="button" class="gp-btn gp-btn--secondary" [disabled]="storageBusy" (click)="cleanupUnusedMedia()">
+              <i class="bi bi-stars" aria-hidden="true"></i> {{ 'options.cleanup.button' | t }}
+            </button>
+          </div>
+        </div>
+        <div class="gp-setting">
+          <div class="gp-setting__text">
+            <p class="gp-setting__label">{{ 'options.deleteAll.label' | t }}</p>
+            <p class="gp-setting__hint">{{ 'options.deleteAll.hint' | t }}</p>
+          </div>
+          <div class="gp-setting__control">
+            <button type="button" class="gp-btn gp-btn--danger-outline" [disabled]="storageBusy" (click)="emptyDB()">
+              <i class="bi bi-trash3" aria-hidden="true"></i> {{ 'options.deleteAll.button' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <nav class="gp-actions" [attr.aria-label]="'common.pageActions' | t">
+    <button type="button" class="gp-btn" (click)="goBack()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'common.backHome' | t }}
+    </button>
+    <div class="gp-actions__end">
+      <button type="button" class="gp-btn gp-btn--ghost" (click)="resetPreferences()">
+        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+        {{ 'options.reset.button' | t }}
+      </button>
+    </div>
+  </nav>
 </div>

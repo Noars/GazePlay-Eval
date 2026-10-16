@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Une nouvelle poussée sur la même PR/branche annule l'exécution précédente devenue obsolète.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build de production
+        run: npm run build
+
+      # Vitest dans un vrai navigateur, piloté par Playwright : le Google Chrome préinstallé sur
+      # les runners ubuntu-latest (vitest-base.config.ts), aucun navigateur n'est téléchargé.
+      - name: Tests unitaires (Vitest, Chrome)
+        run: npx ng test --watch=false
+
+      # Bout en bout sur l'application construite (e2e/e2e-smoke.mjs, sans dépendance) :
+      # Chrome et Firefox, préinstallés sur ubuntu-latest, sont exigés ; profils temporaires.
+      - name: Tests de bout en bout (Chrome, Firefox)
+        run: node e2e/e2e-smoke.mjs chrome firefox
+
+      # Bloque uniquement les vulnérabilités critiques des dépendances livrées dans l'application ;
+      # les autres alertes restent visibles dans le journal et sont traitées lors du rappel semestriel.
+      - name: Audit des dépendances de production
+        run: npm audit --omit=dev --audit-level=critical

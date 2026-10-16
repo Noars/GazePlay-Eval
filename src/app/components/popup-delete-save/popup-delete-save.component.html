@@ -1,41 +1,25 @@
-<!-- popup-delete-save.component.html -->
-<div class="popup-container">
-
-  <!-- Header -->
-  <div class="popup-header">
-    <img class="icon-light me-2" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
-    <img class="icon-dark me-2" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
-    Suppression de sauvegarde
+<div class="gp-dialog">
+  <div class="gp-dialog__header">
+    <span class="gp-dialog__icon gp-dialog__icon--danger" aria-hidden="true"><i class="bi bi-trash3"></i></span>
+    <div>
+      <h2 class="gp-dialog__title" id="delete-title">{{ 'deleteSave.title' | t: {name: data.slotName} }}</h2>
+      <p class="gp-dialog__subtitle">{{ 'deleteSave.subtitle' | t }}</p>
+    </div>
   </div>
 
-  <!-- Body -->
-  <div class="popup-body">
-
-    <!-- Alerte -->
-    <div class="popup-alert">
-      <img class="icon-light alert-icon" src="assets/icons/warning/warning-dark.png" alt="">
-      <img class="icon-dark alert-icon" src="assets/icons/warning/warning.png" alt="">
-      <span>Attention, la suppression de cette évaluation est définitive.</span>
-    </div>
-
-    <!-- Bouton télécharger -->
-    <button class="btn-download fw-semibold w-100" (click)="download()">
-      <img class="icon-light me-2" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-      <img class="icon-dark me-2" src="assets/icons/save/save.png" width="16" height="16" alt="">
-      Télécharger mon ancienne évaluation
+  <div class="gp-dialog__body" id="delete-message">
+    <p class="mb-0">{{ 'deleteSave.body' | t }}</p>
+    <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" (click)="download()">
+      <i class="bi bi-download" aria-hidden="true"></i>
+      {{ 'deleteSave.downloadFirst' | t }}
     </button>
+  </div>
 
-    <!-- Boutons annuler / supprimer -->
-    <div class="d-flex justify-content-between gap-3 mt-2">
-      <button class="btn-cancel fw-semibold flex-grow-1" (click)="cancel()">
-        Annuler
-      </button>
-      <button class="btn-delete fw-semibold flex-grow-1" (click)="delete()">
-        <img class="icon-light me-1" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
-        <img class="icon-dark me-1" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
-        Supprimer
-      </button>
-    </div>
-
+  <div class="gp-dialog__footer">
+    <button type="button" class="gp-btn gp-btn--ghost js-cancel" (click)="cancel()">{{ 'common.cancel' | t }}</button>
+    <button type="button" class="gp-btn gp-btn--danger" (click)="delete()">
+      <i class="bi bi-trash3" aria-hidden="true"></i>
+      {{ 'deleteSave.confirm' | t }}
+    </button>
   </div>
 </div>

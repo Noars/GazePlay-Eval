@@ -1,70 +1,23 @@
-<div class="accordion-body">
+<!--
+  Index du tableau (identiques pour les paramètres globaux et pour un écran de transition) :
+  [0] temps avant écran suivant ? · [1] durée · [2] croix de fixation ? · [3] temps de fixation ? · [4] durée de fixation
+-->
+<h3 class="gp-subheading">{{ 'screen.next.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.next.auto' | t"
+                    [(ngModel)]="globalTransitionScreenInfos[0]"></app-choice-setting>
+@if (globalTransitionScreenInfos[0]) {
+  <app-number-setting [label]="'screen.next.delay' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
+                      [(ngModel)]="globalTransitionScreenInfos[1]"></app-number-setting>
+}
 
-  <div class="param-section-title">Passage à l'écran suivant</div>
-  <div class="param-row">
-    <span class="param-label">Mettre un temps avant passage à l'écran suivant ?</span>
-    <div class="param-control">
-      <div class="form-check mb-0">
-        <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[0]">
-        <label class="form-check-label" for="timeNextScreenTY">Oui</label>
-      </div>
-      <div class="form-check mb-0">
-        <input class="form-check-input" type="radio" name="timeNextScreenT" id="timeNextScreenTN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[0]">
-        <label class="form-check-label" for="timeNextScreenTN">Non</label>
-      </div>
-    </div>
-  </div>
-  @if (globalTransitionScreenInfos[0]) {
-    <div class="param-row">
-      <span class="param-label">Combien de temps ?</span>
-      <div class="param-control">
-        <div class="input-group w-auto">
-          <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="globalTransitionScreenInfos[1]">
-          <span class="input-group-text">secondes</span>
-        </div>
-      </div>
-    </div>
+<h3 class="gp-subheading">{{ 'screen.fixation.heading' | t }}</h3>
+<app-choice-setting [label]="'screen.fixation.show' | t"
+                    [(ngModel)]="globalTransitionScreenInfos[2]"></app-choice-setting>
+@if (globalTransitionScreenInfos[2]) {
+  <app-choice-setting [label]="'screen.fixation.require' | t"
+                      [(ngModel)]="globalTransitionScreenInfos[3]"></app-choice-setting>
+  @if (globalTransitionScreenInfos[3]) {
+    <app-number-setting [label]="'screen.fixation.duration' | t" [unit]="'screen.unit.seconds' | t" [min]="0.1" step="0.1"
+                        [(ngModel)]="globalTransitionScreenInfos[4]"></app-number-setting>
   }
-
-  <div class="param-section-title">Croix de fixation</div>
-  <div class="param-row">
-    <span class="param-label">Mettre une croix de fixation ?</span>
-    <div class="param-control">
-      <div class="form-check mb-0">
-        <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[2]">
-        <label class="form-check-label" for="fixationCrossScreenY">Oui</label>
-      </div>
-      <div class="form-check mb-0">
-        <input class="form-check-input" type="radio" name="fixationCrossScreen" id="fixationCrossScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[2]">
-        <label class="form-check-label" for="fixationCrossScreenN">Non</label>
-      </div>
-    </div>
-  </div>
-  @if (globalTransitionScreenInfos[2]) {
-    <div class="param-row">
-      <span class="param-label">Mettre un temps de fixation ?</span>
-      <div class="param-control">
-        <div class="form-check mb-0">
-          <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenY" [value]="true" [(ngModel)]="globalTransitionScreenInfos[3]">
-          <label class="form-check-label" for="fixationTimeScreenY">Oui</label>
-        </div>
-        <div class="form-check mb-0">
-          <input class="form-check-input" type="radio" name="fixationTimeScreen" id="fixationTimeScreenN" [value]="false" [(ngModel)]="globalTransitionScreenInfos[3]">
-          <label class="form-check-label" for="fixationTimeScreenN">Non</label>
-        </div>
-      </div>
-    </div>
-    @if (globalTransitionScreenInfos[3]) {
-      <div class="param-row">
-        <span class="param-label">Combien de temps ?</span>
-        <div class="param-control">
-          <div class="input-group w-auto">
-            <input type="number" class="form-control" min="0.1" step="0.1" [(ngModel)]="globalTransitionScreenInfos[4]">
-            <span class="input-group-text">secondes</span>
-          </div>
-        </div>
-      </div>
-    }
-  }
-
-</div>
+}

@@ -1,233 +1,102 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Offcanvas } from 'bootstrap';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { LoadZipService } from '../../services/load-zip/load-zip.service';
-import { LoadService} from '../../services/load/load.service';
-import { SaveService } from '../../services/save/save.service';
-import { PopupImportSaveComponent } from '../popup-import-save/popup-import-save.component';
-import { AutoSaveService } from '../../services/auto-save/auto-save.service';
-import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
-import {ThemeService} from '../../services/theme/theme.service';
-import { of } from 'rxjs';
-
-import { MenuComponent } from './menu.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideRouter} from '@angular/router';
+import {signal, WritableSignal} from '@angular/core';
+import {MenuComponent} from './menu.component';
+import {ImportFlowService} from '../../services/import-flow/import-flow.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
   let fixture: ComponentFixture<MenuComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let loadServiceZipSpy: jasmine.SpyObj<LoadZipService>;
-  let autoSaveServiceSpy: jasmine.SpyObj<AutoSaveService>;
-  let loadServiceSpy: jasmine.SpyObj<LoadService>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
-  let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>;
-  let themeServiceSpy: jasmine.SpyObj<ThemeService>;
+  let importFlowSpy: Mocked<ImportFlowService>;
+  let importing: WritableSignal<boolean>;
 
-  let mockZipFile: File;
+  async function create(mode: 'sidebar' | 'drawer'): Promise<void> {
+    fixture = TestBed.createComponent(MenuComponent);
+    component = fixture.componentInstance;
+    component.mode = mode;
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
 
   beforeEach(async () => {
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName']);
-    saveServiceSpy.dataAuto = {
-      format: 'Csv',
-      globalParamsInstructionScreen: [],
-      globalParamsStimuliScreen: [],
-      globalParamsTransitionScreen: [],
-      infoParticipant: [],
-      listScreens: [],
-      step: 0,
-      nomEval: 'TestEval'
-    };
-    saveServiceSpy.activeSlotIndex = null;
-
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    loadServiceZipSpy = jasmine.createSpyObj('LoadZipService', ['loadZipToSlot', 'loadZip']);
-    themeServiceSpy = jasmine.createSpyObj('ThemeService', ['getTheme']);
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.returnValue(null);
-
-    autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
-    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName']);
+    importing = signal(false);
+    importFlowSpy = createSpyObj('ImportFlowService', ['start'], {importing});
+    importFlowSpy.start.mockReturnValue(Promise.resolve(false));
 
     await TestBed.configureTestingModule({
       imports: [MenuComponent],
       providers: [
-        { provide: Router, useValue: routerSpy },
-        { provide: MatDialog, useValue: dialogSpy },
-        { provide: LoadZipService, useValue: loadServiceZipSpy },
-        { provide: AutoSaveService, useValue: autoSaveServiceSpy },
-        { provide: LoadService, useValue: loadServiceSpy },
-        { provide: SaveService, useValue: saveServiceSpy },
-        { provide: OverwriteGuardService, useValue: overwriteGuardSpy},
-        { provide: ThemeService, useValue: themeServiceSpy}
+        provideRouter([]),
+        {provide: ImportFlowService, useValue: importFlowSpy},
       ]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(MenuComponent);
-    component = fixture.componentInstance;
-
-    mockZipFile = new File(['dummy'], 'test.zip', { type: 'application/zip' });
-
-    const menuEl = document.createElement('div');
-    menuEl.id = 'menu';
-    document.body.appendChild(menuEl);
+    }).compileComponents();
   });
 
-  afterEach(() => {
-    document.getElementById('menu')?.remove();
-    document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
-  });
-
-  it('should create', () => {
+  it('devrait être créé', async () => {
+    await create('sidebar');
     expect(component).toBeTruthy();
   });
 
-  it('devrait retourner true pour isDark() si le thème est \'dark\'', () => {
-    themeServiceSpy.getTheme.and.returnValue('dark');
-    expect(component.isDark()).toBeTrue();
+  it('mode barre latérale → navigation avec de vrais liens (atteignables au clavier)', async () => {
+    await create('sidebar');
+    const nav: HTMLElement = fixture.nativeElement.querySelector('nav');
+    const links = Array.from(nav.querySelectorAll('a')) as HTMLAnchorElement[];
+
+    expect(nav.getAttribute('aria-label')).toBe('Navigation principale');
+    expect(links.map(a => a.textContent?.trim())).toStrictEqual(['Accueil', 'Guide', 'Options', 'Mes sauvegardes', 'Charger']);
+    links.forEach(link => expect(link.getAttribute('href')).toBeTruthy());
+    expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
   });
 
-  it('devrait retourner false pour isDark() si le thème est \'light\'', () => {
-    themeServiceSpy.getTheme.and.returnValue('light');
-    expect(component.isDark()).toBeFalse();
+  it('bouton « Importer un fichier » → délègue au parcours d\'import', async () => {
+    await create('sidebar');
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('button.gp-nav__link');
+    button.click();
+    expect(importFlowSpy.start).toHaveBeenCalled();
   });
 
-  it('ngOnInit : devrait initialiser l\'instance Offcanvas et attacher l\'écouteur d\'événement', () => {
-    const spy = spyOn(Offcanvas, 'getOrCreateInstance').and.callThrough();
-    component.ngOnInit();
-    expect(spy).toHaveBeenCalled();
+  it('pendant un import → bouton désactivé avec indication', async () => {
+    importing.set(true);
+    await create('sidebar');
+
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('button.gp-nav__link');
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('Import en cours');
   });
 
-  it('ngOnDestroy : devrait appeler dispose() sur l\'instance Offcanvas', () => {
-    component.ngOnInit();
-    const disposeSpy = spyOn((component as any).offcanvasInstance, 'dispose');
-    component.ngOnDestroy();
-    expect(disposeSpy).toHaveBeenCalled();
+  it('mode tiroir → <dialog> fermé par défaut, ouvert par open(), fermé par close()', async () => {
+    await create('drawer');
+    const dialog: HTMLDialogElement = fixture.nativeElement.querySelector('dialog');
+    expect(dialog).not.toBeNull();
+    expect(dialog.open).toBe(false);
+
+    component.open();
+    expect(dialog.open).toBe(true);
+
+    component.close();
+    expect(dialog.open).toBe(false);
   });
 
-  it('goToSauvegarde : devrait fermer le menu et naviguer vers \'/sauvegarde\'', () => {
-    component.ngOnInit();
-    component.goToSauvegarde();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/sauvegarde']);
+  it('mode tiroir → clic sur le fond ferme le menu', async () => {
+    await create('drawer');
+    const dialog: HTMLDialogElement = fixture.nativeElement.querySelector('dialog');
+    component.open();
+
+    component.onDrawerClick({target: dialog} as unknown as MouseEvent);
+
+    expect(dialog.open).toBe(false);
   });
 
-  it('goToLoadSave : devrait fermer le menu et naviguer vers \'/load-save\'', () => {
-    component.ngOnInit();
-    component.goToLoadSave();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/load-save']);
+  it('openImportPopup → ferme le tiroir avant d\'ouvrir l\'import', async () => {
+    await create('drawer');
+    const dialog: HTMLDialogElement = fixture.nativeElement.querySelector('dialog');
+    component.open();
+
+    await component.openImportPopup();
+
+    expect(dialog.open).toBe(false);
+    expect(importFlowSpy.start).toHaveBeenCalled();
   });
-
-  it('goToGuide : devrait fermer le menu et naviguer vers \'/guide\'', () => {
-    component.ngOnInit();
-    component.goToGuide();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/guide']);
-  });
-
-  it('goToAccueil : devrait fermer le menu et naviguer vers \'/home\'', () => {
-    component.ngOnInit();
-    component.goToAccueil();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
-  });
-
-  it('goToOptions : devrait fermer le menu et naviguer vers \'/option\'', () => {
-    component.ngOnInit();
-    component.goToOptions();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/option']);
-  });
-
-  it('Fermeture du menu : devrait nettoyer le DOM lors de la navigation', () => {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'offcanvas-backdrop';
-    document.body.appendChild(backdrop);
-    document.body.classList.add('offcanvas-open');
-
-    component.goToSauvegarde();
-
-    expect(document.querySelectorAll('.offcanvas-backdrop').length).toBe(0);
-    expect(document.body.classList.contains('offcanvas-open')).toBeFalse();
-  });
-
-  it('devrait ouvrir le dialog avec la bonne configuration et les données des slots', () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
-
-    component.openImportPopup();
-
-    expect(dialogSpy.open).toHaveBeenCalledWith(PopupImportSaveComponent, jasmine.objectContaining({
-      data: jasmine.objectContaining({
-        slots: jasmine.any(Array)
-      }),
-      disableClose: true
-    }));
-  });
-
-  it('Annulation : ne devrait rien faire si la popup est fermée sans résultat', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
-
-    component.openImportPopup();
-    tick();
-
-    expect(overwriteGuardSpy.check).not.toHaveBeenCalled();
-  }));
-
-  it('ne devrait pas continuer si overwriteGuard.check(0) retourne false', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: {} }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZip).not.toHaveBeenCalled();
-  }));
-
-  it('devrait appeler loadZip et tryResume() si le résultat de la popup a mode: \'load\' et que le guard est passé', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'load', zipFile: mockZipFile }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZip).toHaveBeenCalledWith(mockZipFile);
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
-
-  it('ne devrait pas charger le zip si overwriteGuard.check(slotIndex) retourne false pour le slot ciblé', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
-    overwriteGuardSpy.check.and.callFake((index) => Promise.resolve(index !== 1));
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZipToSlot).not.toHaveBeenCalled();
-  }));
-
-  it('devrait charger le zip dans le slot et appeler tryResume() sans renommer ni sauvegarder manuellement, si getUniqueEvalName retourne le même nom.', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: mockZipFile }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    overwriteGuardSpy.getUniqueEvalName.and.returnValue('TestEval');
-
-    component.openImportPopup();
-    tick();
-
-    expect(loadServiceZipSpy.loadZipToSlot).toHaveBeenCalledWith(mockZipFile, 1);
-    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
-
-  it('devrait changer le nom, sauvegarder dans le slot ciblé et le slot 0, puis tryResume() si getUniqueEvalName retourne un nouveau nom', fakeAsync(() => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of({ mode: 'save', slotIndex: 1, zipFile: 'file.zip' }) } as any);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    overwriteGuardSpy.getUniqueEvalName.and.returnValue('New Name');
-
-    component.openImportPopup();
-    tick();
-
-    expect(saveServiceSpy.dataAuto.nomEval).toBe('New Name');
-    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(1, jasmine.any(Object));
-    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.any(Object));
-    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
-  }));
-
 });

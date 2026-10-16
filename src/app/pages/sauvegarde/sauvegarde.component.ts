@@ -1,32 +1,43 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatTooltip } from '@angular/material/tooltip';
-import { PopupDeleteSaveComponent } from '../../components/popup-delete-save/popup-delete-save.component';
-import { LoadService } from '../../services/load/load.service';
-import { SaveService } from '../../services/save/save.service';
-import { AutoSaveService } from '../../services/auto-save/auto-save.service';
-import { saveModel } from '../../shared/saveModel';
-import { FormatTypeConfig } from '../../shared/dataBaseConfig';
-import { Router } from '@angular/router';
+import {Component, inject, OnInit} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {PopupDeleteSaveComponent} from '../../components/popup-delete-save/popup-delete-save.component';
+import {LoadService} from '../../services/load/load.service';
+import {SaveService} from '../../services/save/save.service';
+import {AutoSaveService} from '../../services/auto-save/auto-save.service';
+import {saveModel} from '../../shared/saveModel';
+import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import {Router} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {DownloadService} from '../../services/download/download.service';
-import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
+import {isEmptyEvaluation, OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {FlashService} from '../../services/flash-message/flash.service';
-import {IndexedDBService} from '../../services/indexedDB/indexed-db.service';
+import {MediaCleanupService} from '../../core/media/media-cleanup.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {ExclusiveAction} from '../../shared/exclusive-action';
 
+type Slot = { index: FormatTypeConfig; data: saveModel | null };
+
+/**
+ * Gestion des trois emplacements de sauvegarde : enregistrer l'évaluation en cours,
+ * la remplacer, l'ouvrir, la télécharger (`.gpSave`) ou la supprimer.
+ */
 @Component({
   selector: 'app-sauvegarde',
-  imports: [MatTooltip, DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './sauvegarde.component.html',
   styleUrl: './sauvegarde.component.css'
 })
 export class SauvegardeComponent implements OnInit {
 
-  slots: { index: FormatTypeConfig; data: saveModel | null }[] = [];
-  selectedSlot: FormatTypeConfig | null = null;
+  slots: Slot[] = [];
   hasUnsavedEval: boolean = false;
   evalInProgress: boolean | undefined;
-  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
+  autoSave: saveModel | null = null;
+  private readonly i18n = inject(I18nService);
+  /** Une action sur les emplacements à la fois (un double clic ne la relance pas). */
+  private readonly slotAction = new ExclusiveAction();
 
   constructor(
     private dialog: MatDialog,
@@ -37,73 +48,92 @@ export class SauvegardeComponent implements OnInit {
     public router: Router,
     private downloadService: DownloadService,
     private overwriteGuard: OverwriteGuardService,
-    private indexedDBService: IndexedDBService
+    private mediaCleanup: MediaCleanupService,
+    private confirmService: ConfirmService,
   ) {}
+
   /**
    * Charge les données dans les slots
    */
   ngOnInit(): void {
-    this.evalInProgress = this.loadService.getSlot(0) !== null;
-    this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
-      index: i,
-      data: this.loadService.getSlot(i) // récupération des données dans les différents slots
-    }));
-
-    const autoSave = this.loadService.getSlot(0);
-    if (autoSave !== null && autoSave.nomEval !== '') {
-      // On vérifie si l'autoSave correspond à un slot sauvegardé
-      const alreadySaved = this.slots.some(s => s.data?.nomEval === autoSave.nomEval);
-      this.hasUnsavedEval = !alreadySaved;
-    } else {
-      this.hasUnsavedEval = false;
-    }
-
+    this.refresh();
     if (this.hasUnsavedEval) {
-      this.flashMessageService.show('warning', 'Vous avez une évaluation qui n\'a pas encore été sauvegardée. Pensez à l\'enregistrer pour ne pas la perdre !');
+      this.flashMessageService.show('warning', this.i18n.t('saves.unsavedWarning'));
     }
   }
 
-  /**
-   * Sélectionne ou désélectionne un slot au clic de l'utilisateur, selon l'index donné.
-   * @param index l'index du slot sélectionné (0, 1, 2, 3).
-   */
-  selectSlot(index: FormatTypeConfig): void {
-    if (this.slots.find(s => s.index === index)?.data === null) return;
-    this.selectedSlot = this.selectedSlot === index ? null : index; // toggle
+  /** Relit les emplacements depuis le stockage local. */
+  refresh(): void {
+    this.autoSave = this.loadService.getSlot(0);
+    this.evalInProgress = this.autoSave !== null;
+    this.slots = ([1, 2, 3] as FormatTypeConfig[]).map(i => ({
+      index: i,
+      data: this.loadService.getSlot(i)
+    }));
+
+    // « En lieu sûr » : liée à un emplacement, ou identique au contenu de l'un d'eux
+    // (un emplacement homonyme mais différent ne compte pas).
+    if (this.autoSave !== null && !isEmptyEvaluation(this.autoSave)) {
+      const linked = this.saveService.activeSlotIndex !== null
+        && this.slots.some(s => s.index === this.saveService.activeSlotIndex && s.data !== null);
+      this.hasUnsavedEval = !linked && this.overwriteGuard.findSlotHolding(this.autoSave) === null;
+    } else {
+      this.hasUnsavedEval = false;
+    }
   }
 
   /**
    * Charge le slot correspondant à l'index donné dans le slot dynamique pour pouvoir le modifier.
-   * @param index l'index du slot sélectionné (0, 1, 2, 3).
+   * @param index l'index du slot sélectionné (1, 2, 3).
    */
-  async editSlot(index: FormatTypeConfig): Promise<void> {
-    const save = this.loadService.getSlot(index);
-    if (!save) return;
+  editSlot(index: FormatTypeConfig): Promise<void> {
+    return this.slotAction.run(() => this.openSlot(index));
+  }
 
-    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+  private async openSlot(index: FormatTypeConfig): Promise<void> {
+    if (!this.loadService.getSlot(index)) return;
+
+    // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).
+    const opening = await this.overwriteGuard.reserveForOpening(index);
+    if (!opening) return;
+    const reservation = opening.mode === 'link' ? opening.reservation : null;
+
+    if (!await this.overwriteGuard.check(0)) {
+      reservation?.release();
+      return;
+    }
+    // relu après la vérification : l'évaluation en cours vient peut-être d'y être reportée
+    const save = this.loadService.getSlot(index);
+    if (!save) {
+      reservation?.release();
+      return;
+    }
 
     const step = save.step >= 0 ? save.step : 3;
-    this.saveService.dataAuto = {
-      nomEval: save.nomEval,
-      format: save.format,
-      infoParticipant: save.infoParticipant,
-      globalParamsTransitionScreen: save.globalParamsTransitionScreen,
-      globalParamsInstructionScreen: save.globalParamsInstructionScreen,
-      globalParamsStimuliScreen: save.globalParamsStimuliScreen,
-      listScreens: save.listScreens,
-      step: step
-    };
-    this.saveService.activeSlotIndex = index;
+    this.saveService.loadIntoWorkspace(save, step);
+    this.saveService.setActiveSlot(reservation ? index : null, reservation);
     this.saveService.saveToSlot(0, this.saveService.dataAuto); // Sauvegarde dans le slot dynamique
     this.autoSaveService.tryResume(true);
   }
 
-  async saveToSlot(
-    slot: { index: FormatTypeConfig; data: saveModel | null },
-    dataToSave?: Omit<saveModel, 'createdAt' | 'version'>
-  ): Promise<void> {
+  /**
+   * Enregistre l'évaluation en cours (ou `dataToSave`) dans un emplacement, avec un nom
+   * unique parmi les emplacements nommés, puis lie l'évaluation en cours à cet emplacement :
+   * ses modifications suivantes y seront reportées automatiquement.
+   */
+  saveToSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
+    return this.slotAction.run(() => this.writeSlot(slot, dataToSave));
+  }
+
+  private async writeSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
+    // Un emplacement modifié dans un autre onglet ne peut pas recevoir l'évaluation de celui-ci.
+    const reservation = await this.overwriteGuard.reserveForWriting(slot.index);
+    if (!reservation) return;
     if (slot.data !== null) {
-      if (!await this.overwriteGuard.check(slot.index, slot.data.nomEval)) return;
+      if (!await this.overwriteGuard.check(slot.index, {replacingWithCurrent: true})) {
+        reservation.release();
+        return;
+      }
     }
 
     // on lit depuis le slot dynamique si pas de données passées
@@ -111,57 +141,81 @@ export class SauvegardeComponent implements OnInit {
     const data = dataToSave ?? autoSave ?? this.saveService.dataAuto;
 
     const uniqueName = this.overwriteGuard.getUniqueEvalName(data.nomEval, slot.index);
-    if (uniqueName !== data.nomEval) {
+    const renamed = uniqueName !== data.nomEval;
+    if (renamed) {
       data.nomEval = uniqueName;
     }
 
-    this.saveService.saveToSlot(slot.index, data);
-    // this.saveService.clearSlot(0); // On clear le slot dynamique
-    this.flashMessageService.show('success', 'Votre évaluation a été sauvegardée avec succès.')
-    this.ngOnInit();
-  }
-
-  getSlotAuto() {
-    return this.loadService.getSlot(0);
-  }
-
-  /**
-   * Génère et télécharge un fichier ZIP du slot via le *DownloadService*.
-   * @param slot le slot désiré (1, 2, 3).
-   */
-  downloadSlot(slot: { index: FormatTypeConfig; data: saveModel | null }): void {
-    console.log('[downloadSlot] slot:', slot);
-    if (!slot.data) {
-      this.flashMessageService.show('error', 'L\'évaluation n\'a pas pu être téléchargée car elle ne contient aucune donnée.');
+    try {
+      this.saveService.saveToSlot(slot.index, data);
+      if (renamed) {
+        // l'évaluation en cours prend le même nom, sinon le prochain report le défairait
+        this.saveService.saveToSlot(0, data);
+        if (this.saveService.hasLoadedWorkspace) this.saveService.dataAuto.nomEval = uniqueName;
+      }
+      this.saveService.setActiveSlot(slot.index, reservation);
+    } catch (error) {
+      reservation.release();
+      console.error('Sauvegarde impossible :', error);
+      this.flashMessageService.show('error', this.i18n.t('saves.saveError'));
       return;
     }
-    this.downloadService.generateSlotZip(slot.data);
-    this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
+    this.flashMessageService.show('success', this.i18n.t('saves.saveSuccess'));
+    this.refresh();
   }
 
   /**
-   * Affiche la popup de suppression de sauvegarde.
+   * Génère et télécharge un fichier `.gpSave` du slot via le *DownloadService*.
+   * @param slot le slot désiré (1, 2, 3).
+   */
+  async downloadSlot(slot: Slot): Promise<void> {
+    if (!slot.data) {
+      this.flashMessageService.show('error', this.i18n.t('saves.downloadEmpty'));
+      return;
+    }
+    const ok = await this.downloadService.generateSlotZip(slot.data);
+    if (ok === false) {
+      this.flashMessageService.show('error', this.i18n.t('saves.downloadError'));
+    } else {
+      this.flashMessageService.show('info', this.i18n.t('saves.downloaded'));
+    }
+  }
+
+  /**
+   * Affiche la fenêtre de suppression d'une sauvegarde. Les médias de l'évaluation ne sont
+   * supprimés que s'ils ne sont plus utilisés par aucune autre sauvegarde.
    * @param slot contient l'index du slot et sa donnée.
    */
-  openDeletePopup(slot: { index: FormatTypeConfig; data: saveModel | null }): void {
+  openDeletePopup(slot: Slot): Promise<void> {
+    return this.slotAction.run(() => this.confirmDelete(slot));
+  }
+
+  private async confirmDelete(slot: Slot): Promise<void> {
+    // Supprimer un emplacement modifié dans un autre onglet : refusé (l'autre onglet le recréerait).
+    if (!await this.overwriteGuard.ensureNotOpenElsewhere(slot.index)) return;
     const dialogRef = this.dialog.open(PopupDeleteSaveComponent, {
-      data: { slotName: slot.data?.nomEval ?? `Slot ${slot.index}` },
+      data: {slotName: slot.data?.nomEval || this.i18n.t('saves.slot', {n: slot.index})},
       disableClose: true,
+      panelClass: 'gp-dialog-panel',
+      autoFocus: '.js-cancel',
+      ariaLabelledBy: 'delete-title',
+      ariaDescribedBy: 'delete-message',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async result => {
       if (result === 'delete') {
-        const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? `Slot ${slot.index}`;
-        this.saveService.clearSlot(slot.index); // suppression des données dans le slot de l'index
-        this.indexedDBService.deleteFileByProject(slotName);
-        this.ngOnInit(); // rafraîchit les slots
-        this.selectedSlot = null; // le slot est désélectionné.
-        this.flashMessageService.show('success', 'L\'évaluation a été supprimée avec succès.');
+        const slotName = this.loadService.getSlot(slot.index)?.nomEval ?? '';
+        this.saveService.clearSlot(slot.index);
+        this.refresh();
+        this.flashMessageService.show('success', this.i18n.t('saves.deleted'));
+        try {
+          await this.mediaCleanup.cleanupProject(slotName);
+        } catch (error) {
+          console.warn('Nettoyage des médias ignoré :', error);
+        }
       }
       if (result === 'download' && slot.data) {
-        this.downloadService.generateSlotZip(slot.data);
-        this.flashMessageService.show('info', 'L\'évaluation a été téléchargée.');
-
+        await this.downloadSlot(slot);
       }
     });
   }
@@ -169,22 +223,34 @@ export class SauvegardeComponent implements OnInit {
   /**
    * Vérifie qu'on ne va pas écraser le slot dynamique, puis renvoie vers la création d'évaluation.
    */
-  async newEval(): Promise<void> {
-    if (!await this.overwriteGuard.check(0)) return;
-    this.saveService.newSaveDataAuto();
-    this.router.navigate(['/info-eval']);
+  newEval(): Promise<void> {
+    return this.slotAction.run(async () => {
+      if (!await this.overwriteGuard.check(0)) return;
+      this.saveService.newSaveDataAuto();
+      this.router.navigate(['/info-eval']);
+    });
   }
 
   /**
-   * Supprime le contenu de la sauvegarde dynamique
+   * Supprime le contenu de la sauvegarde automatique (évaluation en cours), après confirmation.
+   * Les emplacements nommés ne sont pas touchés.
    */
-  deleteAutoSave() {
-    if (this.evalInProgress) {
-      this.saveService.clearSlot(0);
-      this.evalInProgress = !this.evalInProgress;
-      this.flashMessageService.show('success', 'Les dernières modifications ont été supprimés avec succès.');
-      this.ngOnInit();
-    }
-  }
+  async deleteAutoSave(): Promise<void> {
+    if (!this.evalInProgress) return;
+    const confirmed = await this.confirmService.confirm({
+      title: this.i18n.t('saves.discard.title'),
+      message: [
+        this.i18n.t('saves.discard.message1'),
+        this.i18n.t('saves.discard.message2'),
+      ],
+      confirmLabel: this.i18n.t('saves.discard.confirm'),
+      tone: 'danger',
+    });
+    if (!confirmed) return;
 
+    this.saveService.clearSlot(0);
+    this.saveService.setActiveSlot(null);
+    this.flashMessageService.show('success', this.i18n.t('saves.discarded'));
+    this.refresh();
+  }
 }

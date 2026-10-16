@@ -1,57 +1,296 @@
+<!-- Contenu rédactionnel : une version par langue (le français reste la référence). -->
+@if (language() === 'en') {
 <div class="guide-home">
-  <div class="card mb-4" style="margin-top: 25px">
+  <div class="card mb-4">
     <div class="card-header">
-      <h2 class="card-title">Guide d'utilisation de GazePlay-Eval</h2>
+      <h1 class="card-title">GazePlay-Eval user guide</h1>
     </div>
     <div class="card-body">
-      <p class="guide-content-title mb-4 text-center">
-        Bienvenue dans le guide utilisateur·trice de GazePlay-Eval !
-      </p>
-      <p>
-        Cette page vous permet de vous familiariser avec les différents éléments du site,
-        comme le système de sauvegarde ou la création d'une évaluation de A à Z.
-      </p>
-      <p class="guide-content-sub">
-        Vous pouvez parcourir les différentes sections du guide en utilisant les boutons ci-dessous.
-      </p>
+      <div class="guide-section-intro">
+        <p>
+          GazePlay-Eval lets you create assessments for <strong>GazePlay-Learning</strong>: a series of screens
+          (instructions, grids of images to look at, pauses) that the person being assessed goes through with their
+          eyes. You prepare the assessment here, then export it as a <code>.zip</code> file that you open in
+          GazePlay-Learning.
+        </p>
 
-      <div class="guide-nav-card mb-4">
-        <div class="guide-nav-card-header text-center">Navigation</div>
-        <div class="guide-nav-card-body">
-          <p class="text-muted mb-3">Accédez directement à la section qui vous intéresse :</p>
-          <div class="d-flex flex-wrap gap-3">
-
-            <a class="btn-section-card" routerLink="/guide/creation">
-              <i class="bi bi-plus-circle fs-4 mb-2"></i>
-              <span class="btn-section-title">Guide - Création</span>
-              <span class="btn-section-desc">Créez et configurez vos évaluations pas à pas.</span>
-            </a>
-
-            <a class="btn-section-card" routerLink="sauvegardes">
-              <i class="bi bi-floppy fs-4 mb-2"></i>
-              <span class="btn-section-title">Guide - Sauvegarde et Chargement</span>
-              <span class="btn-section-desc">Gérez et chargez vos évaluations sauvegardées.</span>
-            </a>
-
-            <a class="btn-section-card" routerLink="/no-page">
-              <i class="bi bi-book fs-4 mb-2"></i>
-              <span class="btn-section-title">Guide - Options et Accessibilité</span>
-              <span class="btn-section-desc">Personnalisez le site selon vos goûts.</span>
-            </a>
-
-            <a class="btn-section-card" routerLink="imports">
-              <i class="bi bi-file-zip fs-4 mb-2"></i>
-              <span class="btn-section-title">Guide - Importation</span>
-              <span class="btn-section-desc">Importez un fichier ZIP dans l'application.</span>
-            </a>
-
+        <div class="gp-callout">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Your data stays on this device</strong>
+            <p>Assessments and media are stored in this browser only. Nothing is sent to a server.</p>
           </div>
         </div>
+
+        <app-guide-toc title="On this page" page="/guide" [items]="[
+          {id: 'interface', label: 'Getting to know the interface'},
+          {id: 'first-steps', label: 'Creating your first assessment in 5 steps'},
+          {id: 'guide-pages', label: 'Guide pages'}
+        ]"></app-guide-toc>
       </div>
 
-      <button class="btn btn-primary" routerLink="/home">
-        ← Retour à l'accueil
-      </button>
+      <section class="guide-section-card" id="interface" aria-labelledby="interface-title">
+        <h2 class="guide-section-title" id="interface-title">Getting to know the interface</h2>
+        <div class="guide-section-body">
+          <figure class="guide-figure">
+            <img src="assets/guide/images/en/home-page.png" width="1280" height="760" loading="lazy"
+                 alt="Home page of GazePlay-Eval. At the top, the header with the Help, theme and language buttons. On the left, the menu with Home, Guide, Options, My saves, Load and Import a file. In the centre, the New assessment and Read the guide buttons, the Assessment in progress card and shortcuts to the saves.">
+            <figcaption>
+              The home page, with the header (top), the menu (left) and the assessment in progress (right).
+              <a class="guide-figure__zoom" href="assets/guide/images/en/home-page.png" target="_blank" rel="noopener">View full size (new tab)</a>
+            </figcaption>
+          </figure>
+
+          <h3 class="guide-subheading">The header</h3>
+          <ul class="guide-list">
+            <li><strong>Help</strong>: opens a side panel with help for the page you are on. Close it with the cross,
+              the <kbd>Esc</kbd> key or by clicking outside the panel. Its width can be changed by dragging its left
+              edge, or with the left and right arrow keys once that edge has keyboard focus.</li>
+            <li><strong>Sun / moon button</strong>: switches between the light and dark themes. The icon shows the
+              current theme (sun = light, moon = dark).</li>
+            <li><strong>Language button</strong> (<code>FR</code> / <code>EN</code>): changes the interface language.</li>
+          </ul>
+
+          <h3 class="guide-subheading">The menu</h3>
+          <ul class="guide-list">
+            <li><strong>Navigation</strong>: <a routerLink="/home">Home</a>, <strong>Guide</strong> (this guide) and
+              <a routerLink="/option">Options</a> (display and accessibility settings).</li>
+            <li><strong>Project</strong>: <a routerLink="/sauvegarde">My saves</a> (the three save slots),
+              <a routerLink="/load-save">Load</a> (resume a saved assessment) and <strong>Import a file</strong>
+              (open a <code>.gpSave</code> or <code>.zip</code> file).</li>
+          </ul>
+          <p>On a small screen the menu is hidden: open it with the <i class="bi bi-list" aria-hidden="true"></i>
+            button on the left of the header (“Open the navigation menu”).</p>
+
+          <h3 class="guide-subheading">The home page</h3>
+          <ul class="guide-list">
+            <li><strong>New assessment</strong> starts a new assessment at step 1.</li>
+            <li>The <strong>Assessment in progress</strong> card shows the last assessment edited (step reached,
+              number of screens, date). <strong>Resume this assessment</strong> takes you back to the step where you
+              stopped.</li>
+            <li>The <strong>Your assessments</strong> shortcuts lead to My saves, Load and Import a file.</li>
+          </ul>
+
+          <h3 class="guide-subheading">The <i class="bi bi-info-circle" aria-hidden="true"></i> buttons</h3>
+          <p>Some settings have an <i class="bi bi-info-circle" aria-hidden="true"></i> button next to them. Click it
+            (or press <kbd>Enter</kbd>) to show a short explanation; click it again or press <kbd>Esc</kbd> to hide it.</p>
+        </div>
+      </section>
+
+      <section class="guide-section-card" id="first-steps" aria-labelledby="first-steps-title">
+        <h2 class="guide-section-title" id="first-steps-title">Creating your first assessment in 5 steps</h2>
+        <div class="guide-section-body">
+          <p>Click <strong>New assessment</strong> on the home page, then follow the steps. A step bar at the top of
+            the page shows where you are.</p>
+          <ol class="guide-steps">
+            <li><a routerLink="/guide/creation" fragment="info-eval">Assessment information</a>: the name of the
+              assessment and the format of the results files.</li>
+            <li><a routerLink="/guide/creation" fragment="info-participant">Participant information</a>: the fields
+              to fill in about the person at each session (e.g. first name, age).</li>
+            <li><a routerLink="/guide/creation" fragment="setup-eval">Mode and settings</a>: the default values
+              used for each new screen.</li>
+            <li><a routerLink="/guide/creation" fragment="create-eval">Screen creation</a>: add the screens in the
+              order the participant will see them, then edit them one by one.</li>
+            <li><a routerLink="/guide/creation" fragment="download-eval">Download and export</a>: get the
+              <code>.zip</code> file for GazePlay-Learning and, if you wish, a <code>.gpSave</code> backup.</li>
+          </ol>
+
+          <div class="gp-callout gp-callout--warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <div class="gp-callout__body">
+              <strong class="gp-callout__title">Tip: keep your assessment in a slot</strong>
+              <p>The automatic save only keeps <em>one</em> assessment, the one in progress: starting another one
+                replaces it. To keep an assessment, save it in one of the three slots of
+                <a routerLink="/sauvegarde">My saves</a>, or download its <code>.gpSave</code> file
+                (see <a routerLink="/guide/sauvegardes">Saving and loading</a>).</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide-section-card" id="guide-pages" aria-labelledby="guide-pages-title">
+        <h2 class="guide-section-title" id="guide-pages-title">Guide pages</h2>
+        <div class="guide-section-body">
+          <div class="d-flex flex-wrap gap-3">
+            <a class="btn-section-card" routerLink="/guide/creation">
+              <i class="bi bi-plus-circle fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Creating an assessment</span>
+              <span class="btn-section-desc">The five steps in detail, from the name to the export.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/sauvegardes">
+              <i class="bi bi-floppy fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Saving and loading</span>
+              <span class="btn-section-desc">Automatic save, the three slots and where your data is stored.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/imports">
+              <i class="bi bi-file-zip fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Import and export</span>
+              <span class="btn-section-desc">The .zip and .gpSave formats, and how to import a file.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/options">
+              <i class="bi bi-sliders fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Options and accessibility</span>
+              <span class="btn-section-desc">Language, theme, reading comfort, notifications and media storage.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/depannage">
+              <i class="bi bi-life-preserver fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">FAQ and troubleshooting</span>
+              <span class="btn-section-desc">What to do when a message appears or something is missing.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <p class="mt-4 mb-0"><a class="gp-btn" routerLink="/home"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to home</a></p>
     </div>
   </div>
 </div>
+} @else {
+<div class="guide-home">
+  <div class="card mb-4">
+    <div class="card-header">
+      <h1 class="card-title">Guide d'utilisation de GazePlay-Eval</h1>
+    </div>
+    <div class="card-body">
+      <div class="guide-section-intro">
+        <p>
+          GazePlay-Eval permet de créer des évaluations pour <strong>GazePlay-Learning</strong> : une suite d'écrans
+          (consignes, grilles d'images à regarder, pauses) que la personne évaluée parcourt avec le regard. Vous
+          préparez l'évaluation ici, puis vous l'exportez dans un fichier <code>.zip</code> à ouvrir dans
+          GazePlay-Learning.
+        </p>
+
+        <div class="gp-callout">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Vos données restent sur cet appareil</strong>
+            <p>Les évaluations et les médias sont enregistrés uniquement dans ce navigateur. Rien n'est envoyé vers un serveur.</p>
+          </div>
+        </div>
+
+        <app-guide-toc title="Sur cette page" page="/guide" [items]="[
+          {id: 'interface', label: 'Découvrir l\'interface'},
+          {id: 'first-steps', label: 'Créer une première évaluation en 5 étapes'},
+          {id: 'guide-pages', label: 'Les pages du guide'}
+        ]"></app-guide-toc>
+      </div>
+
+      <section class="guide-section-card" id="interface" aria-labelledby="interface-title">
+        <h2 class="guide-section-title" id="interface-title">Découvrir l'interface</h2>
+        <div class="guide-section-body">
+          <figure class="guide-figure">
+            <img src="assets/guide/images/fr/home-page.png" width="1280" height="760" loading="lazy"
+                 alt="Page d'accueil de GazePlay-Eval. En haut, l'en-tête avec les boutons Aide, thème et langue. À gauche, le menu avec Accueil, Guide, Options, Mes sauvegardes, Charger et Importer un fichier. Au centre, les boutons Nouvelle évaluation et Lire le guide, la carte Évaluation en cours et les raccourcis vers les sauvegardes.">
+            <figcaption>
+              La page d'accueil, avec l'en-tête (en haut), le menu (à gauche) et l'évaluation en cours (à droite).
+              <a class="guide-figure__zoom" href="assets/guide/images/fr/home-page.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
+            </figcaption>
+          </figure>
+
+          <h3 class="guide-subheading">L'en-tête</h3>
+          <ul class="guide-list">
+            <li><strong>Aide</strong> : ouvre un panneau latéral avec l'aide de la page où vous êtes. Fermez-le avec
+              la croix, la touche <kbd>Échap</kbd> ou en cliquant à côté du panneau. Sa largeur se règle en faisant
+              glisser son bord gauche, ou avec les flèches gauche et droite quand ce bord a le focus clavier.</li>
+            <li><strong>Bouton soleil / lune</strong> : passe du thème clair au thème sombre, et inversement. L'icône
+              indique le thème actuel (soleil = clair, lune = sombre).</li>
+            <li><strong>Bouton de langue</strong> (<code>FR</code> / <code>EN</code>) : change la langue de l'interface.</li>
+          </ul>
+
+          <h3 class="guide-subheading">Le menu</h3>
+          <ul class="guide-list">
+            <li><strong>Navigation</strong> : <a routerLink="/home">Accueil</a>, <strong>Guide</strong> (ce guide) et
+              <a routerLink="/option">Options</a> (réglages d'affichage et d'accessibilité).</li>
+            <li><strong>Projet</strong> : <a routerLink="/sauvegarde">Mes sauvegardes</a> (les trois emplacements de
+              sauvegarde), <a routerLink="/load-save">Charger</a> (reprendre une évaluation enregistrée) et
+              <strong>Importer un fichier</strong> (ouvrir un fichier <code>.gpSave</code> ou <code>.zip</code>).</li>
+          </ul>
+          <p>Sur un petit écran, le menu est masqué : ouvrez-le avec le bouton <i class="bi bi-list" aria-hidden="true"></i>
+            à gauche de l'en-tête (« Ouvrir le menu de navigation »).</p>
+
+          <h3 class="guide-subheading">La page d'accueil</h3>
+          <ul class="guide-list">
+            <li><strong>Nouvelle évaluation</strong> commence une nouvelle évaluation à l'étape 1.</li>
+            <li>La carte <strong>Évaluation en cours</strong> présente la dernière évaluation modifiée (étape atteinte,
+              nombre d'écrans, date). <strong>Reprendre cette évaluation</strong> vous ramène à l'étape où vous vous
+              étiez arrêté·e.</li>
+            <li>Les raccourcis <strong>Vos évaluations</strong> mènent à Mes sauvegardes, Charger et Importer un fichier.</li>
+          </ul>
+
+          <h3 class="guide-subheading">Les boutons <i class="bi bi-info-circle" aria-hidden="true"></i></h3>
+          <p>Certains réglages sont accompagnés d'un bouton <i class="bi bi-info-circle" aria-hidden="true"></i>.
+            Cliquez dessus (ou appuyez sur <kbd>Entrée</kbd>) pour afficher une courte explication ; cliquez à nouveau
+            ou appuyez sur <kbd>Échap</kbd> pour la masquer.</p>
+        </div>
+      </section>
+
+      <section class="guide-section-card" id="first-steps" aria-labelledby="first-steps-title">
+        <h2 class="guide-section-title" id="first-steps-title">Créer une première évaluation en 5 étapes</h2>
+        <div class="guide-section-body">
+          <p>Cliquez sur <strong>Nouvelle évaluation</strong> depuis l'accueil, puis suivez les étapes. Une barre
+            d'étapes, en haut de la page, indique où vous en êtes.</p>
+          <ol class="guide-steps">
+            <li><a routerLink="/guide/creation" fragment="info-eval">Informations de l'évaluation</a> : le nom de
+              l'évaluation et le format des fichiers de résultats.</li>
+            <li><a routerLink="/guide/creation" fragment="info-participant">Informations du participant</a> : les
+              champs à remplir sur la personne lors de chaque passation (par exemple : prénom, âge).</li>
+            <li><a routerLink="/guide/creation" fragment="setup-eval">Mode et paramètres</a> : les valeurs par
+              défaut utilisées pour chaque nouvel écran.</li>
+            <li><a routerLink="/guide/creation" fragment="create-eval">Création des écrans</a> : ajoutez les écrans
+              dans l'ordre où le participant les verra, puis modifiez-les un par un.</li>
+            <li><a routerLink="/guide/creation" fragment="download-eval">Téléchargement et export</a> : récupérez le
+              fichier <code>.zip</code> pour GazePlay-Learning et, si vous le souhaitez, une sauvegarde
+              <code>.gpSave</code>.</li>
+          </ol>
+
+          <div class="gp-callout gp-callout--warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <div class="gp-callout__body">
+              <strong class="gp-callout__title">Conseil : rangez votre évaluation dans un emplacement</strong>
+              <p>La sauvegarde automatique ne garde qu'<em>une</em> évaluation, celle en cours : en commencer une autre
+                la remplace. Pour conserver une évaluation, enregistrez-la dans l'un des trois emplacements de
+                <a routerLink="/sauvegarde">Mes sauvegardes</a>, ou téléchargez son fichier <code>.gpSave</code>
+                (voir <a routerLink="/guide/sauvegardes">Sauvegarde et chargement</a>).</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide-section-card" id="guide-pages" aria-labelledby="guide-pages-title">
+        <h2 class="guide-section-title" id="guide-pages-title">Les pages du guide</h2>
+        <div class="guide-section-body">
+          <div class="d-flex flex-wrap gap-3">
+            <a class="btn-section-card" routerLink="/guide/creation">
+              <i class="bi bi-plus-circle fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Création d'une évaluation</span>
+              <span class="btn-section-desc">Les cinq étapes en détail, du nom jusqu'à l'export.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/sauvegardes">
+              <i class="bi bi-floppy fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Sauvegarde et chargement</span>
+              <span class="btn-section-desc">Sauvegarde automatique, les trois emplacements et l'endroit où sont stockées vos données.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/imports">
+              <i class="bi bi-file-zip fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Importation et exportation</span>
+              <span class="btn-section-desc">Les formats .zip et .gpSave, et l'import d'un fichier.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/options">
+              <i class="bi bi-sliders fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Options et accessibilité</span>
+              <span class="btn-section-desc">Langue, thème, confort de lecture, notifications et stockage des médias.</span>
+            </a>
+            <a class="btn-section-card" routerLink="/guide/depannage">
+              <i class="bi bi-life-preserver fs-4 mb-2" aria-hidden="true"></i>
+              <span class="btn-section-title">Questions fréquentes et dépannage</span>
+              <span class="btn-section-desc">Que faire quand un message apparaît ou qu'un élément manque.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <p class="mt-4 mb-0"><a class="gp-btn" routerLink="/home"><i class="bi bi-arrow-left" aria-hidden="true"></i> Retour à l'accueil</a></p>
+    </div>
+  </div>
+</div>
+}

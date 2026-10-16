@@ -1,0 +1,309 @@
+// =============================================================================
+// Jetons du système de design GazePlay Eval
+// -----------------------------------------------------------------------------
+// Toutes les couleurs de l'interface proviennent de ces variables CSS.
+// Thèmes : clair (défaut), sombre ([data-bs-theme="dark"]) et contraste renforcé
+// ([data-contrast="high"]), combinables. Les préférences utilisateur sont posées
+// sur <html> par `core/preferences/preferences-dom.ts`.
+//
+// Contrastes visés (WCAG 2.2 AA) : texte ≥ 4.5:1 sur sa surface, éléments
+// d'interface et bordures de champs ≥ 3:1. Les valeurs ci-dessous ont été
+// choisies par calcul de luminance ; une vérification outillée reste à faire
+// (voir docs/ACCESSIBILITE.md).
+// =============================================================================
+
+:root {
+  // --- Typographie (surchargées par les préférences) ------------------------
+  --gp-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --gp-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --gp-letter-spacing: 0em;
+  --gp-word-spacing: 0em;
+  --gp-line-height: 1.5;
+
+  --gp-text-xs: 0.8125rem;
+  --gp-text-sm: 0.875rem;
+  --gp-text-md: 1rem;
+  --gp-text-lg: 1.125rem;
+  --gp-text-xl: 1.375rem;
+  --gp-text-2xl: 1.75rem;
+  --gp-text-3xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+
+  // --- Espacements, rayons, ombres -------------------------------------------
+  --gp-space-1: 0.25rem;
+  --gp-space-2: 0.5rem;
+  --gp-space-3: 0.75rem;
+  --gp-space-4: 1rem;
+  --gp-space-5: 1.5rem;
+  --gp-space-6: 2rem;
+  --gp-space-7: 3rem;
+
+  --gp-radius-sm: 0.375rem;
+  --gp-radius-md: 0.625rem;
+  --gp-radius-lg: 0.875rem;
+  --gp-radius-xl: 1.25rem;
+  --gp-radius-pill: 999px;
+
+  --gp-shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
+  --gp-shadow-md: 0 4px 12px rgb(16 24 40 / 0.08), 0 2px 4px rgb(16 24 40 / 0.04);
+  --gp-shadow-lg: 0 18px 40px rgb(16 24 40 / 0.14);
+
+  --gp-header-height: 4rem;
+  --gp-sidebar-width: 16rem;
+  --gp-content-narrow: 48rem;
+  --gp-content-medium: 64rem;
+  --gp-content-wide: 90rem;
+
+  --gp-transition-fast: 120ms ease;
+  --gp-transition: 200ms ease;
+
+  // --- Couleurs : thème clair -------------------------------------------------
+  --gp-bg: #f4f6fb;
+  --gp-surface: #ffffff;
+  --gp-surface-2: #f2f4fa;
+  --gp-surface-3: #e7eaf3;
+  --gp-overlay: rgb(15 18 32 / 0.5);
+
+  --gp-text: #141a2e;
+  --gp-text-muted: #4b5268;
+  --gp-text-subtle: #5d6480;
+
+  --gp-border: #d9dde8;
+  --gp-border-strong: #7a8199;   // bordures de champs : ≥ 3:1 sur blanc
+
+  --gp-primary: #2e46c4;
+  --gp-primary-hover: #2438a6;
+  --gp-primary-active: #1d2f8c;
+  --gp-on-primary: #ffffff;
+  --gp-primary-subtle: #e9edfd;
+  --gp-primary-subtle-border: #b9c5f5;
+  --gp-primary-text: #2a3fb3;
+
+  --gp-accent: #0f766e;
+  --gp-accent-subtle: #e2f4f2;
+
+  --gp-success: #13703f;
+  --gp-success-subtle: #e4f5eb;
+  --gp-success-border: #9dd5b4;
+  --gp-warning: #8a5300;
+  --gp-warning-strong: #c27c00;
+  --gp-warning-subtle: #fff4dc;
+  --gp-warning-border: #f1cf85;
+  --gp-danger: #b42318;
+  --gp-danger-hover: #932016;
+  --gp-on-danger: #ffffff;
+  --gp-danger-subtle: #fdecea;
+  --gp-danger-border: #f2b2ac;
+  --gp-info: #1f5fa8;
+  --gp-info-subtle: #e6f0fb;
+  --gp-info-border: #a9c8ec;
+
+  --gp-focus: #1b3fd1;
+  --gp-focus-halo: #ffffff;
+
+  // Éditeur de grille
+  --gp-canvas: #e9ecf5;
+  --gp-cell: #ffffff;
+  --gp-cell-border: #8e95ab;
+  --gp-cell-placeholder: #f2f4fa;
+
+  color-scheme: light;
+}
+
+// --- Thème sombre -------------------------------------------------------------
+[data-bs-theme="dark"] {
+  --gp-bg: #0e1120;
+  --gp-surface: #161a2c;
+  --gp-surface-2: #1c2136;
+  --gp-surface-3: #252b44;
+  --gp-overlay: rgb(0 0 0 / 0.6);
+
+  --gp-text: #eceef6;
+  --gp-text-muted: #aab1c8;
+  --gp-text-subtle: #9aa2bc;
+
+  --gp-border: #2d3450;
+  --gp-border-strong: #6f7898;
+
+  --gp-primary: #8fa3ff;
+  --gp-primary-hover: #a9b8ff;
+  --gp-primary-active: #c2ccff;
+  --gp-on-primary: #0e1120;
+  --gp-primary-subtle: #222a52;
+  --gp-primary-subtle-border: #3b4789;
+  --gp-primary-text: #aebcff;
+
+  --gp-accent: #5fd0c4;
+  --gp-accent-subtle: #10302d;
+
+  --gp-success: #6ad8a0;
+  --gp-success-subtle: #10291e;
+  --gp-success-border: #22603f;
+  --gp-warning: #f4c561;
+  --gp-warning-strong: #f4c561;
+  --gp-warning-subtle: #2c2210;
+  --gp-warning-border: #6b5222;
+  --gp-danger: #ff8f85;
+  --gp-danger-hover: #ffb0a8;
+  --gp-on-danger: #1b0a08;
+  --gp-danger-subtle: #3a1715;
+  --gp-danger-border: #7a2f29;
+  --gp-info: #86beff;
+  --gp-info-subtle: #13243d;
+  --gp-info-border: #2f4f7c;
+
+  --gp-focus: #ffd35c;
+  --gp-focus-halo: #0e1120;
+
+  --gp-canvas: #0b0e1a;
+  --gp-cell: #1c2136;
+  --gp-cell-border: #6f7898;
+  --gp-cell-placeholder: #141829;
+
+  --gp-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --gp-shadow-md: 0 4px 14px rgb(0 0 0 / 0.45);
+  --gp-shadow-lg: 0 18px 40px rgb(0 0 0 / 0.55);
+
+  color-scheme: dark;
+}
+
+// --- Contraste renforcé : clair -------------------------------------------------
+[data-contrast="high"] {
+  --gp-bg: #ffffff;
+  --gp-surface: #ffffff;
+  --gp-surface-2: #ffffff;
+  --gp-surface-3: #f0f0f0;
+  --gp-text: #000000;
+  --gp-text-muted: #1a1a1a;
+  --gp-text-subtle: #1a1a1a;
+  --gp-border: #000000;
+  --gp-border-strong: #000000;
+  --gp-primary: #0028a8;
+  --gp-primary-hover: #001a75;
+  --gp-primary-active: #00104d;
+  --gp-on-primary: #ffffff;
+  --gp-primary-subtle: #ffffff;
+  --gp-primary-subtle-border: #0028a8;
+  --gp-primary-text: #0028a8;
+  --gp-success: #005a24;
+  --gp-warning: #5c3800;
+  --gp-danger: #8f0000;
+  --gp-info: #003f8a;
+  --gp-focus: #c40000;
+  --gp-focus-halo: #ffffff;
+  --gp-canvas: #ffffff;
+  --gp-cell: #ffffff;
+  --gp-cell-border: #000000;
+  --gp-shadow-sm: none;
+  --gp-shadow-md: none;
+  --gp-shadow-lg: 0 0 0 2px #000000;
+}
+
+// --- Contraste renforcé : sombre -------------------------------------------------
+[data-bs-theme="dark"][data-contrast="high"] {
+  --gp-bg: #000000;
+  --gp-surface: #000000;
+  --gp-surface-2: #000000;
+  --gp-surface-3: #1a1a1a;
+  --gp-text: #ffffff;
+  --gp-text-muted: #f0f0f0;
+  --gp-text-subtle: #f0f0f0;
+  --gp-border: #ffffff;
+  --gp-border-strong: #ffffff;
+  --gp-primary: #ffe14d;
+  --gp-primary-hover: #fff08f;
+  --gp-primary-active: #ffffff;
+  --gp-on-primary: #000000;
+  --gp-primary-subtle: #000000;
+  --gp-primary-subtle-border: #ffe14d;
+  --gp-primary-text: #ffe14d;
+  --gp-success: #7dffb0;
+  --gp-warning: #ffd36b;
+  --gp-danger: #ff9a92;
+  --gp-on-danger: #000000;
+  --gp-info: #9fd0ff;
+  --gp-focus: #00e5ff;
+  --gp-focus-halo: #000000;
+  --gp-canvas: #000000;
+  --gp-cell: #000000;
+  --gp-cell-border: #ffffff;
+  --gp-shadow-lg: 0 0 0 2px #ffffff;
+}
+
+// =============================================================================
+// Mode daltonisme ([data-color-blind="true"], combinable avec les thèmes ci-dessus)
+// -----------------------------------------------------------------------------
+// Problème corrigé : en palette standard, succès (vert) et erreur (rouge) ont une
+// luminosité proche et deviennent presque identiques pour les personnes
+// protanopes/deutéranopes (≈ 99 % des daltonismes). Les états sont donc remappés
+// sur l'axe bleu ↔ rouge cramoisi ↔ ambre, perçu par toutes les formes de
+// dichromatie :
+//   - succès        → bleu-cyan (distinct du bleu indigo « primaire ») ;
+//   - erreur        → rouge cramoisi (garde une composante bleue, s'éloigne de l'ambre) ;
+//   - avertissement → ambre plus jaune (s'éloigne du rouge) ;
+//   - information   → neutre (ardoise), pour ne pas être confondue avec le succès ;
+//   - accent (case source dans l'éditeur) → orange.
+// Valeurs choisies par simulation (Machado 2009) et calcul de contraste : texte
+// ≥ 4,5:1 sur la surface, bordures/indicateurs ≥ 3:1. La couleur n'est jamais le
+// seul indice : `_color-vision.scss` et les composants ajoutent symboles et motifs.
+//
+// Spécificité : chaque variante (sombre, contraste renforcé) redéfinit le même jeu
+// de jetons avec un sélecteur plus spécifique, pour qu'aucune valeur du thème clair
+// ne « fuie » dans le thème sombre.
+// =============================================================================
+
+[data-color-blind="true"] {
+  --gp-success: #005f99;
+  --gp-success-subtle: #e3f1fa;
+  --gp-success-border: #93c3e3;
+  --gp-warning: #7a5a00;
+  --gp-warning-strong: #a87800;
+  --gp-warning-subtle: #fff6d6;
+  --gp-warning-border: #e6c869;
+  --gp-danger: #a8133f;
+  --gp-danger-hover: #860f32;
+  --gp-on-danger: #ffffff;
+  --gp-danger-subtle: #fcebf0;
+  --gp-danger-border: #eaa5b8;
+  --gp-info: #4b5268;
+  --gp-info-subtle: #eef0f5;
+  --gp-info-border: #c3c8d6;
+  --gp-accent: #a34700;
+  --gp-accent-subtle: #fdeee2;
+}
+
+[data-bs-theme="dark"][data-color-blind="true"] {
+  --gp-success: #5ccff5;
+  --gp-success-subtle: #0d2a38;
+  --gp-success-border: #1f5f7a;
+  --gp-warning: #f4c561;
+  --gp-warning-strong: #f4c561;
+  --gp-warning-subtle: #2c2210;
+  --gp-warning-border: #6b5222;
+  --gp-danger: #ff8a9e;
+  --gp-danger-hover: #ffadbb;
+  --gp-on-danger: #1b0a0e;
+  --gp-danger-subtle: #3a1520;
+  --gp-danger-border: #7a2e40;
+  --gp-info: #aab1c8;
+  --gp-info-subtle: #1f2438;
+  --gp-info-border: #3a4160;
+  --gp-accent: #ffaa5c;
+  --gp-accent-subtle: #33210f;
+}
+
+[data-contrast="high"][data-color-blind="true"] {
+  --gp-success: #004a7a;
+  --gp-warning: #5c3800;
+  --gp-danger: #8a0030;
+  --gp-info: #1a1a1a;
+  --gp-accent: #8a3a00;
+}
+
+[data-bs-theme="dark"][data-contrast="high"][data-color-blind="true"] {
+  --gp-success: #7fe0ff;
+  --gp-warning: #ffd36b;
+  --gp-danger: #ffa3b4;
+  --gp-on-danger: #000000;
+  --gp-info: #f0f0f0;
+  --gp-accent: #ffb870;
+}
