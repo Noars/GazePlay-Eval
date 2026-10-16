@@ -11,7 +11,7 @@ Dernière mise à jour : ajout du mode daltonisme (octobre 2026).
 | Domaine | Mesures |
 |---|---|
 | Structure | Repères `header`, `nav`, `main`, `footer` ; un seul `h1` par page ; titre de document unique par page (`app.routes.ts`, `AppTitleStrategy`), traduit dans la langue choisie ; `lang` de `<html>` suit la langue de l'interface (`fr` par défaut, `en`). |
-| Navigation clavier | Lien d'évitement « Aller au contenu principal » ; tous les contrôles sont des `button`/`a` natifs ; après chaque navigation, le focus va sur le `h1` de la page (`RouteFocusService`). |
+| Navigation clavier | Lien d'évitement « Aller au contenu principal » ; tous les contrôles sont des `button`/`a` natifs ; après chaque navigation demandée par l'utilisateur, le focus va sur le `h1` de la page (`RouteFocusService`) ; les navigations automatiques du chargement (reprise au rechargement) ne déplacent pas le focus, ce qui évitait un cadre de focus parasite sur le titre. |
 | Focus | Anneau de 3 px + halo, visible sur toutes les surfaces (`src/styles/_a11y.scss`), couleur dédiée par thème. |
 | Formulaires | Libellés associés (`label for`), groupes de boutons radio nommés (`role="radiogroup"`), aides reliées par `aria-describedby`, erreurs signalées par texte + `aria-invalid` (composants `shared/ui`). |
 | Aides contextuelles | Les icônes « i » à survoler (inaccessibles au clavier et au tactile) sont remplacées par des boutons « toggletip » (`HelpTipComponent`). |

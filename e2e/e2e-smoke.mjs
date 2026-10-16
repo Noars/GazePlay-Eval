@@ -171,6 +171,9 @@ async function launchChromium(exe, profile) {
         return r.result.value;
       },
       viewport: (width, height) => send('Emulation.setDeviceMetricsOverride', {width, height, deviceScaleFactor: 1, mobile: false}),
+      async pressTab() {
+        for (const type of ['keyDown', 'keyUp']) await send('Input.dispatchKeyEvent', {type, key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9});
+      },
       async setFiles(selector, file) {
         const {root} = await send('DOM.getDocument', {depth: 0});
         const {nodeId} = await send('DOM.querySelector', {nodeId: root.nodeId, selector});
@@ -209,6 +212,8 @@ async function launchFirefox(exe, profile) {
         return ['string', 'number', 'boolean'].includes(r.result.type) ? r.result.value : null;
       },
       viewport: (width, height) => c.send('browsingContext.setViewport', {context, viewport: {width, height}}),
+      pressTab: () => c.send('input.performActions', {context, actions: [{type: 'key', id: 'clavier',
+        actions: [{type: 'keyDown', value: ''}, {type: 'keyUp', value: ''}]}]}),
       async setFiles(selector, file) {
         const r = await c.send('script.evaluate', {expression: `document.querySelector(${JSON.stringify(selector)})`,
           target: {context}, awaitPromise: false, resultOwnership: 'root'});
@@ -284,8 +289,21 @@ async function scenarios(browser, base, missing, check, profile) {
   await run(a, `location.hash='#/info-eval';const i=await until(()=>document.querySelector('#evalName'));setInput(i,'Nom avant rechargement');await sleep(50);return 1;`);
   await a.reload();
   const reloaded = JSON.parse(await run(a, `const i=await until(()=>location.hash.includes('info-eval')&&document.querySelector('#evalName'),10000);await sleep(200);
-    return JSON.stringify({value:i.value,hash:location.hash});`));
+    const h1=document.querySelector('main h1');
+    return JSON.stringify({value:i.value,hash:location.hash,h1Ring:document.activeElement===h1&&h1.matches(':focus-visible')});`));
   check('saisie conservée au rechargement de la page', reloaded.value === 'Nom avant rechargement', JSON.stringify(reloaded));
+  check('rechargement d\'une étape : pas de cadre de focus sur le titre', !reloaded.h1Ring, JSON.stringify(reloaded));
+
+  // Clavier après rechargement : le cadre de focus reste visible sur les éléments interactifs ;
+  // une navigation demandée ensuite place toujours le focus sur le titre de la nouvelle page.
+  await a.pressTab();
+  const keyboard = JSON.parse(await run(a, `await sleep(100);const el=document.activeElement;
+    const visible=el!==document.body&&el.matches(':focus-visible')&&getComputedStyle(el).outlineStyle!=='none';
+    document.querySelector('a[href="#/sauvegarde"]').click();await until(()=>location.hash.includes('sauvegarde'));
+    await until(()=>document.activeElement?.tagName==='H1',3000).catch(()=>null);
+    return JSON.stringify({tag:el.tagName,visible,afterNav:document.activeElement?.tagName});`));
+  check('après rechargement : focus clavier visible (Tab), puis focus sur le titre après navigation',
+    keyboard.visible && keyboard.afterNav === 'H1', JSON.stringify(keyboard));
 
   // Rechargement hors parcours : la page affichée est conservée, l'évaluation en cours aussi.
   const stayed = [];
