@@ -106,15 +106,46 @@ describe('App', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('rechargement de la page → retour à /home puis reprise de l\'évaluation', async () => {
+  /** Simule un rechargement de la page affichée à `path`. */
+  async function reloadAt(path: string): Promise<void> {
     spyOn(performance, 'getEntriesByType').and.returnValue([{type: 'reload'}] as any);
+    spyOn<any>(component, 'reloadedPath').and.returnValue(path);
     router.navigate.and.returnValue(Promise.resolve(true));
+    router.navigate.calls.reset();
+    autoSaveSpy.tryResume.calls.reset();
 
     component.ngOnInit();
     await Promise.resolve();
     await Promise.resolve();
+  }
 
-    expect(router.navigate).toHaveBeenCalledWith(['/home']);
-    expect(autoSaveSpy.tryResume).toHaveBeenCalledWith(false);
+  for (const path of ['/info-eval', '/create-eval', '/download-eval']) {
+    it(`rechargement sur l'étape ${path} → retour à /home puis reprise de l'évaluation`, async () => {
+      await reloadAt(path);
+
+      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+      expect(autoSaveSpy.tryResume).toHaveBeenCalledWith(false);
+    });
+  }
+
+  for (const path of ['/option', '/guide', '/guide/creation', '/sauvegarde', '/load-save', '/home', '', '/no-page', '/inconnue']) {
+    it(`rechargement hors parcours (${path || 'adresse vide'}) → reste sur la page, sans reprise`, async () => {
+      await reloadAt(path);
+
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(autoSaveSpy.tryResume).not.toHaveBeenCalled();
+    });
+  }
+
+  it('chargement sans rechargement → aucune redirection', async () => {
+    spyOn(performance, 'getEntriesByType').and.returnValue([{type: 'navigate'}] as any);
+    spyOn<any>(component, 'reloadedPath').and.returnValue('/create-eval');
+    router.navigate.calls.reset();
+
+    component.ngOnInit();
+    await Promise.resolve();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(autoSaveSpy.tryResume).not.toHaveBeenCalled();
   });
 });

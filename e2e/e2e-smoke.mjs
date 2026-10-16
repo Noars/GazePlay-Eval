@@ -287,6 +287,20 @@ async function scenarios(browser, base, missing, check, profile) {
     return JSON.stringify({value:i.value,hash:location.hash});`));
   check('saisie conservée au rechargement de la page', reloaded.value === 'Nom avant rechargement', JSON.stringify(reloaded));
 
+  // Rechargement hors parcours : la page affichée est conservée, l'évaluation en cours aussi.
+  const stayed = [];
+  for (const route of ['option', 'guide', 'guide/creation', 'sauvegarde', 'load-save', 'home']) {
+    await run(a, `location.hash='#/${route}';await until(()=>document.querySelector('main h1'));await sleep(150);return 1;`);
+    await a.reload();
+    const res = JSON.parse(await run(a, `await until(()=>document.querySelector('main h1'),10000);await sleep(800);
+      return JSON.stringify({hash:location.hash,name:working()?.nomEval});`));
+    if (res.hash !== '#/' + route || res.name !== 'Nom avant rechargement') stayed.push(`${route} → ${JSON.stringify(res)}`);
+  }
+  const back = JSON.parse(await run(a, `location.hash='#/info-eval';const i=await until(()=>document.querySelector('#evalName'));await sleep(100);
+    return JSON.stringify({value:i.value});`));
+  check('rechargement hors parcours (options, guide, sauvegardes, accueil) : page et évaluation conservées',
+    stayed.length === 0 && back.value === 'Nom avant rechargement', stayed.join(' ; ') + ' ' + JSON.stringify(back));
+
   // Second onglet : évaluation en cours isolée.
   const b = await browser.newPage();
   await b.viewport(1280, 900);

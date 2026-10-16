@@ -60,13 +60,20 @@ export class App implements OnInit {
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isReload = nav?.type === 'reload';
 
-    // Au rechargement, on repasse par l'accueil puis on ramène l'utilisateur à l'étape
-    // où il s'était arrêté (s'il avait une évaluation en cours).
-    if (isReload) {
+    // Au rechargement d'une étape du parcours, on repasse par l'accueil puis on ramène
+    // l'utilisateur à l'étape où il s'était arrêté. Sur toute autre page (accueil, options,
+    // guide, sauvegardes…), il y reste : l'évaluation de l'onglet est déjà rechargée par
+    // SaveService, indépendamment de la page affichée.
+    if (isReload && isStepPath(this.reloadedPath())) {
       this.router.navigate(['/home']).then(() => {
         this.autoSaveService.tryResume(false);
       });
     }
+  }
+
+  /** Chemin de la page rechargée, lu dans l'adresse (routage par hash : `#/option?…`). */
+  protected reloadedPath(): string {
+    return globalThis.location?.hash.replace(/^#/, '').split('?')[0] ?? '';
   }
 
   /**
@@ -101,4 +108,9 @@ export class App implements OnInit {
     event.preventDefault();
     this.routeFocus.focusMainHeading();
   }
+}
+
+/** Vrai pour la route d'une étape du parcours de création (`/info-eval` … `/download-eval`). */
+function isStepPath(path: string): boolean {
+  return Object.values(STEP_TO_ROUTE).includes(path);
 }
