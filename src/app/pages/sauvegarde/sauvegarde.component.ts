@@ -15,6 +15,7 @@ import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {ExclusiveAction} from '../../shared/exclusive-action';
 
 type Slot = { index: FormatTypeConfig; data: saveModel | null };
 
@@ -35,6 +36,8 @@ export class SauvegardeComponent implements OnInit {
   evalInProgress: boolean | undefined;
   autoSave: saveModel | null = null;
   private readonly i18n = inject(I18nService);
+  /** Une action sur les emplacements à la fois (un double clic ne la relance pas). */
+  private readonly slotAction = new ExclusiveAction();
 
   constructor(
     private dialog: MatDialog,
@@ -83,7 +86,11 @@ export class SauvegardeComponent implements OnInit {
    * Charge le slot correspondant à l'index donné dans le slot dynamique pour pouvoir le modifier.
    * @param index l'index du slot sélectionné (1, 2, 3).
    */
-  async editSlot(index: FormatTypeConfig): Promise<void> {
+  editSlot(index: FormatTypeConfig): Promise<void> {
+    return this.slotAction.run(() => this.openSlot(index));
+  }
+
+  private async openSlot(index: FormatTypeConfig): Promise<void> {
     if (!this.loadService.getSlot(index)) return;
 
     // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).
@@ -114,7 +121,11 @@ export class SauvegardeComponent implements OnInit {
    * unique parmi les emplacements nommés, puis lie l'évaluation en cours à cet emplacement :
    * ses modifications suivantes y seront reportées automatiquement.
    */
-  async saveToSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
+  saveToSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
+    return this.slotAction.run(() => this.writeSlot(slot, dataToSave));
+  }
+
+  private async writeSlot(slot: Slot, dataToSave?: Omit<saveModel, 'createdAt' | 'version'>): Promise<void> {
     // Un emplacement modifié dans un autre onglet ne peut pas recevoir l'évaluation de celui-ci.
     const reservation = await this.overwriteGuard.reserveForWriting(slot.index);
     if (!reservation) return;
@@ -175,7 +186,11 @@ export class SauvegardeComponent implements OnInit {
    * supprimés que s'ils ne sont plus utilisés par aucune autre sauvegarde.
    * @param slot contient l'index du slot et sa donnée.
    */
-  async openDeletePopup(slot: Slot): Promise<void> {
+  openDeletePopup(slot: Slot): Promise<void> {
+    return this.slotAction.run(() => this.confirmDelete(slot));
+  }
+
+  private async confirmDelete(slot: Slot): Promise<void> {
     // Supprimer un emplacement modifié dans un autre onglet : refusé (l'autre onglet le recréerait).
     if (!await this.overwriteGuard.ensureNotOpenElsewhere(slot.index)) return;
     const dialogRef = this.dialog.open(PopupDeleteSaveComponent, {
@@ -208,10 +223,12 @@ export class SauvegardeComponent implements OnInit {
   /**
    * Vérifie qu'on ne va pas écraser le slot dynamique, puis renvoie vers la création d'évaluation.
    */
-  async newEval(): Promise<void> {
-    if (!await this.overwriteGuard.check(0)) return;
-    this.saveService.newSaveDataAuto();
-    this.router.navigate(['/info-eval']);
+  newEval(): Promise<void> {
+    return this.slotAction.run(async () => {
+      if (!await this.overwriteGuard.check(0)) return;
+      this.saveService.newSaveDataAuto();
+      this.router.navigate(['/info-eval']);
+    });
   }
 
   /**

@@ -10,7 +10,7 @@ import {TabSessionService} from '../tab/tab-session.service';
  * Suppression **prudente** des médias IndexedDB.
  *
  * Avant cette classe, supprimer un emplacement ou renommer une évaluation appelait
- * `deleteFileByProject(nom)`, qui effaçait tous les médias du projet même s'ils étaient
+ * `deleteFileByProject(nom)` (supprimée depuis), qui effaçait tous les médias du projet même s'ils étaient
  * encore utilisés par l'évaluation en cours ou par un autre emplacement portant le même
  * nom. Ici, un média n'est supprimé que si **aucune** évaluation connue (emplacements 0 à 3,
  * évaluation de travail, et évaluations des autres onglets) ne le référence, ni par identifiant

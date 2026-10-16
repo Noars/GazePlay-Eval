@@ -15,6 +15,7 @@ import { ConfirmService } from '../../shared/ui/confirm-dialog/confirm-dialog.co
 class ConfigStimuliStubComponent {
   @Input() data: unknown;
   @Output() closed = new EventEmitter<void>();
+  @Output() mediaReleased = new EventEmitter<{ref: string, type: string}>();
 }
 
 describe('ModifyScreenComponent', () => {
@@ -652,6 +653,147 @@ describe('ModifyScreenComponent', () => {
     component.checkStimuliCells();
 
     expect(Object.keys(component.screenToModify.values[12]).length).toBe(1);
+  });
+
+  // ─── setGridSize (réglages lignes / colonnes) ─────────────────────────────────
+
+  function makeFilledGrid(): any {
+    const screen = makeStimuli();
+    screen.values[0] = 2;
+    screen.values[1] = 2;
+    screen.values[12] = {
+      0: { imageId: 'TestProject/a.png', imageName: 'a.png', soundName: '', goodAnswer: true, hidden: false },
+      1: { imageId: 'TestProject/b.png', imageName: 'b.png', soundName: '', goodAnswer: false, hidden: false },
+      2: { imageId: '', imageName: '', soundId: 'TestProject/c.mp3', soundName: 'c.mp3', goodAnswer: false, hidden: false },
+      3: { imageId: 'TestProject/d.png', imageName: 'd.png', soundName: '', goodAnswer: false, hidden: false },
+    };
+    return screen;
+  }
+
+  it('setGridSize — champ vidé (null) : aucune case n\'est supprimée (régression)', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+
+    component.setGridSize(0, null);
+
+    expect(component.screenToModify.values[0]).toBeNull();
+    expect(Object.keys(component.screenToModify.values[12]).length).toBe(4);
+    expect(component.screenToModify.values[12][3].imageName).toBe('d.png');
+  });
+
+  it('setGridSize — valeur 0, négative ou décimale : cases conservées', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+
+    for (const value of [0, -1, 1.5]) {
+      component.setGridSize(1, value);
+      expect(Object.keys(component.screenToModify.values[12]).length).withContext(String(value)).toBe(4);
+    }
+    expect(component.canUndo).toBeFalse();
+  });
+
+  it('setGridSize — vider puis retaper la même valeur ne perd aucun contenu', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+
+    component.setGridSize(0, null);
+    component.setGridSize(0, 2);
+
+    expect(component.screenToModify.values[12][0].imageName).toBe('a.png');
+    expect(component.screenToModify.values[12][3].imageName).toBe('d.png');
+  });
+
+  it('setGridSize — réduction : cases retirées annulables, médias libérés seulement à la sortie', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], id), type: id.endsWith('.mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.setGridSize(0, 1);
+
+    expect(component.screenToModify.values[0]).toBe(1);
+    expect(Object.keys(component.screenToModify.values[12]).length).toBe(2);
+    expect(component.canUndo).toBeTrue();
+    expect(component.announcement).toContain('2');
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+
+    component.undo();
+
+    expect(component.screenToModify.values[0]).toBe(2);
+    expect(component.screenToModify.values[12][2].soundName).toBe('c.mp3');
+    expect(component.screenToModify.values[12][3].imageName).toBe('d.png');
+
+    // Après annulation, plus aucune libération en attente : rien n'est supprimé à la sortie.
+    await component.commitMediaJournal();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('setGridSize — réduction confirmée en sortant : médias des cases retirées libérés', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], id), type: id.endsWith('.mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.setGridSize(0, 1);
+    await component.commitMediaJournal();
+
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/c.mp3');
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/d.png');
+    expect(idbSpy.deleteFile).not.toHaveBeenCalledWith('TestProject/a.png');
+  });
+
+  it('setGridSize — agrandissement : cases ajoutées sans instantané d\'annulation', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+
+    component.setGridSize(1, 3);
+
+    expect(Object.keys(component.screenToModify.values[12]).length).toBe(6);
+    expect(component.canUndo).toBeFalse();
+  });
+
+  it('champ « lignes » vidé dans le formulaire : les cases restent en place', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const rowsInput = fixture.nativeElement.querySelector('app-number-setting input') as HTMLInputElement;
+    rowsInput.value = '';
+    rowsInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(Object.keys(component.screenToModify.values[12]).length).toBe(4);
+  });
+
+  it('média retiré dans le panneau de la case → libéré à la sortie, et pas du tout après « Annuler » (régression)', async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], id), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.setGridSize(1, 1);       // instantané d'annulation
+    component.queueMediaRelease({ref: 'TestProject/a.png', type: 'image'}); // image retirée dans le panneau
+    expect(idbSpy.deleteFile).not.toHaveBeenCalled();
+
+    component.undo();
+    await component.commitMediaJournal();
+    expect(idbSpy.deleteFile).not.toHaveBeenCalledWith('TestProject/a.png');
+  });
+
+  it("média retiré dans le panneau de la case, sans annulation → libéré à la sortie de l'éditeur", async () => {
+    createComponent(makeFilledGrid());
+    await fixture.whenStable();
+    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+      id, file: new File([''], id), type: 'image', lastEdit: new Date(), refCount: 1
+    } as any));
+
+    component.queueMediaRelease({ref: 'TestProject/a.png', type: 'image'});
+    await component.commitMediaJournal();
+
+    expect(idbSpy.deleteFile).toHaveBeenCalledWith('TestProject/a.png');
   });
 
   // ─── openStimuliData ─────────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import {saveModel} from '../../shared/saveModel';
 import {STEP_LABEL_KEYS} from '../../shared/stepRoute.model';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {ExclusiveAction} from '../../shared/exclusive-action';
 
 /**
  * Page d'accueil : démarrer une nouvelle évaluation, reprendre l'évaluation en cours,
@@ -31,6 +32,9 @@ export class HomeComponent implements OnInit {
   private readonly importFlow = inject(ImportFlowService);
   private readonly i18n = inject(I18nService);
 
+  /** Un double clic sur « Nouvelle évaluation » n'ouvre pas deux fois la fenêtre de remplacement. */
+  private readonly newEvalAction = new ExclusiveAction();
+
   /** Évaluation en cours (slot 0), lue à l'affichage de la page. */
   currentEval: saveModel | null = null;
 
@@ -38,10 +42,12 @@ export class HomeComponent implements OnInit {
     this.currentEval = this.loadService.getSlot(0);
   }
 
-  async goToInfoEval(): Promise<void> {
-    if (!await this.overwriteGuard.check(0)) return;
-    this.saveService.newSaveDataAuto();
-    this.router.navigate(['/info-eval']);
+  goToInfoEval(): Promise<void> {
+    return this.newEvalAction.run(async () => {
+      if (!await this.overwriteGuard.check(0)) return;
+      this.saveService.newSaveDataAuto();
+      this.router.navigate(['/info-eval']);
+    });
   }
 
   async goToLastStep(): Promise<void> {

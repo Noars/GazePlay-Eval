@@ -60,6 +60,13 @@ interface GridSnapshot {
 
 type ScreenKind = typeof transitionScreenConstModel | typeof instructionScreenConstModel | typeof stimuliScreenConstModel;
 
+/** Nombre de cases d'une grille, ou `null` si les dimensions ne sont pas des entiers ≥ 1. */
+function gridCellCount(rows: unknown, cols: unknown): number | null {
+  const r = rows === null || rows === '' ? NaN : Number(rows);
+  const c = cols === null || cols === '' ? NaN : Number(cols);
+  return Number.isInteger(r) && r >= 1 && Number.isInteger(c) && c >= 1 ? r * c : null;
+}
+
 /**
  * Éditeur d'un écran (transition, instruction ou stimuli).
  *
@@ -548,9 +555,42 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     return Number(this.screenToModify.values[1]) || 1;
   }
 
-  /** Ajuste le dictionnaire des cases (`values[12]`) au nombre de cases de la grille. */
+  /**
+   * Change le nombre de lignes (`dimension` 0) ou de colonnes (1) saisi dans les réglages.
+   *
+   * La valeur est enregistrée telle quelle (le champ signale lui-même une valeur invalide),
+   * mais une saisie vide ou invalide — par exemple le champ vidé avant de taper un autre
+   * nombre — ne retire aucune case. Une réduction qui retire des cases est annulable
+   * (« Annuler ») et leurs médias ne sont libérés qu'à la sortie de l'éditeur.
+   */
+  setGridSize(dimension: 0 | 1, value: number | null): void {
+    const rows = dimension === 0 ? value : Number(this.screenToModify.values[0]);
+    const cols = dimension === 1 ? value : Number(this.screenToModify.values[1]);
+    const listScreen = this.screenToModify.values[12] ?? {};
+    const total = gridCellCount(rows, cols);
+    const removed = total === null ? [] : Object.keys(listScreen).map(Number)
+      .filter(index => index >= total && listScreen[index] && !listScreen[index].hidden);
+
+    if (removed.length > 0) {
+      this.saveSnapshot(); // dimensions et cases d'avant la réduction
+      for (const index of removed) {
+        this.queueCellMediaRelease(listScreen[index]);
+      }
+    }
+    this.screenToModify.values[dimension] = value;
+    this.checkStimuliCells();
+    if (removed.length > 0) {
+      this.announce(this.i18n.t('editor.announce.gridReduced', {count: removed.length}));
+    }
+  }
+
+  /**
+   * Ajuste le dictionnaire des cases (`values[12]`) au nombre de cases de la grille.
+   * Sans dimensions valides (entiers ≥ 1), les cases sont conservées telles quelles.
+   */
   checkStimuliCells(){
-    let numberCells = this.screenToModify.values[0] * this.screenToModify.values[1];
+    const numberCells = gridCellCount(this.screenToModify.values[0], this.screenToModify.values[1]);
+    if (numberCells === null) return;
     const listScreen = this.screenToModify.values[12];
     const numberKey = Object.keys(listScreen).length;
     if (numberKey < numberCells){
@@ -1121,13 +1161,8 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     const cell = listScreen[cellNumber];
     if (!cell || cell.hidden) return;
 
-    const imageRef = cell.imageId || cell.imageName;
-    const soundRef = cell.soundId || cell.soundName;
-
     listScreen[cellNumber] = this.hiddenCell();
-
-    if (imageRef) this.mediaJournal.push({kind: 'release', ref: imageRef, type: 'image'});
-    if (soundRef) this.mediaJournal.push({kind: 'release', ref: soundRef, type: 'sound'});
+    this.queueCellMediaRelease(cell);
 
     if (this.activeCellIndex === cellNumber) {
       this.activeCellIndex = null;
@@ -1288,6 +1323,20 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
         console.warn('Libération de média ignorée :', error);
       }
     }
+  }
+
+  /** Libération demandée par le panneau de configuration d'une case, différée comme les autres. */
+  queueMediaRelease(release: {ref: string, type: MediaType}): void {
+    if (release.ref) this.mediaJournal.push({kind: 'release', ref: release.ref, type: release.type});
+  }
+
+  /** Programme la libération (à la sortie de l'éditeur) des médias d'une case retirée. */
+  private queueCellMediaRelease(cell: any): void {
+    if (!cell || cell.hidden) return;
+    const imageRef = cell.imageId || cell.imageName;
+    const soundRef = cell.soundId || cell.soundName;
+    if (imageRef) this.mediaJournal.push({kind: 'release', ref: imageRef, type: 'image'});
+    if (soundRef) this.mediaJournal.push({kind: 'release', ref: soundRef, type: 'sound'});
   }
 
   /** Programme la libération de tous les médias d'un écran (changement de type). */

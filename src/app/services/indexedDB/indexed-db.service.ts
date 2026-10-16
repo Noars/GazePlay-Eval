@@ -38,15 +38,27 @@ export class IndexedDBService {
   }
 
   /**
-   * Exécute une requête dans une transaction sur le store des médias et résout avec son résultat.
+   * Connexion à la base. La connexion partagée est fermée quand un autre onglet demande une
+   * version plus récente du schéma (voir `openAppDatabase`) : elle est alors rouverte ici,
+   * au lieu de faire échouer toutes les opérations suivantes jusqu'au rechargement.
+   */
+  private async database(): Promise<IDBDatabase> {
+    this.db = await openAppDatabase();
+    return this.db;
+  }
+
+  /**
+   * Exécute une requête dans une transaction sur le store des médias et résout avec son
+   * résultat **une fois la transaction validée** : une écriture peut encore échouer après le
+   * succès de sa requête (quota dépassé, disque plein), et ne doit pas être annoncée réussie.
    */
   private async run<T>(mode: IDBTransactionMode, operation: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
-    await this.dbReady;
+    const db = await this.database();
     return new Promise<T>((resolve, reject) => {
-      const transaction = this.db.transaction(this.storeName, mode);
+      const transaction = db.transaction(this.storeName, mode);
       const request = operation(transaction.objectStore(this.storeName));
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      transaction.oncomplete = () => resolve(request.result);
+      transaction.onabort = () => reject(transaction.error ?? request.error ?? new Error('Transaction IndexedDB annulée.'));
     });
   }
 
@@ -58,25 +70,29 @@ export class IndexedDBService {
    * @throws si un fichier portant cet identifiant existe déjà.
    */
   async addFile(id: string, file: File | Blob, type: MediaType): Promise<void> {
-    await this.dbReady;
+    const db = await this.database();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(this.storeName, 'readwrite');
+      const transaction = db.transaction(this.storeName, 'readwrite');
       const store = transaction.objectStore(this.storeName);
 
       const entry: EvalFile = {id, file, type, lastEdit: new Date(), refCount: 1};
 
+      let exists = false;
       const check = store.get(id);
       check.onsuccess = () => {
         if (check.result) {
+          exists = true;
           reject(new Error(`L'id "${id}" existe déjà`));
           return;
         }
-        const request = store.add(entry);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
+        store.add(entry);
       };
-      check.onerror = () => reject(check.error);
+      // Le fichier n'est enregistré qu'une fois la transaction validée (voir `run`).
+      transaction.oncomplete = () => {
+        if (!exists) resolve();
+      };
+      transaction.onabort = () => reject(transaction.error ?? new Error('Transaction IndexedDB annulée.'));
     });
   }
 
@@ -173,18 +189,5 @@ export class IndexedDBService {
   async getFilesByProject(projectName: string): Promise<EvalFile[]> {
     const allFiles = await this.run<EvalFile[]>('readonly', store => store.getAll());
     return allFiles.filter(f => f.id.startsWith(`${projectName}/`));
-  }
-
-  /**
-   * Supprime tous les fichiers d'un projet, **sans vérifier** s'ils sont encore utilisés.
-   * Préférer `MediaCleanupService.cleanupProject()` qui ne supprime que les médias
-   * qu'aucune sauvegarde ne référence plus.
-   * @param projectName le nom du projet.
-   */
-  async deleteFileByProject(projectName: string): Promise<void> {
-    const files = await this.getFilesByProject(projectName);
-    for (const file of files) {
-      await this.deleteFile(file.id);
-    }
   }
 }

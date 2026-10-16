@@ -18,6 +18,8 @@ import {TranslatePipe} from '../../core/i18n/translate.pipe';
  *
  * Les médias sont enregistrés dans IndexedDB dès leur sélection ; le remplacement ou la
  * suppression libère l'ancien média (supprimé seulement s'il n'est plus utilisé ailleurs).
+ * Dans l'éditeur, cette libération est confiée au parent par `mediaReleased` : elle n'a lieu
+ * qu'à la sortie de l'éditeur, pour que « Annuler » retrouve toujours le fichier.
  */
 @Component({
   selector: 'app-config-stimuli',
@@ -42,6 +44,12 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
 
   /** Demande de fermeture du panneau (bouton « Terminer »). */
   @Output() closed = new EventEmitter<void>();
+
+  /**
+   * Média retiré de la case. S'il est écouté, le parent se charge de la libération (différée) ;
+   * sinon le média est libéré immédiatement.
+   */
+  @Output() mediaReleased = new EventEmitter<{ref: string, type: MediaType}>();
 
   previewImage: string = '';
   previewSound: string = '';
@@ -248,6 +256,10 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
 
   private async releaseSafely(ref: string | undefined, type: MediaType): Promise<void> {
     if (!ref) return;
+    if (this.mediaReleased.observed) {
+      this.mediaReleased.emit({ref, type});
+      return;
+    }
     try {
       await this.media.release(ref, type);
     } catch (error) {

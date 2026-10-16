@@ -82,6 +82,18 @@ describe('ConfigStimuliComponent', () => {
     expect(title.getAttribute('tabindex')).toBe('-1');
   });
 
+  it("dans l'éditeur (mediaReleased écouté) → la libération est confiée au parent, rien n'est supprimé ici", async () => {
+    component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png', soundId: 'TestProject/snd.mp3', soundName: 'snd.mp3'});
+    const released: {ref: string, type: string}[] = [];
+    component.mediaReleased.subscribe(event => released.push(event));
+
+    await component.deleteCell();
+
+    expect(released).toEqual([{ref: 'TestProject/img.png', type: 'image'}, {ref: 'TestProject/snd.mp3', type: 'sound'}]);
+    expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
+  });
+
   // ─── checkCell ────────────────────────────────────────────────────────────
 
   it('checkCell — imageFile déjà un Blob → aperçu sans appel IDB', async () => {

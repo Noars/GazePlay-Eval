@@ -5,6 +5,7 @@ import {
   inject,
   Input,
   OnChanges,
+  OnDestroy,
   Output,
   SimpleChanges,
   Type,
@@ -43,7 +44,7 @@ interface PageGuide {
   templateUrl: './guide-popup-component.html',
   styleUrl: './guide-popup-component.scss',
 })
-export class GuidePopupComponent implements OnChanges {
+export class GuidePopupComponent implements OnChanges, OnDestroy {
 
   router = inject(Router);
 
@@ -203,6 +204,11 @@ export class GuidePopupComponent implements OnChanges {
     if (event.target === this.dialog?.nativeElement) {
       this.close();
     }
+  }
+
+  /** Guide fermé pendant un redimensionnement : les écouteurs du document sont retirés. */
+  ngOnDestroy(): void {
+    this.stopResize();
   }
 
   startResize(event: PointerEvent | MouseEvent): void {

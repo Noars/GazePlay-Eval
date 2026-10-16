@@ -547,6 +547,7 @@ export const FR = {
   'editor.announce.added.right': 'Case ajoutée à droite de la case {n}.',
   'editor.announce.deleteMode': 'Mode suppression : choisissez la case à retirer.',
   'editor.announce.deleted': '{count} case(s) supprimée(s). Utilisez « Annuler » pour revenir en arrière.',
+  'editor.announce.gridReduced': '{count} case(s) retirée(s) de la grille. Utilisez « Annuler » pour les rétablir.',
   'editor.announce.undone': 'Dernière action annulée.',
   'editor.announce.swapMode': 'Mode échange : choisissez la première case.',
   'editor.hint.duplicateSource': 'Choisissez la case à dupliquer.',

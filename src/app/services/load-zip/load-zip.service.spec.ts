@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { LoadZipService } from './load-zip.service';
 import { SaveService } from '../save/save.service';
 import { IndexedDBService } from '../indexedDB/indexed-db.service';
+import { InvalidEvaluationArchiveError } from './load-zip.service';
 import JSZip from 'jszip';
 import {
   transitionScreenConstModel,
@@ -41,9 +42,10 @@ describe('LoadZipService', () => {
       step: 0
     };
 
-    idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['addFile', 'updateFile']);
+    idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['addFile', 'updateFile', 'getFile']);
     idbServiceSpy.addFile.and.returnValue(Promise.resolve());
     idbServiceSpy.updateFile.and.returnValue(Promise.resolve());
+    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('introuvable')));
 
     TestBed.configureTestingModule({
       providers: [
@@ -188,10 +190,42 @@ describe('LoadZipService', () => {
     expect(saveServiceSpy.saveDataAuto.calls.mostRecent().args[0]).toBe('GazePlayEvalDefaultName');
   });
 
-  it('loadZip — evalData.json invalide → listScreens vide', async () => {
+  it('loadZip — evalData.json illisible → import refusé, rien n\'est enregistré (régression)', async () => {
     spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
       'evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'EvalOK' }) },
-      'evalData.json': { content: 'NOT_JSON' }
+      'evalData.json': { content: 'NOT_JSON' },
+      'EvalOK/images/photo.png': { content: new Blob(['img']) }
+    }) as any));
+
+    await expectAsync(service.loadZip(mockZipFile)).toBeRejectedWithError(InvalidEvaluationArchiveError);
+    expect(saveServiceSpy.saveDataAuto).not.toHaveBeenCalled();
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+  });
+
+  it('loadZip — archive sans evalData.json (autre fichier .zip) → import refusé, rien n\'est enregistré', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'documents/rapport.txt': { content: new Blob(['texte']) }
+    }) as any));
+
+    await expectAsync(service.loadZip(mockZipFile)).toBeRejectedWithError(InvalidEvaluationArchiveError);
+    expect(saveServiceSpy.saveDataAuto).not.toHaveBeenCalled();
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+  });
+
+  it('loadZip — evalData.json qui n\'est pas un tableau → import refusé', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: '{}' },
+      'evalData.json': { content: JSON.stringify({ Type: 'transition' }) }
+    }) as any));
+
+    await expectAsync(service.loadZip(mockZipFile)).toBeRejectedWithError(InvalidEvaluationArchiveError);
+    expect(saveServiceSpy.saveDataAuto).not.toHaveBeenCalled();
+  });
+
+  it('loadZip — évaluation sans écran (tableau vide) → importée normalement', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'Vide' }) },
+      'evalData.json': { content: '[]' }
     }) as any));
 
     await service.loadZip(mockZipFile);
@@ -280,6 +314,92 @@ describe('LoadZipService', () => {
 
     await expectAsync(service.loadZip(mockZipFile))
       .toBeRejectedWithError("Type d'écran inconnu : unknown_type");
+  });
+
+  it('loadZip — type d\'écran inconnu → aucun média écrit avant l\'échec (régression)', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'EvalErr' }) },
+      'evalData.json': { content: JSON.stringify([{ Type: 'unknown_type' }]) },
+      'EvalErr/images/photo.png': { content: new Blob(['img']) }
+    }) as any));
+
+    await expectAsync(service.loadZip(mockZipFile)).toBeRejected();
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.updateFile).not.toHaveBeenCalled();
+  });
+
+  it('loadZip — média homonyme au contenu différent déjà enregistré → jamais remplacé, nouvelle clé (régression)', async () => {
+    const existing = new Blob(['photo-de-l-autre-evaluation']);
+    const imported = new Blob(['photo-importee']);
+    idbServiceSpy.addFile.and.callFake((id: string) =>
+      id === 'Test/chat.png' ? Promise.reject(new Error('existe')) : Promise.resolve());
+    idbServiceSpy.getFile.and.callFake((id: string) => id === 'Test/chat.png'
+      ? Promise.resolve({ id, file: existing, type: 'image', lastEdit: new Date(), refCount: 1 } as any)
+      : Promise.reject(new Error('introuvable')));
+
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'Test/evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'Test' }) },
+      'Test/evalData.json': { content: JSON.stringify([{
+        Type: stimuliScreenConstModel, Name: 'S',
+        'Liste des stimuli': { 0: { imageName: 'chat.png', soundName: '', goodAnswer: true } }
+      }, {
+        Type: instructionScreenConstModel, Name: 'I', 'Type de media': 'Image', 'Nom du fichier': 'chat.png'
+      }]) },
+      'Test/images/chat.png': { content: imported }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    expect(idbServiceSpy.updateFile).not.toHaveBeenCalled();
+    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('Test/chat-1.png', imported, 'image');
+    const screens = saveServiceSpy.saveDataAuto.calls.mostRecent().args[6] as any[];
+    expect(screens[0].values[12][0].imageId).toBe('Test/chat-1.png');
+    expect(screens[0].values[12][0].imageName).toBe('chat.png');
+    expect(screens[1].values[8]).toBe('Test/chat-1.png');
+    expect(screens[1].values[4]).toBe('chat.png');
+  });
+
+  it('loadZip — média homonyme au contenu identique → réutilisé sans doublon ni réécriture', async () => {
+    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('existe')));
+    idbServiceSpy.getFile.and.callFake((id: string) =>
+      Promise.resolve({ id, file: new Blob(['meme-contenu']), type: 'image', lastEdit: new Date(), refCount: 1 } as any));
+
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'Test' }) },
+      'evalData.json': { content: JSON.stringify([{
+        Type: stimuliScreenConstModel, 'Liste des stimuli': { 0: { imageName: 'chat.png' } }
+      }]) },
+      'Test/images/chat.png': { content: new Blob(['meme-contenu']) }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    expect(idbServiceSpy.addFile).toHaveBeenCalledTimes(1);
+    expect(idbServiceSpy.updateFile).not.toHaveBeenCalled();
+    const screens = saveServiceSpy.saveDataAuto.calls.mostRecent().args[6] as any[];
+    expect(screens[0].values[12][0].imageId).toBe('Test/chat.png');
+  });
+
+  it('loadZip — evalInfo sans format ni champs participant → valeurs par défaut', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: JSON.stringify({ "Nom de l'évaluation": 'Incomplete' }) },
+      'evalData.json': { content: '[]' }
+    }) as any));
+
+    await service.loadZip(mockZipFile);
+
+    const args = saveServiceSpy.saveDataAuto.calls.mostRecent().args;
+    expect(args[1]).toBe('Csv&Xlsx');
+    expect(args[2]).toEqual([]);
+  });
+
+  it('loadZip — case de stimuli nulle dans un fichier abîmé → import sans plantage', async () => {
+    spyOn(JSZip, 'loadAsync').and.returnValue(Promise.resolve(createMockZip({
+      'evalInfo.json': { content: '{}' },
+      'evalData.json': { content: JSON.stringify([{ Type: stimuliScreenConstModel, 'Liste des stimuli': { 0: null } }]) }
+    }) as any));
+
+    await expectAsync(service.loadZip(mockZipFile)).toBeResolved();
   });
 
   it('loadZip — globalParams absents → utilise les valeurs de dataAuto', async () => {

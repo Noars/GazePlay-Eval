@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { IndexedDBService } from './indexed-db.service';
+import { closeAppDatabase } from '../../core/storage/app-database';
 
 describe('IndexedDBService', () => {
   let service: IndexedDBService;
@@ -248,19 +249,29 @@ describe('IndexedDBService', () => {
     expect(result.every(f => f.id.startsWith('projetA/'))).toBeTrue();
   });
 
-  it('deleteFileByProject → supprime uniquement les fichiers du projet', async () => {
-    const file1 = new File(['a'], 'a.png', { type: 'image/png' });
-    const file2 = new File(['b'], 'b.png', { type: 'image/png' });
-    const file3 = new File(['c'], 'c.png', { type: 'image/png' });
+  // ─── Robustesse des écritures et de la connexion ─────────────────────────────
 
-    await service.addFile('projetA/a.png', file1, 'image');
-    await service.addFile('projetA/b.png', file2, 'image');
-    await service.addFile('projetB/c.png', file3, 'image'); // ne doit pas être sup
+  it('écriture annulée après le succès de sa requête (quota, disque plein) → rejetée et non enregistrée', async () => {
+    const entry = { id: 'projet/quota.png', file: new File(['x'], 'quota.png'), type: 'image', lastEdit: new Date(), refCount: 1 };
+    const write = (service as any).run('readwrite', (store: IDBObjectStore) => {
+      const request = store.put(entry);
+      // Simule une transaction qui échoue à la validation, après le succès de la requête.
+      request.addEventListener('success', () => store.transaction.abort());
+      return request;
+    });
 
-    await service.deleteFileByProject('projetA');
+    await expectAsync(write).toBeRejected();
+    await expectAsync(service.getFile('projet/quota.png')).toBeRejected();
+  });
 
-    const remaining = await service.getAllFiles();
-    expect(remaining.length).toBe(1);
-    expect(remaining[0].id).toBe('projetB/c.png');
+  it('connexion fermée par une mise à niveau dans un autre onglet → rouverte à la demande suivante', async () => {
+    await service.addFile('projet/avant.png', new File(['a'], 'avant.png'), 'image');
+
+    // Équivaut à `onversionchange` : la connexion partagée est fermée et oubliée.
+    await closeAppDatabase();
+
+    await service.addFile('projet/apres.png', new File(['b'], 'apres.png'), 'image');
+    expect((await service.getFile('projet/avant.png')).id).toBe('projet/avant.png');
+    expect((await service.getFile('projet/apres.png')).id).toBe('projet/apres.png');
   });
 });

@@ -20,7 +20,8 @@ describe('AutoSaveService', () => {
   beforeEach(() => {
     routerEvents$ = new Subject();
     routerSpy = jasmine.createSpyObj('Router', ['navigate'], {
-      events: routerEvents$.asObservable()
+      events: routerEvents$.asObservable(),
+      url: '/home'
     });
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
@@ -182,5 +183,80 @@ describe('AutoSaveService', () => {
     loadServiceSpy.getSlot.and.returnValue({ ...saveModelDefault, step: 99 });
 
     expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
+  // ─── Sortie d'une étape vers une page hors parcours, fermeture de l'onglet ────
+
+  function setCurrentUrl(url: string): void {
+    (Object.getOwnPropertyDescriptor(routerSpy, 'url')!.get as jasmine.Spy).and.returnValue(url);
+  }
+
+  it("quitter une étape pour une page hors parcours (menu) → saisies de l'étape enregistrées (régression)", () => {
+    service.init();
+    setCurrentUrl('/info-eval');
+    saveServiceSpy.dataAuto.nomEval = 'Nom saisi';
+    saveServiceSpy.dataAuto.step = 3;
+
+    routerEvents$.next(new NavigationStart(1, '/sauvegarde'));
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.objectContaining({nomEval: 'Nom saisi', step: 0}));
+  });
+
+  it("quitter une étape liée à un emplacement → l'emplacement reçoit aussi les saisies", () => {
+    service.init();
+    saveServiceSpy.activeSlotIndex = 1 as any;
+    setCurrentUrl('/create-eval');
+
+    routerEvents$.next(new NavigationStart(1, '/option'));
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(1, saveServiceSpy.dataAuto);
+  });
+
+  it('navigation entre deux pages hors parcours → aucune sauvegarde', () => {
+    service.init();
+    setCurrentUrl('/sauvegarde');
+
+    routerEvents$.next(new NavigationStart(1, '/home'));
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it("quitter une étape sans évaluation chargée (modèle vide du démarrage) → rien n'est écrit", () => {
+    service.init();
+    (Object.getOwnPropertyDescriptor(saveServiceSpy, 'hasLoadedWorkspace')!.get as jasmine.Spy).and.returnValue(false);
+    setCurrentUrl('/info-eval');
+
+    routerEvents$.next(new NavigationStart(1, '/home'));
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it("fermeture ou rechargement de l'onglet sur une étape → enregistrement sans notification", () => {
+    service.init();
+    setCurrentUrl('/setup-eval');
+
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledWith(0, jasmine.objectContaining({step: 2}));
+    expect(flashServiceSpy.show).not.toHaveBeenCalled();
+  });
+
+  it("fermeture de l'onglet hors parcours → aucune sauvegarde", () => {
+    service.init();
+    setCurrentUrl('/guide');
+
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  it("ngOnDestroy → l'écouteur de fermeture d'onglet est retiré", () => {
+    service.init();
+    setCurrentUrl('/info-eval');
+    service.ngOnDestroy();
+
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
   });
 });

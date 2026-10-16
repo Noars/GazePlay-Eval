@@ -9,6 +9,7 @@ import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {ExclusiveAction} from '../../shared/exclusive-action';
 
 
 @Component({
@@ -22,6 +23,8 @@ export class LoadSaveComponent implements OnInit {
 
   slots: { index: number; data: saveModel | null }[] = [];
   private readonly i18n = inject(I18nService);
+  /** Un chargement à la fois (un double clic ne le relance pas). */
+  private readonly slotAction = new ExclusiveAction();
 
   constructor(
     private router: Router,
@@ -47,8 +50,11 @@ export class LoadSaveComponent implements OnInit {
    * sinon la fenêtre de confirmation s'affiche si elle serait perdue.
    * @param slotIndex index du slot à charger : 1, 2 ou 3
    */
-  async loadSlot(slotIndex: number): Promise<void> {
-    const index = slotIndex as FormatTypeConfig;
+  loadSlot(slotIndex: number): Promise<void> {
+    return this.slotAction.run(() => this.openSlot(slotIndex as FormatTypeConfig));
+  }
+
+  private async openSlot(index: FormatTypeConfig): Promise<void> {
     if (!this.loadService.getSlot(index)) return;
 
     // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).

@@ -87,6 +87,16 @@ describe('GuidePopupComponent', () => {
     expect(closed).toHaveBeenCalled();
   });
 
+  it('guide fermé pendant un redimensionnement → écouteurs du document retirés', () => {
+    component.startResize(new MouseEvent('mousedown'));
+    const removeSpy = spyOn(document, 'removeEventListener').and.callThrough();
+
+    fixture.destroy();
+
+    expect(removeSpy).toHaveBeenCalledWith('pointermove', component.resize);
+    expect(removeSpy).toHaveBeenCalledWith('pointerup', component.stopResize);
+  });
+
   it('stopResize() → passe isResizing à false', () => {
     component.isResizing = true;
     component.stopResize();

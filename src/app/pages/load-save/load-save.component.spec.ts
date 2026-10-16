@@ -249,6 +249,20 @@ describe('LoadSaveComponent', () => {
     expect(autoSaveServiceSpy.tryResume).not.toHaveBeenCalled();
   });
 
+  it('loadSlot — double clic → un seul chargement (régression)', async () => {
+    const slot1: saveModel = {
+      nomEval: 'Eval1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [],
+      globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1
+    };
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    loadServiceSpy.getSlot.and.callFake((index: number) => index === 1 ? slot1 : null);
+
+    await Promise.all([component.loadSlot(1), component.loadSlot(1)]);
+
+    expect(overwriteGuardSpy.reserveForOpening).toHaveBeenCalledTimes(1);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalledTimes(1);
+  });
+
   it('le chargement d\'un slot avec un step incorrect le remet à 3', async () => {
     const slot1: saveModel = {
       nomEval: 'Eval1',

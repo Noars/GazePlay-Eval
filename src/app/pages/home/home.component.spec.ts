@@ -65,6 +65,15 @@ describe('HomeComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/info-eval']);
   });
 
+  it('goToInfoEval — double clic → une seule vérification et une seule nouvelle évaluation', async () => {
+    await create();
+
+    await Promise.all([component.goToInfoEval(), component.goToInfoEval()]);
+
+    expect(overwriteGuardSpy.check).toHaveBeenCalledTimes(1);
+    expect(saveServiceSpy.newSaveDataAuto).toHaveBeenCalledTimes(1);
+  });
+
   it('goToInfoEval → protection refusée → aucune navigation', async () => {
     overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
     await create();

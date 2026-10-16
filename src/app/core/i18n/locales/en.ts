@@ -546,6 +546,7 @@ export const EN: Record<TranslationKey, string> = {
   'editor.announce.added.right': 'Cell added to the right of cell {n}.',
   'editor.announce.deleteMode': 'Delete mode: choose the cell to remove.',
   'editor.announce.deleted': '{count} cell(s) deleted. Use “Undo” to go back.',
+  'editor.announce.gridReduced': '{count} cell(s) removed from the grid. Use “Undo” to restore them.',
   'editor.announce.undone': 'Last action undone.',
   'editor.announce.swapMode': 'Swap mode: choose the first cell.',
   'editor.hint.duplicateSource': 'Choose the cell to duplicate.',

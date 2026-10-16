@@ -15,7 +15,10 @@ import {I18nService} from '../../core/i18n/i18n.service';
  * Déclenchée à chaque navigation vers une étape du parcours de création, et appelée
  * directement par l'éditeur avec des pseudo-routes (`stimuli`, `instruction`,
  * `backToScreenList`, voir `ROUTE_TO_STEP`). Les autres pages (accueil, sauvegardes,
- * options, guide…) ne déclenchent pas de sauvegarde.
+ * options, guide…) ne déclenchent pas de sauvegarde par elles-mêmes, mais quitter une
+ * étape pour l'une d'elles (menu, en-tête) ou fermer/recharger l'onglet enregistre les
+ * saisies de l'étape quittée : elles sont faites directement dans `dataAuto` et seraient
+ * sinon perdues (ou une version plus ancienne serait enregistrée dans un emplacement).
  */
 @Injectable({providedIn: 'root'})
 export class AutoSaveService implements OnDestroy {
@@ -28,16 +31,33 @@ export class AutoSaveService implements OnDestroy {
 
   private subscription?: Subscription;
   private isResuming = false; // vrai pendant la restauration d'une session
+  private readonly onPageHide = () => this.saveCurrentStep(false);
 
   init(): void {
     if (this.subscription) return;
     this.subscription = this.router.events.pipe(
       filter((event: Event): event is NavigationStart => event instanceof NavigationStart)
     ).subscribe((event: NavigationStart) => {
-      if (!this.isResuming) {
+      if (this.isResuming) return;
+      if (isStepPage(event.url)) {
         this.autoSave(event.url);
+      } else {
+        this.saveCurrentStep(); // on quitte peut-être une étape pour une autre page
       }
     });
+    // Fermeture, rechargement ou mise en arrière-plan définitive de l'onglet.
+    globalThis.addEventListener?.('pagehide', this.onPageHide);
+  }
+
+  /**
+   * Enregistre l'évaluation si la page affichée est une étape du parcours (à la sortie de
+   * cette étape). Rien n'est écrit si l'évaluation de travail n'a jamais été chargée.
+   * @param notify affiche la notification « modifications enregistrées ».
+   */
+  saveCurrentStep(notify = true): void {
+    const current = this.router.url;
+    if (!current || !isStepPage(current) || !this.saveService.hasLoadedWorkspace) return;
+    this.autoSave(current, notify);
   }
 
   /**
@@ -45,13 +65,12 @@ export class AutoSaveService implements OnDestroy {
    * pour pouvoir y revenir au rechargement.
    *
    * @param targetUrl l'URL (ou pseudo-route) de la page concernée.
+   * @param notify affiche la notification « modifications enregistrées » (les erreurs, toujours).
    */
-  public autoSave(targetUrl: string): void {
-    // Nettoyage de l'URL : sans le premier « / » ni les paramètres.
-    const pageActuelle = targetUrl.split('?')[0].replace(/^\//, '');
-
+  public autoSave(targetUrl: string, notify = true): void {
     // Seules les étapes du parcours (et leurs sous-pages) sont sauvegardées.
-    if (!Object.hasOwn(ROUTE_TO_STEP, pageActuelle)) return;
+    if (!isStepPage(targetUrl)) return;
+    const pageActuelle = pageOf(targetUrl);
 
     const previousName = this.loadService.getSlot(0)?.nomEval;
 
@@ -62,7 +81,7 @@ export class AutoSaveService implements OnDestroy {
       if (this.saveService.activeSlotIndex !== null && this.saveService.hasLoadedWorkspace) {
         this.saveService.saveToSlot(this.saveService.activeSlotIndex, this.saveService.dataAuto);
       }
-      this.flashService.show('info', this.i18n.t('autoSave.saved'));
+      if (notify) this.flashService.show('info', this.i18n.t('autoSave.saved'));
     } catch (e) {
       console.error('Sauvegarde automatique impossible :', e);
       this.flashService.show('error', this.i18n.t('autoSave.error'));
@@ -79,6 +98,7 @@ export class AutoSaveService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    globalThis.removeEventListener?.('pagehide', this.onPageHide);
   }
 
   /**
@@ -108,4 +128,14 @@ export class AutoSaveService implements OnDestroy {
       this.isResuming = false;
     });
   }
+}
+
+/** Nom de la page d'une URL ou pseudo-route, sans le premier « / » ni les paramètres. */
+function pageOf(url: string): string {
+  return url.split('?')[0].replace(/^\//, '');
+}
+
+/** Vrai pour une étape du parcours de création (ou une sous-page de l'éditeur). */
+function isStepPage(url: string): boolean {
+  return Object.hasOwn(ROUTE_TO_STEP, pageOf(url));
 }

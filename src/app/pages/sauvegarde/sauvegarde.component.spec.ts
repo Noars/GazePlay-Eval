@@ -387,6 +387,35 @@ describe('SauvegardeComponent', () => {
     expect(autoSaveServiceSpy.tryResume).toHaveBeenCalled();
   });
 
+  it('editSlot — double clic → une seule ouverture, aucune fausse alerte « ouvert ailleurs » (régression)', async () => {
+    const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    fixture.detectChanges();
+
+    await Promise.all([component.editSlot(1), component.editSlot(1)]);
+
+    expect(overwriteGuardSpy.reserveForOpening).toHaveBeenCalledTimes(1);
+    expect(autoSaveServiceSpy.tryResume).toHaveBeenCalledTimes(1);
+
+    // L'action terminée, un nouveau clic est de nouveau pris en compte.
+    await component.editSlot(1);
+    expect(overwriteGuardSpy.reserveForOpening).toHaveBeenCalledTimes(2);
+  });
+
+  it('saveToSlot — double clic → une seule réservation et un seul enregistrement', async () => {
+    const autoSave = { nomEval: 'Courante', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
+    loadServiceSpy.getSlot.and.callFake((i: number) => i === 0 ? autoSave : null);
+    overwriteGuardSpy.getUniqueEvalName.and.callFake((name: string) => name);
+    fixture.detectChanges();
+    const slot = {index: 2 as const, data: null};
+
+    await Promise.all([component.saveToSlot(slot), component.saveToSlot(slot)]);
+
+    expect(overwriteGuardSpy.reserveForWriting).toHaveBeenCalledTimes(1);
+    expect(saveServiceSpy.saveToSlot).toHaveBeenCalledTimes(1);
+  });
+
   it('editSlot — step < 0 → utilise step = 3', async () => {
     const slot1 = { nomEval: 'E1', format: 'Csv' as any, infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: -1, createdAt: '', version: 1 };
     loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);

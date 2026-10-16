@@ -171,9 +171,9 @@
                [7] aléatoire [8] cacher [9] son ? [10] nom du son [12] cases [13] id du son -->
           <h3 class="gp-subheading">{{ 'editor.grid' | t }}</h3>
           <app-number-setting [label]="'screen.grid.rows' | t" [min]="1" step="1"
-                              [(ngModel)]="screenToModify.values[0]" (ngModelChange)="checkStimuliCells()"></app-number-setting>
+                              [ngModel]="screenToModify.values[0]" (ngModelChange)="setGridSize(0, $event)"></app-number-setting>
           <app-number-setting [label]="'screen.grid.columns' | t" [min]="1" step="1"
-                              [(ngModel)]="screenToModify.values[1]" (ngModelChange)="checkStimuliCells()"></app-number-setting>
+                              [ngModel]="screenToModify.values[1]" (ngModelChange)="setGridSize(1, $event)"></app-number-setting>
 
           <h3 class="gp-subheading">{{ 'screen.next.heading' | t }}</h3>
           <app-choice-setting [label]="'editor.limitTime' | t"
@@ -415,7 +415,8 @@
       <!-- Panneau de la case active -->
       <aside class="gp-card stimuli-layout__inspector" aria-labelledby="configStimuliLabel">
         @if (stimuliOffcanvasReady && activeCellIndex !== null) {
-          <app-config-stimuli [data]="dataStimuli" (closed)="closeConfigStimuli()"></app-config-stimuli>
+          <app-config-stimuli [data]="dataStimuli" (closed)="closeConfigStimuli()"
+                              (mediaReleased)="queueMediaRelease($event)"></app-config-stimuli>
           <div class="adjacent-tools">
             <p class="adjacent-tools__label" id="adjacent-label">{{ 'editor.adjacent.label' | t }}</p>
             <div class="adjacent-tools__buttons" role="group" aria-labelledby="adjacent-label">
