@@ -8,25 +8,27 @@ import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-gu
 
 import { LoadSaveComponent } from './load-save.component';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('LoadSaveComponent', () => {
   let component: LoadSaveComponent;
   let fixture: ComponentFixture<LoadSaveComponent>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>
-  let loadServiceSpy: jasmine.SpyObj<LoadService>
-  let autoSaveServiceSpy: jasmine.SpyObj<AutoSaveService>
-  let routerSpy: jasmine.SpyObj<Router>
-  let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>
+  let saveServiceSpy: Mocked<SaveService>
+  let loadServiceSpy: Mocked<LoadService>
+  let autoSaveServiceSpy: Mocked<AutoSaveService>
+  let routerSpy: Mocked<Router>
+  let overwriteGuardSpy: Mocked<OverwriteGuardService>
 
 
   beforeEach(async () => {
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName', 'loadIntoWorkspace', 'setActiveSlot']);
+    saveServiceSpy = createSpyObj('SaveService', ['saveDataAuto', 'saveToSlot', 'clearSlot', 'newSaveDataAuto', 'getEvalName', 'loadIntoWorkspace', 'setActiveSlot']);
     // Reproduit le comportement réel des méthodes utilisées par la page.
-    saveServiceSpy.loadIntoWorkspace.and.callFake((save: saveModel, step: number = save.step) => {
+    saveServiceSpy.loadIntoWorkspace.mockImplementation((save: saveModel, step: number = save.step) => {
       const {createdAt, version, ...rest} = save;
       saveServiceSpy.dataAuto = {...rest, step};
     });
-    saveServiceSpy.setActiveSlot.and.callFake((index: any) => saveServiceSpy.activeSlotIndex = index);
+    saveServiceSpy.setActiveSlot.mockImplementation((index: any) => saveServiceSpy.activeSlotIndex = index);
     saveServiceSpy.dataAuto = {
       format: 'Csv',
       globalParamsInstructionScreen: [],
@@ -38,13 +40,13 @@ describe('LoadSaveComponent', () => {
       nomEval: '' };
     saveServiceSpy.activeSlotIndex = null;
 
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.returnValue(null);
+    loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
+    loadServiceSpy.getSlot.mockReturnValue(null);
 
-    autoSaveServiceSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
-    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName', 'reserveForOpening']);
+    autoSaveServiceSpy = createSpyObj('AutoSaveService', ['tryResume']);
+    overwriteGuardSpy = createSpyObj('OverwriteGuardService', ['check', 'getUniqueEvalName', 'reserveForOpening']);
     // Par défaut, aucun autre onglet n'utilise l'emplacement.
-    overwriteGuardSpy.reserveForOpening.and.callFake(async (slot: any) => ({mode: 'link', reservation: {slot, release: jasmine.createSpy('release')}}));
+    overwriteGuardSpy.reserveForOpening.mockImplementation(async (slot: any) => ({mode: 'link', reservation: {slot, release: vi.fn().mockName('release')}}));
 
     await TestBed.configureTestingModule({
       imports: [LoadSaveComponent],
@@ -58,8 +60,8 @@ describe('LoadSaveComponent', () => {
     })
       .compileComponents();
 
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    spyOn(routerSpy, 'navigate').and.returnValue(Promise.resolve(true));
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
+    vi.spyOn(routerSpy, 'navigate').mockReturnValue(Promise.resolve(true));
 
     fixture = TestBed.createComponent(LoadSaveComponent);
     component = fixture.componentInstance;
@@ -107,14 +109,7 @@ describe('LoadSaveComponent', () => {
       version: 1
     };
 
-    // V1
-
-    // loadServiceSpy.getSlot.withArgs(1).and.returnValue(slot1)
-    // loadServiceSpy.getSlot.withArgs(2).and.returnValue(slot2)
-    // loadServiceSpy.getSlot.withArgs(3).and.returnValue(slot3)
-
-    // V2
-    loadServiceSpy.getSlot.and.callFake((index: number) => {
+    loadServiceSpy.getSlot.mockImplementation((index: number) => {
       if (index === 0) return null; // le slot auto est vide
       if (index === 1) return slot1;
       if (index === 2) return slot2;
@@ -130,7 +125,7 @@ describe('LoadSaveComponent', () => {
       { index: 3, data: slot3 }
     ]
 
-    expect(component.slots).toEqual(expectedSlots);
+    expect(component.slots).toStrictEqual(expectedSlots);
     expect(loadServiceSpy.getSlot).toHaveBeenCalled();
   });
 
@@ -153,9 +148,9 @@ describe('LoadSaveComponent', () => {
       version: 1
     };
 
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(true));
 
-    loadServiceSpy.getSlot.and.callFake((index: number) => {
+    loadServiceSpy.getSlot.mockImplementation((index: number) => {
       if (index === 1) return slot1;
       return null;
     });
@@ -173,20 +168,20 @@ describe('LoadSaveComponent', () => {
     const before: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
     const after: saveModel = { ...before, listScreens: [{name: 'ajouté pendant la reprise'}] as any };
     let slot1 = before;
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
-    overwriteGuardSpy.check.and.callFake(async () => { slot1 = after; return true; });
+    loadServiceSpy.getSlot.mockImplementation((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.mockImplementation(async () => { slot1 = after; return true; });
     fixture.detectChanges();
 
     await component.loadSlot(1);
 
-    expect(component.saveService.dataAuto.listScreens).toEqual(after.listScreens);
+    expect(component.saveService.dataAuto.listScreens).toStrictEqual(after.listScreens);
   });
 
   it("loadSlot — emplacement ouvert dans un autre onglet, « Ouvrir une copie » → chargé sans lien", async () => {
     const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
-    overwriteGuardSpy.reserveForOpening.and.resolveTo({mode: 'copy'});
-    overwriteGuardSpy.check.and.resolveTo(true);
+    loadServiceSpy.getSlot.mockImplementation((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.reserveForOpening.mockResolvedValue({mode: 'copy'});
+    overwriteGuardSpy.check.mockResolvedValue(true);
     fixture.detectChanges();
 
     await component.loadSlot(1);
@@ -198,8 +193,8 @@ describe('LoadSaveComponent', () => {
 
   it("loadSlot — emplacement ouvert dans un autre onglet, annulation → rien n'est chargé", async () => {
     const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
-    overwriteGuardSpy.reserveForOpening.and.resolveTo(null);
+    loadServiceSpy.getSlot.mockImplementation((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.reserveForOpening.mockResolvedValue(null);
     fixture.detectChanges();
 
     await component.loadSlot(1);
@@ -210,10 +205,10 @@ describe('LoadSaveComponent', () => {
 
   it("loadSlot — protection annulée → la réservation de l'emplacement est libérée", async () => {
     const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
-    const release = jasmine.createSpy('release');
-    overwriteGuardSpy.reserveForOpening.and.resolveTo({mode: 'link', reservation: {slot: 1, release}});
-    overwriteGuardSpy.check.and.resolveTo(false);
+    loadServiceSpy.getSlot.mockImplementation((i: number) => i === 1 ? slot1 : null);
+    const release = vi.fn().mockName('release');
+    overwriteGuardSpy.reserveForOpening.mockResolvedValue({mode: 'link', reservation: {slot: 1, release}});
+    overwriteGuardSpy.check.mockResolvedValue(false);
     fixture.detectChanges();
 
     await component.loadSlot(1);
@@ -229,7 +224,7 @@ describe('LoadSaveComponent', () => {
   });
 
   it('loadSlot — slot vide → retourne sans rien faire', async () => {
-    loadServiceSpy.getSlot.and.returnValue(null);
+    loadServiceSpy.getSlot.mockReturnValue(null);
     fixture.detectChanges();
 
     await component.loadSlot(1);
@@ -240,8 +235,8 @@ describe('LoadSaveComponent', () => {
 
   it('loadSlot — overwriteGuard bloque → retourne sans charger', async () => {
     const slot1: saveModel = { nomEval: 'E1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1 };
-    loadServiceSpy.getSlot.and.callFake((i: number) => i === 1 ? slot1 : null);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    loadServiceSpy.getSlot.mockImplementation((i: number) => i === 1 ? slot1 : null);
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(false));
     fixture.detectChanges();
 
     await component.loadSlot(1);
@@ -254,8 +249,8 @@ describe('LoadSaveComponent', () => {
       nomEval: 'Eval1', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [],
       globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 2, createdAt: '', version: 1
     };
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    loadServiceSpy.getSlot.and.callFake((index: number) => index === 1 ? slot1 : null);
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(true));
+    loadServiceSpy.getSlot.mockImplementation((index: number) => index === 1 ? slot1 : null);
 
     await Promise.all([component.loadSlot(1), component.loadSlot(1)]);
 
@@ -277,9 +272,9 @@ describe('LoadSaveComponent', () => {
       version: 1
     };
 
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(true));
 
-    loadServiceSpy.getSlot.and.callFake((index: number) => {
+    loadServiceSpy.getSlot.mockImplementation((index: number) => {
       if (index === 1) return slot1;
       return null;
     });

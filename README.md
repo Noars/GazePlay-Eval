@@ -73,7 +73,7 @@ une-page/
 ```
 - Le CSS contient le style spécifique au component ou à la page. L'apparence générale vient du **système de design** de `src/styles/` (classes `gp-…` et variables `--gp-…`), construit au-dessus de **Bootstrap** (grille, utilitaires). Les couleurs ne sont jamais écrites en dur : elles viennent des jetons, ce qui garantit la cohérence des thèmes clair, sombre et contrasté.
 - Le HTML contient le "layout" de l'élément. C'est la vue modifiée dynamiquement par le fichier **TypeScript**.
-- Le SPEC contient les tests unitaires de l'élément. Ils utilisent Jasmine (plus de détails dans la partie sur les tests).
+- Le SPEC contient les tests unitaires de l'élément. Ils utilisent Vitest (plus de détails dans la partie sur les tests).
 - Le TS (TypeScript) correspond au View-Model. Il permet d'afficher la vue et de récupérer les actions utilisateurs pour utiliser les services.
 
 Les services sont structurés d'une façon similaire : 
@@ -269,8 +269,10 @@ Un même média peut être utilisé par plusieurs cases (duplication) : un compt
 Commande utilisée par l'intégration continue (exécution unique, navigateur sans interface) :
 
 ```bash
-npx ng test --watch=false --no-progress --browsers=ChromeHeadless
+npx ng test --watch=false
 ```
+
+Les tests unitaires utilisent **Vitest** et s'exécutent dans un vrai navigateur : le Google Chrome installé sur la machine, piloté par Playwright ([vitest-base.config.ts](vitest-base.config.ts)). Aucun navigateur n'est téléchargé ; pour un autre navigateur Chromium (Edge par exemple), indiquer son chemin dans la variable d'environnement `CHROME_BIN`.
 
 Les tests comprennent des contrôles d'accessibilité automatisés sur chaque page ([a11y-pages.spec.ts](src/app/testing/a11y-pages.spec.ts)). Ils ne remplacent pas un audit complet : voir [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md).
 
@@ -279,12 +281,12 @@ Pour lancer les tests sous IntelliJ Idea, vous pouvez lancer les commandes suiva
 ```bash
 ng test
 ```
---> Lance *Karma* (outil permettant de simuler un navigateur web) et déroule l'ensemble des tests.
+--> Lance *Vitest* en mode surveillance : l'ensemble des tests est déroulé dans Chrome (sans interface), puis relancé à chaque modification.
 
 ```bash
-ng test --code-coverage GazePlay-Eval 
+ng test --watch=false --coverage
 ```
---> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
+--> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `coverage/GazePlay-Eval/index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
 
 ### Tests de bout en bout
 

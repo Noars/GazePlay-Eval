@@ -1,4 +1,4 @@
-name: CI Angular (build et tests)
+name: CI
 
 on:
   pull_request:
@@ -37,9 +37,10 @@ jobs:
       - name: Build de production
         run: npm run build
 
-      # Google Chrome est préinstallé sur les runners ubuntu-latest (détecté par karma-chrome-launcher).
-      - name: Tests Karma (ChromeHeadless)
-        run: npx ng test --watch=false --no-progress --browsers=ChromeHeadless
+      # Vitest dans un vrai navigateur, piloté par Playwright : le Google Chrome préinstallé sur
+      # les runners ubuntu-latest (vitest-base.config.ts), aucun navigateur n'est téléchargé.
+      - name: Tests unitaires (Vitest, Chrome)
+        run: npx ng test --watch=false
 
       # Bout en bout sur l'application construite (e2e/e2e-smoke.mjs, sans dépendance) :
       # Chrome et Firefox, préinstallés sur ubuntu-latest, sont exigés ; profils temporaires.

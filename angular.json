@@ -76,26 +76,19 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "buildTarget": "::development",
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
-              }
+            "runner": "vitest",
+            "runnerConfig": "vitest-base.config.ts",
+            "setupFiles": [
+              "src/app/testing/global-test-setup.spec.ts"
             ],
-            "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "src/styles.scss"
-            ],
-            "inlineStyleLanguage": "scss"
+            "exclude": [
+              "src/app/testing/global-test-setup.spec.ts",
+              "src/app/core/tab/testing/fake-tabs.spec.ts"
+            ]
           }
         }
       }

@@ -20,11 +20,11 @@ describe('SaveService', () => {
   });
 
   it('newSaveDataAuto doit initialiser dataAuto et sauvegarder dans le slot 0', () => {
-    spyOn(service, 'saveToSlot').and.callThrough();
+    vi.spyOn(service, 'saveToSlot');
 
     service.newSaveDataAuto();
 
-    expect(service.dataAuto).toEqual(jasmine.any(Object));
+    expect(service.dataAuto).toStrictEqual(expect.any(Object));
     expect(service.saveToSlot).toHaveBeenCalledWith(0, service.dataAuto);
     expect(localStorage.getItem(SAVE_SLOT_LIST[0])).not.toBeNull();
   });
@@ -41,7 +41,7 @@ describe('SaveService', () => {
       step: 0
     };
 
-    spyOn(service, 'saveToSlot').and.callThrough();
+    vi.spyOn(service, 'saveToSlot');
 
     service.saveDataAuto(
       mockData.nomEval,
@@ -54,7 +54,7 @@ describe('SaveService', () => {
       mockData.step
     );
 
-    expect(service.dataAuto).toEqual(mockData);
+    expect(service.dataAuto).toStrictEqual(mockData);
     expect(service.saveToSlot).toHaveBeenCalledWith(0, mockData);
     expect(localStorage.getItem(SAVE_SLOT_LIST[0])).not.toBeNull();
   });
@@ -81,7 +81,7 @@ describe('SaveService', () => {
     service.dataAuto.nomEval = String();
     const result = service.getEvalName();
     expect(result.length).toBeGreaterThan(0);
-    expect(result).not.toEqual(service.dataAuto.nomEval);
+    expect(result).not.toStrictEqual(service.dataAuto.nomEval);
   });
 
   it("setActiveSlot → lien propre à l'onglet (sessionStorage), publié avec la dernière évaluation en cours", () => {
@@ -101,9 +101,9 @@ describe('SaveService', () => {
     const tabCopy = JSON.parse(sessionStorage.getItem(TAB_KEYS.working)!);
     const shared = JSON.parse(localStorage.getItem(SAVE_SLOT_LIST[0])!);
     expect(tabCopy.nomEval).toBe('E');
-    expect(shared).toEqual(tabCopy);
+    expect(shared).toStrictEqual(tabCopy);
     expect(shared.version).toBe(1);
-    expect(shared.createdAt).toEqual(jasmine.any(String));
+    expect(shared.createdAt).toStrictEqual(expect.any(String));
   });
 
   it("clearSlot(0) → supprime l'évaluation de l'onglet et la copie partagée qu'il a publiée", () => {
@@ -118,25 +118,25 @@ describe('SaveService', () => {
     TestBed.resetTestingModule();
     const fresh = TestBed.inject(SaveService);
     expect(fresh.dataAuto.nomEval).toBe('Reprise');
-    expect(fresh.hasLoadedWorkspace).toBeTrue();
+    expect(fresh.hasLoadedWorkspace).toBe(true);
   });
 
   it("hasLoadedWorkspace → faux au démarrage, vrai après création, saisie ou chargement de l'évaluation", () => {
     const fresh = () => TestBed.runInInjectionContext(() => new SaveService());
-    expect(fresh().hasLoadedWorkspace).toBeFalse();
+    expect(fresh().hasLoadedWorkspace).toBe(false);
 
     const created = fresh();
     created.newSaveDataAuto();
-    expect(created.hasLoadedWorkspace).toBeTrue();
+    expect(created.hasLoadedWorkspace).toBe(true);
 
     const saved = fresh();
     saved.saveDataAuto('E', 'Csv', [], [], [], [], [], 0);
-    expect(saved.hasLoadedWorkspace).toBeTrue();
+    expect(saved.hasLoadedWorkspace).toBe(true);
 
     const loaded = fresh();
     loaded.loadIntoWorkspace({nomEval: 'E', format: 'Csv', infoParticipant: [], globalParamsTransitionScreen: [],
       globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 1, createdAt: 'x', version: 1});
-    expect(loaded.hasLoadedWorkspace).toBeTrue();
+    expect(loaded.hasLoadedWorkspace).toBe(true);
   });
 
   it("clearSlot de l'emplacement actif → l'évaluation en est détachée", () => {
@@ -155,7 +155,7 @@ describe('SaveService', () => {
     const save = {nomEval: 'E', format: 'Csv' as const, infoParticipant: ['Nom'], globalParamsTransitionScreen: [],
       globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 1, createdAt: 'x', version: 1};
     service.loadIntoWorkspace(save, 3);
-    expect(service.dataAuto).toEqual({nomEval: 'E', format: 'Csv', infoParticipant: ['Nom'], globalParamsTransitionScreen: [],
+    expect(service.dataAuto).toStrictEqual({nomEval: 'E', format: 'Csv', infoParticipant: ['Nom'], globalParamsTransitionScreen: [],
       globalParamsInstructionScreen: [], globalParamsStimuliScreen: [], listScreens: [], step: 3});
   });
 });

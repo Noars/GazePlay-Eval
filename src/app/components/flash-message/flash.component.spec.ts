@@ -24,27 +24,27 @@ describe('FlashComponent', () => {
   });
 
   it('mapType(\'success\') → \'success\'', () => {
-    expect(component.mapType('success')).toEqual('success');
+    expect(component.mapType('success')).toStrictEqual('success');
   });
 
   it('mapType(\'error\') → \'danger\'', () => {
-    expect(component.mapType('error')).toEqual('danger');
+    expect(component.mapType('error')).toStrictEqual('danger');
   });
 
   it('mapType(\'unknown\') → \'info\'', () => {
-    expect(component.mapType('unknown')).toEqual('info');
+    expect(component.mapType('unknown')).toStrictEqual('info');
   });
 
   it('mapIcon(\'success\') → \'bi-check-circle\'', () => {
-    expect(component.mapIcon('success')).toEqual('bi-check-circle');
+    expect(component.mapIcon('success')).toStrictEqual('bi-check-circle');
   });
 
   it('mapIcon(\'error\') → \'bi-x-circle\'', () => {
-    expect(component.mapIcon('error')).toEqual('bi-x-circle');
+    expect(component.mapIcon('error')).toStrictEqual('bi-x-circle');
   });
 
   it('mapIcon(\'unknown\') → \'bi-info-circle\'', () => {
-    expect(component.mapIcon('unknown')).toEqual('bi-info-circle');
+    expect(component.mapIcon('unknown')).toStrictEqual('bi-info-circle');
   });
 
   describe('type du message (« Erreur : »…)', () => {

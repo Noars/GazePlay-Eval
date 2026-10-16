@@ -3,12 +3,14 @@ import {LanguageMenuComponent} from './language-menu.component';
 import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {LANGUAGES} from '../../core/preferences/user-preferences.model';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('LanguageMenuComponent', () => {
   let fixture: ComponentFixture<LanguageMenuComponent>;
   let component: LanguageMenuComponent;
   let host: HTMLElement;
-  let preferencesSpy: jasmine.SpyObj<UserPreferencesService>;
+  let preferencesSpy: Mocked<UserPreferencesService>;
   let i18n: I18nService;
 
   const trigger = () => host.querySelector<HTMLButtonElement>('button[aria-haspopup="menu"]')!;
@@ -23,9 +25,9 @@ describe('LanguageMenuComponent', () => {
   };
 
   beforeEach(async () => {
-    preferencesSpy = jasmine.createSpyObj('UserPreferencesService', ['setLanguage']);
+    preferencesSpy = createSpyObj('UserPreferencesService', ['setLanguage']);
     // Comme le vrai service : la langue enregistrée est appliquée à l'interface.
-    preferencesSpy.setLanguage.and.callFake(async language => {
+    preferencesSpy.setLanguage.mockImplementation(async language => {
       i18n.setLanguage(language);
       return true;
     });
@@ -50,19 +52,19 @@ describe('LanguageMenuComponent', () => {
     expect(trigger().querySelector('[lang="fr"]')).not.toBeNull();
     expect(trigger().textContent).toContain('langue de l\'interface : Français');
     expect(trigger().getAttribute('aria-expanded')).toBe('false');
-    expect(list().hidden).toBeTrue();
+    expect(list().hidden).toBe(true);
   });
 
   it('la liste propose toutes les langues disponibles, chacune dans sa langue, la langue en cours cochée', async () => {
     trigger().click();
     await settle();
 
-    expect(list().hidden).toBeFalse();
+    expect(list().hidden).toBe(false);
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
-    expect(items().map(item => item.getAttribute('lang'))).toEqual([...LANGUAGES]);
-    expect(items().map(item => item.querySelector('.language-menu__item-name')?.textContent?.trim())).toEqual(['Français', 'English']);
-    expect(items().map(item => item.querySelector('.language-menu__item-code')?.textContent?.trim())).toEqual(['FR', 'EN']);
-    expect(items().map(item => item.getAttribute('aria-checked'))).toEqual(['true', 'false']);
+    expect(items().map(item => item.getAttribute('lang'))).toStrictEqual([...LANGUAGES]);
+    expect(items().map(item => item.querySelector('.language-menu__item-name')?.textContent?.trim())).toStrictEqual(['Français', 'English']);
+    expect(items().map(item => item.querySelector('.language-menu__item-code')?.textContent?.trim())).toStrictEqual(['FR', 'EN']);
+    expect(items().map(item => item.getAttribute('aria-checked'))).toStrictEqual(['true', 'false']);
     expect(document.activeElement).toBe(items()[0]);
   });
 
@@ -72,15 +74,15 @@ describe('LanguageMenuComponent', () => {
     items()[1].click();
     await settle();
 
-    expect(preferencesSpy.setLanguage).toHaveBeenCalledOnceWith('en');
-    expect(list().hidden).toBeTrue();
+    expect(preferencesSpy.setLanguage).toHaveBeenCalledExactlyOnceWith('en');
+    expect(list().hidden).toBe(true);
     expect(document.activeElement).toBe(trigger());
     expect(trigger().textContent).toContain('EN');
     expect(trigger().textContent).toContain('interface language: English');
 
     trigger().click();
     await settle();
-    expect(items().map(item => item.getAttribute('aria-checked'))).toEqual(['false', 'true']);
+    expect(items().map(item => item.getAttribute('aria-checked'))).toStrictEqual(['false', 'true']);
     i18n.setLanguage('fr');
   });
 
@@ -94,7 +96,7 @@ describe('LanguageMenuComponent', () => {
   it('clavier : flèche bas ouvre, flèches/Début/Fin déplacent, Échap ferme et rend le focus', async () => {
     key(trigger(), 'ArrowDown');
     await settle();
-    expect(list().hidden).toBeFalse();
+    expect(list().hidden).toBe(false);
     expect(document.activeElement).toBe(items()[0]);
 
     key(items()[0], 'ArrowDown');
@@ -108,7 +110,7 @@ describe('LanguageMenuComponent', () => {
 
     key(items()[0], 'Escape');
     fixture.detectChanges();
-    expect(list().hidden).toBeTrue();
+    expect(list().hidden).toBe(true);
     expect(document.activeElement).toBe(trigger());
   });
 
@@ -117,6 +119,6 @@ describe('LanguageMenuComponent', () => {
     await settle();
     document.body.click();
     fixture.detectChanges();
-    expect(component.isOpen()).toBeFalse();
+    expect(component.isOpen()).toBe(false);
   });
 });

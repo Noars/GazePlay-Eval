@@ -13,6 +13,8 @@ import {ConfirmService} from '../../../shared/ui/confirm-dialog/confirm-dialog.c
 import {MediaCleanupService} from '../../media/media-cleanup.service';
 import {IndexedDBService} from '../../../services/indexedDB/indexed-db.service';
 import {AutoSaveService} from '../../../services/auto-save/auto-save.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../../testing/spy-obj';
 
 /** Stockage en mémoire (sessionStorage d'un onglet simulé). */
 export class MemoryStorage implements Storage {
@@ -83,9 +85,9 @@ export interface FakeTab {
   guard: OverwriteGuardService;
   cleanup: MediaCleanupService;
   autoSave: AutoSaveService;
-  dialog: jasmine.SpyObj<MatDialog>;
-  confirm: jasmine.SpyObj<ConfirmService>;
-  flash: jasmine.SpyObj<FlashService>;
+  dialog: Mocked<MatDialog>;
+  confirm: Mocked<ConfirmService>;
+  flash: Mocked<FlashService>;
   close: () => void;
 }
 
@@ -96,14 +98,14 @@ export interface FakeTab {
  */
 export async function openFakeTab(registry: FakeLockRegistry, storage = new MemoryStorage(), extra: Provider[] = []): Promise<FakeTab> {
   const {locks, close} = registry.forTab();
-  const dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-  dialog.open.and.returnValue({afterClosed: () => of(null)} as any);
-  const confirm = jasmine.createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
-  confirm.confirm.and.resolveTo(false);
-  const flash = jasmine.createSpyObj<FlashService>('FlashService', ['show']);
-  const download = jasmine.createSpyObj<DownloadService>('DownloadService', ['generateSlotZip']);
-  download.generateSlotZip.and.resolveTo(true);
-  const idb = jasmine.createSpyObj<IndexedDBService>('IndexedDBService', ['getAllFiles', 'deleteFile']);
+  const dialog = createSpyObj<MatDialog>('MatDialog', ['open']);
+  dialog.open.mockReturnValue({afterClosed: () => of(null)} as any);
+  const confirm = createSpyObj<ConfirmService>('ConfirmService', ['confirm']);
+  confirm.confirm.mockResolvedValue(false);
+  const flash = createSpyObj<FlashService>('FlashService', ['show']);
+  const download = createSpyObj<DownloadService>('DownloadService', ['generateSlotZip']);
+  download.generateSlotZip.mockResolvedValue(true);
+  const idb = createSpyObj<IndexedDBService>('IndexedDBService', ['getAllFiles', 'deleteFile']);
 
   const injector = Injector.create({
     parent: TestBed.inject(EnvironmentInjector),

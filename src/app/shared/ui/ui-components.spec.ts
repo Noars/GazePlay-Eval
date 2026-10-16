@@ -7,6 +7,8 @@ import {NumberSettingComponent} from './number-setting/number-setting.component'
 import {HelpTipComponent} from './help-tip/help-tip.component';
 import {FilePickerComponent} from './file-picker/file-picker.component';
 import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 @Component({
   imports: [FormsModule, ChoiceSettingComponent, NumberSettingComponent, HelpTipComponent, FilePickerComponent],
@@ -51,7 +53,7 @@ describe('Composants de formulaire partagés', () => {
 
   it('choice-setting → reflète la valeur et émet exactement la valeur de l\'option (booléen)', () => {
     const radios = el.querySelectorAll('app-choice-setting')[0].querySelectorAll('input[type="radio"]') as NodeListOf<HTMLInputElement>;
-    expect(radios[0].checked).toBeTrue();
+    expect(radios[0].checked).toBe(true);
 
     radios[1].click();
     fixture.detectChanges();
@@ -146,10 +148,10 @@ describe('Composants de formulaire partagés', () => {
 
 describe('ConfirmDialogComponent', () => {
   let fixture: ComponentFixture<ConfirmDialogComponent>;
-  let dialogRef: jasmine.SpyObj<MatDialogRef<ConfirmDialogComponent>>;
+  let dialogRef: Mocked<MatDialogRef<ConfirmDialogComponent>>;
 
   beforeEach(async () => {
-    dialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+    dialogRef = createSpyObj('MatDialogRef', ['close']);
     await TestBed.configureTestingModule({
       imports: [ConfirmDialogComponent],
       providers: [

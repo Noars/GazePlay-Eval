@@ -57,11 +57,11 @@ describe('Guide : contenu', () => {
         it(`${page} : chaque entrée du sommaire mène à une section de la page`, () => {
           const root = render(component);
           const links = [...root.querySelectorAll<HTMLAnchorElement>('.guide-toc a')];
-          expect(links.length).withContext('sommaire présent').toBeGreaterThan(0);
+          expect(links.length, 'sommaire présent').toBeGreaterThan(0);
           for (const link of links) {
             const id = link.getAttribute('href')!.split('#').pop()!;
-            expect(link.getAttribute('href')).withContext(id).toBe(`#${page}#${id}`);
-            expect(root.querySelector(`#${id}`)).withContext(`section #${id}`).not.toBeNull();
+            expect(link.getAttribute('href'), id).toBe(`#${page}#${id}`);
+            expect(root.querySelector(`#${id}`), `section #${id}`).not.toBeNull();
           }
         });
 
@@ -70,14 +70,14 @@ describe('Guide : contenu', () => {
           const links = [...root.querySelectorAll<HTMLAnchorElement>('a[href^="/"]')];
           for (const link of links) {
             const [path, fragment] = link.getAttribute('href')!.split('#');
-            expect(knownPaths.has(path)).withContext(`route ${path}`).toBeTrue();
+            expect(knownPaths.has(path), `route ${path}`).toBe(true);
             if (fragment) {
               const target = GUIDE_PAGES.find(([p]) => p === path);
-              expect(target).withContext(`${path}#${fragment} : page du guide`).toBeDefined();
+              expect(target, `${path}#${fragment} : page du guide`).toBeDefined();
               const targetRoot = render(target![1]);
-              expect(targetRoot.querySelector(`#${fragment}`)).withContext(`${path}#${fragment}`).not.toBeNull();
+              expect(targetRoot.querySelector(`#${fragment}`), `${path}#${fragment}`).not.toBeNull();
               const tocIds = [...targetRoot.querySelectorAll('.guide-toc a')].map(a => a.getAttribute('href')!.split('#').pop());
-              expect(tocIds).withContext(`${path}#${fragment} : présent dans le sommaire (défilement à l'ouverture)`).toContain(fragment);
+              expect(tocIds, `${path}#${fragment} : présent dans le sommaire (défilement à l'ouverture)`).toContain(fragment);
             }
           }
         });
@@ -87,11 +87,11 @@ describe('Guide : contenu', () => {
           const images = [...root.querySelectorAll<HTMLImageElement>('figure.guide-figure img')];
           for (const img of images) {
             const src = img.getAttribute('src')!;
-            expect(src).withContext(src).toMatch(new RegExp(`^assets/guide/images/${language}/[a-z-]+\\.png$`));
-            expect((img.getAttribute('alt') ?? '').length).withContext(`alt de ${src}`).toBeGreaterThan(20);
-            expect(img.closest('figure')!.querySelector('figcaption')).withContext(`légende de ${src}`).not.toBeNull();
+            expect(src, src).toMatch(new RegExp(`^assets/guide/images/${language}/[a-z-]+\\.png$`));
+            expect((img.getAttribute('alt') ?? '').length, `alt de ${src}`).toBeGreaterThan(20);
+            expect(img.closest('figure')!.querySelector('figcaption'), `légende de ${src}`).not.toBeNull();
             const response = await fetch(src);
-            expect(response.ok).withContext(`${src} accessible`).toBeTrue();
+            expect(response.ok, `${src} accessible`).toBe(true);
           }
         });
       }

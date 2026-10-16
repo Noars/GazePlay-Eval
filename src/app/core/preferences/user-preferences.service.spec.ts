@@ -39,9 +39,9 @@ describe('UserPreferencesService', () => {
     setup();
     await service.init();
 
-    expect(service.preferences()).toEqual({...DEFAULT_PREFERENCES});
+    expect(service.preferences()).toStrictEqual({...DEFAULT_PREFERENCES});
     expect(service.storageStatus()).toBe('ready');
-    expect(store.record?.data).toEqual({...DEFAULT_PREFERENCES});
+    expect(store.record?.data).toStrictEqual({...DEFAULT_PREFERENCES});
     expect(root.getAttribute('data-contrast')).toBe('standard');
     expect(root.style.fontSize).toBe('100%');
   });
@@ -87,14 +87,14 @@ describe('UserPreferencesService', () => {
   it('IndexedDB indisponible → valeurs locales appliquées, statut « unavailable », erreur expliquée à l\'enregistrement', async () => {
     const failing = new InMemoryPreferencesStore();
     failing.loadError = new Error('IndexedDB bloquée');
-    spyOn(console, 'warn');
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     setup(failing);
 
     await service.init();
     const ok = await service.update({contrast: 'high'});
 
     expect(service.storageStatus()).toBe('unavailable');
-    expect(ok).toBeFalse();
+    expect(ok).toBe(false);
     expect(service.preferences().contrast).toBe('high'); // appliqué malgré tout
     expect(root.getAttribute('data-contrast')).toBe('high');
     expect(service.saveError()).toContain('ne peuvent pas être enregistrées');
@@ -104,16 +104,16 @@ describe('UserPreferencesService', () => {
     setup();
     await service.init();
     store.saveError = new Error('QuotaExceededError');
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     const ok = await service.update({font: 'verdana'});
 
-    expect(ok).toBeFalse();
+    expect(ok).toBe(false);
     expect(service.preferences().font).toBe('verdana');
     expect(service.saveError()).toContain('n\'ont pas pu être enregistrées');
 
     store.saveError = null;
-    expect(await service.update({font: 'system'})).toBeTrue();
+    expect(await service.update({font: 'system'})).toBe(true);
     expect(service.saveError()).toBeNull();
   });
 
@@ -130,7 +130,7 @@ describe('UserPreferencesService', () => {
     expect(root.style.getPropertyValue('--gp-letter-spacing')).toBe('0.12em');
     expect(root.style.getPropertyValue('--gp-word-spacing')).toBe('0.16em');
     expect(root.style.getPropertyValue('--gp-line-height')).toBe('2');
-    expect(store.record?.data).toEqual(jasmine.objectContaining({letterSpacing: 0.12, wordSpacing: 0.16, lineHeight: 2}));
+    expect(store.record?.data).toStrictEqual(expect.objectContaining({letterSpacing: 0.12, wordSpacing: 0.16, lineHeight: 2}));
   });
 
   it('toggleTheme → bascule à partir du thème affiché', async () => {
@@ -148,7 +148,7 @@ describe('UserPreferencesService', () => {
     await service.update({theme: 'dark', textScale: 130});
 
     const cache = JSON.parse(localStorage.getItem(FIRST_PAINT_CACHE_KEY)!);
-    expect(cache).toEqual(jasmine.objectContaining({theme: 'dark', textScale: 130, contrast: 'standard'}));
+    expect(cache).toStrictEqual(expect.objectContaining({theme: 'dark', textScale: 130, contrast: 'standard'}));
   });
 
   it('mode daltonisme → appliqué au document, enregistré et retrouvé après rechargement', async () => {
@@ -159,8 +159,8 @@ describe('UserPreferencesService', () => {
     await service.update({colorBlindMode: true});
 
     expect(root.getAttribute('data-color-blind')).toBe('true');
-    expect(store.record?.data.colorBlindMode).toBeTrue();
-    expect(JSON.parse(localStorage.getItem(FIRST_PAINT_CACHE_KEY)!).colorBlindMode).toBeTrue();
+    expect(store.record?.data.colorBlindMode).toBe(true);
+    expect(JSON.parse(localStorage.getItem(FIRST_PAINT_CACHE_KEY)!).colorBlindMode).toBe(true);
 
     // Rechargement simulé : nouvelle instance du service sur le même stockage.
     const persisted = store;
@@ -169,12 +169,12 @@ describe('UserPreferencesService', () => {
     setup(persisted);
     await service.init();
 
-    expect(service.preferences().colorBlindMode).toBeTrue();
+    expect(service.preferences().colorBlindMode).toBe(true);
     expect(root.getAttribute('data-color-blind')).toBe('true');
 
     await service.update({colorBlindMode: false});
     expect(root.getAttribute('data-color-blind')).toBe('false');
-    expect(store.record?.data.colorBlindMode).toBeFalse();
+    expect(store.record?.data.colorBlindMode).toBe(false);
   });
 
   it('enregistrement antérieur sans mode daltonisme → désactivé, autres réglages conservés, rien réécrit', async () => {
@@ -183,7 +183,7 @@ describe('UserPreferencesService', () => {
 
     await service.init();
 
-    expect(service.preferences().colorBlindMode).toBeFalse();
+    expect(service.preferences().colorBlindMode).toBe(false);
     expect(service.preferences().contrast).toBe('high');
     expect(store.saves.length).toBe(0);
   });
@@ -219,7 +219,7 @@ describe('UserPreferencesService', () => {
 
     await service.reset();
 
-    expect(service.preferences()).toEqual({...DEFAULT_PREFERENCES, language: 'en'});
+    expect(service.preferences()).toStrictEqual({...DEFAULT_PREFERENCES, language: 'en'});
     await service.setLanguage('fr');
   });
 
@@ -244,8 +244,8 @@ describe('UserPreferencesService', () => {
 
 describe('Modèle des préférences', () => {
   it('normalizePreferences — objet vide ou invalide → valeurs par défaut', () => {
-    expect(normalizePreferences(undefined)).toEqual({...DEFAULT_PREFERENCES});
-    expect(normalizePreferences('n\'importe quoi')).toEqual({...DEFAULT_PREFERENCES});
+    expect(normalizePreferences(undefined)).toStrictEqual({...DEFAULT_PREFERENCES});
+    expect(normalizePreferences('n\'importe quoi')).toStrictEqual({...DEFAULT_PREFERENCES});
   });
 
   it('normalizePreferences — valeurs numériques bornées, chaînes numériques acceptées', () => {
@@ -263,17 +263,17 @@ describe('Modèle des préférences', () => {
   });
 
   it('normalizePreferences — mode daltonisme : seul un booléen est accepté', () => {
-    expect(normalizePreferences({colorBlindMode: true}).colorBlindMode).toBeTrue();
-    expect(normalizePreferences({colorBlindMode: 'true'}).colorBlindMode).toBeFalse();
-    expect(normalizePreferences({}).colorBlindMode).toBeFalse();
+    expect(normalizePreferences({colorBlindMode: true}).colorBlindMode).toBe(true);
+    expect(normalizePreferences({colorBlindMode: 'true'}).colorBlindMode).toBe(false);
+    expect(normalizePreferences({}).colorBlindMode).toBe(false);
   });
 
   it('readLegacyPreferences — ignore les valeurs illisibles', () => {
     const storage = {getItem: (key: string) => key === 'theme' ? 'bleu' : '{pas du json'};
-    expect(readLegacyPreferences(storage)).toEqual({});
+    expect(readLegacyPreferences(storage)).toStrictEqual({});
   });
 
   it('readLegacyPreferences — stockage absent → objet vide', () => {
-    expect(readLegacyPreferences(null)).toEqual({});
+    expect(readLegacyPreferences(null)).toStrictEqual({});
   });
 });

@@ -8,15 +8,17 @@ import {MediaLibraryService} from '../../core/media/media-library.service';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {screenTypeModel} from '../../shared/screenModel';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('CreateEvalComponent', () => {
   let component: CreateEvalComponent;
   let fixture: ComponentFixture<CreateEvalComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
-  let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let mediaSpy: jasmine.SpyObj<MediaLibraryService>;
-  let confirmSpy: jasmine.SpyObj<ConfirmService>;
+  let routerSpy: Mocked<Router>;
+  let saveServiceSpy: Mocked<SaveService>;
+  let autoSaveSpy: Mocked<AutoSaveService>;
+  let mediaSpy: Mocked<MediaLibraryService>;
+  let confirmSpy: Mocked<ConfirmService>;
 
   function stimuliScreen(name = 'Grille'): screenTypeModel {
     return {
@@ -29,10 +31,10 @@ describe('CreateEvalComponent', () => {
   }
 
   beforeEach(async () => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    routerSpy = createSpyObj('Router', ['navigate']);
+    routerSpy.navigate.mockReturnValue(Promise.resolve(true));
 
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto']);
+    saveServiceSpy = createSpyObj('SaveService', ['saveDataAuto']);
     saveServiceSpy.dataAuto = {
       nomEval: 'TestEval',
       format: 'Csv&Xlsx',
@@ -43,13 +45,13 @@ describe('CreateEvalComponent', () => {
       listScreens: [],
       step: 3
     };
-    autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
-    mediaSpy = jasmine.createSpyObj('MediaLibraryService', ['resolve', 'addReference', 'release']);
-    mediaSpy.resolve.and.returnValue(Promise.resolve(undefined));
-    mediaSpy.addReference.and.returnValue(Promise.resolve());
-    mediaSpy.release.and.returnValue(Promise.resolve(true));
-    confirmSpy = jasmine.createSpyObj('ConfirmService', ['confirm']);
-    confirmSpy.confirm.and.returnValue(Promise.resolve(true));
+    autoSaveSpy = createSpyObj('AutoSaveService', ['autoSave']);
+    mediaSpy = createSpyObj('MediaLibraryService', ['resolve', 'addReference', 'release']);
+    mediaSpy.resolve.mockReturnValue(Promise.resolve(undefined));
+    mediaSpy.addReference.mockReturnValue(Promise.resolve());
+    mediaSpy.release.mockReturnValue(Promise.resolve(true));
+    confirmSpy = createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [CreateEvalComponent],
@@ -60,7 +62,7 @@ describe('CreateEvalComponent', () => {
         {provide: AutoSaveService, useValue: autoSaveSpy},
         {provide: MediaLibraryService, useValue: mediaSpy},
         {provide: ConfirmService, useValue: confirmSpy},
-        {provide: FlashService, useValue: jasmine.createSpyObj('FlashService', ['show'])},
+        {provide: FlashService, useValue: createSpyObj('FlashService', ['show'])},
       ]
     }).compileComponents();
 
@@ -121,8 +123,8 @@ describe('CreateEvalComponent', () => {
 
     await component.removeScreen(screenB);
 
-    expect(confirmSpy.confirm).toHaveBeenCalledWith(jasmine.objectContaining({tone: 'danger'}));
-    expect(component.listScreens).toEqual([screenA]);
+    expect(confirmSpy.confirm).toHaveBeenCalledWith(expect.objectContaining({tone: 'danger'}));
+    expect(component.listScreens).toStrictEqual([screenA]);
     expect(component.selectedScreen).toBe(screenA);
     expect(saveServiceSpy.saveDataAuto).toHaveBeenCalled();
   });
@@ -130,7 +132,7 @@ describe('CreateEvalComponent', () => {
   it('removeScreen — confirmation refusée → rien ne change', async () => {
     const screen: screenTypeModel = {name: 'Ecran 1', type: 'transition', values: []};
     component.listScreens = [screen];
-    confirmSpy.confirm.and.returnValue(Promise.resolve(false));
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(false));
 
     await component.removeScreen(screen);
 
@@ -196,7 +198,7 @@ describe('CreateEvalComponent', () => {
 
     component.listScreens[1].values[12][0].goodAnswer = false;
 
-    expect(screen.values[12][0].goodAnswer).toBeTrue();
+    expect(screen.values[12][0].goodAnswer).toBe(true);
   });
 
   // ─── Ordre ────────────────────────────────────────────────────────────────
@@ -209,7 +211,7 @@ describe('CreateEvalComponent', () => {
 
     component.moveScreen(0, 1);
 
-    expect(component.listScreens).toEqual([b, a]);
+    expect(component.listScreens).toStrictEqual([b, a]);
     expect(component.indexSelectedScreen).toBe(1);
     expect(component.announcement).toContain('position 2');
   });
@@ -218,7 +220,7 @@ describe('CreateEvalComponent', () => {
     const a: screenTypeModel = {name: 'A', type: 'transition', values: []};
     component.listScreens = [a];
     component.moveScreen(0, -1);
-    expect(component.listScreens).toEqual([a]);
+    expect(component.listScreens).toStrictEqual([a]);
   });
 
   it('drop → réordonne listScreens et suit l\'écran sélectionné', () => {
@@ -230,7 +232,7 @@ describe('CreateEvalComponent', () => {
 
     component.drop({previousIndex: 0, currentIndex: 2});
 
-    expect(component.listScreens).toEqual([b, c, a]);
+    expect(component.listScreens).toStrictEqual([b, c, a]);
     expect(component.indexSelectedScreen).toBe(2);
   });
 
@@ -262,11 +264,11 @@ describe('CreateEvalComponent', () => {
 
     component.editNameScreen(screen, false, 0);
     expect(component.renamingIndex).toBe(0);
-    expect(component.editNameScreenDisable).toBeFalse();
+    expect(component.editNameScreenDisable).toBe(false);
 
     component.exitInputScreen();
     expect(component.renamingIndex).toBe(-1);
-    expect(component.editNameScreenDisable).toBeTrue();
+    expect(component.editNameScreenDisable).toBe(true);
     expect(screen.name).toBe('Ecran 1'); // un nom vide est remplacé
     expect(saveServiceSpy.saveDataAuto).toHaveBeenCalled();
   });
@@ -278,7 +280,7 @@ describe('CreateEvalComponent', () => {
 
   it('hasSounds → vrai si une case visible a un son', () => {
     component.selectedScreen = stimuliScreen();
-    expect(component.hasSounds()).toBeTrue();
+    expect(component.hasSounds()).toBe(true);
   });
 
   it('onModifyScreenChange → remplace l\'écran édité et ferme l\'éditeur', () => {
@@ -291,7 +293,7 @@ describe('CreateEvalComponent', () => {
     component.onModifyScreenChange({screen: edited, flag: false});
 
     expect(component.listScreens[0]).toBe(edited);
-    expect(component.isModifyScreen).toBeFalse();
+    expect(component.isModifyScreen).toBe(false);
     expect(saveServiceSpy.saveDataAuto).toHaveBeenCalled();
   });
 

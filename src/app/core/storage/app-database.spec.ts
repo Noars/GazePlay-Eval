@@ -57,7 +57,7 @@ describe('Migration de la base IndexedDB', () => {
 
     const v2 = await open(2, upgradeAppDatabase);
 
-    expect(Array.from(v2.objectStoreNames).sort()).toEqual([STORE_EVAL_FILES, STORE_USER_PREFERENCES].sort());
+    expect(Array.from(v2.objectStoreNames).sort()).toStrictEqual([STORE_EVAL_FILES, STORE_USER_PREFERENCES].sort());
     const media = await new Promise<any>((resolve, reject) => {
       const request = v2.transaction(STORE_EVAL_FILES, 'readonly').objectStore(STORE_EVAL_FILES).get('Eval/chat.png');
       request.onsuccess = () => resolve(request.result);
@@ -71,8 +71,8 @@ describe('Migration de la base IndexedDB', () => {
 
   it('création depuis zéro : les deux stores sont créés', async () => {
     const db = await open(2, upgradeAppDatabase);
-    expect(db.objectStoreNames.contains(STORE_EVAL_FILES)).toBeTrue();
-    expect(db.objectStoreNames.contains(STORE_USER_PREFERENCES)).toBeTrue();
+    expect(db.objectStoreNames.contains(STORE_EVAL_FILES)).toBe(true);
+    expect(db.objectStoreNames.contains(STORE_USER_PREFERENCES)).toBe(true);
     db.close();
   });
 

@@ -17,7 +17,7 @@ describe('GuideTocComponent', () => {
 
     target = document.createElement('section');
     target.id = 'section-test';
-    target.scrollIntoView = jasmine.createSpy('scrollIntoView');
+    target.scrollIntoView = vi.fn().mockName('scrollIntoView');
     document.body.appendChild(target);
 
     fixture = TestBed.createComponent(GuideTocComponent);
@@ -50,7 +50,7 @@ describe('GuideTocComponent', () => {
     const event = new MouseEvent('click', {cancelable: true});
     link.dispatchEvent(event);
 
-    expect(event.defaultPrevented).toBeTrue();
+    expect(event.defaultPrevented).toBe(true);
     expect(target.scrollIntoView).toHaveBeenCalled();
     expect(target.getAttribute('tabindex')).toBe('-1');
     expect(document.activeElement).toBe(target);
@@ -60,31 +60,27 @@ describe('GuideTocComponent', () => {
     document.documentElement.setAttribute('data-motion', 'reduce');
     try {
       component.scrollToSection('section-test');
-      expect(target.scrollIntoView).toHaveBeenCalledWith(jasmine.objectContaining({behavior: 'auto'}));
+      expect(target.scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({behavior: 'auto'}));
     } finally {
       document.documentElement.removeAttribute('data-motion');
     }
   });
 
   it('renvoie false pour une section absente de la page', () => {
-    expect(component.scrollToSection('absente')).toBeFalse();
+    expect(component.scrollToSection('absente')).toBe(false);
   });
 
-  it('fait défiler jusqu\'au fragment de l\'adresse à l\'ouverture de la page', (done) => {
+  it('fait défiler jusqu\'au fragment de l\'adresse à l\'ouverture de la page', async () => {
     fragment = 'section-test';
     fixture.detectChanges();
-    setTimeout(() => {
-      expect(target.scrollIntoView).toHaveBeenCalled();
-      done();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(target.scrollIntoView).toHaveBeenCalled();
   });
 
-  it('ignore un fragment qui ne correspond à aucune entrée du sommaire', (done) => {
+  it('ignore un fragment qui ne correspond à aucune entrée du sommaire', async () => {
     fragment = 'inconnu';
     fixture.detectChanges();
-    setTimeout(() => {
-      expect(target.scrollIntoView).not.toHaveBeenCalled();
-      done();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(target.scrollIntoView).not.toHaveBeenCalled();
   });
 });

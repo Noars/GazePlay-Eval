@@ -21,10 +21,10 @@ describe('a11y-checks (auto-test du vérificateur)', () => {
       <a>Lien mort</a>
     `);
     const problems = findA11yProblems(root);
-    expect(problems.some(p => p.startsWith('Contrôle sans nom'))).toBeTrue();
-    expect(problems.some(p => p.startsWith('Champ sans libellé'))).toBeTrue();
-    expect(problems.some(p => p.startsWith('Image sans attribut alt'))).toBeTrue();
-    expect(problems.some(p => p.startsWith('Lien sans href'))).toBeTrue();
+    expect(problems.some(p => p.startsWith('Contrôle sans nom'))).toBe(true);
+    expect(problems.some(p => p.startsWith('Champ sans libellé'))).toBe(true);
+    expect(problems.some(p => p.startsWith('Image sans attribut alt'))).toBe(true);
+    expect(problems.some(p => p.startsWith('Lien sans href'))).toBe(true);
   });
 
   it('signale les identifiants dupliqués et les références aria cassées', () => {
@@ -33,8 +33,8 @@ describe('a11y-checks (auto-test du vérificateur)', () => {
       <button aria-describedby="inexistant">OK</button>
     `);
     const problems = findA11yProblems(root);
-    expect(problems.some(p => p.startsWith('Identifiant dupliqué'))).toBeTrue();
-    expect(problems.some(p => p.includes('#inexistant'))).toBeTrue();
+    expect(problems.some(p => p.startsWith('Identifiant dupliqué'))).toBe(true);
+    expect(problems.some(p => p.includes('#inexistant'))).toBe(true);
   });
 
   it('accepte un formulaire correct', () => {
@@ -46,11 +46,11 @@ describe('a11y-checks (auto-test du vérificateur)', () => {
         <input type="radio" id="r1" name="r"><label for="r1">Oui</label>
       </div>
     `);
-    expect(findA11yProblems(root)).toEqual([]);
+    expect(findA11yProblems(root)).toStrictEqual([]);
   });
 
   it('signale les sauts de niveaux de titres', () => {
-    expect(findHeadingSkips(html('<h1>A</h1><h3>B</h3>'))).toEqual(['Saut de niveau de titre : h1 → h3']);
-    expect(findHeadingSkips(html('<h1>A</h1><h2>B</h2><h3>C</h3><h2>D</h2>'))).toEqual([]);
+    expect(findHeadingSkips(html('<h1>A</h1><h3>B</h3>'))).toStrictEqual(['Saut de niveau de titre : h1 → h3']);
+    expect(findHeadingSkips(html('<h1>A</h1><h2>B</h2><h3>C</h3><h2>D</h2>'))).toStrictEqual([]);
   });
 });

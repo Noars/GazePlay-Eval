@@ -10,6 +10,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MediaCleanupService } from '../../core/media/media-cleanup.service';
 import { emptyReferences } from '../../core/media/media-references';
 import { ConfirmService } from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 @Component({ selector: 'app-config-stimuli', template: '', standalone: true })
 class ConfigStimuliStubComponent {
@@ -21,13 +23,13 @@ class ConfigStimuliStubComponent {
 describe('ModifyScreenComponent', () => {
   let component: ModifyScreenComponent;
   let fixture: ComponentFixture<ModifyScreenComponent>;
-  let updateScreenSpy: jasmine.SpyObj<UpdateScreensService>;
-  let saveSpy: jasmine.SpyObj<SaveService>;
-  let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let idbSpy: jasmine.SpyObj<IndexedDBService>;
-  let flashSpy: jasmine.SpyObj<FlashService>;
-  let cleanupSpy: jasmine.SpyObj<MediaCleanupService>;
-  let confirmSpy: jasmine.SpyObj<ConfirmService>;
+  let updateScreenSpy: Mocked<UpdateScreensService>;
+  let saveSpy: Mocked<SaveService>;
+  let autoSaveSpy: Mocked<AutoSaveService>;
+  let idbSpy: Mocked<IndexedDBService>;
+  let flashSpy: Mocked<FlashService>;
+  let cleanupSpy: Mocked<MediaCleanupService>;
+  let confirmSpy: Mocked<ConfirmService>;
 
   function makeTransition(): any {
     return { name: 'TS', type: 'transition', values: [false, 0, false, false, 0] };
@@ -53,38 +55,38 @@ describe('ModifyScreenComponent', () => {
   }
 
   beforeEach(async () => {
-    updateScreenSpy = jasmine.createSpyObj('UpdateScreensService', [
+    updateScreenSpy = createSpyObj('UpdateScreensService', [
       'updateTransitionScreen', 'updateInstructionScreen', 'updateStimuliScreen'
     ]);
-    saveSpy = jasmine.createSpyObj('SaveService', ['getEvalName'], {
+    saveSpy = createSpyObj('SaveService', ['getEvalName'], {
       dataAuto: {
         globalParamsTransitionScreen: [false, 0, false, false, 0],
         globalParamsInstructionScreen: [false, 1, false, 'Image', false, 1],
         globalParamsStimuliScreen: [1, 1, false, 10, 1, 1, false, false]
       }
     });
-    autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
-    idbSpy = jasmine.createSpyObj('IndexedDBService', [
+    autoSaveSpy = createSpyObj('AutoSaveService', ['autoSave']);
+    idbSpy = createSpyObj('IndexedDBService', [
       'getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile'
     ]);
-    flashSpy = jasmine.createSpyObj('FlashService', ['show']);
-    cleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['collectAllReferences']);
-    cleanupSpy.collectAllReferences.and.callFake(() => emptyReferences());
-    confirmSpy = jasmine.createSpyObj('ConfirmService', ['confirm']);
-    confirmSpy.confirm.and.returnValue(Promise.resolve(true));
+    flashSpy = createSpyObj('FlashService', ['show']);
+    cleanupSpy = createSpyObj('MediaCleanupService', ['collectAllReferences']);
+    cleanupSpy.collectAllReferences.mockImplementation(() => emptyReferences());
+    confirmSpy = createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(true));
 
-    saveSpy.getEvalName.and.returnValue('TestProject');
-    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbSpy.addFile.and.returnValue(Promise.resolve());
-    idbSpy.updateFile.and.returnValue(Promise.resolve());
-    idbSpy.deleteFile.and.returnValue(Promise.resolve());
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
-    idbSpy.incrementRef.and.returnValue(Promise.resolve());
-    idbSpy.releaseFile.and.returnValue(Promise.resolve());
+    saveSpy.getEvalName.mockReturnValue('TestProject');
+    idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbSpy.addFile.mockReturnValue(Promise.resolve());
+    idbSpy.updateFile.mockReturnValue(Promise.resolve());
+    idbSpy.deleteFile.mockReturnValue(Promise.resolve());
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([]));
+    idbSpy.incrementRef.mockReturnValue(Promise.resolve());
+    idbSpy.releaseFile.mockReturnValue(Promise.resolve());
 
-    updateScreenSpy.updateTransitionScreen.and.callFake((s: any, name: string) => { s.name = name; return s; });
-    updateScreenSpy.updateInstructionScreen.and.callFake((s: any, name: string) => { s.name = name; return s; });
-    updateScreenSpy.updateStimuliScreen.and.callFake((s: any, name: string) => { s.name = name; return s; });
+    updateScreenSpy.updateTransitionScreen.mockImplementation((s: any, name: string) => { s.name = name; return s; });
+    updateScreenSpy.updateInstructionScreen.mockImplementation((s: any, name: string) => { s.name = name; return s; });
+    updateScreenSpy.updateStimuliScreen.mockImplementation((s: any, name: string) => { s.name = name; return s; });
 
     await TestBed.configureTestingModule({
       imports: [ModifyScreenComponent],
@@ -104,8 +106,8 @@ describe('ModifyScreenComponent', () => {
     })
     .compileComponents();
 
-    spyOn(URL, 'createObjectURL').and.returnValue('blob:fake-url');
-    spyOn(URL, 'revokeObjectURL');
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake-url');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
   });
 
   function createComponent(screen: any): void {
@@ -134,128 +136,128 @@ describe('ModifyScreenComponent', () => {
   it('ngOnInit — écran transition → haveInstructionFile et haveStimuliSoundFile restent false', async () => {
     createComponent(makeTransition());
     await fixture.whenStable();
-    expect(component.haveInstructionFile).toBeFalse();
-    expect(component.haveStimuliSoundFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
+    expect(component.haveStimuliSoundFile).toBe(false);
   });
 
   it('ngOnInit — instruction type Texte → textToRead défini et haveInstructionFile false', async () => {
     createComponent(makeInstruction('Texte', 'Bonjour'));
     await fixture.whenStable();
     expect(component.textToRead).toBe('Bonjour');
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
   });
 
   it('ngOnInit — instruction avec image trouvée dans IDB → haveInstructionFile true', async () => {
     const mockFile = new File(['img'], 'photo.png', { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/photo.png', file: mockFile, type: 'image', lastEdit: new Date()
     } as any));
 
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
 
-    expect(component.haveInstructionFile).toBeTrue();
+    expect(component.haveInstructionFile).toBe(true);
     expect(component.nameFile).toBe('photo.png');
   });
 
   it('ngOnInit — stimuli avec son trouvé dans IDB → haveStimuliSoundFile true', async () => {
     const mockFile = new File(['snd'], 'son.mp3', { type: 'audio/mp3' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/son.mp3', file: mockFile, type: 'sound', lastEdit: new Date()
     } as any));
 
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
 
-    expect(component.haveStimuliSoundFile).toBeTrue();
+    expect(component.haveStimuliSoundFile).toBe(true);
   });
 
   it('ngOnInit — IDB retourne mauvais type pour image → haveInstructionFile false', async () => {
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'sound', lastEdit: new Date()
     } as any));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([]));
 
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
 
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
   });
 
   it('ngOnInit — IDB retourne Blob (pas File) pour image → crée File → haveInstructionFile true', async () => {
     const blob = new Blob(['img'], { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/photo.png', file: blob, type: 'image', lastEdit: new Date()
     } as any));
 
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
 
-    expect(component.haveInstructionFile).toBeTrue();
+    expect(component.haveInstructionFile).toBe(true);
   });
 
   it('ngOnInit — image fallback getAllFiles avec File → haveInstructionFile true', async () => {
     const mockFile = new File(['img'], 'photo.png', { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([
       { id: 'TestProject/photo.png', file: mockFile, type: 'image', lastEdit: new Date() }
     ] as any));
 
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
 
-    expect(component.haveInstructionFile).toBeTrue();
+    expect(component.haveInstructionFile).toBe(true);
   });
 
   it('ngOnInit — image fallback getAllFiles avec Blob (pas File) → crée File → true', async () => {
     const blob = new Blob(['img'], { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([
       { id: 'TestProject/photo.png', file: blob, type: 'image', lastEdit: new Date() }
     ] as any));
 
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
 
-    expect(component.haveInstructionFile).toBeTrue();
+    expect(component.haveInstructionFile).toBe(true);
   });
 
   it('ngOnInit — son stimuli fallback getAllFiles avec File → haveStimuliSoundFile true', async () => {
     const mockFile = new File(['snd'], 'son.mp3', { type: 'audio/mp3' });
-    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([
       { id: 'TestProject/son.mp3', file: mockFile, type: 'sound', lastEdit: new Date() }
     ] as any));
 
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
 
-    expect(component.haveStimuliSoundFile).toBeTrue();
+    expect(component.haveStimuliSoundFile).toBe(true);
   });
 
   it('ngOnInit — son stimuli fallback getAllFiles avec Blob (pas File) → true', async () => {
     const blob = new Blob(['snd'], { type: 'audio/mp3' });
-    idbSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([
       { id: 'TestProject/son.mp3', file: blob, type: 'sound', lastEdit: new Date() }
     ] as any));
 
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
 
-    expect(component.haveStimuliSoundFile).toBeTrue();
+    expect(component.haveStimuliSoundFile).toBe(true);
   });
 
   it('ngOnInit — son stimuli IDB mauvais type → fallback vide → false', async () => {
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'image', lastEdit: new Date()
     } as any));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([]));
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([]));
 
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
 
-    expect(component.haveStimuliSoundFile).toBeFalse();
+    expect(component.haveStimuliSoundFile).toBe(false);
   });
 
   // ─── changeTypeScreen ─────────────────────────────────────────────────────────
@@ -313,7 +315,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[3]).toBe('Video');
     expect(component.screenToModify.values[4]).toBe('');
     expect(component.screenToModify.values[5]).toBeUndefined();
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
   });
 
   it('changeTypeFile — écran transition → ne fait rien', async () => {
@@ -340,7 +342,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[4]).toBe('photo.png');
     expect(component.screenToModify.values[5]).toBe(file);
     expect(component.screenToModify.values[8]).toBe('TestProject/photo.png');
-    expect(component.haveInstructionFile).toBeTrue();
+    expect(component.haveInstructionFile).toBe(true);
     expect(component.nameFile).toBe('photo.png');
   });
 
@@ -371,7 +373,7 @@ describe('ModifyScreenComponent', () => {
   it('getInstructionFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
     createComponent(makeInstruction('Image'));
     await fixture.whenStable();
-    idbSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
+    idbSpy.addFile.mockReturnValue(Promise.reject(new Error('exists')));
 
     const file = new File(['img'], 'photo.png', { type: 'image/png' });
     const event = { target: { files: [file], value: '' } } as unknown as Event;
@@ -390,7 +392,7 @@ describe('ModifyScreenComponent', () => {
     await component.getInstructionFile(event);
 
     expect(idbSpy.addFile).not.toHaveBeenCalled();
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
   });
 
   it('getInstructionFile — type écran non instruction → rien ne se passe', async () => {
@@ -420,7 +422,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[10]).toBe('son.mp3');
     expect(component.screenToModify.values[11]).toBe(file);
     expect(component.screenToModify.values[13]).toBe('TestProject/son.mp3');
-    expect(component.haveStimuliSoundFile).toBeTrue();
+    expect(component.haveStimuliSoundFile).toBe(true);
     expect(component.typeFile).toBe('Son');
     expect(component.nameFile).toBe('son.mp3');
   });
@@ -428,7 +430,7 @@ describe('ModifyScreenComponent', () => {
   it('getStimuliSoundFile — addFile échoue (déjà présent) → incrementRef appelé en fallback', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
-    idbSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
+    idbSpy.addFile.mockReturnValue(Promise.reject(new Error('exists')));
 
     const file = new File(['snd'], 'son.mp3', { type: 'audio/mp3' });
     const event = { target: { files: [file], value: '' } } as unknown as Event;
@@ -447,7 +449,7 @@ describe('ModifyScreenComponent', () => {
     await component.getStimuliSoundFile(event);
 
     expect(idbSpy.addFile).not.toHaveBeenCalled();
-    expect(component.haveStimuliSoundFile).toBeFalse();
+    expect(component.haveStimuliSoundFile).toBe(false);
   });
 
   it('getStimuliSoundFile — type écran non stimuli → rien ne se passe', async () => {
@@ -473,14 +475,14 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[4]).toBe('');
     expect(component.screenToModify.values[5]).toBeUndefined();
     expect(component.screenToModify.values[8]).toBe('');
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('instruction');
   });
 
   it('deleteImageInstruction → média libéré à la sortie de l\'éditeur seulement', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -506,7 +508,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[4]).toBe('');
     expect(component.screenToModify.values[5]).toBeUndefined();
     expect(component.screenToModify.values[8]).toBe('');
-    expect(component.haveInstructionFile).toBeFalse();
+    expect(component.haveInstructionFile).toBe(false);
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('instruction');
   });
 
@@ -521,14 +523,14 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[10]).toBe('');
     expect(component.screenToModify.values[11]).toBeUndefined();
     expect(component.screenToModify.values[13]).toBe('');
-    expect(component.haveStimuliSoundFile).toBeFalse();
+    expect(component.haveStimuliSoundFile).toBe(false);
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
   it('deleteSoundStimuli → son libéré à la sortie de l\'éditeur seulement', async () => {
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'sound', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -567,14 +569,14 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.textToRead = 'Bonjour';
 
-    const cancelSpy = spyOn(window.speechSynthesis, 'cancel');
-    const speakSpy = spyOn(window.speechSynthesis, 'speak');
+    const cancelSpy = vi.spyOn(window.speechSynthesis, 'cancel').mockImplementation(() => undefined);
+    const speakSpy = vi.spyOn(window.speechSynthesis, 'speak').mockImplementation(() => undefined);
 
     component.playText();
 
     expect(cancelSpy).toHaveBeenCalled();
     expect(speakSpy).toHaveBeenCalled();
-    const utterance = speakSpy.calls.mostRecent().args[0] as SpeechSynthesisUtterance;
+    const utterance = speakSpy.mock.lastCall![0] as SpeechSynthesisUtterance;
     expect(utterance.lang).toBe('fr-FR');
     expect(utterance.text).toBe('Bonjour');
   });
@@ -584,7 +586,7 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.textToRead = '   ';
 
-    const speakSpy = spyOn(window.speechSynthesis, 'speak');
+    const speakSpy = vi.spyOn(window.speechSynthesis, 'speak').mockImplementation(() => undefined);
     component.playText();
 
     expect(speakSpy).not.toHaveBeenCalled();
@@ -687,9 +689,9 @@ describe('ModifyScreenComponent', () => {
 
     for (const value of [0, -1, 1.5]) {
       component.setGridSize(1, value);
-      expect(Object.keys(component.screenToModify.values[12]).length).withContext(String(value)).toBe(4);
+      expect(Object.keys(component.screenToModify.values[12]).length, String(value)).toBe(4);
     }
-    expect(component.canUndo).toBeFalse();
+    expect(component.canUndo).toBe(false);
   });
 
   it('setGridSize — vider puis retaper la même valeur ne perd aucun contenu', async () => {
@@ -706,7 +708,7 @@ describe('ModifyScreenComponent', () => {
   it('setGridSize — réduction : cases retirées annulables, médias libérés seulement à la sortie', async () => {
     createComponent(makeFilledGrid());
     await fixture.whenStable();
-    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], id), type: id.endsWith('.mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -714,7 +716,7 @@ describe('ModifyScreenComponent', () => {
 
     expect(component.screenToModify.values[0]).toBe(1);
     expect(Object.keys(component.screenToModify.values[12]).length).toBe(2);
-    expect(component.canUndo).toBeTrue();
+    expect(component.canUndo).toBe(true);
     expect(component.announcement).toContain('2');
     expect(idbSpy.deleteFile).not.toHaveBeenCalled();
 
@@ -732,7 +734,7 @@ describe('ModifyScreenComponent', () => {
   it('setGridSize — réduction confirmée en sortant : médias des cases retirées libérés', async () => {
     createComponent(makeFilledGrid());
     await fixture.whenStable();
-    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], id), type: id.endsWith('.mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -751,7 +753,7 @@ describe('ModifyScreenComponent', () => {
     component.setGridSize(1, 3);
 
     expect(Object.keys(component.screenToModify.values[12]).length).toBe(6);
-    expect(component.canUndo).toBeFalse();
+    expect(component.canUndo).toBe(false);
   });
 
   it('champ « lignes » vidé dans le formulaire : les cases restent en place', async () => {
@@ -770,7 +772,7 @@ describe('ModifyScreenComponent', () => {
   it('média retiré dans le panneau de la case → libéré à la sortie, et pas du tout après « Annuler » (régression)', async () => {
     createComponent(makeFilledGrid());
     await fixture.whenStable();
-    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], id), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -786,7 +788,7 @@ describe('ModifyScreenComponent', () => {
   it("média retiré dans le panneau de la case, sans annulation → libéré à la sortie de l'éditeur", async () => {
     createComponent(makeFilledGrid());
     await fixture.whenStable();
-    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], id), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -802,10 +804,10 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
 
-    spyOn(component, 'openOffcanvasStimuli');
+    vi.spyOn(component, 'openOffcanvasStimuli').mockImplementation(() => undefined);
     component.openStimuliData(0);
 
-    expect(component.stimuliOffcanvasReady).toBeTrue();
+    expect(component.stimuliOffcanvasReady).toBe(true);
     expect(component.activeCellIndex).toBe(0);
     expect(component.dataStimuli.cell).toBe(0);
     expect(component.dataStimuli.rows).toBe(1);
@@ -819,13 +821,13 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     const heading = document.createElement('h2');
     heading.tabIndex = -1;
-    spyOn(document, 'getElementById').and.returnValue(heading);
-    const focus = spyOn(heading, 'focus');
+    vi.spyOn(document, 'getElementById').mockReturnValue(heading);
+    const focus = vi.spyOn(heading, 'focus').mockImplementation(() => undefined);
 
     component.openOffcanvasStimuli();
     await new Promise(resolve => setTimeout(resolve));
 
-    expect(component.configStimuliOpen).toBeTrue();
+    expect(component.configStimuliOpen).toBe(true);
     expect(focus).toHaveBeenCalled();
   });
 
@@ -833,12 +835,12 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
     component.openStimuliData(0);
-    const focusCell = spyOn(component, 'focusCell');
+    const focusCell = vi.spyOn(component, 'focusCell').mockImplementation(() => undefined);
 
     component.closeConfigStimuli();
 
     expect(component.activeCellIndex).toBeNull();
-    expect(component.stimuliOffcanvasReady).toBeFalse();
+    expect(component.stimuliOffcanvasReady).toBe(false);
     expect(focusCell).toHaveBeenCalledWith(0);
   });
 
@@ -851,10 +853,10 @@ describe('ModifyScreenComponent', () => {
     component.screenToModify.values[0] = true; // passage automatique activé
     component.screenToModify.values[1] = 10;
 
-    spyOn(component.selectedScreenChange, 'emit');
+    vi.spyOn(component.selectedScreenChange, 'emit').mockImplementation(() => undefined);
     component.checkFileDurationAndTimeScreen();
 
-    expect(component.showWarningMessage).toBeTrue();
+    expect(component.showWarningMessage).toBe(true);
     expect(component.selectedScreenChange.emit).not.toHaveBeenCalled();
   });
 
@@ -866,10 +868,10 @@ describe('ModifyScreenComponent', () => {
     component.screenToModify.values[1] = 10;
     component.showWarningMessage = true;
 
-    spyOn(component.selectedScreenChange, 'emit');
+    vi.spyOn(component.selectedScreenChange, 'emit').mockImplementation(() => undefined);
     component.checkFileDurationAndTimeScreen();
 
-    expect(component.showWarningMessage).toBeFalse();
+    expect(component.showWarningMessage).toBe(false);
     expect(component.selectedScreenChange.emit).toHaveBeenCalledWith({ screen: component.screenToModify, flag: false });
   });
 
@@ -879,10 +881,10 @@ describe('ModifyScreenComponent', () => {
     component.fileDuration = 5;
     component.screenToModify.values[1] = 10;
 
-    spyOn(component.selectedScreenChange, 'emit');
+    vi.spyOn(component.selectedScreenChange, 'emit').mockImplementation(() => undefined);
     component.checkFileDurationAndTimeScreen();
 
-    expect(component.showWarningMessage).toBeFalse();
+    expect(component.showWarningMessage).toBe(false);
     expect(component.selectedScreenChange.emit).toHaveBeenCalledWith({ screen: component.screenToModify, flag: false });
   });
 
@@ -892,7 +894,7 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeTransition());
     await fixture.whenStable();
 
-    spyOn(component.selectedScreenChange, 'emit');
+    vi.spyOn(component.selectedScreenChange, 'emit').mockImplementation(() => undefined);
     component.backToScreenList();
 
     expect(component.selectedScreenChange.emit).toHaveBeenCalledWith({ screen: component.screenToModify, flag: false });
@@ -904,7 +906,7 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.typeFile = 'Video';
 
-    spyOn(component, 'checkFileDurationAndTimeScreen');
+    vi.spyOn(component, 'checkFileDurationAndTimeScreen').mockImplementation(() => undefined);
     component.backToScreenList();
 
     expect(component.checkFileDurationAndTimeScreen).toHaveBeenCalled();
@@ -916,7 +918,7 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.typeFile = 'Son';
 
-    spyOn(component, 'checkFileDurationAndTimeScreen');
+    vi.spyOn(component, 'checkFileDurationAndTimeScreen').mockImplementation(() => undefined);
     component.backToScreenList();
 
     expect(component.checkFileDurationAndTimeScreen).toHaveBeenCalled();
@@ -927,8 +929,8 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.typeFile = 'Image';
 
-    spyOn(component, 'checkFileDurationAndTimeScreen');
-    spyOn(component.selectedScreenChange, 'emit');
+    vi.spyOn(component, 'checkFileDurationAndTimeScreen').mockImplementation(() => undefined);
+    vi.spyOn(component.selectedScreenChange, 'emit').mockImplementation(() => undefined);
     component.backToScreenList();
 
     expect(component.checkFileDurationAndTimeScreen).not.toHaveBeenCalled();
@@ -943,7 +945,7 @@ describe('ModifyScreenComponent', () => {
     component.typeFile = 'Video';
 
     const mockMedia = { src: '', preload: '', onloadedmetadata: null as any, duration: 0 };
-    spyOn(document, 'createElement').and.returnValue(mockMedia as any);
+    vi.spyOn(document, 'createElement').mockReturnValue(mockMedia as any);
 
     const file = new File(['vid'], 'video.mp4', { type: 'video/mp4' });
     component.getFileDuration(file);
@@ -959,7 +961,7 @@ describe('ModifyScreenComponent', () => {
     component.typeFile = 'Son';
 
     const mockMedia = { src: '', preload: '', onloadedmetadata: null as any, duration: 0 };
-    spyOn(document, 'createElement').and.returnValue(mockMedia as any);
+    vi.spyOn(document, 'createElement').mockReturnValue(mockMedia as any);
 
     const file = new File(['snd'], 'son.mp3', { type: 'audio/mpeg' });
     component.getFileDuration(file);
@@ -972,7 +974,7 @@ describe('ModifyScreenComponent', () => {
     await fixture.whenStable();
     component.typeFile = 'Image';
 
-    const createSpy = spyOn(document, 'createElement');
+    const createSpy = vi.spyOn(document, 'createElement').mockImplementation(() => undefined as any);
     const file = new File(['img'], 'photo.png', { type: 'image/png' });
     component.getFileDuration(file);
 
@@ -992,7 +994,7 @@ describe('ModifyScreenComponent', () => {
       get onloadedmetadata() { return metaHandler; },
       duration: 42
     };
-    spyOn(document, 'createElement').and.returnValue(mockMedia as any);
+    vi.spyOn(document, 'createElement').mockReturnValue(mockMedia as any);
 
     const file = new File(['snd'], 'son.mp3', { type: 'audio/mpeg' });
     component.getFileDuration(file);
@@ -1028,10 +1030,10 @@ describe('ModifyScreenComponent', () => {
 
     component.toggleDuplicateMode();
 
-    expect(component.duplicateMode).toBeTrue();
-    expect(component.deleteMode).toBeFalse();
-    expect(component.swapMode).toBeFalse();
-    expect(component.multiSelectMode).toBeFalse();
+    expect(component.duplicateMode).toBe(true);
+    expect(component.deleteMode).toBe(false);
+    expect(component.swapMode).toBe(false);
+    expect(component.multiSelectMode).toBe(false);
     expect(component.selectedCells.size).toBe(0);
   });
 
@@ -1042,7 +1044,7 @@ describe('ModifyScreenComponent', () => {
     component.toggleDuplicateMode();
     component.toggleDuplicateMode();
 
-    expect(component.duplicateMode).toBeFalse();
+    expect(component.duplicateMode).toBe(false);
   });
 
   // ─── toggleDeleteMode ───────────────────────────────────────────────────────
@@ -1056,10 +1058,10 @@ describe('ModifyScreenComponent', () => {
 
     component.toggleDeleteMode();
 
-    expect(component.deleteMode).toBeTrue();
-    expect(component.duplicateMode).toBeFalse();
-    expect(component.swapMode).toBeFalse();
-    expect(component.multiSelectMode).toBeFalse();
+    expect(component.deleteMode).toBe(true);
+    expect(component.duplicateMode).toBe(false);
+    expect(component.swapMode).toBe(false);
+    expect(component.multiSelectMode).toBe(false);
   });
 
   // ─── toggleSwapMode ─────────────────────────────────────────────────────────
@@ -1072,10 +1074,10 @@ describe('ModifyScreenComponent', () => {
 
     component.toggleSwapMode();
 
-    expect(component.swapMode).toBeTrue();
+    expect(component.swapMode).toBe(true);
     expect(component.swapSourceIndex).toBeNull();
-    expect(component.duplicateMode).toBeFalse();
-    expect(component.deleteMode).toBeFalse();
+    expect(component.duplicateMode).toBe(false);
+    expect(component.deleteMode).toBe(false);
   });
 
   // ─── toggleMultiSelectMode ──────────────────────────────────────────────────
@@ -1088,10 +1090,10 @@ describe('ModifyScreenComponent', () => {
 
     component.toggleMultiSelectMode();
 
-    expect(component.multiSelectMode).toBeTrue();
+    expect(component.multiSelectMode).toBe(true);
     expect(component.selectedCells.size).toBe(0);
-    expect(component.duplicateMode).toBeFalse();
-    expect(component.deleteMode).toBeFalse();
+    expect(component.duplicateMode).toBe(false);
+    expect(component.deleteMode).toBe(false);
   });
 
   // ─── onDeleteClick ──────────────────────────────────────────────────────────
@@ -1099,7 +1101,7 @@ describe('ModifyScreenComponent', () => {
   it('onDeleteClick — hors multi-sélection → bascule le mode suppression', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
-    spyOn(component, 'toggleDeleteMode');
+    vi.spyOn(component, 'toggleDeleteMode').mockImplementation(() => undefined);
 
     component.onDeleteClick();
 
@@ -1115,14 +1117,14 @@ describe('ModifyScreenComponent', () => {
     component.onDeleteClick();
 
     // une case avec données → confirmation en attente
-    expect(component.pendingDeleteCells).toEqual([0]);
+    expect(component.pendingDeleteCells).toStrictEqual([0]);
   });
 
   it('onDeleteClick — multi-sélection sans sélection → ne fait rien', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
     component.multiSelectMode = true;
-    spyOn(component, 'toggleDeleteMode');
+    vi.spyOn(component, 'toggleDeleteMode').mockImplementation(() => undefined);
 
     component.onDeleteClick();
 
@@ -1144,7 +1146,7 @@ describe('ModifyScreenComponent', () => {
 
     expect(component.screenToModify.values[12][1].imageId).toBe('TestProject/img.png');
     expect(component.screenToModify.values[12][1].soundId).toBe('TestProject/snd.mp3');
-    expect(component.screenToModify.values[12][1].hidden).toBeFalse();
+    expect(component.screenToModify.values[12][1].hidden).toBe(false);
     expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/img.png');
     expect(idbSpy.incrementRef).toHaveBeenCalledWith('TestProject/snd.mp3');
   });
@@ -1186,7 +1188,7 @@ describe('ModifyScreenComponent', () => {
     expect(component.screenToModify.values[12][1].imageId).toBe('TestProject/img.png');
     expect(component.pendingDuplicateTarget).toBeNull();
     expect(component.duplicateSourceIndex).toBeNull();
-    expect(component.duplicateMode).toBeFalse();
+    expect(component.duplicateMode).toBe(false);
   });
 
   it('cancelOverwrite — réinitialise la cible en attente', async () => {
@@ -1208,7 +1210,7 @@ describe('ModifyScreenComponent', () => {
     };
     createComponent(makeStimuliGrid(1, 2, cells));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
     component.pendingDeleteCells = [0];
@@ -1216,7 +1218,7 @@ describe('ModifyScreenComponent', () => {
     component.confirmDelete();
     await fixture.whenStable();
 
-    expect(component.screenToModify.values[12][0].hidden).toBeTrue();
+    expect(component.screenToModify.values[12][0].hidden).toBe(true);
     expect(component.pendingDeleteCells).toBeNull();
     // Libération différée pour permettre l'annulation…
     expect(idbSpy.releaseFile).not.toHaveBeenCalled();
@@ -1248,7 +1250,7 @@ describe('ModifyScreenComponent', () => {
 
     component.onDeleteClick();
 
-    expect(flashSpy.show).toHaveBeenCalledWith('warning', jasmine.any(String));
+    expect(flashSpy.show).toHaveBeenCalledWith('warning', expect.any(String));
     expect(component.pendingDeleteCells).toBeNull();
   });
 
@@ -1273,10 +1275,10 @@ describe('ModifyScreenComponent', () => {
     component.multiSelectMode = true;
 
     component.openStimuliData(0);
-    expect(component.selectedCells.has(0)).toBeTrue();
+    expect(component.selectedCells.has(0)).toBe(true);
 
     component.openStimuliData(0);
-    expect(component.selectedCells.has(0)).toBeFalse();
+    expect(component.selectedCells.has(0)).toBe(false);
   });
 
   it('openStimuliData — mode suppression : déclenche requestDelete sur la case', async () => {
@@ -1287,7 +1289,7 @@ describe('ModifyScreenComponent', () => {
 
     component.openStimuliData(0);
 
-    expect(component.pendingDeleteCells).toEqual([0]);
+    expect(component.pendingDeleteCells).toStrictEqual([0]);
   });
 
   // ─── undo ───────────────────────────────────────────────────────────────────
@@ -1296,7 +1298,7 @@ describe('ModifyScreenComponent', () => {
     const cells = { 0: cell({ imageName: 'img.png', imageId: 'TestProject/img.png' }), 1: cell() };
     createComponent(makeStimuliGrid(1, 2, cells));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -1304,20 +1306,20 @@ describe('ModifyScreenComponent', () => {
     component.pendingDeleteCells = [0];
     component.confirmDelete();
     await fixture.whenStable();
-    expect(component.canUndo).toBeTrue();
+    expect(component.canUndo).toBe(true);
 
     component.undo();
 
     expect(component.screenToModify.values[12][0].imageName).toBe('img.png');
-    expect(component.deleteMode).toBeFalse();
-    expect(component.duplicateMode).toBeFalse();
+    expect(component.deleteMode).toBe(false);
+    expect(component.duplicateMode).toBe(false);
   });
 
   it('undo — sans historique → ne lève pas d\'erreur', async () => {
     createComponent(makeStimuli());
     await fixture.whenStable();
 
-    expect(component.canUndo).toBeFalse();
+    expect(component.canUndo).toBe(false);
     expect(() => component.undo()).not.toThrow();
   });
 
@@ -1331,7 +1333,7 @@ describe('ModifyScreenComponent', () => {
     component.zoomIn();
 
     expect(component.cellSize).toBe(168); // 160 + 20 plafonné à 168
-    expect(component.canZoomIn).toBeFalse();
+    expect(component.canZoomIn).toBe(false);
   });
 
   it('zoomOut — diminue cellSize sans descendre sous le minimum (48)', async () => {
@@ -1342,7 +1344,7 @@ describe('ModifyScreenComponent', () => {
     component.zoomOut();
 
     expect(component.cellSize).toBe(48); // plancher à 48
-    expect(component.canZoomOut).toBeFalse();
+    expect(component.canZoomOut).toBe(false);
   });
 
   // ─── openStimuliData — mode échange ─────────────────────────────────────────
@@ -1360,7 +1362,7 @@ describe('ModifyScreenComponent', () => {
 
     expect(component.screenToModify.values[12][0].imageName).toBe('b.png');
     expect(component.screenToModify.values[12][1].imageName).toBe('a.png');
-    expect(component.swapMode).toBeFalse();
+    expect(component.swapMode).toBe(false);
     expect(component.swapSourceIndex).toBeNull();
   });
 
@@ -1389,7 +1391,7 @@ describe('ModifyScreenComponent', () => {
     component.openStimuliData(1);
 
     expect(component.screenToModify.values[12][1].imageName).toBe('a.png');
-    expect(component.duplicateMode).toBeFalse();
+    expect(component.duplicateMode).toBe(false);
   });
 
   it('openStimuliData — duplication vers une case occupée : demande confirmation', async () => {
@@ -1410,12 +1412,12 @@ describe('ModifyScreenComponent', () => {
   it('openStimuliData — mode normal : ouvre le panneau de configuration', async () => {
     createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
     await fixture.whenStable();
-    spyOn(component, 'openOffcanvasStimuli');
+    vi.spyOn(component, 'openOffcanvasStimuli').mockImplementation(() => undefined);
 
     component.openStimuliData(0);
 
     expect(component.activeCellIndex).toBe(0);
-    expect(component.stimuliOffcanvasReady).toBeTrue();
+    expect(component.stimuliOffcanvasReady).toBe(true);
   });
 
   // ─── canAddAdjacent ─────────────────────────────────────────────────────────
@@ -1425,7 +1427,7 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuliGrid(1, 2, cells));
     await fixture.whenStable();
 
-    expect(component.canAddAdjacent(0, 'right')).toBeTrue();
+    expect(component.canAddAdjacent(0, 'right')).toBe(true);
   });
 
   it('canAddAdjacent — voisin visible → false (ajout impossible)', async () => {
@@ -1433,21 +1435,21 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuliGrid(1, 2, cells));
     await fixture.whenStable();
 
-    expect(component.canAddAdjacent(0, 'right')).toBeFalse();
+    expect(component.canAddAdjacent(0, 'right')).toBe(false);
   });
 
   it('canAddAdjacent — voisin hors grille → true', async () => {
     createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
     await fixture.whenStable();
 
-    expect(component.canAddAdjacent(0, 'left')).toBeTrue();
+    expect(component.canAddAdjacent(0, 'left')).toBe(true);
   });
 
   // ─── addAdjacent ────────────────────────────────────────────────────────────
 
   function clickEvent(): Event {
     const e = new Event('click');
-    spyOn(e, 'stopPropagation');
+    vi.spyOn(e, 'stopPropagation').mockImplementation(() => undefined);
     return e;
   }
 
@@ -1458,7 +1460,7 @@ describe('ModifyScreenComponent', () => {
 
     component.addAdjacent(clickEvent(), 0, 'right');
 
-    expect(component.screenToModify.values[12][1].hidden).toBeFalse();
+    expect(component.screenToModify.values[12][1].hidden).toBe(false);
     expect(Number(component.screenToModify.values[1])).toBe(2); // pas d'agrandissement
   });
 
@@ -1533,29 +1535,29 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
     const blob = new Blob(['snd'], { type: 'audio/mp3' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/son.mp3', file: blob, type: 'sound', lastEdit: new Date(), refCount: 1
     } as any));
 
     const result = await component.checkStimuliSoundFileExist();
 
-    expect(result).toBeTrue();
-    expect(component.screenToModify.values[11] instanceof File).toBeTrue();
+    expect(result).toBe(true);
+    expect(component.screenToModify.values[11] instanceof File).toBe(true);
   });
 
   it('checkStimuliSoundFileExist — getFile mauvais type → fallback getAllFiles', async () => {
     createComponent(makeStimuli('son.mp3', 'TestProject/son.mp3'));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/son.mp3', file: new File([''], 'son.mp3'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
-    idbSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbSpy.getAllFiles.mockReturnValue(Promise.resolve([
       { id: 'TestProject/son.mp3', file: new File(['snd'], 'son.mp3'), type: 'sound', lastEdit: new Date(), refCount: 1 }
     ] as any));
 
     const result = await component.checkStimuliSoundFileExist();
 
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   it('checkStimuliSoundFileExist — valeur vide → réinitialise la preview et retourne false', async () => {
@@ -1564,7 +1566,7 @@ describe('ModifyScreenComponent', () => {
 
     const result = await component.checkStimuliSoundFileExist();
 
-    expect(result).toBeFalse();
+    expect(result).toBe(false);
     expect(component.stimuliFile).toBe('');
   });
 
@@ -1572,7 +1574,7 @@ describe('ModifyScreenComponent', () => {
 
   it('toggleVisualizationMode — active le mode, sort des modes d\'édition et charge les images des cases', async () => {
     const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
     } as any));
     createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
@@ -1583,16 +1585,16 @@ describe('ModifyScreenComponent', () => {
 
     await component.toggleVisualizationMode();
 
-    expect(component.visualizationMode).toBeTrue();
-    expect(component.duplicateMode).toBeFalse();
-    expect(component.multiSelectMode).toBeFalse();
+    expect(component.visualizationMode).toBe(true);
+    expect(component.duplicateMode).toBe(false);
+    expect(component.multiSelectMode).toBe(false);
     expect(component.selectedCells.size).toBe(0);
     expect(component.cellImageUrls[0]).toBe('blob:fake-url');
   });
 
   it('toggleVisualizationMode — second appel désactive le mode et révoque les URLs d\'images', async () => {
     const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
     } as any));
     createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
@@ -1603,7 +1605,7 @@ describe('ModifyScreenComponent', () => {
 
     await component.toggleVisualizationMode();
 
-    expect(component.visualizationMode).toBeFalse();
+    expect(component.visualizationMode).toBe(false);
     expect(component.cellImageUrls[0]).toBeUndefined();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
   });
@@ -1621,12 +1623,12 @@ describe('ModifyScreenComponent', () => {
     createComponent(makeStimuliGrid(1, 1, { 0: cell() }));
     await fixture.whenStable();
     component.visualizationMode = true;
-    spyOn(component, 'openOffcanvasStimuli');
+    vi.spyOn(component, 'openOffcanvasStimuli').mockImplementation(() => undefined);
 
     component.openStimuliData(0);
 
     expect(component.activeCellIndex).toBeNull();
-    expect(component.stimuliOffcanvasReady).toBeFalse();
+    expect(component.stimuliOffcanvasReady).toBe(false);
     expect(component.openOffcanvasStimuli).not.toHaveBeenCalled();
   });
 
@@ -1645,7 +1647,7 @@ describe('ModifyScreenComponent', () => {
     await component.commitMediaJournal();
 
     expect(component.screenToModify.values[12][0].imageName).toBe('chat.png');
-    expect(component.screenToModify.values[12][0].hidden).toBeFalse();
+    expect(component.screenToModify.values[12][0].hidden).toBe(false);
     expect(idbSpy.releaseFile).not.toHaveBeenCalled();
     expect(idbSpy.deleteFile).not.toHaveBeenCalled();
   });
@@ -1656,7 +1658,7 @@ describe('ModifyScreenComponent', () => {
       1: cell(),
     }));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/chat.png', file: new File([''], 'chat.png'), type: 'image', lastEdit: new Date(), refCount: 2
     } as any));
 
@@ -1680,7 +1682,7 @@ describe('ModifyScreenComponent', () => {
       1: cell({imageName: 'chien.png', imageId: 'TestProject/chien.png'}),
     }));
     await fixture.whenStable();
-    idbSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], 'f.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -1694,7 +1696,7 @@ describe('ModifyScreenComponent', () => {
   it('ngOnDestroy → applique les libérations en attente', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
-    const commit = spyOn(component, 'commitMediaJournal').and.returnValue(Promise.resolve());
+    const commit = vi.spyOn(component, 'commitMediaJournal').mockReturnValue(Promise.resolve());
 
     fixture.destroy();
 
@@ -1716,7 +1718,7 @@ describe('ModifyScreenComponent', () => {
   it('requestTypeChange — confirmation refusée → écran inchangé', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
-    confirmSpy.confirm.and.returnValue(Promise.resolve(false));
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(false));
 
     await component.requestTypeChange('stimuli');
 
@@ -1737,7 +1739,7 @@ describe('ModifyScreenComponent', () => {
   it('changeTypeFile → l\'ancien média de la consigne sera libéré', async () => {
     createComponent(makeInstruction('Image', 'photo.png', 'TestProject/photo.png'));
     await fixture.whenStable();
-    idbSpy.getFile.and.returnValue(Promise.resolve({
+    idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/photo.png', file: new File([''], 'photo.png'), type: 'image', lastEdit: new Date(), refCount: 1
     } as any));
 
@@ -1792,7 +1794,7 @@ describe('ModifyScreenComponent', () => {
   it('onGridKeydown → flèches, Début et Fin déplacent le focus dans la grille', async () => {
     createComponent(makeStimuliGrid(2, 3, {0: cell(), 1: cell(), 2: cell(), 3: cell(), 4: cell(), 5: cell()}));
     await fixture.whenStable();
-    const focusCell = spyOn(component, 'focusCell');
+    const focusCell = vi.spyOn(component, 'focusCell').mockImplementation(() => undefined);
 
     component.onGridKeydown(new KeyboardEvent('keydown', {key: 'ArrowRight'}), 0);
     expect(focusCell).toHaveBeenCalledWith(1);
@@ -1813,7 +1815,7 @@ describe('ModifyScreenComponent', () => {
 
     component.onGridKeydown(new KeyboardEvent('keydown', {key: 'Escape'}), 0);
 
-    expect(component.swapMode).toBeFalse();
+    expect(component.swapMode).toBe(false);
   });
 
   it('modeHint → consigne adaptée au mode actif', async () => {

@@ -79,10 +79,10 @@ describe('TabSessionService : plusieurs onglets', () => {
     addScreen(b, 'B2');
     b.autoSave.autoSave('create-eval');
 
-    expect(names(a.load.getSlot(1))).toEqual(['A1', 'A2']);
-    expect(names(a.load.getSlot(2))).toEqual(['B1', 'B2']);
-    expect(names(a.load.getSlot(0))).toEqual(['A1', 'A2']);
-    expect(names(b.load.getSlot(0))).toEqual(['B1', 'B2']);
+    expect(names(a.load.getSlot(1))).toStrictEqual(['A1', 'A2']);
+    expect(names(a.load.getSlot(2))).toStrictEqual(['B1', 'B2']);
+    expect(names(a.load.getSlot(0))).toStrictEqual(['A1', 'A2']);
+    expect(names(b.load.getSlot(0))).toStrictEqual(['B1', 'B2']);
   });
 
   it('deux évaluations non enregistrées : les modifications de l\'une ne remplacent pas l\'autre, même après rechargement', async () => {
@@ -100,7 +100,7 @@ describe('TabSessionService : plusieurs onglets', () => {
     a.close();
     const aReloaded = await openFakeTab(registry, a.storage); // rechargement de l'onglet A
     expect(aReloaded.load.getSlot(0)?.nomEval).toBe('Alpha');
-    expect(names(aReloaded.load.getSlot(0))).toEqual(['A1']);
+    expect(names(aReloaded.load.getSlot(0))).toStrictEqual(['A1']);
     expect(b.load.getSlot(0)?.nomEval).toBe('Beta');
     expect(aReloaded.session.notice).toBeNull();
   });
@@ -113,9 +113,9 @@ describe('TabSessionService : plusieurs onglets', () => {
     b.save.newSaveDataAuto();
 
     expect(await b.guard.reserveForWriting(1)).toBeNull();
-    expect(b.flash.show).toHaveBeenCalledWith('warning', jasmine.stringContaining('1'));
+    expect(b.flash.show).toHaveBeenCalledWith('warning', expect.stringContaining('1'));
     expect(await b.guard.reserveForWriting(2)).not.toBeNull();
-    expect(await a.guard.reserveForWriting(1)).withContext('l\'onglet lié peut toujours y écrire').not.toBeNull();
+    expect(await a.guard.reserveForWriting(1), 'l\'onglet lié peut toujours y écrire').not.toBeNull();
   });
 
   it('suppression refusée tant que l\'emplacement est ouvert dans un autre onglet, puis permise après sa fermeture', async () => {
@@ -124,9 +124,9 @@ describe('TabSessionService : plusieurs onglets', () => {
     await load(a, 1);
     const b = await openFakeTab(registry);
 
-    expect(await b.guard.ensureNotOpenElsewhere(1)).toBeFalse();
+    expect(await b.guard.ensureNotOpenElsewhere(1)).toBe(false);
     a.close();
-    expect(await b.guard.ensureNotOpenElsewhere(1)).toBeTrue();
+    expect(await b.guard.ensureNotOpenElsewhere(1)).toBe(true);
   });
 
   it('chargement d\'un emplacement déjà ouvert ailleurs : copie non liée proposée ; annuler ne change rien', async () => {
@@ -136,18 +136,18 @@ describe('TabSessionService : plusieurs onglets', () => {
     const b = await openFakeTab(registry);
 
     expect(await load(b, 1)).toBe('cancel'); // confirmation refusée par défaut
-    expect(b.confirm.confirm).toHaveBeenCalledWith(jasmine.objectContaining({confirmLabel: jasmine.any(String)}));
+    expect(b.confirm.confirm).toHaveBeenCalledWith(expect.objectContaining({confirmLabel: expect.any(String)}));
     expect(b.load.getSlot(0)).toBeNull();
 
-    b.confirm.confirm.and.resolveTo(true); // « Ouvrir une copie »
+    b.confirm.confirm.mockResolvedValue(true); // « Ouvrir une copie »
     expect(await load(b, 1)).toBe('copy');
     expect(b.load.getSlot(0)?.nomEval).toBe('Alpha');
     expect(b.save.activeSlotIndex).toBeNull();
-    expect(a.save.activeSlotIndex).withContext('l\'onglet d\'origine garde son lien').toBe(1);
+    expect(a.save.activeSlotIndex, 'l\'onglet d\'origine garde son lien').toBe(1);
 
     addScreen(b, 'copie');
     b.autoSave.autoSave('create-eval');
-    expect(names(a.load.getSlot(1))).withContext('la copie n\'écrit pas dans l\'emplacement').toEqual(['A1']);
+    expect(names(a.load.getSlot(1)), 'la copie n\'écrit pas dans l\'emplacement').toStrictEqual(['A1']);
   });
 
   it('annuler la protection après la réservation : l\'emplacement est libéré, le lien actuel conservé', async () => {
@@ -163,9 +163,9 @@ describe('TabSessionService : plusieurs onglets', () => {
     addScreen(b, 'brouillon');
     b.save.saveToSlot(0, b.save.dataAuto);
     expect(await load(b, 2)).toBe('cancel');
-    expect(registry.isHeld('gazeplay-eval.slot.2')).toBeFalse();
-    expect(registry.isHeld('gazeplay-eval.slot.1')).toBeTrue();
-    expect(names(b.load.getSlot(0))).toEqual(['brouillon']);
+    expect(registry.isHeld('gazeplay-eval.slot.2')).toBe(false);
+    expect(registry.isHeld('gazeplay-eval.slot.1')).toBe(true);
+    expect(names(b.load.getSlot(0))).toStrictEqual(['brouillon']);
   });
 
   it('nouvel onglet : reprend la dernière évaluation en cours si l\'onglet qui la modifiait est fermé', async () => {
@@ -177,7 +177,7 @@ describe('TabSessionService : plusieurs onglets', () => {
     const fresh = await openFakeTab(registry);
     expect(fresh.load.getSlot(0)?.nomEval).toBe('Alpha');
     expect(fresh.save.activeSlotIndex).toBe(1);
-    expect(fresh.save.hasLoadedWorkspace).toBeTrue();
+    expect(fresh.save.hasLoadedWorkspace).toBe(true);
     expect(fresh.session.notice).toBeNull();
   });
 
@@ -189,12 +189,12 @@ describe('TabSessionService : plusieurs onglets', () => {
     const fresh = await openFakeTab(registry);
     expect(fresh.load.getSlot(0)).toBeNull();
     expect(fresh.save.activeSlotIndex).toBeNull();
-    expect(fresh.session.notice).toEqual({kind: 'busy'});
+    expect(fresh.session.notice).toStrictEqual({kind: 'busy'});
 
     // La sauvegarde automatique d'une page ouverte directement n'écrase rien.
     fresh.autoSave.autoSave('create-eval');
-    expect(names(a.load.getSlot(1))).toEqual(['A1']);
-    expect(JSON.parse(localStorage.getItem(SHARED_KEYS.working)!).nomEval).withContext('copie partagée intacte').toBe('Alpha');
+    expect(names(a.load.getSlot(1))).toStrictEqual(['A1']);
+    expect(JSON.parse(localStorage.getItem(SHARED_KEYS.working)!).nomEval, 'copie partagée intacte').toBe('Alpha');
   });
 
   it('onglet dupliqué : copie non liée avec un message, l\'onglet d\'origine garde le lien et ses données', async () => {
@@ -204,7 +204,7 @@ describe('TabSessionService : plusieurs onglets', () => {
 
     const duplicate = await openFakeTab(registry, a.storage.copy()); // « Dupliquer l'onglet »
     expect(duplicate.session.tabId).not.toBe(a.session.tabId);
-    expect(duplicate.session.notice).toEqual({kind: 'duplicated', slot: 1});
+    expect(duplicate.session.notice).toStrictEqual({kind: 'duplicated', slot: 1});
     expect(duplicate.load.getSlot(0)?.nomEval).toBe('Alpha');
     expect(duplicate.save.activeSlotIndex).toBeNull();
     expect(a.save.activeSlotIndex).toBe(1);
@@ -213,8 +213,8 @@ describe('TabSessionService : plusieurs onglets', () => {
     duplicate.autoSave.autoSave('create-eval');
     addScreen(a, 'A2');
     a.autoSave.autoSave('create-eval');
-    expect(names(a.load.getSlot(1))).toEqual(['A1', 'A2']);
-    expect(names(duplicate.load.getSlot(0))).toEqual(['A1', 'dans le doublon']);
+    expect(names(a.load.getSlot(1))).toStrictEqual(['A1', 'A2']);
+    expect(names(duplicate.load.getSlot(0))).toStrictEqual(['A1', 'dans le doublon']);
   });
 
   it('rechargement d\'un onglet lié : même identifiant, lien repris, aucun message', async () => {
@@ -228,7 +228,7 @@ describe('TabSessionService : plusieurs onglets', () => {
     expect(reloaded.session.tabId).toBe(id);
     expect(reloaded.save.activeSlotIndex).toBe(2);
     expect(reloaded.session.notice).toBeNull();
-    expect(registry.isHeld('gazeplay-eval.slot.2')).toBeTrue();
+    expect(registry.isHeld('gazeplay-eval.slot.2')).toBe(true);
   });
 
   it('lien d\'un onglet rechargé vers un emplacement supprimé entre-temps : abandonné sans erreur', async () => {
@@ -250,9 +250,9 @@ describe('TabSessionService : plusieurs onglets', () => {
     legacyTab.setItem(TAB_KEYS.slot, '3');
 
     const tab = await openFakeTab(registry, legacyTab);
-    expect(names(tab.load.getSlot(0))).toEqual(['X1', 'X2']);
+    expect(names(tab.load.getSlot(0))).toStrictEqual(['X1', 'X2']);
     expect(tab.save.activeSlotIndex).toBe(3);
-    expect(names(tab.load.getSlot(3))).toEqual(['X1']);
+    expect(names(tab.load.getSlot(3))).toStrictEqual(['X1']);
     expect(JSON.parse(localStorage.getItem('save3')!).nomEval).toBe('Ancienne'); // format inchangé
   });
 
@@ -266,7 +266,7 @@ describe('TabSessionService : plusieurs onglets', () => {
 
     const shared = JSON.parse(localStorage.getItem(SHARED_KEYS.working)!);
     expect(shared.nomEval).toBe('Alpha');
-    expect(Object.keys(shared)).toEqual(jasmine.arrayContaining(['nomEval', 'format', 'listScreens', 'createdAt', 'version']));
+    expect(Object.keys(shared)).toStrictEqual(expect.arrayContaining(['nomEval', 'format', 'listScreens', 'createdAt', 'version']));
   });
 
   it('nettoyage des médias : un média utilisé par l\'évaluation d\'un autre onglet n\'est jamais considéré comme inutilisé', async () => {
@@ -283,12 +283,12 @@ describe('TabSessionService : plusieurs onglets', () => {
     a.save.saveToSlot(0, a.save.dataAuto);
 
     const refs = a.cleanup.collectAllReferences();
-    expect(isReferenced('Beta/chat.png', refs)).toBeTrue();
+    expect(isReferenced('Beta/chat.png', refs)).toBe(true);
     expect(localStorage.getItem(TAB_MEDIA_PREFIX + b.session.tabId)).not.toBeNull();
 
     b.save.clearSlot(0); // « Abandonner les modifications » dans B
     expect(localStorage.getItem(TAB_MEDIA_PREFIX + b.session.tabId)).toBeNull();
-    expect(isReferenced('Beta/chat.png', collectMediaReferences(a.load.getSlot(0)))).toBeFalse();
+    expect(isReferenced('Beta/chat.png', collectMediaReferences(a.load.getSlot(0)))).toBe(false);
   });
 
   it('sans API Web Locks : chaque onglet garde sa propre évaluation (isolation conservée)', async () => {

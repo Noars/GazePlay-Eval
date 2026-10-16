@@ -6,23 +6,25 @@ import {App} from './app';
 import {AutoSaveService} from './services/auto-save/auto-save.service';
 import {RouteFocusService} from './core/a11y/route-focus.service';
 import {TranslatePipe} from './core/i18n/translate.pipe';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from './testing/spy-obj';
 
 describe('App', () => {
   let component: App;
   let fixture: any;
   let routerEvents$: Subject<any>;
-  let router: jasmine.SpyObj<Router>;
-  let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let routeFocusSpy: jasmine.SpyObj<RouteFocusService>;
+  let router: Mocked<Router>;
+  let autoSaveSpy: Mocked<AutoSaveService>;
+  let routeFocusSpy: Mocked<RouteFocusService>;
 
   beforeEach(async () => {
     routerEvents$ = new Subject();
-    router = jasmine.createSpyObj<Router>('Router', ['navigate'], {
+    router = createSpyObj<Router>('Router', ['navigate'], {
       events: routerEvents$.asObservable(),
       url: '/home'
     });
-    autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['init', 'tryResume']);
-    routeFocusSpy = jasmine.createSpyObj('RouteFocusService', ['start', 'focusMainHeading']);
+    autoSaveSpy = createSpyObj('AutoSaveService', ['init', 'tryResume']);
+    routeFocusSpy = createSpyObj('RouteFocusService', ['start', 'focusMainHeading']);
 
     await TestBed.configureTestingModule({
       imports: [App],
@@ -101,18 +103,18 @@ describe('App', () => {
   it('lien d\'évitement → déplace le focus sans changer de route', () => {
     const event = new MouseEvent('click', {cancelable: true});
     component['skipToContent'](event);
-    expect(event.defaultPrevented).toBeTrue();
+    expect(event.defaultPrevented).toBe(true);
     expect(routeFocusSpy.focusMainHeading).toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
   /** Simule un rechargement de la page affichée à `path`. */
   async function reloadAt(path: string): Promise<void> {
-    spyOn(performance, 'getEntriesByType').and.returnValue([{type: 'reload'}] as any);
-    spyOn<any>(component, 'reloadedPath').and.returnValue(path);
-    router.navigate.and.returnValue(Promise.resolve(true));
-    router.navigate.calls.reset();
-    autoSaveSpy.tryResume.calls.reset();
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{type: 'reload'}] as any);
+    vi.spyOn(component as any, 'reloadedPath').mockReturnValue(path);
+    router.navigate.mockReturnValue(Promise.resolve(true));
+    router.navigate.mockClear();
+    autoSaveSpy.tryResume.mockClear();
 
     component.ngOnInit();
     await Promise.resolve();
@@ -138,9 +140,9 @@ describe('App', () => {
   }
 
   it('chargement sans rechargement → aucune redirection', async () => {
-    spyOn(performance, 'getEntriesByType').and.returnValue([{type: 'navigate'}] as any);
-    spyOn<any>(component, 'reloadedPath').and.returnValue('/create-eval');
-    router.navigate.calls.reset();
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{type: 'navigate'}] as any);
+    vi.spyOn(component as any, 'reloadedPath').mockReturnValue('/create-eval');
+    router.navigate.mockClear();
 
     component.ngOnInit();
     await Promise.resolve();

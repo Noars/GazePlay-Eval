@@ -4,6 +4,8 @@ import { CropImageComponent } from './crop-image.component';
 import { FlashService } from '../../services/flash-message/flash.service';
 import { ImageCropperComponent } from 'ngx-image-cropper';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 @Component({ selector: 'image-cropper', template: '', standalone: true })
 class ImageCropperStub {
@@ -20,14 +22,14 @@ class ImageCropperStub {
 describe('CropImageComponent', () => {
   let component: CropImageComponent;
   let fixture: ComponentFixture<CropImageComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<CropImageComponent>>;
-  let flashSpy: jasmine.SpyObj<FlashService>;
+  let dialogRefSpy: Mocked<MatDialogRef<CropImageComponent>>;
+  let flashSpy: Mocked<FlashService>;
   let capturedReader: any;
   let mockImage: any;
 
   beforeEach(async () => {
-    dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
-    flashSpy     = jasmine.createSpyObj('FlashService',  ['show']);
+    dialogRefSpy = createSpyObj('MatDialogRef', ['close']);
+    flashSpy     = createSpyObj('FlashService',  ['show']);
 
     await TestBed.configureTestingModule({
       imports: [CropImageComponent],
@@ -45,13 +47,14 @@ describe('CropImageComponent', () => {
 
     // Capture l'instance FileReader créée dans ngOnInit
     capturedReader = null;
-    spyOn(FileReader.prototype, 'readAsDataURL').and.callFake(function(this: any) {
+    vi.spyOn(FileReader.prototype, 'readAsDataURL').mockImplementation(function(this: any) {
       capturedReader = this;
     });
 
     // Mock de Image (utilisé dans ngOnInit et resizeImage)
     mockImage = { onload: null as any, src: '', width: 600, height: 800 };
-    spyOn(window as any, 'Image').and.returnValue(mockImage);
+    // `new Image()` doit renvoyer le faux objet : Vitest exige une fonction (et non une valeur de retour) pour `new`.
+    vi.spyOn(window as any, 'Image').mockImplementation(function () { return mockImage; });
 
     fixture   = TestBed.createComponent(CropImageComponent);
     component = fixture.componentInstance;
@@ -80,7 +83,7 @@ describe('CropImageComponent', () => {
     expect(component.croppedImage).toBeUndefined();
     expect(component.imageMaxHeight).toBe(-1);
     expect(component.imageMaxWidth).toBe(-1);
-    expect(component.cropperPosition).toEqual({ x1: 0, y1: 0, x2: 200, y2: 200 });
+    expect(component.cropperPosition).toStrictEqual({ x1: 0, y1: 0, x2: 200, y2: 200 });
   });
 
   // ─── ngOnInit ─────────────────────────────────────────────────────────────
@@ -89,15 +92,15 @@ describe('CropImageComponent', () => {
     triggerNgOnInit('data:image/png;base64,abc', 600, 800);
 
     expect(component.imageToCrop).toBe('data:image/png;base64,abc');
-    expect(component.cropperPosition).toEqual({ x1: 0, y1: 0, x2: 600, y2: 800 });
+    expect(component.cropperPosition).toStrictEqual({ x1: 0, y1: 0, x2: 600, y2: 800 });
   });
 
   it('ngOnInit — image < 500 px → resizeImage appelé et imageToCrop mis à jour', () => {
-    spyOn(component, 'resizeImage').and.returnValue('data:image/png;base64,resized');
+    vi.spyOn(component, 'resizeImage').mockReturnValue('data:image/png;base64,resized');
     triggerNgOnInit('data:image/png;base64,small', 200, 300);
 
     // L'image déjà chargée est transmise pour éviter de dessiner une image non décodée.
-    expect(component.resizeImage).toHaveBeenCalledWith('data:image/png;base64,small', 200, 300, jasmine.any(Object));
+    expect(component.resizeImage).toHaveBeenCalledWith('data:image/png;base64,small', 200, 300, expect.any(Object));
     expect(component.imageToCrop).toBe('data:image/png;base64,resized');
   });
 
@@ -109,13 +112,13 @@ describe('CropImageComponent', () => {
   // ─── resizeImage ──────────────────────────────────────────────────────────
 
   it('resizeImage — width < height → newWidth = 500, newHeight proportionnel', () => {
-    const mockCtx  = { drawImage: jasmine.createSpy('drawImage') };
+    const mockCtx  = { drawImage: vi.fn().mockName('drawImage') };
     const mockCanvas: any = {
       width: 0, height: 0,
-      getContext: jasmine.createSpy('getContext').and.returnValue(mockCtx),
-      toDataURL:  jasmine.createSpy('toDataURL').and.returnValue('data:resized')
+      getContext: vi.fn().mockName('getContext').mockReturnValue(mockCtx),
+      toDataURL:  vi.fn().mockName('toDataURL').mockReturnValue('data:resized')
     };
-    spyOn(document, 'createElement').and.callFake((tag: string) =>
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) =>
       tag === 'canvas' ? mockCanvas : document.createElement(tag)
     );
 
@@ -128,13 +131,13 @@ describe('CropImageComponent', () => {
   });
 
   it('resizeImage — width >= height → newHeight = 500, newWidth proportionnel', () => {
-    const mockCtx  = { drawImage: jasmine.createSpy('drawImage') };
+    const mockCtx  = { drawImage: vi.fn().mockName('drawImage') };
     const mockCanvas: any = {
       width: 0, height: 0,
-      getContext: jasmine.createSpy('getContext').and.returnValue(mockCtx),
-      toDataURL:  jasmine.createSpy('toDataURL').and.returnValue('data:resized')
+      getContext: vi.fn().mockName('getContext').mockReturnValue(mockCtx),
+      toDataURL:  vi.fn().mockName('toDataURL').mockReturnValue('data:resized')
     };
-    spyOn(document, 'createElement').and.callFake((tag: string) =>
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) =>
       tag === 'canvas' ? mockCanvas : document.createElement(tag)
     );
 
@@ -146,13 +149,13 @@ describe('CropImageComponent', () => {
   });
 
   it('resizeImage — width === height → newHeight = newWidth = 500', () => {
-    const mockCtx  = { drawImage: jasmine.createSpy('drawImage') };
+    const mockCtx  = { drawImage: vi.fn().mockName('drawImage') };
     const mockCanvas: any = {
       width: 0, height: 0,
-      getContext: jasmine.createSpy('getContext').and.returnValue(mockCtx),
-      toDataURL:  jasmine.createSpy('toDataURL').and.returnValue('data:resized')
+      getContext: vi.fn().mockName('getContext').mockReturnValue(mockCtx),
+      toDataURL:  vi.fn().mockName('toDataURL').mockReturnValue('data:resized')
     };
-    spyOn(document, 'createElement').and.callFake((tag: string) =>
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) =>
       tag === 'canvas' ? mockCanvas : document.createElement(tag)
     );
 
@@ -180,7 +183,7 @@ describe('CropImageComponent', () => {
   it('onCropperChange → met à jour cropperPosition et toutes les dimensions', () => {
     component.onCropperChange({ x1: 10, y1: 20, x2: 110, y2: 120 });
 
-    expect(component.cropperPosition).toEqual({ x1: 10, y1: 20, x2: 110, y2: 120 });
+    expect(component.cropperPosition).toStrictEqual({ x1: 10, y1: 20, x2: 110, y2: 120 });
     expect(component.cropWidthX1).toBe(10);
     expect(component.cropWidthX2).toBe(110);
     expect(component.cropHeightY1).toBe(20);
@@ -223,7 +226,7 @@ describe('CropImageComponent', () => {
 
     component.changeHeightCropper(80);
 
-    expect(component.cropperPosition).toEqual({ x1: 10, y1: 20, x2: 110, y2: 100 });
+    expect(component.cropperPosition).toStrictEqual({ x1: 10, y1: 20, x2: 110, y2: 100 });
     expect(component.cropHeightY2).toBe(100);
     expect(component.cropHeightSize).toBe(80);
   });
@@ -250,7 +253,7 @@ describe('CropImageComponent', () => {
 
     component.changeWidthCropper(60);
 
-    expect(component.cropperPosition).toEqual({ x1: 10, y1: 20, x2: 70, y2: 120 });
+    expect(component.cropperPosition).toStrictEqual({ x1: 10, y1: 20, x2: 70, y2: 120 });
     expect(component.cropWidthX2).toBe(70);
     expect(component.cropWidthSize).toBe(60);
   });
@@ -275,22 +278,22 @@ describe('CropImageComponent', () => {
 
     component.validateCrop();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(croppedFile);
-    expect(flashSpy.show).toHaveBeenCalledOnceWith('success', 'Votre image a bien été recadrée.');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith(croppedFile);
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('success', 'Votre image a bien été recadrée.');
   });
 
   it("validateCrop — aucun recadrage effectué → fermeture sans résultat et message « non modifiée »", () => {
     component.croppedImage = undefined;
     component.validateCrop();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith();
-    expect(flashSpy.show).toHaveBeenCalledOnceWith('info', "L'image n'a pas été modifiée.");
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith();
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('info', "L'image n'a pas été modifiée.");
   });
 
   // ─── cancelCrop ───────────────────────────────────────────────────────────
 
   it('cancelCrop → dialogRef.close() et flash info', () => {
     component.cancelCrop();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith();
-    expect(flashSpy.show).toHaveBeenCalledOnceWith('info', 'Les proportions de votre image ont été conservées.');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith();
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('info', 'Les proportions de votre image ont été conservées.');
   });
 });

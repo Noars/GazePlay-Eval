@@ -3,17 +3,19 @@ import {provideRouter} from '@angular/router';
 import {GuideSauvegardeComponent} from './guide-sauvegarde.component';
 import {FlashService} from '../../../services/flash-message/flash.service';
 import {UserPreferencesService} from '../../../core/preferences/user-preferences.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../../testing/spy-obj';
 
 describe('GuideSauvegardeComponent', () => {
   let component: GuideSauvegardeComponent;
   let fixture: ComponentFixture<GuideSauvegardeComponent>;
-  let flashServiceSpy: jasmine.SpyObj<FlashService>;
-  let preferencesSpy: jasmine.SpyObj<UserPreferencesService>;
+  let flashServiceSpy: Mocked<FlashService>;
+  let preferencesSpy: Mocked<UserPreferencesService>;
 
   beforeEach(async () => {
-    flashServiceSpy = jasmine.createSpyObj('FlashService', ['show']);
-    preferencesSpy = jasmine.createSpyObj('UserPreferencesService', ['update']);
-    preferencesSpy.update.and.returnValue(Promise.resolve(true));
+    flashServiceSpy = createSpyObj('FlashService', ['show']);
+    preferencesSpy = createSpyObj('UserPreferencesService', ['update']);
+    preferencesSpy.update.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [GuideSauvegardeComponent],
@@ -49,8 +51,8 @@ describe('GuideSauvegardeComponent', () => {
   });
 
   it('resetDuration — échec d\'enregistrement → message d\'erreur', async () => {
-    preferencesSpy.update.and.returnValue(Promise.resolve(false));
+    preferencesSpy.update.mockReturnValue(Promise.resolve(false));
     await component.resetDuration();
-    expect(flashServiceSpy.show).toHaveBeenCalledWith('error', jasmine.any(String), 3000);
+    expect(flashServiceSpy.show).toHaveBeenCalledWith('error', expect.any(String), 3000);
   });
 });

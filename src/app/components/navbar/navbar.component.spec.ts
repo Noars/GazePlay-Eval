@@ -5,25 +5,27 @@ import {NavbarComponent} from './navbar.component';
 import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
 import {SaveService} from '../../services/save/save.service';
 import {I18nService} from '../../core/i18n/i18n.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
   let router: Router;
   const theme = signal<'light' | 'dark'>('light');
-  let preferencesSpy: jasmine.SpyObj<UserPreferencesService>;
+  let preferencesSpy: Mocked<UserPreferencesService>;
 
   beforeEach(async () => {
     theme.set('light');
-    preferencesSpy = jasmine.createSpyObj('UserPreferencesService', ['toggleTheme', 'setLanguage'], {
+    preferencesSpy = createSpyObj('UserPreferencesService', ['toggleTheme', 'setLanguage'], {
       resolvedTheme: computed(() => theme()),
     });
-    preferencesSpy.toggleTheme.and.callFake(async () => {
+    preferencesSpy.toggleTheme.mockImplementation(async () => {
       theme.set(theme() === 'light' ? 'dark' : 'light');
       return true;
     });
     // Comme le vrai service : la langue enregistrée est appliquée à l'interface.
-    preferencesSpy.setLanguage.and.callFake(async language => {
+    preferencesSpy.setLanguage.mockImplementation(async language => {
       TestBed.inject(I18nService).setLanguage(language);
       return true;
     });
@@ -48,9 +50,9 @@ describe('NavbarComponent', () => {
   });
 
   it('getTheme → icône du thème actuel : \'sun\' en thème clair, \'moon\' en thème sombre', () => {
-    expect(component.getTheme()).toEqual('sun');
+    expect(component.getTheme()).toStrictEqual('sun');
     component.changeTheme();
-    expect(component.getTheme()).toEqual('moon');
+    expect(component.getTheme()).toStrictEqual('moon');
   });
 
   it('le bouton affiche l\'icône du thème actuel et garde un nom accessible décrivant l\'action', async () => {
@@ -87,7 +89,7 @@ describe('NavbarComponent', () => {
   });
 
   it('bouton de menu → émet menuRequested', () => {
-    const emitted = spyOn(component.menuRequested, 'emit');
+    const emitted = vi.spyOn(component.menuRequested, 'emit').mockImplementation(() => undefined);
     const button: HTMLButtonElement = fixture.nativeElement.querySelector('.gp-header__menu-button');
     button.click();
     expect(emitted).toHaveBeenCalled();
@@ -97,7 +99,7 @@ describe('NavbarComponent', () => {
     const controls = fixture.nativeElement.querySelectorAll('button, a') as NodeListOf<HTMLElement>;
     controls.forEach(control => {
       const name = control.getAttribute('aria-label') || control.textContent?.trim();
-      expect(name).withContext(control.outerHTML).toBeTruthy();
+      expect(name, control.outerHTML).toBeTruthy();
     });
   });
 
@@ -123,7 +125,7 @@ describe('NavbarComponent', () => {
   });
 
   it('bouton d\'aide masqué dans les pages du guide', () => {
-    spyOnProperty(router, 'url', 'get').and.returnValue('/guide/creation');
-    expect(component.showGuideButton()).toBeFalse();
+    vi.spyOn(router, 'url', 'get').mockReturnValue('/guide/creation');
+    expect(component.showGuideButton()).toBe(false);
   });
 });

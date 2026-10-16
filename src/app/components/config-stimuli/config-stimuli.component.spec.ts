@@ -9,6 +9,8 @@ import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {emptyReferences, MediaReferences} from '../../core/media/media-references';
 import {stimuliScreenValues} from '../../shared/screenModel';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 function makeCell(overrides: Partial<stimuliScreenValues> = {}): stimuliScreenValues {
   return {
@@ -22,33 +24,33 @@ function makeCell(overrides: Partial<stimuliScreenValues> = {}): stimuliScreenVa
 describe('ConfigStimuliComponent', () => {
   let component: ConfigStimuliComponent;
   let fixture: ComponentFixture<ConfigStimuliComponent>;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let idbServiceSpy: jasmine.SpyObj<IndexedDBService>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
-  let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let flashSpy: jasmine.SpyObj<FlashService>;
-  let cleanupSpy: jasmine.SpyObj<MediaCleanupService>;
+  let dialogSpy: Mocked<MatDialog>;
+  let idbServiceSpy: Mocked<IndexedDBService>;
+  let saveServiceSpy: Mocked<SaveService>;
+  let autoSaveSpy: Mocked<AutoSaveService>;
+  let flashSpy: Mocked<FlashService>;
+  let cleanupSpy: Mocked<MediaCleanupService>;
   let references: MediaReferences;
 
   beforeEach(async () => {
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    idbServiceSpy = jasmine.createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['getEvalName']);
-    autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['autoSave']);
-    flashSpy = jasmine.createSpyObj('FlashService', ['show']);
-    cleanupSpy = jasmine.createSpyObj('MediaCleanupService', ['collectAllReferences']);
+    dialogSpy = createSpyObj('MatDialog', ['open']);
+    idbServiceSpy = createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile']);
+    saveServiceSpy = createSpyObj('SaveService', ['getEvalName']);
+    autoSaveSpy = createSpyObj('AutoSaveService', ['autoSave']);
+    flashSpy = createSpyObj('FlashService', ['show']);
+    cleanupSpy = createSpyObj('MediaCleanupService', ['collectAllReferences']);
     references = emptyReferences();
-    cleanupSpy.collectAllReferences.and.callFake(() => references);
+    cleanupSpy.collectAllReferences.mockImplementation(() => references);
 
-    idbServiceSpy.getFile.and.returnValue(Promise.reject(new Error('not found')));
-    idbServiceSpy.addFile.and.returnValue(Promise.resolve());
-    idbServiceSpy.updateFile.and.returnValue(Promise.resolve());
-    idbServiceSpy.deleteFile.and.returnValue(Promise.resolve());
-    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([]));
-    idbServiceSpy.incrementRef.and.returnValue(Promise.resolve());
-    idbServiceSpy.releaseFile.and.returnValue(Promise.resolve());
-    saveServiceSpy.getEvalName.and.returnValue('TestProject');
-    dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
+    idbServiceSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
+    idbServiceSpy.addFile.mockReturnValue(Promise.resolve());
+    idbServiceSpy.updateFile.mockReturnValue(Promise.resolve());
+    idbServiceSpy.deleteFile.mockReturnValue(Promise.resolve());
+    idbServiceSpy.getAllFiles.mockReturnValue(Promise.resolve([]));
+    idbServiceSpy.incrementRef.mockReturnValue(Promise.resolve());
+    idbServiceSpy.releaseFile.mockReturnValue(Promise.resolve());
+    saveServiceSpy.getEvalName.mockReturnValue('TestProject');
+    dialogSpy.open.mockReturnValue({afterClosed: () => of(null)} as any);
 
     await TestBed.configureTestingModule({
       imports: [ConfigStimuliComponent],
@@ -66,8 +68,8 @@ describe('ConfigStimuliComponent', () => {
     component = fixture.componentInstance;
 
     component.data = {cell: 0, screen: {0: makeCell()}, cols: 2};
-    spyOn(URL, 'createObjectURL').and.returnValue('blob:fake-url');
-    spyOn(URL, 'revokeObjectURL');
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake-url');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     fixture.detectChanges();
   });
 
@@ -89,7 +91,7 @@ describe('ConfigStimuliComponent', () => {
 
     await component.deleteCell();
 
-    expect(released).toEqual([{ref: 'TestProject/img.png', type: 'image'}, {ref: 'TestProject/snd.mp3', type: 'sound'}]);
+    expect(released).toStrictEqual([{ref: 'TestProject/img.png', type: 'image'}, {ref: 'TestProject/snd.mp3', type: 'sound'}]);
     expect(idbServiceSpy.releaseFile).not.toHaveBeenCalled();
     expect(idbServiceSpy.deleteFile).not.toHaveBeenCalled();
   });
@@ -98,7 +100,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('checkCell — imageFile déjà un Blob → aperçu sans appel IDB', async () => {
     component.data.screen[0].imageFile = new Blob(['img'], {type: 'image/png'}) as File;
-    idbServiceSpy.getFile.calls.reset();
+    idbServiceSpy.getFile.mockClear();
 
     await component.checkCell();
 
@@ -108,7 +110,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('checkCell — imageId sans fichier en mémoire → résolu depuis l\'IDB', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File(['img'], 'img.png', {type: 'image/png'}), type: 'image', lastEdit: new Date(), refCount: 1
     }));
 
@@ -116,18 +118,18 @@ describe('ConfigStimuliComponent', () => {
 
     expect(component.data.screen[0].imageFile).toBeTruthy();
     expect(component.previewImage).toBe('blob:fake-url');
-    expect(component.missingImage).toBeFalse();
+    expect(component.missingImage).toBe(false);
   });
 
   it('checkCell — son stocké sous forme de Blob → converti en File', async () => {
     component.data.screen[0] = makeCell({soundId: 'TestProject/snd.mp3', soundName: 'snd.mp3'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/snd.mp3', file: new Blob(['snd'], {type: 'audio/mpeg'}), type: 'sound', lastEdit: new Date(), refCount: 1
     }));
 
     await component.checkCell();
 
-    expect(component.data.screen[0].soundFile instanceof File).toBeTrue();
+    expect(component.data.screen[0].soundFile instanceof File).toBe(true);
     expect(component.previewSound).toBe('blob:fake-url');
   });
 
@@ -138,13 +140,13 @@ describe('ConfigStimuliComponent', () => {
     fixture.detectChanges();
 
     expect(component.previewImage).toBe('');
-    expect(component.missingImage).toBeTrue();
+    expect(component.missingImage).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('missing.png');
   });
 
   it('checkCell — repli par nom de fichier quand l\'identifiant ne correspond pas', async () => {
     component.data.screen[0] = makeCell({imageId: 'AutreNom/img.png', imageName: 'img.png'});
-    idbServiceSpy.getAllFiles.and.returnValue(Promise.resolve([
+    idbServiceSpy.getAllFiles.mockReturnValue(Promise.resolve([
       {id: 'Ancien/img.png', file: new File(['img'], 'img.png'), type: 'image' as const, lastEdit: new Date(), refCount: 1}
     ]));
 
@@ -157,7 +159,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('setGoodAnswer → met à jour la case', () => {
     component.setGoodAnswer(true);
-    expect(component.data.screen[0].goodAnswer).toBeTrue();
+    expect(component.data.screen[0].goodAnswer).toBe(true);
   });
 
   // ─── Suppression ──────────────────────────────────────────────────────────
@@ -175,7 +177,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('deleteImage — média partagé (refCount 2) → une référence libérée, fichier conservé', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 2
     }));
 
@@ -187,7 +189,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('deleteImage — dernière référence et plus utilisé ailleurs → fichier supprimé', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
     }));
 
@@ -198,7 +200,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('deleteImage — dernière référence mais encore utilisé par une sauvegarde → fichier conservé', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', imageName: 'img.png'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/img.png', file: new File([''], 'img.png'), type: 'image', lastEdit: new Date(), refCount: 1
     }));
     references.ids.add('TestProject/img.png');
@@ -227,7 +229,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('deleteCell → vide image, son et réponse, libère les deux médias', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/img.png', soundId: 'TestProject/snd.mp3', goodAnswer: true});
-    idbServiceSpy.getFile.and.callFake((id: string) => Promise.resolve({
+    idbServiceSpy.getFile.mockImplementation((id: string) => Promise.resolve({
       id, file: new File([''], 'f'), type: id.includes('mp3') ? 'sound' : 'image', lastEdit: new Date(), refCount: 2
     } as any));
 
@@ -236,7 +238,7 @@ describe('ConfigStimuliComponent', () => {
     const cell = component.data.screen[0];
     expect(cell.imageId).toBe('');
     expect(cell.soundId).toBe('');
-    expect(cell.goodAnswer).toBeFalse();
+    expect(cell.goodAnswer).toBe(false);
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/img.png');
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/snd.mp3');
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
@@ -266,7 +268,7 @@ describe('ConfigStimuliComponent', () => {
   });
 
   it('getImageFile — fichier déjà présent → une référence ajoutée', async () => {
-    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('exists')));
+    idbServiceSpy.addFile.mockReturnValue(Promise.reject(new Error('exists')));
 
     await component.getImageFile(new File(['img'], 'photo.png'));
 
@@ -275,7 +277,7 @@ describe('ConfigStimuliComponent', () => {
 
   it('getImageFile — remplace une image → l\'ancienne est libérée', async () => {
     component.data.screen[0] = makeCell({imageId: 'TestProject/old.png', imageName: 'old.png'});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/old.png', file: new File([''], 'old.png'), type: 'image', lastEdit: new Date(), refCount: 2
     }));
 
@@ -298,12 +300,12 @@ describe('ConfigStimuliComponent', () => {
   });
 
   it('getImageFile — échec d\'enregistrement → message d\'erreur, case inchangée', async () => {
-    idbServiceSpy.addFile.and.returnValue(Promise.reject(new Error('quota')));
-    idbServiceSpy.incrementRef.and.returnValue(Promise.reject(new Error('introuvable')));
+    idbServiceSpy.addFile.mockReturnValue(Promise.reject(new Error('quota')));
+    idbServiceSpy.incrementRef.mockReturnValue(Promise.reject(new Error('introuvable')));
 
     await component.getImageFile(new File(['img'], 'photo.png'));
 
-    expect(flashSpy.show).toHaveBeenCalledWith('error', jasmine.stringMatching('photo.png'));
+    expect(flashSpy.show).toHaveBeenCalledWith('error', expect.stringMatching('photo.png'));
     expect(component.data.screen[0].imageName).toBe('');
     expect(component.busy).toBeNull();
   });
@@ -328,26 +330,26 @@ describe('ConfigStimuliComponent', () => {
   it('cropImage — résultat → enregistré comme nouveau fichier, ancienne référence libérée', async () => {
     const original = new File(['original'], 'chat.jpg', {type: 'image/jpeg'});
     component.data.screen[0] = makeCell({imageId: 'TestProject/chat.jpg', imageName: 'chat.jpg', imageFile: original});
-    idbServiceSpy.getFile.and.returnValue(Promise.resolve({
+    idbServiceSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/chat.jpg', file: original, type: 'image', lastEdit: new Date(), refCount: 2
     }));
-    dialogSpy.open.and.returnValue({afterClosed: () => of(new Blob(['cropped'], {type: 'image/png'}))} as any);
+    dialogSpy.open.mockReturnValue({afterClosed: () => of(new Blob(['cropped'], {type: 'image/png'}))} as any);
 
     await component.cropImage();
 
     const cell = component.data.screen[0];
     expect(cell.imageName).toBe('chat-recadree.png');
     expect(cell.imageId).toBe('TestProject/chat-recadree.png');
-    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/chat-recadree.png', jasmine.any(File), 'image');
+    expect(idbServiceSpy.addFile).toHaveBeenCalledWith('TestProject/chat-recadree.png', expect.any(File), 'image');
     expect(idbServiceSpy.releaseFile).toHaveBeenCalledWith('TestProject/chat.jpg');
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
   });
 
   it('cropImage — nom recadré déjà pris → suffixe numérique', async () => {
     component.data.screen[0] = makeCell({imageName: 'chat.jpg', imageFile: new File(['o'], 'chat.jpg')});
-    idbServiceSpy.addFile.and.callFake((id: string) => id === 'TestProject/chat-recadree.png'
+    idbServiceSpy.addFile.mockImplementation((id: string) => id === 'TestProject/chat-recadree.png'
       ? Promise.reject(new Error('exists')) : Promise.resolve());
-    dialogSpy.open.and.returnValue({afterClosed: () => of(new Blob(['c']))} as any);
+    dialogSpy.open.mockReturnValue({afterClosed: () => of(new Blob(['c']))} as any);
 
     await component.cropImage();
 
@@ -367,7 +369,7 @@ describe('ConfigStimuliComponent', () => {
   // ─── Fermeture ────────────────────────────────────────────────────────────
 
   it('finish → sauvegarde puis émet closed', () => {
-    const closed = spyOn(component.closed, 'emit');
+    const closed = vi.spyOn(component.closed, 'emit').mockImplementation(() => undefined);
     component.finish();
     expect(autoSaveSpy.autoSave).toHaveBeenCalledWith('stimuli');
     expect(closed).toHaveBeenCalled();

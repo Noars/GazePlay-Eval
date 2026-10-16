@@ -6,16 +6,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTooltip } from '@angular/material/tooltip';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 describe('InfoParticipantComponent', () => {
   let component: InfoParticipantComponent;
   let fixture: ComponentFixture<InfoParticipantComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let saveServiceSpy: Mocked<SaveService>;
 
   beforeEach(async () => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto'], {
+    routerSpy = createSpyObj('Router', ['navigate']);
+    saveServiceSpy = createSpyObj('SaveService', ['saveDataAuto'], {
       dataAuto: {
         nomEval: 'EvalTest',
         format: 'Csv&Xlsx',
@@ -47,7 +49,7 @@ describe('InfoParticipantComponent', () => {
 
   it('devrait charger les données depuis SaveService au démarrage', () => {
     component.ngOnInit();
-    expect(component.infoParticipantList).toEqual(['Nom', 'Âge']);
+    expect(component.infoParticipantList).toStrictEqual(['Nom', 'Âge']);
   });
 
   it('devrait appeler saveDataAuto avec les bonnes valeurs', () => {
@@ -76,24 +78,24 @@ describe('InfoParticipantComponent', () => {
   it('devrait supprimer le bon champ avec removeField()', () => {
     component.infoParticipantList = ['Nom', 'Âge', 'Sexe'];
     component.removeField(1);
-    expect(component.infoParticipantList).toEqual(['Nom', 'Sexe']);
+    expect(component.infoParticipantList).toStrictEqual(['Nom', 'Sexe']);
   });
 
   it('devrait réorganiser les champs après un drop()', () => {
     component.infoParticipantList = ['Nom', 'Âge', 'Sexe'];
     component.drop({ previousIndex: 0, currentIndex: 2 });
-    expect(component.infoParticipantList).toEqual(['Âge', 'Sexe', 'Nom']);
+    expect(component.infoParticipantList).toStrictEqual(['Âge', 'Sexe', 'Nom']);
   });
 
   it('devrait sauvegarder et naviguer vers /info-eval avec backToInfoEval()', () => {
-    spyOn(component, 'saveData').and.callThrough();
+    vi.spyOn(component, 'saveData');
     component.backToInfoEval();
     expect(component.saveData).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/info-eval']);
   });
 
   it('devrait sauvegarder et naviguer vers /setup-eval avec goToCreateEval()', () => {
-    spyOn(component, 'saveData').and.callThrough();
+    vi.spyOn(component, 'saveData');
     component.goToCreateEval();
     expect(component.saveData).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/setup-eval']);
@@ -102,7 +104,7 @@ describe('InfoParticipantComponent', () => {
   it("moveField → déplace le champ (alternative clavier au glisser-déposer) et l'annonce", () => {
     component.infoParticipantList = ['Nom', 'Prénom', 'Âge'];
     component.moveField(0, 1, 'down');
-    expect(component.infoParticipantList).toEqual(['Prénom', 'Nom', 'Âge']);
+    expect(component.infoParticipantList).toStrictEqual(['Prénom', 'Nom', 'Âge']);
     expect(component.announcement).toContain('position 2 sur 3');
   });
 
@@ -110,14 +112,14 @@ describe('InfoParticipantComponent', () => {
     component.infoParticipantList = ['Nom', 'Prénom'];
     component.moveField(0, -1, 'up');
     component.moveField(1, 1, 'down');
-    expect(component.infoParticipantList).toEqual(['Nom', 'Prénom']);
+    expect(component.infoParticipantList).toStrictEqual(['Nom', 'Prénom']);
   });
 
   it("addField(valeur) → ajoute une suggestion ; availableSuggestions exclut les champs existants", () => {
     component.infoParticipantList = ['nom'];
     expect(component.availableSuggestions()).not.toContain('Nom');
     component.addField('Âge');
-    expect(component.infoParticipantList).toEqual(['nom', 'Âge']);
+    expect(component.infoParticipantList).toStrictEqual(['nom', 'Âge']);
     expect(component.availableSuggestions()).not.toContain('Âge');
   });
 

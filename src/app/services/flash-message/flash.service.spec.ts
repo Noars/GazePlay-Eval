@@ -1,4 +1,4 @@
-import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 import {FlashService} from './flash.service';
 import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
 import {provideInMemoryPreferences} from '../../core/preferences/testing/in-memory-preferences.store';
@@ -16,6 +16,7 @@ describe('FlashService', () => {
   });
 
   afterEach(async () => {
+    vi.useRealTimers();
     await preferences.reset();
   });
 
@@ -41,24 +42,26 @@ describe('FlashService', () => {
     expect(service.flashs().length).toBe(0);
   });
 
-  it('un message d\'erreur reste affiché au moins 8 secondes, même si les messages sont désactivés', fakeAsync(() => {
+  it('un message d\'erreur reste affiché au moins 8 secondes, même si les messages sont désactivés', () => {
+    vi.useFakeTimers();
     service.show('error', 'Erreur importante', 0);
     expect(service.flashs().length).toBe(1);
 
-    tick(7999);
+    vi.advanceTimersByTime(7999);
     expect(service.flashs().length).toBe(1);
-    tick(1 + 300);
+    vi.advanceTimersByTime(1 + 300);
     expect(service.flashs().length).toBe(0);
-  }));
+  });
 
-  it('sans durée précisée → durée par défaut des préférences', fakeAsync(() => {
+  it('sans durée précisée → durée par défaut des préférences', () => {
+    vi.useFakeTimers();
     void preferences.update({messageDuration: 0.1});
     service.show('info', 'Message sans durée');
     expect(service.flashs().length).toBe(1);
 
-    tick(100 + 300);
+    vi.advanceTimersByTime(100 + 300);
     expect(service.flashs().length).toBe(0);
-  }));
+  });
 
   it('préférence à 0 → les messages d\'information sont désactivés', () => {
     void preferences.update({messageDuration: 0});
@@ -66,19 +69,21 @@ describe('FlashService', () => {
     expect(service.flashs().length).toBe(0);
   });
 
-  it('remove → passe fadingOut à true puis supprime après 300ms', fakeAsync(() => {
+  it('remove → passe fadingOut à true puis supprime après 300ms', () => {
+    vi.useFakeTimers();
     service.show('info', 'Test');
     const id = service.flashs()[0].id;
 
     service.remove(id);
-    expect(service.flashs()[0].fadingOut).toBeTrue();
+    expect(service.flashs()[0].fadingOut).toBe(true);
 
-    tick(300);
+    vi.advanceTimersByTime(300);
     expect(service.flashs().length).toBe(0);
-    tick(10000);
-  }));
+    vi.advanceTimersByTime(10000);
+  });
 
-  it('remove — plusieurs flashs → seul le flash ciblé disparaît', fakeAsync(() => {
+  it('remove — plusieurs flashs → seul le flash ciblé disparaît', () => {
+    vi.useFakeTimers();
     service.show('info', 'Flash A');
     service.show('info', 'Flash B');
     const idA = service.flashs()[0].id;
@@ -86,14 +91,14 @@ describe('FlashService', () => {
 
     service.remove(idA);
 
-    expect(service.flashs().find(f => f.id === idA)?.fadingOut).toBeTrue();
+    expect(service.flashs().find(f => f.id === idA)?.fadingOut).toBe(true);
     expect(service.flashs().find(f => f.id === idB)?.fadingOut).toBeFalsy();
 
-    tick(300);
-    expect(service.flashs().some(f => f.id === idB)).toBeTrue();
-    expect(service.flashs().some(f => f.id === idA)).toBeFalse();
-    tick(10000);
-  }));
+    vi.advanceTimersByTime(300);
+    expect(service.flashs().some(f => f.id === idB)).toBe(true);
+    expect(service.flashs().some(f => f.id === idA)).toBe(false);
+    vi.advanceTimersByTime(10000);
+  });
 
   it('getDefaultDuration → durée des préférences, en secondes', async () => {
     await preferences.update({messageDuration: 8});
@@ -108,6 +113,6 @@ describe('FlashService', () => {
     service.show('info', 'A');
     service.show('info', 'B');
     service.show('info', 'C');
-    expect(service.flashs().map(f => f.message)).toEqual(['A', 'B', 'C']);
+    expect(service.flashs().map(f => f.message)).toStrictEqual(['A', 'B', 'C']);
   });
 });

@@ -40,7 +40,7 @@ describe('RouteFocusService', () => {
     await navigate('/info-eval');
 
     expect(document.activeElement).not.toBe(heading);
-    expect(heading.hasAttribute('tabindex')).toBeFalse();
+    expect(heading.hasAttribute('tabindex')).toBe(false);
   });
 
   for (const type of ['pointerdown', 'keydown', 'click']) {
@@ -69,7 +69,7 @@ describe('RouteFocusService', () => {
   it('start appelé deux fois → un seul abonnement', async () => {
     service.start();
     service.start();
-    const focus = spyOn(service, 'focusMainHeading').and.callThrough();
+    const focus = vi.spyOn(service, 'focusMainHeading');
 
     document.body.dispatchEvent(new Event('click', {bubbles: true}));
     await navigate('/option');

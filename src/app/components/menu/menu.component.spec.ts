@@ -3,11 +3,13 @@ import {provideRouter} from '@angular/router';
 import {signal, WritableSignal} from '@angular/core';
 import {MenuComponent} from './menu.component';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
   let fixture: ComponentFixture<MenuComponent>;
-  let importFlowSpy: jasmine.SpyObj<ImportFlowService>;
+  let importFlowSpy: Mocked<ImportFlowService>;
   let importing: WritableSignal<boolean>;
 
   async function create(mode: 'sidebar' | 'drawer'): Promise<void> {
@@ -20,8 +22,8 @@ describe('MenuComponent', () => {
 
   beforeEach(async () => {
     importing = signal(false);
-    importFlowSpy = jasmine.createSpyObj('ImportFlowService', ['start'], {importing});
-    importFlowSpy.start.and.returnValue(Promise.resolve(false));
+    importFlowSpy = createSpyObj('ImportFlowService', ['start'], {importing});
+    importFlowSpy.start.mockReturnValue(Promise.resolve(false));
 
     await TestBed.configureTestingModule({
       imports: [MenuComponent],
@@ -43,7 +45,7 @@ describe('MenuComponent', () => {
     const links = Array.from(nav.querySelectorAll('a')) as HTMLAnchorElement[];
 
     expect(nav.getAttribute('aria-label')).toBe('Navigation principale');
-    expect(links.map(a => a.textContent?.trim())).toEqual(['Accueil', 'Guide', 'Options', 'Mes sauvegardes', 'Charger']);
+    expect(links.map(a => a.textContent?.trim())).toStrictEqual(['Accueil', 'Guide', 'Options', 'Mes sauvegardes', 'Charger']);
     links.forEach(link => expect(link.getAttribute('href')).toBeTruthy());
     expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
   });
@@ -60,7 +62,7 @@ describe('MenuComponent', () => {
     await create('sidebar');
 
     const button: HTMLButtonElement = fixture.nativeElement.querySelector('button.gp-nav__link');
-    expect(button.disabled).toBeTrue();
+    expect(button.disabled).toBe(true);
     expect(button.textContent).toContain('Import en cours');
   });
 
@@ -68,13 +70,13 @@ describe('MenuComponent', () => {
     await create('drawer');
     const dialog: HTMLDialogElement = fixture.nativeElement.querySelector('dialog');
     expect(dialog).not.toBeNull();
-    expect(dialog.open).toBeFalse();
+    expect(dialog.open).toBe(false);
 
     component.open();
-    expect(dialog.open).toBeTrue();
+    expect(dialog.open).toBe(true);
 
     component.close();
-    expect(dialog.open).toBeFalse();
+    expect(dialog.open).toBe(false);
   });
 
   it('mode tiroir → clic sur le fond ferme le menu', async () => {
@@ -84,7 +86,7 @@ describe('MenuComponent', () => {
 
     component.onDrawerClick({target: dialog} as unknown as MouseEvent);
 
-    expect(dialog.open).toBeFalse();
+    expect(dialog.open).toBe(false);
   });
 
   it('openImportPopup → ferme le tiroir avant d\'ouvrir l\'import', async () => {
@@ -94,7 +96,7 @@ describe('MenuComponent', () => {
 
     await component.openImportPopup();
 
-    expect(dialog.open).toBeFalse();
+    expect(dialog.open).toBe(false);
     expect(importFlowSpy.start).toHaveBeenCalled();
   });
 });

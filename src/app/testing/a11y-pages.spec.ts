@@ -90,10 +90,10 @@ describe('Accessibilité (contrôles automatisés)', () => {
 
   function expectAccessible(fixture: ComponentFixture<unknown>, options: {singleH1?: boolean} = {}): void {
     const root = fixture.nativeElement as HTMLElement;
-    expect(findA11yProblems(root)).withContext(root.tagName).toEqual([]);
-    expect(findHeadingSkips(root)).withContext(root.tagName).toEqual([]);
+    expect(findA11yProblems(root), root.tagName).toStrictEqual([]);
+    expect(findHeadingSkips(root), root.tagName).toStrictEqual([]);
     if (options.singleH1 !== false) {
-      expect(root.querySelectorAll('h1').length).withContext(`${root.tagName} : un seul h1`).toBe(1);
+      expect(root.querySelectorAll('h1').length, `${root.tagName} : un seul h1`).toBe(1);
     }
   }
 
@@ -150,8 +150,7 @@ describe('Accessibilité (contrôles automatisés)', () => {
     TestBed.inject(I18nService).setLanguage('en');
     for (const [label, component] of pages) {
       const fixture = await render(component);
-      expect((fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent)
-        .withContext(`${label} : titre traduit`).not.toMatch(/[éèàç]|Étape|Évaluation/);
+      expect((fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent, `${label} : titre traduit`).not.toMatch(/[éèàç]|Étape|Évaluation/);
       expectAccessible(fixture);
     }
     expectAccessible(await render(ModifyScreenComponent, c => c.screenToModify = structuredClone(screens[1])));

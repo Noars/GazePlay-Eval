@@ -24,7 +24,7 @@ describe('LoadService', () => {
     it('retourne les données si slot rempli', () => {
       localStorage.setItem(SAVE_SLOT_LIST[1], JSON.stringify(saveModelDefault));
       const result = service.getSlot(1);
-      expect(result).toEqual(saveModelDefault);
+      expect(result).toStrictEqual(saveModelDefault);
     });
 
     it('retourne null si JSON invalide', () => {

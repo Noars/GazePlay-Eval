@@ -6,6 +6,8 @@ import { SaveService } from '../save/save.service';
 import { MatDialog } from '@angular/material/dialog';
 import {of} from 'rxjs';
 import {saveModel} from '../../shared/saveModel';
+import type {Mock, Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 /** Sauvegarde complète de test ; `screens` différencie les contenus. */
 function evaluation(nomEval: string, screens: string[] = []): saveModel {
@@ -18,26 +20,26 @@ function evaluation(nomEval: string, screens: string[] = []): saveModel {
 
 describe('OverwriteGuardService', () => {
   let service: OverwriteGuardService;
-  let loadServiceSpy: jasmine.SpyObj<LoadService>;
-  let saveServiceFake: {saveToSlot: jasmine.Spy; dataAuto: any; activeSlotIndex: number | null; hasLoadedWorkspace: boolean};
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
-  let downloadServiceSpy: jasmine.SpyObj<DownloadService>;
+  let loadServiceSpy: Mocked<LoadService>;
+  let saveServiceFake: {saveToSlot: Mock; dataAuto: any; activeSlotIndex: number | null; hasLoadedWorkspace: boolean};
+  let dialogSpy: Mocked<MatDialog>;
+  let downloadServiceSpy: Mocked<DownloadService>;
   let slots: Record<number, saveModel | null>;
 
   /** Réponse de la fenêtre de remplacement : 'download', 'overwrite' ou null (annuler). */
   function dialogAnswers(answer: 'download' | 'overwrite' | null): void {
-    dialogSpy.open.and.returnValue({afterClosed: () => of(answer)} as any);
+    dialogSpy.open.mockReturnValue({afterClosed: () => of(answer)} as any);
   }
 
   beforeEach(() => {
     slots = {0: null, 1: null, 2: null, 3: null};
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.callFake((index: any) => slots[index] ?? null);
-    saveServiceFake = {saveToSlot: jasmine.createSpy('saveToSlot'), dataAuto: {nomEval: 'TestEval'}, activeSlotIndex: null, hasLoadedWorkspace: true};
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
+    loadServiceSpy.getSlot.mockImplementation((index: any) => slots[index] ?? null);
+    saveServiceFake = {saveToSlot: vi.fn().mockName('saveToSlot'), dataAuto: {nomEval: 'TestEval'}, activeSlotIndex: null, hasLoadedWorkspace: true};
+    dialogSpy = createSpyObj('MatDialog', ['open']);
     dialogAnswers(null);
-    downloadServiceSpy = jasmine.createSpyObj('DownloadService', ['generateSlotZip']);
-    downloadServiceSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
+    downloadServiceSpy = createSpyObj('DownloadService', ['generateSlotZip']);
+    downloadServiceSpy.generateSlotZip.mockReturnValue(Promise.resolve(true));
 
     TestBed.configureTestingModule({
       providers: [
@@ -57,19 +59,19 @@ describe('OverwriteGuardService', () => {
   });
 
   it('check → retourne true si le slot est null (vide)', async () => {
-    expect(await service.check(1)).toBeTrue();
+    expect(await service.check(1)).toBe(true);
     expect(dialogSpy.open).not.toHaveBeenCalled();
   });
 
   it('check → retourne true si l\'évaluation du slot est réellement vide (pas de nom, rien d\'autre)', async () => {
     slots[1] = {...evaluation(''), format: 'Csv&Xlsx'};
-    expect(await service.check(1)).toBeTrue();
+    expect(await service.check(1)).toBe(true);
     expect(dialogSpy.open).not.toHaveBeenCalled();
   });
 
   it('check → fenêtre si le slot n\'a pas de nom mais contient des écrans (le nom vide ne veut pas dire vide)', async () => {
     slots[1] = evaluation('', ['Ecran 1']);
-    expect(await service.check(1)).toBeFalse();
+    expect(await service.check(1)).toBe(false);
     expect(dialogSpy.open).toHaveBeenCalled();
   });
 
@@ -79,7 +81,7 @@ describe('OverwriteGuardService', () => {
       slots[2] = evaluation('TestEval', ['ancienne version']);
       saveServiceFake.activeSlotIndex = 2;
 
-      expect(await service.check(0)).toBeTrue();
+      expect(await service.check(0)).toBe(true);
       expect(saveServiceFake.saveToSlot).toHaveBeenCalledWith(2, saveServiceFake.dataAuto);
       expect(dialogSpy.open).not.toHaveBeenCalled();
     });
@@ -91,7 +93,7 @@ describe('OverwriteGuardService', () => {
       saveServiceFake.hasLoadedWorkspace = false;
       saveServiceFake.dataAuto = {nomEval: '', listScreens: []};
 
-      expect(await service.check(0)).toBeTrue();
+      expect(await service.check(0)).toBe(true);
       expect(saveServiceFake.saveToSlot).toHaveBeenCalledWith(1, slots[0]);
     });
 
@@ -99,7 +101,7 @@ describe('OverwriteGuardService', () => {
       slots[0] = evaluation('TestEval');
       saveServiceFake.activeSlotIndex = 3;
 
-      expect(await service.check(0)).toBeFalse();
+      expect(await service.check(0)).toBe(false);
       expect(saveServiceFake.saveToSlot).not.toHaveBeenCalled();
       expect(dialogSpy.open).toHaveBeenCalled();
     });
@@ -109,7 +111,7 @@ describe('OverwriteGuardService', () => {
       slots[2] = evaluation('TestEval', ['A', 'B', 'C']);
       saveServiceFake.dataAuto = slots[0];
 
-      expect(await service.check(0)).toBeFalse();
+      expect(await service.check(0)).toBe(false);
       expect(dialogSpy.open).toHaveBeenCalled();
       expect(saveServiceFake.saveToSlot).not.toHaveBeenCalled();
     });
@@ -119,7 +121,7 @@ describe('OverwriteGuardService', () => {
       slots[3] = {...evaluation('TestEval', ['A']), createdAt: '2020-01-01T00:00:00.000Z', step: 4};
       saveServiceFake.dataAuto = {...slots[0]};
 
-      expect(await service.check(0)).toBeTrue();
+      expect(await service.check(0)).toBe(true);
       expect(dialogSpy.open).not.toHaveBeenCalled();
       expect(saveServiceFake.saveToSlot).not.toHaveBeenCalled();
     });
@@ -129,7 +131,7 @@ describe('OverwriteGuardService', () => {
     it('occupé → fenêtre, même si le nom est identique', async () => {
       slots[1] = evaluation('TestEval');
 
-      expect(await service.check(1)).toBeFalse();
+      expect(await service.check(1)).toBe(false);
       expect(dialogSpy.open).toHaveBeenCalled();
     });
 
@@ -137,7 +139,7 @@ describe('OverwriteGuardService', () => {
       slots[1] = evaluation('TestEval', ['ancienne version']);
       saveServiceFake.activeSlotIndex = 1;
 
-      expect(await service.check(1, {replacingWithCurrent: true})).toBeTrue();
+      expect(await service.check(1, {replacingWithCurrent: true})).toBe(true);
       expect(dialogSpy.open).not.toHaveBeenCalled();
     });
 
@@ -145,7 +147,7 @@ describe('OverwriteGuardService', () => {
       slots[1] = evaluation('Brouillon', ['B1']);
       saveServiceFake.dataAuto = evaluation('Brouillon', ['B1']);
 
-      expect(await service.check(1, {replacingWithCurrent: true})).toBeTrue();
+      expect(await service.check(1, {replacingWithCurrent: true})).toBe(true);
       expect(dialogSpy.open).not.toHaveBeenCalled();
     });
 
@@ -153,7 +155,7 @@ describe('OverwriteGuardService', () => {
       slots[1] = evaluation('Important', ['I1', 'I2']);
       saveServiceFake.dataAuto = evaluation('Brouillon', ['B1']);
 
-      expect(await service.check(1, {replacingWithCurrent: true})).toBeFalse();
+      expect(await service.check(1, {replacingWithCurrent: true})).toBe(false);
       expect(dialogSpy.open).toHaveBeenCalled();
     });
   });
@@ -165,7 +167,7 @@ describe('OverwriteGuardService', () => {
     const result = await service.check(1);
 
     expect(downloadServiceSpy.generateSlotZip).toHaveBeenCalledWith(slots[1]!);
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   it('check → popup, réponse overwrite → retourne true sans download', async () => {
@@ -175,7 +177,7 @@ describe('OverwriteGuardService', () => {
     const result = await service.check(1);
 
     expect(downloadServiceSpy.generateSlotZip).not.toHaveBeenCalled();
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   it('check → popup, réponse null → retourne false', async () => {
@@ -185,7 +187,7 @@ describe('OverwriteGuardService', () => {
 
     expect(downloadServiceSpy.generateSlotZip).not.toHaveBeenCalled();
     expect(saveServiceFake.saveToSlot).not.toHaveBeenCalled();
-    expect(result).toBeFalse();
+    expect(result).toBe(false);
   });
 
   it('findSlotHolding → emplacement au contenu identique, sinon null', () => {
@@ -207,7 +209,7 @@ describe('OverwriteGuardService', () => {
 
 describe('sameEvaluation', () => {
   it('ignore la date, la version et l\'étape', () => {
-    expect(sameEvaluation(evaluation('E', ['A']), {...evaluation('E', ['A']), createdAt: 'autre', version: 2, step: 4})).toBeTrue();
+    expect(sameEvaluation(evaluation('E', ['A']), {...evaluation('E', ['A']), createdAt: 'autre', version: 2, step: 4})).toBe(true);
   });
 
   it('ignore l\'ordre des clés des objets', () => {
@@ -215,7 +217,7 @@ describe('sameEvaluation', () => {
     const b = evaluation('E');
     a.listScreens = [{name: 'S', type: 'stimuli', values: [{imageName: 'x', goodAnswer: true}]}] as any;
     b.listScreens = [{values: [{goodAnswer: true, imageName: 'x'}], type: 'stimuli', name: 'S'}] as any;
-    expect(sameEvaluation(a, b)).toBeTrue();
+    expect(sameEvaluation(a, b)).toBe(true);
   });
 
   it('un File en mémoire équivaut à sa forme enregistrée ({})', () => {
@@ -223,13 +225,13 @@ describe('sameEvaluation', () => {
     const stored = evaluation('E');
     memory.listScreens = [{name: 'S', type: 'instruction', values: [true, 1, true, 'Image', 'a.png', new File(['x'], 'a.png')]}] as any;
     stored.listScreens = JSON.parse(JSON.stringify(memory.listScreens));
-    expect(sameEvaluation(memory, stored)).toBeTrue();
+    expect(sameEvaluation(memory, stored)).toBe(true);
   });
 
   it('détecte une différence de nom, de champs ou d\'écrans', () => {
-    expect(sameEvaluation(evaluation('E'), evaluation('F'))).toBeFalse();
-    expect(sameEvaluation(evaluation('E', ['A']), evaluation('E', ['A', 'B']))).toBeFalse();
-    expect(sameEvaluation(evaluation('E'), {...evaluation('E'), infoParticipant: ['Nom']})).toBeFalse();
+    expect(sameEvaluation(evaluation('E'), evaluation('F'))).toBe(false);
+    expect(sameEvaluation(evaluation('E', ['A']), evaluation('E', ['A', 'B']))).toBe(false);
+    expect(sameEvaluation(evaluation('E'), {...evaluation('E'), infoParticipant: ['Nom']})).toBe(false);
   });
 });
 
@@ -241,16 +243,16 @@ describe('isEmptyEvaluation', () => {
   });
 
   it('nouvelle évaluation non modifiée, ou modèle jamais renseigné : vide', () => {
-    expect(isEmptyEvaluation(base())).toBeTrue();
-    expect(isEmptyEvaluation({...base(), globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: []})).toBeTrue();
-    expect(isEmptyEvaluation({...base(), nomEval: '   '})).toBeTrue();
+    expect(isEmptyEvaluation(base())).toBe(true);
+    expect(isEmptyEvaluation({...base(), globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: []})).toBe(true);
+    expect(isEmptyEvaluation({...base(), nomEval: '   '})).toBe(true);
   });
 
   it('dès qu\'il y a un nom, un champ, un écran, un autre format ou des paramètres modifiés : pas vide', () => {
-    expect(isEmptyEvaluation({...base(), nomEval: 'E'})).toBeFalse();
-    expect(isEmptyEvaluation({...base(), infoParticipant: ['Nom']})).toBeFalse();
-    expect(isEmptyEvaluation({...base(), listScreens: [{name: 'S'} as any]})).toBeFalse();
-    expect(isEmptyEvaluation({...base(), format: 'Csv'})).toBeFalse();
-    expect(isEmptyEvaluation({...base(), globalParamsStimuliScreen: [2, 2, false, 10, 1, 1, false, false]})).toBeFalse();
+    expect(isEmptyEvaluation({...base(), nomEval: 'E'})).toBe(false);
+    expect(isEmptyEvaluation({...base(), infoParticipant: ['Nom']})).toBe(false);
+    expect(isEmptyEvaluation({...base(), listScreens: [{name: 'S'} as any]})).toBe(false);
+    expect(isEmptyEvaluation({...base(), format: 'Csv'})).toBe(false);
+    expect(isEmptyEvaluation({...base(), globalParamsStimuliScreen: [2, 2, false, 10, 1, 1, false, false]})).toBe(false);
   });
 });

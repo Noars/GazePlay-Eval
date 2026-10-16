@@ -5,6 +5,7 @@ import {provideInMemoryPreferences} from '../../core/preferences/testing/in-memo
 import {FakeLockRegistry, FakeTab, openFakeTab} from '../../core/tab/testing/fake-tabs.spec';
 import {saveModel} from '../../shared/saveModel';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
+import type {Mock} from 'vitest';
 
 /**
  * Scénarios de perte silencieuse reproduits dans l'application le 15/10/2026, rejoués avec les
@@ -49,9 +50,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
     tab.save.dataAuto.nomEval = 'Test';  // étape 1 : même nom qu'une sauvegarde
     tab.save.saveToSlot(0, tab.save.dataAuto);
 
-    expect(await tab.guard.check(0)).toBeFalse(); // second « Nouvelle évaluation », annulé
+    expect(await tab.guard.check(0)).toBe(false); // second « Nouvelle évaluation », annulé
     expect(tab.dialog.open).toHaveBeenCalledTimes(1);
-    expect(screensOf(tab, 1)).toEqual(['A', 'B', 'C']);
+    expect(screensOf(tab, 1)).toStrictEqual(['A', 'B', 'C']);
   });
 
   it('B — import « Ouvrir » d\'un fichier homonyme : la fenêtre s\'affiche et la sauvegarde est intacte', async () => {
@@ -63,9 +64,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
       imported.globalParamsInstructionScreen, imported.globalParamsStimuliScreen, imported.listScreens, 0); // LoadZipService.loadZip
     tab.save.setActiveSlot(null);
 
-    expect(await tab.guard.check(0)).toBeFalse();
+    expect(await tab.guard.check(0)).toBe(false);
     expect(tab.dialog.open).toHaveBeenCalledTimes(1);
-    expect(screensOf(tab, 1)).toEqual(['T1', 'T2', 'T3', 'T4', 'T5']);
+    expect(screensOf(tab, 1)).toStrictEqual(['T1', 'T2', 'T3', 'T4', 'T5']);
   });
 
   it('C — rechargement de l\'onglet puis réouverture du même emplacement : la modification est conservée', async () => {
@@ -75,13 +76,13 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
 
     first.close(); // rechargement : même sessionStorage, nouvelle page
     const reloaded = await openFakeTab(registry, first.storage);
-    expect(reloaded.save.activeSlotIndex).withContext('le lien survit au rechargement').toBe(1);
+    expect(reloaded.save.activeSlotIndex, 'le lien survit au rechargement').toBe(1);
     reloaded.save.dataAuto.listScreens = [...reloaded.save.dataAuto.listScreens, {name: 'D', type: 'transition', values: []} as any];
     reloaded.save.saveToSlot(0, reloaded.save.dataAuto);
 
-    expect(await reloaded.guard.check(0)).toBeTrue(); // Charger › emplacement 1
+    expect(await reloaded.guard.check(0)).toBe(true); // Charger › emplacement 1
     expect(reloaded.dialog.open).not.toHaveBeenCalled();
-    expect(screensOf(reloaded, 1)).toEqual(['A', 'B', 'C', 'D']);
+    expect(screensOf(reloaded, 1)).toStrictEqual(['A', 'B', 'C', 'D']);
   });
 
   it('C bis — évaluation en cours non liée et plus récente que l\'emplacement homonyme : la fenêtre s\'affiche', async () => {
@@ -90,9 +91,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
     tab.save.loadIntoWorkspace({...evaluation('Test', ['A', 'B', 'C', 'D']), createdAt: '', version: 1});
     tab.save.saveToSlot(0, tab.save.dataAuto);
 
-    expect(await tab.guard.check(0)).toBeFalse();
+    expect(await tab.guard.check(0)).toBe(false);
     expect(tab.dialog.open).toHaveBeenCalledTimes(1);
-    expect(screensOf(tab, 1)).toEqual(['A', 'B', 'C']);
+    expect(screensOf(tab, 1)).toStrictEqual(['A', 'B', 'C']);
   });
 
   it('D — nouvel onglet (onglet précédent fermé) puis « Nouvelle évaluation » : l\'emplacement n\'est jamais vidé', async () => {
@@ -102,9 +103,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
     first.close();
 
     const fresh = await openFakeTab(registry); // nouvel onglet : reprise de la dernière évaluation
-    expect(fresh.save.hasLoadedWorkspace).toBeTrue();
-    expect(await fresh.guard.check(0)).toBeTrue();
-    expect(screensOf(fresh, 1)).toEqual(['T1', 'T2', 'T3']);
+    expect(fresh.save.hasLoadedWorkspace).toBe(true);
+    expect(await fresh.guard.check(0)).toBe(true);
+    expect(screensOf(fresh, 1)).toStrictEqual(['T1', 'T2', 'T3']);
   });
 
   it('E — « Remplacer par l\'évaluation en cours » sur une autre évaluation : confirmation demandée', async () => {
@@ -113,9 +114,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
     tab.save.loadIntoWorkspace({...evaluation('Brouillon', ['B1']), createdAt: '', version: 1});
     tab.save.saveToSlot(0, tab.save.dataAuto);
 
-    expect(await tab.guard.check(1, {replacingWithCurrent: true})).toBeFalse();
+    expect(await tab.guard.check(1, {replacingWithCurrent: true})).toBe(false);
     expect(tab.dialog.open).toHaveBeenCalledTimes(1);
-    expect(screensOf(tab, 1)).toEqual(['I1', 'I2', 'I3', 'I4']);
+    expect(screensOf(tab, 1)).toStrictEqual(['I1', 'I2', 'I3', 'I4']);
   });
 
   it('cas normal — évaluation liée remplacée par « Nouvelle évaluation » : reportée sans question', async () => {
@@ -124,9 +125,9 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
     await openSlot(tab, 1);
     tab.save.dataAuto.listScreens = [...tab.save.dataAuto.listScreens, {name: 'B', type: 'transition', values: []} as any];
 
-    expect(await tab.guard.check(0)).toBeTrue();
+    expect(await tab.guard.check(0)).toBe(true);
     expect(tab.dialog.open).not.toHaveBeenCalled();
-    expect(screensOf(tab, 1)).toEqual(['A', 'B']);
+    expect(screensOf(tab, 1)).toStrictEqual(['A', 'B']);
   });
 
   describe('évaluation sans nom', () => {
@@ -142,7 +143,7 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
       const tab = await openFakeTab(registry);
       tab.save.newSaveDataAuto();
 
-      expect(await tab.guard.check(0)).toBeTrue();
+      expect(await tab.guard.check(0)).toBe(true);
       expect(tab.dialog.open).not.toHaveBeenCalled();
     });
 
@@ -159,27 +160,27 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
 
       const go = await tab.guard.check(0);
 
-      expect(go).toBeFalse(); // l'appelant (Nouvelle évaluation, Ouvrir, Charger, Importer) s'arrête
-      expect(tab.load.getSlot(0)?.listScreens.map(s => s.name)).toEqual(['Ecran 1']);
+      expect(go).toBe(false); // l'appelant (Nouvelle évaluation, Ouvrir, Charger, Importer) s'arrête
+      expect(tab.load.getSlot(0)?.listScreens.map(s => s.name)).toStrictEqual(['Ecran 1']);
       expect(tab.save.dataAuto.listScreens.length).toBe(1);
     });
 
     it('sans nom, avec des écrans, « Remplacer sans télécharger » : le remplacement a lieu', async () => {
       const tab = await unnamedWithScreens();
-      tab.dialog.open.and.returnValue({afterClosed: () => of('overwrite')} as any);
+      tab.dialog.open.mockReturnValue({afterClosed: () => of('overwrite')} as any);
 
-      expect(await tab.guard.check(0)).toBeTrue();
+      expect(await tab.guard.check(0)).toBe(true);
       tab.save.newSaveDataAuto(); // suite de « Nouvelle évaluation »
-      expect(tab.load.getSlot(0)?.listScreens).toEqual([]);
+      expect(tab.load.getSlot(0)?.listScreens).toStrictEqual([]);
     });
 
     it('sans nom, avec des écrans, « Télécharger puis remplacer » : téléchargement puis remplacement', async () => {
       const tab = await unnamedWithScreens();
-      tab.dialog.open.and.returnValue({afterClosed: () => of('download')} as any);
-      const download = (tab.guard as any).downloadService.generateSlotZip as jasmine.Spy;
+      tab.dialog.open.mockReturnValue({afterClosed: () => of('download')} as any);
+      const download = (tab.guard as any).downloadService.generateSlotZip as Mock;
 
-      expect(await tab.guard.check(0)).toBeTrue();
-      expect(download).toHaveBeenCalledWith(jasmine.objectContaining({listScreens: [jasmine.objectContaining({name: 'Ecran 1'})]}));
+      expect(await tab.guard.check(0)).toBe(true);
+      expect(download).toHaveBeenCalledWith(expect.objectContaining({listScreens: [expect.objectContaining({name: 'Ecran 1'})]}));
     });
 
     it('sans nom, seulement des champs participant ou des paramètres modifiés : protégée aussi', async () => {
@@ -187,12 +188,12 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
       tab.save.newSaveDataAuto();
       tab.save.dataAuto.infoParticipant = ['Prénom'];
       tab.save.saveToSlot(0, tab.save.dataAuto);
-      expect(await tab.guard.check(0)).toBeFalse();
+      expect(await tab.guard.check(0)).toBe(false);
 
       tab.save.newSaveDataAuto();
       tab.save.dataAuto.globalParamsStimuliScreen = [2, 3, false, 10, 1, 1, false, false];
       tab.save.saveToSlot(0, tab.save.dataAuto);
-      expect(await tab.guard.check(0)).toBeFalse();
+      expect(await tab.guard.check(0)).toBe(false);
       expect(tab.dialog.open).toHaveBeenCalledTimes(2);
     });
 
@@ -200,8 +201,8 @@ describe('OverwriteGuardService : scénarios de remplacement', () => {
       const tab = await openFakeTab(registry);
       tab.save.saveToSlot(2, evaluation('', ['X']));
 
-      expect(await tab.guard.check(2)).toBeFalse();
-      expect(screensOf(tab, 2)).toEqual(['X']);
+      expect(await tab.guard.check(2)).toBe(false);
+      expect(screensOf(tab, 2)).toStrictEqual(['X']);
     });
   });
 });

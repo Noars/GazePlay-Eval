@@ -1,5 +1,5 @@
 /**
- * Vérifications d'accessibilité élémentaires, exécutées dans les tests Karma.
+ * Vérifications d'accessibilité élémentaires, exécutées dans les tests unitaires (navigateur réel).
  *
  * Elles ne remplacent ni un outil d'audit complet (axe-core, Lighthouse) ni des tests
  * manuels avec lecteur d'écran : elles détectent automatiquement les régressions les plus

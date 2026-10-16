@@ -46,19 +46,19 @@ describe('Dictionnaires de traduction', () => {
   const enKeys = Object.keys(EN).sort();
 
   it('le français et l\'anglais ont exactement les mêmes clés', () => {
-    expect(enKeys).toEqual(frKeys);
+    expect(enKeys).toStrictEqual(frKeys);
   });
 
   it('aucun texte anglais vide là où le français a du texte', () => {
     const empty = frKeys.filter(key => FR[key as keyof typeof FR].trim() && !EN[key as keyof typeof EN].trim());
     // Exceptions volontaires : morceaux de phrase qui n'existent qu'en français (« Fichier » avant <code>).
-    expect(empty.sort()).toEqual(['download.backup.before', 'download.export.before', 'import.subtitle.before']);
+    expect(empty.sort()).toStrictEqual(['download.backup.before', 'download.export.before', 'import.subtitle.before']);
   });
 
   it('chaque traduction anglaise utilise les mêmes paramètres que le français', () => {
     const mismatches = frKeys.filter(key =>
       placeholders(FR[key as keyof typeof FR]).join() !== placeholders(EN[key as keyof typeof EN]).join());
-    expect(mismatches).toEqual([]);
+    expect(mismatches).toStrictEqual([]);
   });
 });
 
@@ -81,20 +81,20 @@ describe('TranslatePipe', () => {
     const labels = () => Array.from(el.querySelectorAll('label')).map(label => label.textContent?.trim());
 
     expect(el.querySelector('.t')?.textContent).toBe('Accueil');
-    expect(labels()).toEqual(['Oui', 'Non']);
+    expect(labels()).toStrictEqual(['Oui', 'Non']);
 
     TestBed.inject(I18nService).setLanguage('en');
     await fixture.whenStable();
 
     expect(el.querySelector('.t')?.textContent).toBe('Home');
-    expect(labels()).toEqual(['Yes', 'No']);
+    expect(labels()).toStrictEqual(['Yes', 'No']);
   });
 });
 
 describe('Compatibilité des valeurs enregistrées', () => {
   it('les types de média gardent leurs valeurs françaises quelle que soit la langue', () => {
     TestBed.inject(I18nService).setLanguage('en');
-    expect(INSTRUCTION_MEDIA_OPTIONS.map(option => option.value)).toEqual(['Image', 'Video', 'Texte', 'Son']);
+    expect(INSTRUCTION_MEDIA_OPTIONS.map(option => option.value)).toStrictEqual(['Image', 'Video', 'Texte', 'Son']);
   });
 });
 

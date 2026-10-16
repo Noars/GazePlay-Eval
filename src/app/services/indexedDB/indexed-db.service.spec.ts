@@ -42,7 +42,7 @@ describe('IndexedDBService', () => {
 
     expect(result.id).toBe('projet/test.png');
     expect(result.type).toBe('image');
-    expect(result.file).toEqual(file);
+    expect(result.file).toStrictEqual(file);
   });
 
   it('addFile → initialise refCount à 1', async () => {
@@ -59,15 +59,15 @@ describe('IndexedDBService', () => {
 
     await service.addFile('projet/test.png', file, 'image');
 
-    await expectAsync(
+    await expect(
       service.addFile('projet/test.png', file, 'image')
-    ).toBeRejectedWithError(`L'id "projet/test.png" existe déjà`);
+    ).rejects.toThrow(new Error(`L'id "projet/test.png" existe déjà`));
   });
 
   it('getFile → rejette si le fichier est introuvable', async () => {
-    await expectAsync(
+    await expect(
       service.getFile('projet/inexistant.png')
-    ).toBeRejectedWithError('Fichier "projet/inexistant.png" introuvable');
+    ).rejects.toThrow(new Error('Fichier "projet/inexistant.png" introuvable'));
   });
 
   it('getAllFiles → retourne tous les fichiers', async () => {
@@ -91,7 +91,7 @@ describe('IndexedDBService', () => {
 
     const result = await service.getFile('projet/test.png');
 
-    expect(result.file).toEqual(fileV2);
+    expect(result.file).toStrictEqual(fileV2);
   });
 
   it('updateFile → préserve le refCount existant', async () => {
@@ -139,7 +139,7 @@ describe('IndexedDBService', () => {
   });
 
   it('incrementRef → rejette si le fichier est introuvable', async () => {
-    await expectAsync(service.incrementRef('projet/inexistant.png')).toBeRejected();
+    await expect(service.incrementRef('projet/inexistant.png')).rejects.toThrow();
   });
 
   // ─── releaseFile ────────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ describe('IndexedDBService', () => {
     await service.addFile('projet/test.png', file, 'image');
     await service.releaseFile('projet/test.png');
 
-    await expectAsync(service.getFile('projet/test.png')).toBeRejected();
+    await expect(service.getFile('projet/test.png')).rejects.toThrow();
   });
 
   it('releaseFile → deux écrans partagés : suppression seulement au second release', async () => {
@@ -178,7 +178,7 @@ describe('IndexedDBService', () => {
 
     // Suppression depuis le 2e écran → supprimé
     await service.releaseFile('projet/shared.png');
-    await expectAsync(service.getFile('projet/shared.png')).toBeRejected();
+    await expect(service.getFile('projet/shared.png')).rejects.toThrow();
   });
 
   // ─── Données legacy (entrées sans refCount) ─────────────────────────────────
@@ -197,7 +197,7 @@ describe('IndexedDBService', () => {
 
     await service.releaseFile('projet/legacy.png');
 
-    await expectAsync(service.getFile('projet/legacy.png')).toBeRejected();
+    await expect(service.getFile('projet/legacy.png')).rejects.toThrow();
   });
 
   it('updateFile → entrée legacy sans refCount → réécrit avec refCount à 1', async () => {
@@ -216,9 +216,9 @@ describe('IndexedDBService', () => {
     await service.addFile('projet/test.png', file, 'image');
     await service.deleteFile('projet/test.png');
 
-    await expectAsync(
+    await expect(
       service.getFile('projet/test.png')
-    ).toBeRejected();
+    ).rejects.toThrow();
   });
 
   it('deleteAll → supprime tous les fichiers', async () => {
@@ -246,7 +246,7 @@ describe('IndexedDBService', () => {
     const result = await service.getFilesByProject('projetA');
 
     expect(result.length).toBe(2);
-    expect(result.every(f => f.id.startsWith('projetA/'))).toBeTrue();
+    expect(result.every(f => f.id.startsWith('projetA/'))).toBe(true);
   });
 
   // ─── Robustesse des écritures et de la connexion ─────────────────────────────
@@ -260,8 +260,8 @@ describe('IndexedDBService', () => {
       return request;
     });
 
-    await expectAsync(write).toBeRejected();
-    await expectAsync(service.getFile('projet/quota.png')).toBeRejected();
+    await expect(write).rejects.toThrow();
+    await expect(service.getFile('projet/quota.png')).rejects.toThrow();
   });
 
   it('connexion fermée par une mise à niveau dans un autre onglet → rouverte à la demande suivante', async () => {

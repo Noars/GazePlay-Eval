@@ -4,14 +4,16 @@ import {DownloadEvalComponent} from './download-eval.component';
 import {SaveService} from '../../services/save/save.service';
 import {DownloadService} from '../../services/download/download.service';
 import {FlashService} from '../../services/flash-message/flash.service';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('DownloadEvalComponent', () => {
   let component: DownloadEvalComponent;
   let fixture: ComponentFixture<DownloadEvalComponent>;
-  let downloadSpy: jasmine.SpyObj<DownloadService>;
-  let saveSpy: jasmine.SpyObj<SaveService>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let flashSpy: jasmine.SpyObj<FlashService>;
+  let downloadSpy: Mocked<DownloadService>;
+  let saveSpy: Mocked<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let flashSpy: Mocked<FlashService>;
 
   function stimuliScreen(cells: Record<number, any>, values: Record<number, any> = {}) {
     const v: any[] = [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, cells, ''];
@@ -20,20 +22,20 @@ describe('DownloadEvalComponent', () => {
   }
 
   beforeEach(async () => {
-    downloadSpy = jasmine.createSpyObj('DownloadService', ['generateEvalZip', 'generateSlotZip']);
-    saveSpy = jasmine.createSpyObj('SaveService', ['getEvalName']);
+    downloadSpy = createSpyObj('DownloadService', ['generateEvalZip', 'generateSlotZip']);
+    saveSpy = createSpyObj('SaveService', ['getEvalName']);
     saveSpy.dataAuto = {
       nomEval: 'Couleurs', format: 'Csv&Xlsx', infoParticipant: ['Nom', ' '],
       globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [],
       listScreens: [], step: 4,
     };
-    saveSpy.getEvalName.and.returnValue('Couleurs');
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    flashSpy = jasmine.createSpyObj('FlashService', ['show']);
+    saveSpy.getEvalName.mockReturnValue('Couleurs');
+    routerSpy = createSpyObj('Router', ['navigate']);
+    flashSpy = createSpyObj('FlashService', ['show']);
 
-    downloadSpy.generateEvalZip.and.returnValue(Promise.resolve());
-    downloadSpy.generateSlotZip.and.returnValue(Promise.resolve(true));
-    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    downloadSpy.generateEvalZip.mockReturnValue(Promise.resolve());
+    downloadSpy.generateSlotZip.mockReturnValue(Promise.resolve(true));
+    routerSpy.navigate.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [DownloadEvalComponent],
@@ -57,41 +59,41 @@ describe('DownloadEvalComponent', () => {
   it('récapitulatif → nom, format lisible et champs participant non vides', () => {
     expect(component.evalName).toBe('Couleurs');
     expect(component.format).toBe('CSV et XLSX');
-    expect(component.participantFields).toEqual(['Nom']);
+    expect(component.participantFields).toStrictEqual(['Nom']);
   });
 
   it('goDownload → generateSlotZip avec createdAt et version, puis message de succès', async () => {
     await component.goDownload();
-    expect(downloadSpy.generateSlotZip).toHaveBeenCalledOnceWith(
-      jasmine.objectContaining({nomEval: 'Couleurs', createdAt: jasmine.any(String), version: 1})
+    expect(downloadSpy.generateSlotZip).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({nomEval: 'Couleurs', createdAt: expect.any(String), version: 1})
     );
-    expect(flashSpy.show).toHaveBeenCalledWith('success', jasmine.any(String));
+    expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
     expect(component.busy).toBeNull();
   });
 
   it('goDownload — échec signalé → message d\'erreur', async () => {
-    downloadSpy.generateSlotZip.and.returnValue(Promise.resolve(false));
+    downloadSpy.generateSlotZip.mockReturnValue(Promise.resolve(false));
     await component.goDownload();
-    expect(flashSpy.show).toHaveBeenCalledWith('error', jasmine.any(String));
+    expect(flashSpy.show).toHaveBeenCalledWith('error', expect.any(String));
   });
 
   it('goExport → generateEvalZip avec le SaveService', async () => {
     await component.goExport();
-    expect(downloadSpy.generateEvalZip).toHaveBeenCalledOnceWith(saveSpy as any);
-    expect(flashSpy.show).toHaveBeenCalledWith('success', jasmine.any(String));
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledExactlyOnceWith(saveSpy as any);
+    expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
   });
 
   it('goExport — erreur → message d\'erreur et boutons réactivés', async () => {
-    downloadSpy.generateEvalZip.and.returnValue(Promise.reject(new Error('média manquant')));
-    spyOn(console, 'error');
+    downloadSpy.generateEvalZip.mockReturnValue(Promise.reject(new Error('média manquant')));
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
     await component.goExport();
-    expect(flashSpy.show).toHaveBeenCalledWith('error', jasmine.any(String));
+    expect(flashSpy.show).toHaveBeenCalledWith('error', expect.any(String));
     expect(component.busy).toBeNull();
   });
 
   it('goExport — un export déjà en cours → second clic ignoré', async () => {
     let resolveExport!: () => void;
-    downloadSpy.generateEvalZip.and.returnValue(new Promise<void>(resolve => resolveExport = resolve));
+    downloadSpy.generateEvalZip.mockReturnValue(new Promise<void>(resolve => resolveExport = resolve));
 
     const first = component.goExport();
     await component.goExport();
@@ -103,7 +105,7 @@ describe('DownloadEvalComponent', () => {
 
   it('backToCreateEval → navigue vers /create-eval', () => {
     component.backToCreateEval();
-    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/create-eval']);
+    expect(routerSpy.navigate).toHaveBeenCalledExactlyOnceWith(['/create-eval']);
   });
 
   // ─── Vérifications avant export ─────────────────────────────────────────────
@@ -132,7 +134,7 @@ describe('DownloadEvalComponent', () => {
       stimuliScreen({0: {imageName: 'chat.png', soundName: '', hidden: false}}),
       {name: 'Pause', type: 'transition', values: [true, 2, false, false, 0]} as any,
     ]);
-    expect(checks).toEqual([]);
+    expect(checks).toStrictEqual([]);
   });
 
   it('screenCounts → compte les écrans par type', () => {
@@ -141,6 +143,6 @@ describe('DownloadEvalComponent', () => {
       {name: 'Pause', type: 'transition', values: []} as any,
       {name: 'Consigne', type: 'instruction', values: []} as any,
     ];
-    expect(component.screenCounts).toEqual({transition: 1, instruction: 1, stimuli: 1, total: 3});
+    expect(component.screenCounts).toStrictEqual({transition: 1, instruction: 1, stimuli: 1, total: 3});
   });
 });

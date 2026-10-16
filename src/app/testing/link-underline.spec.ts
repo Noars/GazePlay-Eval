@@ -1,6 +1,6 @@
 /**
  * Soulignement des liens selon les préférences, vérifié sur les styles globaux réels
- * (`src/styles.scss`, chargé par Karma via angular.json) et le style calculé du navigateur.
+ * (`src/styles.scss`, chargé dans les tests par la configuration de build d'angular.json) et le style calculé du navigateur.
  */
 describe('Styles globaux — soulignement des liens', () => {
   const root = document.documentElement;
@@ -53,7 +53,7 @@ describe('Styles globaux — soulignement des liens', () => {
     it(`préférence ${value} → boutons, cartes, navigation, marque et étapes gardent leur forme (non soulignés)`, () => {
       root.setAttribute('data-underline-links', value);
       shapedLinkClasses.forEach(cls => {
-        expect(decoration(container.querySelector(`a.${cls}`)!)).withContext(cls).toBe('none');
+        expect(decoration(container.querySelector(`a.${cls}`)!), cls).toBe('none');
       });
     });
   }

@@ -7,16 +7,18 @@ import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {LoadService} from '../../services/load/load.service';
 import {ImportFlowService} from '../../services/import-flow/import-flow.service';
 import {saveModelDefault} from '../../shared/saveModel';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let router: Router;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
-  let overwriteGuardSpy: jasmine.SpyObj<OverwriteGuardService>;
-  let autoSaveSpy: jasmine.SpyObj<AutoSaveService>;
-  let loadServiceSpy: jasmine.SpyObj<LoadService>;
-  let importFlowSpy: jasmine.SpyObj<ImportFlowService>;
+  let saveServiceSpy: Mocked<SaveService>;
+  let overwriteGuardSpy: Mocked<OverwriteGuardService>;
+  let autoSaveSpy: Mocked<AutoSaveService>;
+  let loadServiceSpy: Mocked<LoadService>;
+  let importFlowSpy: Mocked<ImportFlowService>;
 
   async function create(): Promise<void> {
     fixture = TestBed.createComponent(HomeComponent);
@@ -25,14 +27,14 @@ describe('HomeComponent', () => {
   }
 
   beforeEach(async () => {
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['newSaveDataAuto']);
-    overwriteGuardSpy = jasmine.createSpyObj('OverwriteGuardService', ['check']);
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(true));
-    autoSaveSpy = jasmine.createSpyObj('AutoSaveService', ['tryResume']);
-    loadServiceSpy = jasmine.createSpyObj('LoadService', ['getSlot']);
-    loadServiceSpy.getSlot.and.returnValue(null);
-    importFlowSpy = jasmine.createSpyObj('ImportFlowService', ['start']);
-    importFlowSpy.start.and.returnValue(Promise.resolve(false));
+    saveServiceSpy = createSpyObj('SaveService', ['newSaveDataAuto']);
+    overwriteGuardSpy = createSpyObj('OverwriteGuardService', ['check']);
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(true));
+    autoSaveSpy = createSpyObj('AutoSaveService', ['tryResume']);
+    loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
+    loadServiceSpy.getSlot.mockReturnValue(null);
+    importFlowSpy = createSpyObj('ImportFlowService', ['start']);
+    importFlowSpy.start.mockReturnValue(Promise.resolve(false));
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
@@ -47,7 +49,7 @@ describe('HomeComponent', () => {
     }).compileComponents();
 
     router = TestBed.inject(Router);
-    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    vi.spyOn(router, 'navigate').mockReturnValue(Promise.resolve(true));
   });
 
   it('devrait être créé avec un unique titre de niveau 1', async () => {
@@ -75,7 +77,7 @@ describe('HomeComponent', () => {
   });
 
   it('goToInfoEval → protection refusée → aucune navigation', async () => {
-    overwriteGuardSpy.check.and.returnValue(Promise.resolve(false));
+    overwriteGuardSpy.check.mockReturnValue(Promise.resolve(false));
     await create();
 
     await component.goToInfoEval();
@@ -86,7 +88,7 @@ describe('HomeComponent', () => {
 
   it('clic sur « Nouvelle évaluation » → goToInfoEval', async () => {
     await create();
-    const spy = spyOn(component, 'goToInfoEval').and.returnValue(Promise.resolve());
+    const spy = vi.spyOn(component, 'goToInfoEval').mockReturnValue(Promise.resolve());
     const button = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
       .find(b => b.textContent?.includes('Nouvelle évaluation'));
 
@@ -101,7 +103,7 @@ describe('HomeComponent', () => {
   });
 
   it('avec une évaluation en cours → carte de reprise avec son nom et son étape', async () => {
-    loadServiceSpy.getSlot.and.returnValue({...saveModelDefault, nomEval: 'Couleurs', step: 3, listScreens: []});
+    loadServiceSpy.getSlot.mockReturnValue({...saveModelDefault, nomEval: 'Couleurs', step: 3, listScreens: []});
     await create();
 
     expect(fixture.nativeElement.textContent).toContain('Couleurs');

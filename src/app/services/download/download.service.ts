@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import JSZip from 'jszip';
-import {saveAs} from 'file-saver';
+// Appel par l'objet du module (et non par une fonction importée) : les tests peuvent ainsi
+// remplacer `FileSaver.saveAs` sans déclencher de vrai téléchargement.
+import FileSaver from 'file-saver';
 import {SaveService} from '../save/save.service';
 import {
   instructionScreenConstKey,
@@ -78,7 +80,7 @@ export class DownloadService {
     zip.file(saveService.getEvalName() + '/evalInfo.json', JSON.stringify(this.getInfoEval(saveService), null, 2));
 
     const content = await zip.generateAsync({type: 'blob'});
-    saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
+    FileSaver.saveAs(content, saveService.getEvalName() + '-gazeplayEval.zip');
   }
 
   /**
@@ -351,7 +353,7 @@ export class DownloadService {
 
 
       const content = await zip.generateAsync({type: 'blob'});
-      saveAs(content, evalName + '-gazeplayEval.gpSave');
+      FileSaver.saveAs(content, evalName + '-gazeplayEval.gpSave');
       return true;
     } catch (err) {
       console.error('[generateSlotZip] erreur:', err);
