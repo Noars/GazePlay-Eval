@@ -18,31 +18,37 @@ L'architecture du projet se présente sous la forme suivante :
 src/
 ├── app/
 │   ├── components/
-│   │   └── [des éléments de page réutilisés, comme les notifications ou la navbar]
+│   │   └── [éléments réutilisés : en-tête, menu, éditeur d'écran, fenêtres…]
+│   ├── core/
+│   │   ├── a11y/          [titre de page, focus après navigation]
+│   │   ├── media/         [accès aux médias, inventaire des références, nettoyage sûr]
+│   │   ├── preferences/   [préférences d'affichage stockées dans IndexedDB]
+│   │   └── storage/       [ouverture et migrations de la base IndexedDB]
 │   ├── pages/
-│   │   └── [des pages entières de l'application, comme la page de save ou le guide]
+│   │   └── [pages de l'application : parcours de création, sauvegardes, options, guide…]
 │   ├── services/
-│   │   └── [regroupement de méthodes qui interagissent avec la partie métier]
+│   │   └── [logique métier : sauvegarde, import, export, médias…]
 │   ├── shared/
-│   │   └── [le modèle, la structure des objets de l'application]
+│   │   ├── ui/            [composants de formulaire accessibles réutilisables]
+│   │   └── [modèles de données de l'application]
+│   ├── testing/           [contrôles d'accessibilité automatisés]
 │   ├── app.config.ts
-│   ├── app.css
 │   ├── app.html
 │   ├── app.routes.ts
-│   ├── app.spec.ts
 │   └── app.ts
 ├── assets/
 │   ├── guide/images/
-│   │   └── [images utilisés dans les guides]
 │   └── icons/
-│       └── [toutes les îcones utilisés dans le projet, en version claire et sombre]
+├── styles/                [système de design SCSS : jetons, composants, accessibilité]
 ├── index.html
 ├── main.ts
-└── styles.css
+└── styles.scss
+docs/
+└── ACCESSIBILITE.md       [état de l'accessibilité et écarts connus]
 tests/
 ├── [fichiers png, mp3, gpSave]
 └── README.md
-[...]
+CLAUDE.md                  [règles de travail et contraintes du projet]
 README.md
 package.json
 ```
@@ -65,9 +71,9 @@ une-page/
 ├── une-page.component.spec.ts
 └── une-page.component.ts
 ```
-- Le CSS contient le style spécifique au component ou à la page. Pour rappel, le projet utilise **Bootstrap**.
+- Le CSS contient le style spécifique au component ou à la page. L'apparence générale vient du **système de design** de `src/styles/` (classes `gp-…` et variables `--gp-…`), construit au-dessus de **Bootstrap** (grille, utilitaires). Les couleurs ne sont jamais écrites en dur : elles viennent des jetons, ce qui garantit la cohérence des thèmes clair, sombre et contrasté.
 - Le HTML contient le "layout" de l'élément. C'est la vue modifiée dynamiquement par le fichier **TypeScript**.
-- Le SPEC contient les tests unitaires de l'élément. Ils utilisent Jasmine (plus de détails dans la partie sur les tests).
+- Le SPEC contient les tests unitaires de l'élément. Ils utilisent Vitest (plus de détails dans la partie sur les tests).
 - Le TS (TypeScript) correspond au View-Model. Il permet d'afficher la vue et de récupérer les actions utilisateurs pour utiliser les services.
 
 Les services sont structurés d'une façon similaire : 
@@ -91,10 +97,19 @@ GazePlay-Eval n'utilise aucun serveur pour stocker les données des utilisateurs
 - Le Local Storage contient :
   - 3 emplacements pour les évaluations, appelés `save1`, `save2`, `save3`.
   - 1 emplacement pour la sauvegarde automatique, appelé `saveAuto`.
-  - une liste des options.
+  - `gazeplay-eval.preferences-cache` : un simple instantané (thème, contraste, taille du texte) lu avant le démarrage d'Angular pour éviter un « flash » visuel. La source de vérité des préférences reste l'IDB.
+  - les anciennes clés `theme` et `options`, qui ne sont plus écrites mais sont conservées : elles sont reprises une fois lors de la première ouverture de la nouvelle version.
+  - `saveAuto` est la copie de la **dernière** évaluation en cours modifiée, accompagnée de `gazeplay-eval.active-slot` (son emplacement lié) et de `gazeplay-eval.saveAuto-tab` (l'onglet qui l'a écrite). Un nouvel onglet la reprend si cet onglet est fermé.
+  - `gazeplay-eval.tab-media.<onglet>` : les écrans de l'évaluation de chaque onglet, pour que le nettoyage des médias ne supprime jamais un média utilisé dans un autre onglet (conservé 7 jours après la fermeture de l'onglet).
 
-- L'IDB contient :
-  - toutes les pièces jointes utilisés dans une évaluation : des images, des sons, des vidéos, ...
+- Le Session Storage (propre à chaque onglet, conservé au rechargement) contient l'évaluation en cours de l'onglet (`gazeplay-eval.tab-working`, même format que les sauvegardes), son emplacement lié (`gazeplay-eval.active-slot`) et l'identifiant de l'onglet (`gazeplay-eval.tab-id`). Deux onglets ne partagent donc jamais leur évaluation en cours. Des verrous [Web Locks](https://developer.mozilla.org/fr/docs/Web/API/Web_Locks_API) signalent les onglets ouverts et les emplacements en cours de modification (onglet dupliqué, emplacement ouvert ailleurs).
+
+- L'IDB (base `GazePlayEvalDB`, **version 2**) contient :
+  - le store `evalFiles` : toutes les pièces jointes utilisées dans une évaluation (images, sons, vidéos) ;
+  - le store `userPreferences` (ajouté en version 2) : les préférences d'affichage (thème, contraste, police, taille du texte, espacements, interligne, animations, durée des notifications).
+
+> [!IMPORTANT]
+> La migration de la version 1 vers la version 2 est **additive** : elle crée le store `userPreferences` sans toucher à `evalFiles`. Elle est testée dans [app-database.spec.ts](src/app/core/storage/app-database.spec.ts) sur une base temporaire. Si un autre onglet ouvert sur l'ancienne version bloque la mise à jour, un bandeau invite à le fermer.
 
 Le format d'une évaluation (complétée) est le suivant : 
 
@@ -247,19 +262,39 @@ Vous pouvez remarquer que chaque pièce jointe (dans le cas de l'exemple, des im
 > [!NOTE]
 > Vous pouvez retrouver toute la logique de gestion de fichier de l'IDB dans le service [indexed-db.service.ts](src/app/services/indexedDB/indexed-db.service.ts).
 
+Un même média peut être utilisé par plusieurs cases (duplication) : un compteur `refCount` suit ces références. Comme ce compteur n'est pas toujours exact (une archive importée enregistre chaque fichier une seule fois), un média n'est **supprimé que s'il n'est plus référencé par aucune évaluation connue** (emplacements 0 à 3 et évaluation en cours). Voir [media-cleanup.service.ts](src/app/core/media/media-cleanup.service.ts) et [media-library.service.ts](src/app/core/media/media-library.service.ts).
+
 ## Tests
+
+Commande utilisée par l'intégration continue (exécution unique, navigateur sans interface) :
+
+```bash
+npx ng test --watch=false
+```
+
+Les tests unitaires utilisent **Vitest** et s'exécutent dans un vrai navigateur : le Google Chrome installé sur la machine, piloté par Playwright ([vitest-base.config.ts](vitest-base.config.ts)). Aucun navigateur n'est téléchargé ; pour un autre navigateur Chromium (Edge par exemple), indiquer son chemin dans la variable d'environnement `CHROME_BIN`.
+
+Les tests comprennent des contrôles d'accessibilité automatisés sur chaque page ([a11y-pages.spec.ts](src/app/testing/a11y-pages.spec.ts)). Ils ne remplacent pas un audit complet : voir [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md).
 
 Pour lancer les tests sous IntelliJ Idea, vous pouvez lancer les commandes suivantes : 
 
 ```bash
 ng test
 ```
---> Lance *Karma* (outil permettant de simuler un navigateur web) et déroule l'ensemble des tests.
+--> Lance *Vitest* en mode surveillance : l'ensemble des tests est déroulé dans Chrome (sans interface), puis relancé à chaque modification.
 
 ```bash
-ng test --code-coverage GazePlay-Eval 
+ng test --watch=false --coverage
 ```
---> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
+--> créé (ou recharge) un dossier `coverage` dans le projet. Lancer le fichier `coverage/GazePlay-Eval/index.html` pour obtenir le taux de couverture des tests, de façon globale et sur chaque fichier.
+
+### Tests de bout en bout
+
+```bash
+npm run build
+npm run e2e
+```
+--> Sert l'application construite en local et rejoue les parcours principaux (pages, thème, import d'un `.gpSave`, sauvegarde automatique, rechargement, onglets, fichier invalide) dans Chrome, Edge et Firefox s'ils sont installés, avec des profils temporaires : vos sauvegardes ne sont jamais touchées. Aucune dépendance à installer ([e2e/e2e-smoke.mjs](e2e/e2e-smoke.mjs)). Pour un seul navigateur : `node e2e/e2e-smoke.mjs firefox`. Safari n'est pas couvert : à vérifier manuellement.
 
 ## Tâches restantes
 

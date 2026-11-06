@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Popup de confirmation avant suppression d'une sauvegarde.
@@ -15,7 +16,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   templateUrl: './popup-delete-save.component.html',
   styleUrl: './popup-delete-save.component.css',
   standalone: true,
-  imports: []
+  imports: [TranslatePipe]
 })
 export class PopupDeleteSaveComponent {
 

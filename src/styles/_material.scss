@@ -1,0 +1,143 @@
+// =============================================================================
+// Angular Material (MatDialog, MatTooltip) sans thème Material
+// -----------------------------------------------------------------------------
+// Seuls la superposition et le comportement accessible (piège de focus,
+// Échap, retour du focus) de Material sont utilisés ; l'apparence suit nos jetons.
+// =============================================================================
+
+.cdk-overlay-container {
+  z-index: 2000;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: var(--gp-overlay);
+}
+
+.cdk-overlay-backdrop {
+  transition: opacity var(--gp-transition);
+}
+
+// Boîtes de dialogue
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--gp-surface);
+  --mat-dialog-container-color: var(--gp-surface);
+  --mdc-dialog-container-shape: var(--gp-radius-xl);
+  --mat-dialog-container-shape: var(--gp-radius-xl);
+  --mat-dialog-container-max-width: min(40rem, calc(100vw - 2rem));
+  --mat-dialog-container-small-max-width: calc(100vw - 2rem);
+}
+
+.mat-mdc-dialog-surface {
+  background: var(--gp-surface) !important;
+  color: var(--gp-text);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-xl) !important;
+  box-shadow: var(--gp-shadow-lg) !important;
+  max-height: calc(100dvh - 2rem);
+  overflow: auto !important;
+}
+
+.gp-dialog-panel {
+  width: min(36rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem) !important;
+
+  &--wide {
+    width: min(52rem, calc(100vw - 2rem));
+  }
+}
+
+// Structure commune des contenus de dialogue
+.gp-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 2rem);
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gp-space-3);
+    padding: var(--gp-space-5) var(--gp-space-5) var(--gp-space-3);
+  }
+
+  &__icon {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--gp-radius-md);
+    background: var(--gp-primary-subtle);
+    color: var(--gp-primary-text);
+    font-size: 1.2rem;
+
+    &--danger {
+      background: var(--gp-danger-subtle);
+      color: var(--gp-danger);
+    }
+
+    &--warning {
+      background: var(--gp-warning-subtle);
+      color: var(--gp-warning);
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--gp-text-xl);
+  }
+
+  &__subtitle {
+    margin: var(--gp-space-1) 0 0;
+    color: var(--gp-text-muted);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gp-space-4);
+    padding: var(--gp-space-2) var(--gp-space-5) var(--gp-space-4);
+    overflow-y: auto;
+  }
+
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--gp-space-2);
+    padding: var(--gp-space-4) var(--gp-space-5) var(--gp-space-5);
+    border-top: 1px solid var(--gp-border);
+
+    @media (max-width: 479.98px) {
+      flex-direction: column-reverse;
+
+      .gp-btn {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Infobulles
+.mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: var(--gp-text);
+  --mdc-plain-tooltip-supporting-text-color: var(--gp-bg);
+  --mat-tooltip-container-color: var(--gp-text);
+  --mat-tooltip-supporting-text-color: var(--gp-bg);
+}
+
+.mat-mdc-tooltip-panel {
+  pointer-events: none;
+}
+
+.mdc-tooltip__surface,
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background: var(--gp-text) !important;
+  color: var(--gp-bg) !important;
+  font-family: var(--gp-font-family);
+  font-size: var(--gp-text-sm) !important;
+  line-height: 1.45 !important;
+  padding: 0.4rem 0.65rem !important;
+  border-radius: var(--gp-radius-sm) !important;
+  max-width: 18rem !important;
+  white-space: pre-line;
+}

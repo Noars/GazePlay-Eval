@@ -1,0 +1,317 @@
+// =============================================================================
+// Structure de l'application : en-tête, navigation latérale, contenu, pied de page
+// -----------------------------------------------------------------------------
+//  ≥ 992 px : navigation latérale permanente à gauche du contenu.
+//  < 992 px : navigation dans un tiroir (<dialog>) ouvert depuis l'en-tête.
+// =============================================================================
+
+$gp-breakpoint-nav: 992px;
+
+// Masquage visuel réutilisable en Sass
+@mixin visually-hidden-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.gp-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+// --- En-tête ------------------------------------------------------------------
+.gp-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-3);
+  min-height: var(--gp-header-height);
+  padding: var(--gp-space-2) var(--gp-space-4);
+  background: var(--gp-surface);
+  border-bottom: 1px solid var(--gp-border);
+  box-shadow: var(--gp-shadow-sm);
+
+  &__menu-button {
+    @media (min-width: $gp-breakpoint-nav) {
+      display: none !important;
+    }
+  }
+
+  &__brand {
+    flex: 0 1 auto;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gp-space-2);
+    min-width: 0;
+    color: var(--gp-text);
+    font-size: var(--gp-text-lg);
+    font-weight: 800;
+    text-decoration: none;
+    letter-spacing: max(var(--gp-letter-spacing), -0.01em);
+
+    &:hover {
+      color: var(--gp-primary-text);
+    }
+  }
+
+  &__logo {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--gp-radius-md);
+    background: var(--gp-primary);
+    color: var(--gp-on-primary);
+    font-size: 1.15rem;
+  }
+
+  &__brand-text {
+    white-space: nowrap;
+
+    @media (max-width: 399.98px) {
+      @include visually-hidden-text;
+    }
+  }
+
+  &__context {
+    display: none;
+    min-width: 0;
+    margin-left: var(--gp-space-3);
+    padding-left: var(--gp-space-4);
+    border-left: 1px solid var(--gp-border);
+    color: var(--gp-text-muted);
+    font-size: var(--gp-text-sm);
+
+    strong {
+      color: var(--gp-text);
+    }
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--gp-space-1);
+    margin-left: auto;
+  }
+
+  // Très petits écrans : en-tête compact (cibles de 40 px, au-dessus du minimum de 24 px).
+  @media (max-width: 399.98px) {
+    gap: var(--gp-space-2);
+    padding-inline: var(--gp-space-2);
+
+    .gp-btn--icon,
+    .guide-button {
+      width: 2.5rem;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+    }
+  }
+}
+
+// --- Corps : navigation + contenu -------------------------------------------------
+.gp-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+
+  &__sidebar {
+    display: none;
+
+    @media (min-width: $gp-breakpoint-nav) {
+      display: block;
+      position: sticky;
+      top: var(--gp-header-height);
+      flex: 0 0 var(--gp-sidebar-width);
+      height: calc(100dvh - var(--gp-header-height));
+      overflow-y: auto;
+      padding: var(--gp-space-4) var(--gp-space-3);
+      border-right: 1px solid var(--gp-border);
+      background: var(--gp-surface);
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__main {
+    flex: 1;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+// --- Navigation ---------------------------------------------------------------
+.gp-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-1);
+
+  &__section {
+    margin: var(--gp-space-4) 0 var(--gp-space-1);
+    padding: 0 var(--gp-space-3);
+    color: var(--gp-text-subtle);
+    font-size: var(--gp-text-xs);
+    font-weight: 700;
+    letter-spacing: max(var(--gp-letter-spacing), 0.06em);
+    text-transform: uppercase;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: var(--gp-space-3);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--gp-space-2) var(--gp-space-3);
+    border: 0;
+    border-radius: var(--gp-radius-md);
+    background: transparent;
+    color: var(--gp-text-muted);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    .bi {
+      font-size: 1.15rem;
+      width: 1.25rem;
+      text-align: center;
+    }
+
+    &:hover {
+      background: var(--gp-surface-2);
+      color: var(--gp-text);
+    }
+
+    &.is-active,
+    &[aria-current="page"] {
+      background: var(--gp-primary-subtle);
+      color: var(--gp-primary-text);
+      box-shadow: inset 3px 0 0 var(--gp-primary);
+    }
+  }
+}
+
+// --- Tiroir de navigation (mobile) ---------------------------------------------------
+.gp-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: min(20rem, 88vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  color: var(--gp-text);
+  box-shadow: var(--gp-shadow-lg);
+
+  &::backdrop {
+    background: var(--gp-overlay);
+  }
+
+  &[open] {
+    animation: gp-drawer-in var(--gp-transition) both;
+  }
+
+  &--end {
+    inset: 0 0 0 auto;
+    border-right: 0;
+    border-left: 1px solid var(--gp-border);
+
+    &[open] {
+      animation-name: gp-drawer-in-end;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gp-space-3);
+    padding: var(--gp-space-3) var(--gp-space-4);
+    border-bottom: 1px solid var(--gp-border);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--gp-text-lg);
+  }
+
+  &__body {
+    padding: var(--gp-space-4) var(--gp-space-3);
+    overflow-y: auto;
+    height: calc(100% - 4.25rem);
+  }
+}
+
+@keyframes gp-drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes gp-drawer-in-end {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+// --- Pied de page --------------------------------------------------------------------
+.gp-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gp-space-3);
+  padding: var(--gp-space-4) var(--gp-space-5);
+  border-top: 1px solid var(--gp-border);
+  background: var(--gp-surface);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+
+  a {
+    color: var(--gp-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gp-space-2);
+
+    &:hover {
+      color: var(--gp-text);
+    }
+  }
+}

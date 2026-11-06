@@ -6,10 +6,13 @@ import {SaveService} from '../../services/save/save.service';
 import {saveModelDefault} from '../../shared/saveModel';
 import {GlobalInstructionScreenComponent} from '../global-instruction-screen/global-instruction-screen.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
+import {GlobalStimuliScreenComponent} from '../global-stimuli-screen/global-stimuli-screen.component';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-eval-manual',
-  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent],
+  imports: [FormsModule, GlobalTransitionScreenComponent, GlobalInstructionScreenComponent, GlobalStimuliScreenComponent, TranslatePipe],
   templateUrl: './eval-manual.component.html',
   standalone: true,
   styleUrl: './eval-manual.component.css'
@@ -22,6 +25,13 @@ export class EvalManualComponent implements OnInit{
   globalInstructionScreenInfos: any[] = saveModelDefault.globalParamsInstructionScreen;
   globalStimuliScreenInfos: any[] = saveModelDefault.globalParamsStimuliScreen;
   openAccordion: string | null = null;
+
+  /** Sections repliables, une par type d'écran. */
+  readonly sections: {id: string, title: TranslationKey, icon: string, summary: TranslationKey}[] = [
+    {id: 'transition', title: 'setup.section.transition', icon: 'bi-hourglass-split', summary: 'setup.section.transition.summary'},
+    {id: 'instruction', title: 'setup.section.instruction', icon: 'bi-chat-square-text', summary: 'setup.section.instruction.summary'},
+    {id: 'stimuli', title: 'setup.section.stimuli', icon: 'bi-grid-3x3-gap', summary: 'setup.section.stimuli.summary'},
+  ];
 
   constructor(private router: Router,
               private saveService: SaveService,) {
@@ -68,5 +78,4 @@ export class EvalManualComponent implements OnInit{
     this.openAccordion = this.openAccordion === id ? null : id;
   }
 
-  protected readonly Number = Number;
 }

@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PopupOverwriteSaveComponent } from './popup-overwrite-save.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { saveModelDefault } from '../../shared/saveModel';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 const DIALOG_DATA = {
   save: { ...saveModelDefault, nomEval: 'MonEval', createdAt: '2026-05-21T10:00:00.000Z' },
@@ -11,10 +13,10 @@ const DIALOG_DATA = {
 describe('PopupOverwriteSaveComponent', () => {
   let component: PopupOverwriteSaveComponent;
   let fixture: ComponentFixture<PopupOverwriteSaveComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<PopupOverwriteSaveComponent>>;
+  let dialogRefSpy: Mocked<MatDialogRef<PopupOverwriteSaveComponent>>;
 
   beforeEach(async () => {
-    dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+    dialogRefSpy = createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
       imports: [PopupOverwriteSaveComponent],
@@ -44,21 +46,21 @@ describe('PopupOverwriteSaveComponent', () => {
 
   it('download → dialogRef.close(\'download\')', () => {
     component.download();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('download');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith('download');
   });
 
   // ─── overwrite ────────────────────────────────────────────────────────────
 
   it('overwrite → dialogRef.close(\'overwrite\')', () => {
     component.overwrite();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('overwrite');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith('overwrite');
   });
 
   // ─── cancel ───────────────────────────────────────────────────────────────
 
   it('cancel → dialogRef.close(null)', () => {
     component.cancel();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(null);
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith(null);
   });
 
   // ─── exclusivité des actions ──────────────────────────────────────────────

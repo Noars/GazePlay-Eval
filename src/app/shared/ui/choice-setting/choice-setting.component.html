@@ -1,0 +1,31 @@
+<div class="gp-setting" [class.gp-setting--stacked]="stacked">
+  <div class="gp-setting__text">
+    <span class="gp-setting__label-row">
+      <span class="gp-setting__label" [id]="labelId">{{ label }}</span>
+      <ng-content select="[slot=label-addon]"></ng-content>
+    </span>
+    @if (hint) {
+      <p class="gp-setting__hint" [id]="hintId">{{ hint }}</p>
+    }
+  </div>
+  <div class="gp-setting__control">
+    <div class="gp-segmented"
+         role="radiogroup"
+         [attr.aria-labelledby]="labelId"
+         [attr.aria-describedby]="hint ? hintId : null">
+      @for (option of options; track $index; let i = $index) {
+        <span class="gp-segmented__option">
+          <input class="gp-segmented__input"
+                 type="radio"
+                 [id]="optionId(i)"
+                 [name]="groupName"
+                 [checked]="option.value === value"
+                 [disabled]="disabled"
+                 (change)="select(option)"
+                 (blur)="touch()">
+          <label class="gp-segmented__label" [for]="optionId(i)" [attr.lang]="option.lang ?? null">{{ option.labelKey ? (option.labelKey | t) : option.label }}</label>
+        </span>
+      }
+    </div>
+  </div>
+</div>

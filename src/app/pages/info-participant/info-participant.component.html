@@ -1,75 +1,115 @@
-<div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 800px;">
-    <div class="card-header text-center">
-      <h2 class="card-title text-center">Informations participant</h2>
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <span class="gp-page-header__eyebrow">{{ 'steps.eyebrow' | t: {current: 2} }}</span>
+      <h1 class="gp-page-header__title">{{ 'infoParticipant.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'infoParticipant.lead' | t }}</p>
     </div>
-    <div class="card-body" style="text-align: -webkit-center;">
-      <div class="alert alert-info text-center fw-semibold col-11">
-        Lorsque vous évaluerez quelqu’un sous Gazeplay-Learning, vous souhaiterez pouvoir renseigner certaines informations à son propos <br>
-        Ici, vous pouvez définir les champs que vous pourrez compléter lors de l’évaluation <br>
-        Par exemple : nom, prénom, âge, adresse, etc ... <br>
-        À vous de choisir ce qui vous servira <br>
-        Attention : veillez à ajouter un champ pour y renseigner chaque type d’information <br>
-        <br>
-        Les évaluations sont sauvegardés dans le stockage local du navigateur.
-        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
-             [matTooltip]="tooltipTextData" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
-             [matTooltip]="tooltipTextData" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-      </div>
-      <div class="alert alert-info text-center fw-semibold col-11">
-        Vous pouvez réogarniser vos champs ci-dessous via du Drag and Drop !
-        <img class="icon-light ms-1" src="assets/icons/info/info-dark.png" width="16" height="16" alt=""
-             [matTooltip]="tooltipDragDrop" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-        <img class="icon-dark ms-1" src="assets/icons/info/info.png" width="16" height="16" alt=""
-             [matTooltip]="tooltipDragDrop" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">
-      </div>
-      <div class="card shadow-lg col-11">
-        <div class="card-header bg-secondary text-white fw-semibold">
-          Liste informations
-        </div>
-        <div class="mb-3 mt-3">
-          <div (cdkDropListDropped)="drop($event)" cdkDropList class="d-flex flex-column gap-2 col-7">
-            @for (field of infoParticipantList; let i = $index; track i){
-              <div cdkDrag>
-                <div class="input-group">
-              <span class="input-group-text bg-secondary-subtle cursor-move" cdkDragHandle>
-                &#x2630;
-              </span>
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Titre du champ"
-                    [(ngModel)]="infoParticipantList[i]"
-                  />
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    (click)="removeField(i)"
-                  >
-                    &minus;
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-          <div class="text-center mt-4">
-            <button (click)="addField()" class="btn btn-secondary px-4 fw-semibold">
-              <img class="icon-light me-2" src="assets/icons/plus/plus-dark.png" width="16" height="16" alt="">
-              <img class="icon-dark me-2" src="assets/icons/plus/plus.png" width="16" height="16" alt="">
-              Ajouter un champ
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="d-flex justify-content-between mt-4">
-        <button (click)="backToInfoEval()" class="btn btn-primary fw-semibold">
-          ← Précédent
-        </button>
-        <button (click)="goToCreateEval()" class="btn btn-primary fw-semibold">
-          Suivant →
-        </button>
-      </div>
+  </header>
+
+  <div class="gp-callout gp-callout--neutral mb-4">
+    <i class="bi bi-shield-lock" aria-hidden="true"></i>
+    <div class="gp-callout__body">
+      <p>
+        {{ 'infoParticipant.privacy' | t }}
+        <app-help-tip [topic]="'infoParticipant.privacy.topic' | t" [text]="'infoParticipant.privacy.tooltip' | t"></app-help-tip>
+      </p>
     </div>
   </div>
+
+  <section class="gp-card" aria-labelledby="fields-title">
+    <div class="gp-card__header">
+      <div>
+        <h2 class="gp-card__title" id="fields-title">{{ 'infoParticipant.fields.title' | t }}</h2>
+        <p class="gp-card__subtitle">
+          {{ (infoParticipantList.length > 1 ? 'infoParticipant.fields.count.other' : 'infoParticipant.fields.count.one') | t: {count: infoParticipantList.length} }}{{ 'infoParticipant.fields.reorder' | t }}
+          <app-help-tip [topic]="'infoParticipant.reorder.topic' | t" [text]="'infoParticipant.reorder.tooltip' | t"></app-help-tip>
+        </p>
+      </div>
+    </div>
+
+    <div class="gp-card__body">
+      @if (infoParticipantList.length === 0) {
+        <div class="gp-empty">
+          <i class="bi bi-person-vcard" aria-hidden="true"></i>
+          <p class="gp-empty__title mb-0">{{ 'infoParticipant.empty.title' | t }}</p>
+          <p class="mb-0">{{ 'infoParticipant.empty.body' | t }}</p>
+        </div>
+      }
+
+      <ol class="field-list" cdkDropList (cdkDropListDropped)="drop($event)">
+        @for (field of infoParticipantList; let i = $index; let first = $first; let last = $last; track i) {
+          <li class="field-item" cdkDrag cdkDragLockAxis="y">
+            <span class="field-item__handle" cdkDragHandle [title]="'infoParticipant.dragHandle' | t" aria-hidden="true">
+              <i class="bi bi-grip-vertical"></i>
+            </span>
+            <label class="visually-hidden" [for]="'participant-field-' + i">{{ 'infoParticipant.field.label' | t: {n: i + 1} }}</label>
+            <input #fieldInput
+                   type="text"
+                   class="form-control field-item__input"
+                   [id]="'participant-field-' + i"
+                   [name]="'participant-field-' + i"
+                   [placeholder]="'infoParticipant.field.placeholder' | t"
+                   [(ngModel)]="infoParticipantList[i]">
+            <div class="field-item__actions">
+              <button type="button"
+                      class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
+                      [attr.data-move]="'up-' + i"
+                      [disabled]="first"
+                      [attr.aria-label]="'infoParticipant.field.up' | t: {name: field || (i + 1)}"
+                      (click)="moveField(i, -1, 'up')">
+                <i class="bi bi-arrow-up" aria-hidden="true"></i>
+              </button>
+              <button type="button"
+                      class="gp-btn gp-btn--ghost gp-btn--icon gp-btn--sm"
+                      [attr.data-move]="'down-' + i"
+                      [disabled]="last"
+                      [attr.aria-label]="'infoParticipant.field.down' | t: {name: field || (i + 1)}"
+                      (click)="moveField(i, 1, 'down')">
+                <i class="bi bi-arrow-down" aria-hidden="true"></i>
+              </button>
+              <button type="button"
+                      class="gp-btn gp-btn--danger-outline gp-btn--icon gp-btn--sm"
+                      [attr.aria-label]="'infoParticipant.field.remove' | t: {name: field || (i + 1)}"
+                      (click)="removeField(i)">
+                <i class="bi bi-trash3" aria-hidden="true"></i>
+              </button>
+            </div>
+          </li>
+        }
+      </ol>
+
+      <div class="add-row">
+        <button type="button" class="gp-btn gp-btn--secondary" (click)="addField()">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          {{ 'infoParticipant.add' | t }}
+        </button>
+        @if (availableSuggestions().length) {
+          <div class="suggestions" role="group" aria-labelledby="suggestions-label">
+            <span id="suggestions-label" class="gp-muted gp-text-sm">{{ 'infoParticipant.suggestions' | t }}</span>
+            @for (suggestion of availableSuggestions(); track suggestion) {
+              <button type="button" class="gp-btn gp-btn--ghost gp-btn--sm suggestion" (click)="addField(suggestion)">
+                <i class="bi bi-plus" aria-hidden="true"></i>{{ suggestion }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
+
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
+    <button type="button" (click)="backToInfoEval()" class="gp-btn">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'steps.previous' | t }}
+    </button>
+    <div class="gp-actions__end">
+      <button type="button" (click)="goToCreateEval()" class="gp-btn gp-btn--primary">
+        {{ 'infoParticipant.next' | t }}
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </nav>
 </div>

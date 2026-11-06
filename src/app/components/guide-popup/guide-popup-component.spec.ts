@@ -22,16 +22,16 @@ describe('GuidePopupComponent', () => {
   });
 
   it('close() → émet l\'événement closed', () => {
-    const emitSpy = spyOn(component.closed, 'emit');
+    const emitSpy = vi.spyOn(component.closed, 'emit').mockImplementation(() => undefined);
     component.close();
     expect(emitSpy).toHaveBeenCalled();
   });
 
   it('startResize() → passe isResizing à true et appelle preventDefault', () => {
     const mockEvent = new MouseEvent('mousedown');
-    spyOn(mockEvent, 'preventDefault');
+    vi.spyOn(mockEvent, 'preventDefault').mockImplementation(() => undefined);
     component.startResize(mockEvent);
-    expect(component.isResizing).toBeTrue();
+    expect(component.isResizing).toBe(true);
     expect(mockEvent.preventDefault).toHaveBeenCalled();
   });
 
@@ -61,17 +61,50 @@ describe('GuidePopupComponent', () => {
     component.isResizing = true;
     const mockEvent = { clientX: 0 } as MouseEvent; // newWidth = innerWidth, au dessus du max
     component.resize(mockEvent);
-    expect(component.panelWidth).toBe(window.innerWidth * 0.9);
+    expect(component.panelWidth).toBe(Math.round(window.innerWidth * 0.9));
+  });
+
+  it("onResizeKey() → flèche gauche élargit, flèche droite rétrécit (alternative clavier)", () => {
+    component.panelWidth = 440;
+    component.onResizeKey(new KeyboardEvent('keydown', {key: 'ArrowLeft'}));
+    expect(component.panelWidth).toBe(480);
+    component.onResizeKey(new KeyboardEvent('keydown', {key: 'ArrowRight'}));
+    component.onResizeKey(new KeyboardEvent('keydown', {key: 'ArrowRight'}));
+    expect(component.panelWidth).toBe(400);
+  });
+
+  it("ouverture → <dialog> modal ouvert ; fermeture → événement closed", () => {
+    const dialog: HTMLDialogElement = fixture.nativeElement.querySelector('dialog');
+    const closed = vi.spyOn(component.closed, 'emit').mockImplementation(() => undefined);
+
+    component.isOpen = true;
+    component.ngOnChanges({isOpen: {currentValue: true, previousValue: false, firstChange: false, isFirstChange: () => false}});
+    expect(dialog.open).toBe(true);
+
+    component.close();
+    dialog.dispatchEvent(new Event('close'));
+    expect(dialog.open).toBe(false);
+    expect(closed).toHaveBeenCalled();
+  });
+
+  it('guide fermé pendant un redimensionnement → écouteurs du document retirés', () => {
+    component.startResize(new MouseEvent('mousedown'));
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
+
+    fixture.destroy();
+
+    expect(removeSpy).toHaveBeenCalledWith('pointermove', component.resize);
+    expect(removeSpy).toHaveBeenCalledWith('pointerup', component.stopResize);
   });
 
   it('stopResize() → passe isResizing à false', () => {
     component.isResizing = true;
     component.stopResize();
-    expect(component.isResizing).toBeFalse();
+    expect(component.isResizing).toBe(false);
   });
 
   it('currentGuideInputs() → retourne le segment courant comme sectionId', () => {
-    spyOnProperty(component.router, 'url', 'get').and.returnValue('/info-eval');
-    expect(component.currentGuideInputs).toEqual({ sectionId: 'info-eval' });
+    vi.spyOn(component.router, 'url', 'get').mockReturnValue('/info-eval');
+    expect(component.currentGuideInputs).toStrictEqual({ sectionId: 'info-eval' });
   });
 });

@@ -2,16 +2,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EvalManualComponent } from './eval-manual.component';
 import { Router } from '@angular/router';
 import { SaveService } from '../../services/save/save.service';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 describe('EvalManualComponent', () => {
   let component: EvalManualComponent;
   let fixture: ComponentFixture<EvalManualComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let saveServiceSpy: Mocked<SaveService>;
 
   beforeEach(async () => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto']);
+    routerSpy = createSpyObj('Router', ['navigate']);
+    saveServiceSpy = createSpyObj('SaveService', ['saveDataAuto']);
     saveServiceSpy.dataAuto = {
       nomEval: '',
       format: 'Csv&Xlsx',

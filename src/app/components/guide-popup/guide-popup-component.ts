@@ -1,127 +1,134 @@
-import {Component, EventEmitter, inject, Input, Output, Type} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+  SimpleChanges,
+  Type,
+  ViewChild
+} from '@angular/core';
 import {NgComponentOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {GuideSauvegardeComponent} from '../../pages/guide/guide-sauvegarde/guide-sauvegarde.component';
 import {GuideCreationComponent} from '../../pages/guide/guide-creation/guide-creation.component';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
+/** Textes du panneau, sous forme de clés de traduction. */
 interface GuideSection {
-  title: string;
-  body: string;
+  title: TranslationKey;
+  body: TranslationKey;
 }
 
 interface PageGuide {
-  title: string;
-  intro?: string;
+  title: TranslationKey;
+  intro?: TranslationKey;
   sections?: GuideSection[];
 }
 
+/**
+ * Panneau d'aide contextuelle, ouvert depuis le bouton « Aide » de l'en-tête.
+ *
+ * Implémenté avec un élément `<dialog>` natif ouvert en modal : le focus y est confiné,
+ * Échap le ferme et le navigateur rend le focus au bouton d'origine. La largeur est
+ * réglable à la souris (poignée) ou au clavier (flèches sur la poignée).
+ */
 @Component({
   selector: 'app-guide-popup',
   standalone: true,
-  imports: [NgComponentOutlet],
+  imports: [NgComponentOutlet, TranslatePipe],
   templateUrl: './guide-popup-component.html',
-  styleUrl: './guide-popup-component.css',
+  styleUrl: './guide-popup-component.scss',
 })
-export class GuidePopupComponent {
+export class GuidePopupComponent implements OnChanges, OnDestroy {
 
   router = inject(Router);
 
   @Input() isOpen = false;
   @Output() closed = new EventEmitter<void>();
 
-  panelWidth = 400;
+  @ViewChild('dialog', {static: true}) private dialog?: ElementRef<HTMLDialogElement>;
+
+  panelWidth = 440;
   isResizing = false;
 
   private readonly minWidth = 280;
+  private readonly keyboardStep = 40;
 
   // Guide affiché par défaut (pas de page dédiée)
   private readonly defaultGuide: PageGuide = {
-    title: 'Guide',
-    intro: "Le guide correspondant à cette page est en cours de développement.",
+    title: 'helpPanel.default.title',
+    intro: 'helpPanel.default.intro',
     sections: [],
   };
 
-  // Titre des différentes parties + contenu
+  // Titre des différentes parties + contenu (clés de traduction)
   private readonly guides: Record<string, PageGuide> = {
     home: {
-      title: "Accueil",
-      intro: "Cette page permet d'accéder aux évaluations, de deux façons différentes : ",
+      title: 'helpPanel.home.title',
+      intro: 'helpPanel.home.intro',
       sections: [
-        {
-          title: "Nouvelle évaluation",
-          body: "Lancez la création d'une évaluation de zéro et laissez-vous guider pas à pas.",
-        },
-        {
-          title: "Reprendre l'évaluation précédente",
-          body: "Si une évaluation est en cours, reprenez-la là où vous vous en étiez arrêté.",
-        },
+        {title: 'helpPanel.home.new.title', body: 'helpPanel.home.new.body'},
+        {title: 'helpPanel.home.resume.title', body: 'helpPanel.home.resume.body'},
       ],
     },
     'info-eval': {
-      title: "Informations de l'évaluation",
-      intro: "Définissez les informations générales de votre évaluation.",
+      title: 'helpPanel.infoEval.title',
+      intro: 'helpPanel.infoEval.intro',
       sections: [
-        {
-          title: "Nom de l'évaluation",
-          body: "Choisissez un nom clair : il identifiera votre évaluation dans GazePlay-Eval.",
-        },
+        {title: 'helpPanel.infoEval.name.title', body: 'helpPanel.infoEval.name.body'},
       ],
     },
     'info-participant': {
-      title: "Informations sur le participant",
-      intro: "Choisissez les informations à renseigner sur la personne évaluée.",
+      title: 'helpPanel.infoParticipant.title',
+      intro: 'helpPanel.infoParticipant.intro',
       sections: [
-        {
-          title: "Champs personnalisés",
-          body: "Sélectionnez le type d'informations que vous souhaitez collecter lors de la passation.",
-        },
+        {title: 'helpPanel.infoParticipant.fields.title', body: 'helpPanel.infoParticipant.fields.body'},
       ],
     },
     'setup-eval': {
-      title: "Configuration de l'évaluation",
-      intro: "Mettez en place la structure de votre évaluation.",
+      title: 'helpPanel.setupEval.title',
+      intro: 'helpPanel.setupEval.intro',
       sections: [
-        {
-          title: "Écrans",
-          body: "Organisez les écrans et leur disposition avant d'ajouter vos contenus.",
-        },
+        {title: 'helpPanel.setupEval.screens.title', body: 'helpPanel.setupEval.screens.body'},
       ],
     },
     'create-eval': {
-      title: "Création des stimuli",
-      intro: "Ajoutez et configurez les stimuli de chaque écran.",
+      title: 'helpPanel.createEval.title',
+      intro: 'helpPanel.createEval.intro',
       sections: [
-        {
-          title: "Médias",
-          body: "Importez les images, sons, vidéos ou textes à présenter dans chaque case.",
-        },
-        {
-          title: "Bonne réponse",
-          body: "Indiquez pour chaque case si elle correspond à la bonne réponse attendue.",
-        },
+        {title: 'helpPanel.createEval.media.title', body: 'helpPanel.createEval.media.body'},
+        {title: 'helpPanel.createEval.answer.title', body: 'helpPanel.createEval.answer.body'},
       ],
     },
     'download-eval': {
-      title: "Téléchargement",
-      intro: "Exportez votre évaluation pour l'utiliser dans GazePlay-Eval.",
+      title: 'helpPanel.downloadEval.title',
+      intro: 'helpPanel.downloadEval.intro',
       sections: [
-        {
-          title: "Export",
-          body: "Téléchargez le fichier de l'évaluation une fois la création terminée.",
-        },
+        {title: 'helpPanel.downloadEval.export.title', body: 'helpPanel.downloadEval.export.body'},
       ],
     },
     sauvegarde: {
-      title: "Sauvegardes",
+      title: 'helpPanel.saves.title',
     },
     'load-save': {
-      title: "Chargement",
-      intro: "Rechargez une évaluation sauvegardée précédemment.",
+      title: 'helpPanel.load.title',
+      intro: 'helpPanel.load.intro',
       sections: [
-        {
-          title: "Charger une sauvegarde",
-          body: "Sélectionnez une sauvegarde existante pour reprendre son édition.",
-        },
+        {title: 'helpPanel.load.slot.title', body: 'helpPanel.load.slot.body'},
+      ],
+    },
+    option: {
+      title: 'helpPanel.options.title',
+      intro: 'helpPanel.options.intro',
+      sections: [
+        {title: 'helpPanel.options.appearance.title', body: 'helpPanel.options.appearance.body'},
+        {title: 'helpPanel.options.reading.title', body: 'helpPanel.options.reading.body'},
+        {title: 'helpPanel.options.language.title', body: 'helpPanel.options.language.body'},
       ],
     },
   };
@@ -159,35 +166,88 @@ export class GuidePopupComponent {
 
   // Sous-partie du guide à afficher en premier
   get currentGuideInputs(): Record<string, unknown> | undefined {
-    return {sectionId : this.currentSegment};
+    return {sectionId: this.currentSegment};
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['isOpen']) return;
+    const dialog = this.dialog?.nativeElement;
+    if (!dialog) return;
+
+    if (this.isOpen && !dialog.open) {
+      if (typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      } else {
+        dialog.setAttribute('open', '');
+      }
+    } else if (!this.isOpen && dialog.open) {
+      dialog.close();
+    }
   }
 
   close(): void {
+    const dialog = this.dialog?.nativeElement;
+    if (dialog?.open) {
+      dialog.close(); // déclenche l'événement `close`, géré par onDialogClosed()
+    } else {
+      this.closed.emit();
+    }
+  }
+
+  /** Fermeture par Échap, par le bouton ou par clic sur le fond. */
+  onDialogClosed(): void {
     this.closed.emit();
   }
 
-  startResize(event: MouseEvent): void {
+  /** Un clic sur le fond (hors du panneau) ferme le guide. */
+  onDialogClick(event: MouseEvent): void {
+    if (event.target === this.dialog?.nativeElement) {
+      this.close();
+    }
+  }
+
+  /** Guide fermé pendant un redimensionnement : les écouteurs du document sont retirés. */
+  ngOnDestroy(): void {
+    this.stopResize();
+  }
+
+  startResize(event: PointerEvent | MouseEvent): void {
     event.preventDefault();
     this.isResizing = true;
 
-    document.addEventListener('mousemove', this.resize);
-    document.addEventListener('mouseup', this.stopResize);
+    document.addEventListener('pointermove', this.resize);
+    document.addEventListener('pointerup', this.stopResize);
   }
 
-  resize = (event: MouseEvent): void => {
+  resize = (event: PointerEvent | MouseEvent): void => {
     if (!this.isResizing) return;
-
     // Le panneau est ancré à droite
-    const newWidth = window.innerWidth - event.clientX;
-    const maxWidth = window.innerWidth * 0.9;
-
-    this.panelWidth = Math.min(Math.max(newWidth, this.minWidth), maxWidth);
+    this.setWidth(window.innerWidth - event.clientX);
   };
 
   stopResize = (): void => {
     this.isResizing = false;
 
-    document.removeEventListener('mousemove', this.resize);
-    document.removeEventListener('mouseup', this.stopResize);
+    document.removeEventListener('pointermove', this.resize);
+    document.removeEventListener('pointerup', this.stopResize);
   };
+
+  /** Redimensionnement au clavier : flèche gauche = plus large, flèche droite = plus étroit. */
+  onResizeKey(event: KeyboardEvent): void {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.setWidth(this.panelWidth + this.keyboardStep);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.setWidth(this.panelWidth - this.keyboardStep);
+    }
+  }
+
+  get maxWidth(): number {
+    return Math.round(window.innerWidth * 0.9);
+  }
+
+  private setWidth(width: number): void {
+    this.panelWidth = Math.round(Math.min(Math.max(width, this.minWidth), this.maxWidth));
+  }
 }

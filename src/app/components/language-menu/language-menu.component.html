@@ -1,0 +1,39 @@
+<!-- Le bouton affiche la langue en cours ; la liste propose toutes les langues disponibles. -->
+<button #trigger
+        type="button"
+        class="gp-btn gp-btn--ghost language-menu__trigger"
+        id="language-menu-button"
+        aria-haspopup="menu"
+        aria-controls="language-menu-list"
+        [attr.aria-expanded]="isOpen()"
+        [title]="'header.language.change' | t"
+        (click)="toggle()"
+        (keydown)="onTriggerKeydown($event)">
+  <i class="bi bi-translate" aria-hidden="true"></i>
+  <span class="language-menu__code" [attr.lang]="current()">{{ current().toUpperCase() }}</span>
+  <span class="visually-hidden">{{ 'header.language.current' | t: {language: currentName()} }}</span>
+  <i class="bi bi-chevron-down language-menu__chevron" aria-hidden="true"></i>
+</button>
+
+<ul class="language-menu__list"
+    id="language-menu-list"
+    role="menu"
+    [attr.aria-label]="'header.language.menu' | t"
+    [hidden]="!isOpen()">
+  @for (language of languages; track language; let i = $index) {
+    <li role="none">
+      <button type="button"
+              class="language-menu__item"
+              role="menuitemradio"
+              tabindex="-1"
+              [attr.lang]="language"
+              [attr.aria-checked]="language === current()"
+              (click)="select(language)"
+              (keydown)="onMenuKeydown($event, i)">
+        <span class="language-menu__item-code" aria-hidden="true">{{ language.toUpperCase() }}</span>
+        <span class="language-menu__item-name">{{ nameKey(language) | t }}</span>
+        <i class="bi bi-check-lg language-menu__check" aria-hidden="true"></i>
+      </button>
+    </li>
+  }
+</ul>

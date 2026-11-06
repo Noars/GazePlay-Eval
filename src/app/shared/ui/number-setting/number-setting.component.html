@@ -1,0 +1,36 @@
+<div class="gp-setting">
+  <div class="gp-setting__text">
+    <span class="gp-setting__label-row">
+      <label class="gp-setting__label" [for]="inputId">{{ label }}</label>
+      <ng-content select="[slot=label-addon]"></ng-content>
+    </span>
+    @if (hint) {
+      <p class="gp-setting__hint" [id]="hintId">{{ hint }}</p>
+    }
+    @if (error) {
+      <p class="gp-field__error" [id]="errorId">
+        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>{{ error }}
+      </p>
+    }
+  </div>
+  <div class="gp-setting__control">
+    <span class="gp-input-unit" [class.gp-input-unit--plain]="!unit">
+      <input #input
+             class="form-control"
+             type="number"
+             inputmode="decimal"
+             [id]="inputId"
+             [attr.min]="min"
+             [attr.max]="max"
+             [attr.step]="step"
+             [disabled]="disabled"
+             [attr.aria-invalid]="error ? 'true' : null"
+             [attr.aria-describedby]="describedBy"
+             (input)="onInput($any($event.target).value)"
+             (blur)="touch()">
+      @if (unit) {
+        <span class="gp-input-unit__unit" [id]="unitId">{{ unit }}</span>
+      }
+    </span>
+  </div>
+</div>

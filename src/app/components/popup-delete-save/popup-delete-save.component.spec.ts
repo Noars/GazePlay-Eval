@@ -1,14 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PopupDeleteSaveComponent } from './popup-delete-save.component';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 describe('PopupDeleteSaveComponent', () => {
   let component: PopupDeleteSaveComponent;
   let fixture: ComponentFixture<PopupDeleteSaveComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<PopupDeleteSaveComponent>>;
+  let dialogRefSpy: Mocked<MatDialogRef<PopupDeleteSaveComponent>>;
 
   beforeEach(async () => {
-    dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+    dialogRefSpy = createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
       imports: [PopupDeleteSaveComponent],
@@ -39,7 +41,7 @@ describe('PopupDeleteSaveComponent', () => {
   it('download() → appelle dialogRef.close(\'download\')', () => {
     component.download();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('download');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith('download');
   });
 
   // ── Cas 3 ────────────────────────────────────────────────────────────────────
@@ -48,7 +50,7 @@ describe('PopupDeleteSaveComponent', () => {
   it('delete() → appelle dialogRef.close(\'delete\')', () => {
     component.delete();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith('delete');
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith('delete');
   });
 
   // ── Cas 4 ────────────────────────────────────────────────────────────────────
@@ -57,6 +59,6 @@ describe('PopupDeleteSaveComponent', () => {
   it('cancel() → appelle dialogRef.close(null)', () => {
     component.cancel();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(null);
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith(null);
   });
 });
