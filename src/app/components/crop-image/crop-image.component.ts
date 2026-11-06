@@ -21,6 +21,8 @@ export class CropImageComponent implements OnInit{
   @ViewChild('cropper') cropper: any;
 
   imageToCrop: string = '';
+  /** Vrai si l'image n'a pas pu être ouverte : un message remplace l'outil de recadrage. */
+  loadFailed = false;
   croppedImage: File | undefined;
   imageMaxHeight = -1;
   imageMaxWidth = -1;
@@ -71,11 +73,19 @@ export class CropImageComponent implements OnInit{
           }
         }
       };
+      img.onerror = () => this.onLoadFailed();
 
       img.src = base64;
     };
+    reader.onerror = () => this.onLoadFailed();
 
     reader.readAsDataURL(file);
+  }
+
+  onLoadFailed(): void {
+    this.loadFailed = true;
+    this.imageToCrop = '';
+    this.croppedImage = undefined;
   }
 
   /**

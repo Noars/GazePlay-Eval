@@ -11,6 +11,7 @@ import {
 } from '../../shared/screenModel';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {findUnsupportedMedia, UnsupportedMedia} from '../../core/media/media-formats';
 
 /** Point de vigilance affiché avant l'export (non bloquant). */
 export interface ExportCheck {
@@ -23,7 +24,8 @@ export interface ExportCheck {
  *
  * - « Télécharger » produit un `.gpSave` (sauvegarde réimportable dans GazePlay Eval) ;
  * - « Exporter » produit le `.zip` lu par GazePlay-Learning.
- * Les vérifications sont indicatives : elles n'empêchent jamais l'export.
+ * Les vérifications sont indicatives, sauf les médias dans un format que Learning refuse : ils
+ * bloquent le `.zip`, qu'il ne pourrait pas ouvrir. Le `.gpSave` reste toujours possible.
  */
 @Component({
   selector: 'app-download-eval',
@@ -38,6 +40,8 @@ export class DownloadEvalComponent implements OnInit {
   /** Action en cours (affiche un indicateur et désactive les boutons). */
   busy: 'export' | 'download' | null = null;
   checks: ExportCheck[] = [];
+  /** Médias qui bloquent l'export `.zip`. */
+  unsupportedMedia: UnsupportedMedia[] = [];
 
   constructor(private saveService: SaveService,
               private downloadService: DownloadService,
@@ -46,7 +50,16 @@ export class DownloadEvalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.checks = this.computeChecks(this.saveService.dataAuto.listScreens ?? []);
+    const screens = this.saveService.dataAuto.listScreens ?? [];
+    this.checks = this.computeChecks(screens);
+    this.unsupportedMedia = findUnsupportedMedia(screens);
+  }
+
+  unsupportedLabel(media: UnsupportedMedia): string {
+    const label = this.i18n.t('download.check.label', {
+      name: media.screenName || this.i18n.t('download.check.fallbackName', {n: media.screenIndex + 1}),
+    });
+    return this.i18n.t('download.blocked.item', {label, name: media.fileName});
   }
 
   get evalName(): string {
@@ -75,7 +88,7 @@ export class DownloadEvalComponent implements OnInit {
   }
 
   async goExport(): Promise<void> {
-    if (this.busy) return;
+    if (this.busy || this.unsupportedMedia.length > 0) return;
     this.busy = 'export';
     try {
       await this.downloadService.generateEvalZip(this.saveService);

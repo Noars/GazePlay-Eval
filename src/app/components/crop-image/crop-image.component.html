@@ -9,7 +9,12 @@
 
   <div class="gp-dialog__body">
     <div class="cropper-stage">
-      @if (imageToCrop) {
+      @if (loadFailed) {
+        <div class="gp-callout gp-callout--danger" role="alert">
+          <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+          <div class="gp-callout__body"><p>{{ 'crop.loadError' | t }}</p></div>
+        </div>
+      } @else if (imageToCrop) {
         <image-cropper
           #cropper
           [imageBase64]="imageToCrop"
@@ -19,42 +24,47 @@
           [imageQuality]="1"
           format="png"
           (cropperChange)="onCropperChange($event)"
-          (imageCropped)="imageCropped($event)">
+          (imageCropped)="imageCropped($event)"
+          (loadImageFailed)="onLoadFailed()">
         </image-cropper>
       } @else {
         <p class="gp-muted" role="status"><span class="gp-spinner" aria-hidden="true"></span> {{ 'crop.loading' | t }}</p>
       }
     </div>
 
-    <div class="crop-sizes">
-      <div class="gp-field">
-        <label class="gp-field__label" for="crop-width">{{ 'crop.width' | t }}</label>
-        <span class="gp-input-unit">
-          <input id="crop-width" type="number" class="form-control" min="1"
-                 [max]="imageMaxWidth - cropWidthX1"
-                 aria-describedby="crop-width-unit"
-                 [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
-          <span class="gp-input-unit__unit" id="crop-width-unit">px</span>
-        </span>
+    @if (!loadFailed) {
+      <div class="crop-sizes">
+        <div class="gp-field">
+          <label class="gp-field__label" for="crop-width">{{ 'crop.width' | t }}</label>
+          <span class="gp-input-unit">
+            <input id="crop-width" type="number" class="form-control" min="1"
+                   [max]="imageMaxWidth - cropWidthX1"
+                   aria-describedby="crop-width-unit"
+                   [(ngModel)]="cropWidthSize" (ngModelChange)="changeWidthCropper($event)">
+            <span class="gp-input-unit__unit" id="crop-width-unit">px</span>
+          </span>
+        </div>
+        <div class="gp-field">
+          <label class="gp-field__label" for="crop-height">{{ 'crop.height' | t }}</label>
+          <span class="gp-input-unit">
+            <input id="crop-height" type="number" class="form-control" min="1"
+                   [max]="imageMaxHeight - cropHeightY1"
+                   aria-describedby="crop-height-unit"
+                   [(ngModel)]="cropHeightSize" (ngModelChange)="changeHeightCropper($event)">
+            <span class="gp-input-unit__unit" id="crop-height-unit">px</span>
+          </span>
+        </div>
       </div>
-      <div class="gp-field">
-        <label class="gp-field__label" for="crop-height">{{ 'crop.height' | t }}</label>
-        <span class="gp-input-unit">
-          <input id="crop-height" type="number" class="form-control" min="1"
-                 [max]="imageMaxHeight - cropHeightY1"
-                 aria-describedby="crop-height-unit"
-                 [(ngModel)]="cropHeightSize" (ngModelChange)="changeHeightCropper($event)">
-          <span class="gp-input-unit__unit" id="crop-height-unit">px</span>
-        </span>
-      </div>
-    </div>
+    }
   </div>
 
   <div class="gp-dialog__footer">
     <button type="button" class="gp-btn gp-btn--ghost" (click)="cancelCrop()">{{ 'common.cancel' | t }}</button>
-    <button type="button" class="gp-btn gp-btn--primary" (click)="validateCrop()">
-      <i class="bi bi-check-lg" aria-hidden="true"></i>
-      {{ 'crop.title' | t }}
-    </button>
+    @if (!loadFailed) {
+      <button type="button" class="gp-btn gp-btn--primary" (click)="validateCrop()">
+        <i class="bi bi-check-lg" aria-hidden="true"></i>
+        {{ 'crop.title' | t }}
+      </button>
+    }
   </div>
 </div>

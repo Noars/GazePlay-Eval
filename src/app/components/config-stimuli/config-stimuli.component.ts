@@ -1,5 +1,4 @@
 import {Component, EventEmitter, inject, Input, OnChanges, OnDestroy, Output} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {firstValueFrom} from 'rxjs';
 import {stimuliScreenValues} from '../../shared/screenModel';
@@ -7,8 +6,9 @@ import {CropImageComponent} from '../crop-image/crop-image.component';
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaLibraryService, MediaType} from '../../core/media/media-library.service';
+import {MediaValidationService} from '../../core/media/media-validation.service';
+import {isSupportedMediaName, mediaAccept, mediaFormatsLabel} from '../../core/media/media-formats';
 import {FilePickerComponent} from '../../shared/ui/file-picker/file-picker.component';
-import {ChoiceOption, ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
@@ -23,7 +23,7 @@ import {TranslatePipe} from '../../core/i18n/translate.pipe';
  */
 @Component({
   selector: 'app-config-stimuli',
-  imports: [FormsModule, FilePickerComponent, ChoiceSettingComponent, TranslatePipe],
+  imports: [FilePickerComponent, TranslatePipe],
   templateUrl: './config-stimuli.component.html',
   standalone: true,
   styleUrl: './config-stimuli.component.css'
@@ -31,6 +31,7 @@ import {TranslatePipe} from '../../core/i18n/translate.pipe';
 export class ConfigStimuliComponent implements OnChanges, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly media = inject(MediaLibraryService);
+  private readonly validation = inject(MediaValidationService);
   private readonly saveAutoService = inject(AutoSaveService);
   private readonly flashService = inject(FlashService);
   private readonly i18n = inject(I18nService);
@@ -59,10 +60,19 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
   missingImage = false;
   missingSound = false;
 
-  readonly answerOptions: ChoiceOption<boolean>[] = [
-    {value: true, labelKey: 'editor.goodAnswer'},
-    {value: false, labelKey: 'editor.wrongAnswer'},
-  ];
+  readonly imageAccept = mediaAccept('image');
+  readonly soundAccept = mediaAccept('sound');
+  readonly imageFormats = mediaFormatsLabel('image');
+  readonly soundFormats = mediaFormatsLabel('sound');
+
+  /** Média déjà présent (sauvegarde, import) dans un format non lu par GazePlay-Learning. */
+  get imageUnsupported(): boolean {
+    return !!this.cell.imageName && !isSupportedMediaName(this.cell.imageName, 'image');
+  }
+
+  get soundUnsupported(): boolean {
+    return !!this.cell.soundName && !isSupportedMediaName(this.cell.soundName, 'sound');
+  }
 
   get cell(): stimuliScreenValues & {hidden?: boolean} {
     return this.data.screen[this.data.cell];
@@ -165,14 +175,21 @@ export class ConfigStimuliComponent implements OnChanges, OnDestroy {
 
   async getImageFile(event: Event | File) {
     const file = this.fileFrom(event);
-    if (!file) return;
+    if (!file || !await this.isAccepted(file, 'image')) return;
     await this.replaceMedia(file, 'image');
   }
 
   async getSoundFile(event: Event | File) {
     const file = this.fileFrom(event);
-    if (!file) return;
+    if (!file || !await this.isAccepted(file, 'sound')) return;
     await this.replaceMedia(file, 'sound');
+  }
+
+  /** Contrôle le fichier choisi ; s'il est refusé, le message s'affiche et la case ne change pas. */
+  private async isAccepted(file: File, type: MediaType): Promise<boolean> {
+    const rejection = await this.validation.rejectionMessage(file, type);
+    if (rejection) this.flashService.show('error', rejection);
+    return !rejection;
   }
 
   /**

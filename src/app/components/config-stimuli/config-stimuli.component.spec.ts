@@ -8,6 +8,7 @@ import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {emptyReferences, MediaReferences} from '../../core/media/media-references';
+import {MediaValidationService} from '../../core/media/media-validation.service';
 import {stimuliScreenValues} from '../../shared/screenModel';
 import type {Mocked} from 'vitest';
 import {createSpyObj} from '../../testing/spy-obj';
@@ -31,8 +32,11 @@ describe('ConfigStimuliComponent', () => {
   let flashSpy: Mocked<FlashService>;
   let cleanupSpy: Mocked<MediaCleanupService>;
   let references: MediaReferences;
+  let validationSpy: Mocked<MediaValidationService>;
 
   beforeEach(async () => {
+    validationSpy = createSpyObj('MediaValidationService', ['rejectionMessage']);
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve(null));
     dialogSpy = createSpyObj('MatDialog', ['open']);
     idbServiceSpy = createSpyObj('IndexedDBService', ['getFile', 'addFile', 'updateFile', 'deleteFile', 'getAllFiles', 'incrementRef', 'releaseFile']);
     saveServiceSpy = createSpyObj('SaveService', ['getEvalName']);
@@ -61,6 +65,7 @@ describe('ConfigStimuliComponent', () => {
         {provide: AutoSaveService, useValue: autoSaveSpy},
         {provide: FlashService, useValue: flashSpy},
         {provide: MediaCleanupService, useValue: cleanupSpy},
+        {provide: MediaValidationService, useValue: validationSpy},
       ]
     }).compileComponents();
 
@@ -75,6 +80,50 @@ describe('ConfigStimuliComponent', () => {
 
   it('devrait être créé', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('getImageFile — fichier refusé → message, rien d\'enregistré, image actuelle conservée', async () => {
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve('refusé'));
+    component.data.screen[0] = makeCell({imageName: 'avant.png', imageId: 'TestProject/avant.png'});
+
+    await component.getImageFile(new File(['x'], 'papillon.svg'));
+
+    expect(validationSpy.rejectionMessage).toHaveBeenCalledWith(expect.any(File), 'image');
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('error', 'refusé');
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+    expect(component.data.screen[0].imageName).toBe('avant.png');
+  });
+
+  it('getSoundFile — fichier refusé → message, rien d\'enregistré, son actuel conservé', async () => {
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve('refusé'));
+    component.data.screen[0] = makeCell({soundName: 'avant.mp3', soundId: 'TestProject/avant.mp3'});
+
+    await component.getSoundFile(new File(['x'], 'son.m4a'));
+
+    expect(validationSpy.rejectionMessage).toHaveBeenCalledWith(expect.any(File), 'sound');
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('error', 'refusé');
+    expect(idbServiceSpy.addFile).not.toHaveBeenCalled();
+    expect(component.data.screen[0].soundName).toBe('avant.mp3');
+  });
+
+  it('sélecteurs limités aux formats acceptés, formats affichés', () => {
+    const inputs = fixture.nativeElement.querySelectorAll('input[type="file"]');
+    expect(inputs[0].getAttribute('accept')).toBe('.png,.jpg,.jpeg,.gif,.bmp');
+    expect(inputs[1].getAttribute('accept')).toBe('.mp3,.wav,.aif,.aiff');
+    expect(fixture.nativeElement.textContent).toContain('PNG, JPG, JPEG, GIF, BMP');
+    expect(fixture.nativeElement.textContent).toContain('MP3, WAV, AIF, AIFF');
+  });
+
+  it('média déjà présent dans un format incompatible → signalé dans le panneau', () => {
+    component.data.screen[0] = makeCell({imageName: 'papillon.svg', soundName: 'son.m4a'});
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(component.imageUnsupported).toBe(true);
+    expect(component.soundUnsupported).toBe(true);
+    const warnings = fixture.nativeElement.querySelectorAll('.inspector__warning');
+    expect([...warnings].map((w: any) => w.textContent).join(' ')).toContain('papillon.svg');
+    expect([...warnings].map((w: any) => w.textContent).join(' ')).toContain('son.m4a');
   });
 
   it('affiche la position de la case et un titre focalisable', () => {
@@ -156,6 +205,25 @@ describe('ConfigStimuliComponent', () => {
   });
 
   // ─── Réponse ──────────────────────────────────────────────────────────────
+
+  it('réponse — deux boutons radio nommés, état suivi par la case', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    const group = el.querySelector('[role="radiogroup"]')!;
+    const good = el.querySelector<HTMLInputElement>('#cell-answer-good')!;
+    const wrong = el.querySelector<HTMLInputElement>('#cell-answer-wrong')!;
+
+    expect(el.querySelector(`#${group.getAttribute('aria-labelledby')}`)?.textContent).toContain('Réponse');
+    expect(el.querySelector('label[for="cell-answer-good"]')?.textContent).toContain('Bonne réponse');
+    expect(el.querySelector('label[for="cell-answer-wrong"]')?.textContent).toContain('Mauvaise réponse');
+    expect(wrong.checked).toBe(true);
+
+    good.click();
+    fixture.detectChanges();
+
+    expect(component.data.screen[0].goodAnswer).toBe(true);
+    expect(good.checked).toBe(true);
+    expect(wrong.checked).toBe(false);
+  });
 
   it('setGoodAnswer → met à jour la case', () => {
     component.setGoodAnswer(true);

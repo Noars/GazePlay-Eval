@@ -14,6 +14,9 @@
         {id: 'no-notification', label: 'No message appears after saving'},
         {id: 'storage-full', label: '“The browser storage may be full”'},
         {id: 'media-missing', label: 'A file “cannot be found in the browser storage”'},
+        {id: 'media-refused', label: 'A file “was not added”'},
+        {id: 'export-blocked', label: '“.zip export blocked”'},
+        {id: 'crop-error', label: '“This image cannot be opened for cropping”'},
         {id: 'eval-missing', label: 'My assessment has disappeared'},
         {id: 'other-computer', label: 'Using an assessment on another computer'},
         {id: 'import-failed', label: '“The file could not be imported”'},
@@ -55,6 +58,34 @@
         <p>The assessment still refers to an image, a sound or a video, but the file is no longer in the browser (for
           example after <strong>Delete all</strong> in the options, or after clearing the browsing data). Choose the file
           again in the screen or cell concerned, or import a <code>.gpSave</code> of the assessment that contains it.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-refused" aria-labelledby="media-refused-title">
+      <h2 class="guide-section-title" id="media-refused-title">A file “was not added”</h2>
+      <div class="guide-section-body">
+        <p>The file is empty, damaged or renamed, or GazePlay-Learning cannot read its format. The message gives the
+          reason and the accepted formats, and the file already in place does not change. Convert the file to an accepted
+          format with another program, then choose it again. Accepted formats are listed in
+          <a routerLink="/guide/creation">Creating an assessment</a>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="export-blocked" aria-labelledby="export-blocked-title">
+      <h2 class="guide-section-title" id="export-blocked-title">“.zip export blocked”</h2>
+      <div class="guide-section-body">
+        <p>The assessment contains files that GazePlay-Learning cannot read, usually because it was created or imported
+          before these checks. Step 5 lists each file with its screen. At step 4, a yellow triangle marks the cells
+          concerned: replace each file with an accepted one. To continue later, you can still download the
+          <code>.gpSave</code>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="crop-error" aria-labelledby="crop-error-title">
+      <h2 class="guide-section-title" id="crop-error-title">“This image cannot be opened for cropping”</h2>
+      <div class="guide-section-body">
+        <p>The image is damaged or in an unsupported format. Choose <strong>Cancel</strong>, then choose another image
+          for the cell.</p>
       </div>
     </section>
 
@@ -176,6 +207,9 @@
         {id: 'no-notification', label: 'Aucun message n\'apparaît après un enregistrement'},
         {id: 'storage-full', label: '« Le stockage du navigateur est peut-être plein »'},
         {id: 'media-missing', label: 'Un fichier est « introuvable dans le stockage du navigateur »'},
+        {id: 'media-refused', label: 'Un fichier « n\'a pas été ajouté »'},
+        {id: 'export-blocked', label: '« Export .zip bloqué »'},
+        {id: 'crop-error', label: '« Cette image ne peut pas être ouverte pour le recadrage »'},
         {id: 'eval-missing', label: 'Mon évaluation a disparu'},
         {id: 'other-computer', label: 'Utiliser une évaluation sur un autre ordinateur'},
         {id: 'import-failed', label: '« Le fichier n\'a pas pu être importé »'},
@@ -221,6 +255,34 @@
           navigateur (par exemple après <strong>Tout supprimer</strong> dans les options, ou après un effacement des
           données de navigation). Choisissez à nouveau le fichier dans l'écran ou la case concernée, ou importez un
           <code>.gpSave</code> de l'évaluation qui le contient.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="media-refused" aria-labelledby="media-refused-title">
+      <h2 class="guide-section-title" id="media-refused-title">Un fichier « n'a pas été ajouté »</h2>
+      <div class="guide-section-body">
+        <p>Le fichier est vide, endommagé ou renommé, ou GazePlay-Learning ne lit pas son format. Le message donne la
+          raison et les formats acceptés, et le fichier déjà en place ne change pas. Convertissez le fichier dans un format
+          accepté avec un autre logiciel, puis choisissez-le à nouveau. Les formats acceptés sont listés dans
+          <a routerLink="/guide/creation">Création d'une évaluation</a>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="export-blocked" aria-labelledby="export-blocked-title">
+      <h2 class="guide-section-title" id="export-blocked-title">« Export .zip bloqué »</h2>
+      <div class="guide-section-body">
+        <p>L'évaluation contient des fichiers que GazePlay-Learning ne lit pas, le plus souvent parce qu'elle a été créée
+          ou importée avant ces contrôles. L'étape 5 liste chaque fichier avec son écran. À l'étape 4, un triangle jaune
+          signale les cases concernées : remplacez chaque fichier par un fichier accepté. Pour continuer plus tard, vous
+          pouvez toujours télécharger le <code>.gpSave</code>.</p>
+      </div>
+    </section>
+
+    <section class="guide-section-card" id="crop-error" aria-labelledby="crop-error-title">
+      <h2 class="guide-section-title" id="crop-error-title">« Cette image ne peut pas être ouverte pour le recadrage »</h2>
+      <div class="guide-section-body">
+        <p>L'image est endommagée ou dans un format non pris en charge. Choisissez <strong>Annuler</strong>, puis une
+          autre image pour la case.</p>
       </div>
     </section>
 

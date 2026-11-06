@@ -121,7 +121,7 @@
             @let mediaKind = typeFile === 'Video' ? 'video' : typeFile === 'Son' ? 'sound' : 'image';
             <div class="gp-btn-group">
               <app-file-picker [label]="(mediaKind === 'video' ? 'editor.choose.video' : mediaKind === 'sound' ? 'editor.choose.sound' : 'editor.choose.image') | t"
-                               [accept]="typeFile === 'Video' ? 'video/*' : typeFile === 'Son' ? 'audio/*' : 'image/*'"
+                               [accept]="mediaAcceptFor(mediaKind)"
                                [fileName]="screenToModify.values[4]"
                                (fileSelected)="getInstructionFile($event)"></app-file-picker>
               <button type="button" class="gp-btn gp-btn--danger-outline"
@@ -131,6 +131,17 @@
                 {{ (mediaKind === 'video' ? 'editor.remove.video' : mediaKind === 'sound' ? 'editor.remove.sound' : 'editor.remove.image') | t }}
               </button>
             </div>
+
+            <p class="gp-muted gp-text-sm mb-0">{{ 'media.formats' | t: {formats: mediaFormatsFor(mediaKind)} }}</p>
+
+            @if (isUnsupportedMedia(screenToModify.values[4], mediaKind)) {
+              <div class="gp-callout gp-callout--warning">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <div class="gp-callout__body">
+                  <p>{{ 'media.unsupported' | t: {name: screenToModify.values[4], formats: mediaFormatsFor(mediaKind)} }}</p>
+                </div>
+              </div>
+            }
 
             @if (screenToModify.values[4] && !haveInstructionFile) {
               <div class="gp-callout gp-callout--warning">
@@ -211,7 +222,7 @@
           @if (screenToModify.values[9]) {
             <div class="sound-block">
               <div class="gp-btn-group">
-                <app-file-picker [label]="'editor.choose.sound' | t" accept="audio/*"
+                <app-file-picker [label]="'editor.choose.sound' | t" [accept]="mediaAcceptFor('sound')"
                                  [fileName]="screenToModify.values[10]"
                                  (fileSelected)="getStimuliSoundFile($event)"></app-file-picker>
                 <button type="button" class="gp-btn gp-btn--danger-outline gp-btn--icon"
@@ -221,6 +232,15 @@
                   <i class="bi bi-trash3" aria-hidden="true"></i>
                 </button>
               </div>
+              <p class="gp-muted gp-text-sm mb-0">{{ 'media.formats' | t: {formats: mediaFormatsFor('sound')} }}</p>
+              @if (isUnsupportedMedia(screenToModify.values[10], 'sound')) {
+                <div class="gp-callout gp-callout--warning">
+                  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                  <div class="gp-callout__body">
+                    <p>{{ 'media.unsupported' | t: {name: screenToModify.values[10], formats: mediaFormatsFor('sound')} }}</p>
+                  </div>
+                </div>
+              }
               @if (haveStimuliSoundFile) {
                 <audio controls [attr.src]="stimuliFile" [attr.aria-label]="'editor.preview.sound' | t: {name: screenToModify.values[10]}"></audio>
               }
@@ -338,8 +358,8 @@
                         <i class="bi" [class.bi-check-lg]="cell?.goodAnswer === true" [class.bi-x-lg]="cell?.goodAnswer !== true" aria-hidden="true"></i>
                         <span class="visually-hidden">{{ (cell?.goodAnswer === true ? 'editor.goodAnswer' : 'editor.wrongAnswer') | t }}</span>
                       </span>
-                      @if (cellImageUrls[i]) {
-                        <img class="cell__image" [src]="cellImageUrls[i]" [alt]="cell.imageName">
+                      @if (cellImageUrl(cell); as imageUrl) {
+                        <img class="cell__image" [src]="imageUrl" [alt]="cell.imageName">
                       } @else if (cell?.imageName) {
                         <span class="cell__name">{{ cell.imageName }}</span>
                       } @else if (!cell?.soundName) {
@@ -369,8 +389,14 @@
                       <span class="cell__answer" [class.is-good]="cell?.goodAnswer === true" aria-hidden="true">
                         <i class="bi" [class.bi-check-lg]="cell?.goodAnswer === true" [class.bi-x-lg]="cell?.goodAnswer !== true"></i>
                       </span>
+                      @if (hasUnsupportedMedia(cell)) {
+                        <span class="cell__warning" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                      }
                       @if (!cell?.imageName && !cell?.soundName) {
                         <span class="cell__number" aria-hidden="true">{{ i + 1 }}</span>
+                      }
+                      @if (cellImageUrl(cell); as imageUrl) {
+                        <img class="cell__thumbnail" [src]="imageUrl" alt="" draggable="false">
                       }
                       @if (cell?.imageName) {
                         <span class="cell__name" aria-hidden="true"><i class="bi bi-image"></i> {{ cell.imageName }}</span>

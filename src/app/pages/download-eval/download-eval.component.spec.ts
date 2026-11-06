@@ -103,6 +103,39 @@ describe('DownloadEvalComponent', () => {
     await first;
   });
 
+  // ─── Médias incompatibles ───────────────────────────────────────────────────
+
+  function withUnsupportedImage(): void {
+    saveSpy.dataAuto.listScreens = [stimuliScreen({0: {imageName: 'papillon.svg', soundName: '', hidden: false}})];
+    component.ngOnInit();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+  }
+
+  it('média incompatible → .zip bloqué avec la liste des fichiers, .gpSave disponible', async () => {
+    withUnsupportedImage();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('#export-blocked')?.textContent).toContain('« Grille » : papillon.svg');
+    const exportButton = el.querySelector<HTMLButtonElement>('.gp-btn--primary.gp-btn--block')!;
+    const backupButton = el.querySelector<HTMLButtonElement>('.gp-btn--secondary.gp-btn--block')!;
+    expect(exportButton.disabled).toBe(true);
+    expect(exportButton.getAttribute('aria-describedby')).toBe('export-blocked');
+    expect(backupButton.disabled).toBe(false);
+    expect(el.querySelector('.gp-callout--success')).toBeNull();
+
+    await component.goExport();
+    expect(downloadSpy.generateEvalZip).not.toHaveBeenCalled();
+
+    await component.goDownload();
+    expect(downloadSpy.generateSlotZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('écran sans nom → le fichier incompatible est rattaché au numéro de l\'écran', () => {
+    expect(component.unsupportedLabel({screenIndex: 2, screenName: '', type: 'image', fileName: 'a.svg'}))
+      .toBe('« Écran 3 » : a.svg');
+  });
+
   it('backToCreateEval → navigue vers /create-eval', () => {
     component.backToCreateEval();
     expect(routerSpy.navigate).toHaveBeenCalledExactlyOnceWith(['/create-eval']);

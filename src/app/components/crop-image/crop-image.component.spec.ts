@@ -17,6 +17,7 @@ class ImageCropperStub {
   @Input() format: any;
   @Output() cropperChange = new EventEmitter<any>();
   @Output() imageCropped  = new EventEmitter<any>();
+  @Output() loadImageFailed = new EventEmitter<void>();
 }
 
 describe('CropImageComponent', () => {
@@ -102,6 +103,40 @@ describe('CropImageComponent', () => {
     // L'image déjà chargée est transmise pour éviter de dessiner une image non décodée.
     expect(component.resizeImage).toHaveBeenCalledWith('data:image/png;base64,small', 200, 300, expect.any(Object));
     expect(component.imageToCrop).toBe('data:image/png;base64,resized');
+  });
+
+  function expectLoadErrorShown(): void {
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(component.loadFailed).toBe(true);
+    expect(el.querySelector('[role="alert"]')).not.toBeNull();
+    expect(el.querySelector('.gp-spinner')).toBeNull();
+    expect(el.querySelector('#crop-width')).toBeNull();
+    expect(el.querySelector('.gp-btn--primary')).toBeNull();
+    expect(el.querySelector('.gp-btn--ghost')).not.toBeNull();
+  }
+
+  it('image illisible par le navigateur → message d\'erreur à la place du chargement sans fin', () => {
+    fixture.detectChanges();
+    Object.defineProperty(capturedReader, 'result', { value: 'data:image/tiff;base64,abc', configurable: true });
+    capturedReader.onload();
+    mockImage.onerror();
+    expectLoadErrorShown();
+  });
+
+  it('fichier illisible → message d\'erreur', () => {
+    fixture.detectChanges();
+    capturedReader.onerror();
+    expectLoadErrorShown();
+  });
+
+  it('échec de l\'outil de recadrage (grand SVG) → message d\'erreur', () => {
+    triggerNgOnInit('data:image/svg+xml;base64,abc', 600, 800);
+    fixture.detectChanges();
+    const cropper = fixture.debugElement.query(debug => debug.name === 'image-cropper');
+    cropper.triggerEventHandler('loadImageFailed');
+    expectLoadErrorShown();
+    expect(component.imageToCrop).toBe('');
   });
 
   it('ngOnInit — readAsDataURL appelé avec le fichier injecté', () => {

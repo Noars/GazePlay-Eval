@@ -29,6 +29,21 @@
           </dd>
         </dl>
 
+        @if (unsupportedMedia.length) {
+          <div class="gp-callout gp-callout--danger" id="export-blocked">
+            <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+            <div class="gp-callout__body">
+              <strong class="gp-callout__title">{{ 'download.blocked.title' | t: {count: unsupportedMedia.length} }}</strong>
+              <ul class="checks">
+                @for (media of unsupportedMedia; track $index) {
+                  <li>{{ unsupportedLabel(media) }}</li>
+                }
+              </ul>
+              <p class="gp-text-sm">{{ 'download.blocked.text' | t }}</p>
+            </div>
+          </div>
+        }
+
         @if (checks.length) {
           <div class="gp-callout gp-callout--warning">
             <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
@@ -42,7 +57,7 @@
               <p class="gp-text-sm">{{ 'download.checks.notBlocking' | t }}</p>
             </div>
           </div>
-        } @else {
+        } @else if (!unsupportedMedia.length) {
           <div class="gp-callout gp-callout--success">
             <i class="bi bi-check-circle" aria-hidden="true"></i>
             <div class="gp-callout__body"><p>{{ 'download.checks.none' | t }}</p></div>
@@ -59,7 +74,10 @@
           <p class="gp-muted">
             {{ 'download.export.before' | t }}<code>.zip</code>{{ 'download.export.middle' | t }}<a [href]="'download.export.url' | t" target="_blank" rel="noopener noreferrer">GazePlay-Learning<span class="visually-hidden">{{ 'common.newTab' | t }}</span></a>{{ 'download.export.after' | t }}
           </p>
-          <button type="button" class="gp-btn gp-btn--primary gp-btn--block" [disabled]="busy !== null" (click)="goExport()">
+          <button type="button" class="gp-btn gp-btn--primary gp-btn--block"
+                  [disabled]="busy !== null || unsupportedMedia.length > 0"
+                  [attr.aria-describedby]="unsupportedMedia.length ? 'export-blocked' : null"
+                  (click)="goExport()">
             @if (busy === 'export') {
               <span class="gp-spinner" aria-hidden="true"></span> {{ 'download.generating' | t }}
             } @else {

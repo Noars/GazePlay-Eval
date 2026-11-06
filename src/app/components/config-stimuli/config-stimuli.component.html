@@ -12,11 +12,27 @@
   </div>
 
   <div class="inspector__body">
-    <app-choice-setting [label]="'cell.answer' | t"
-                        [stacked]="true"
-                        [options]="answerOptions"
-                        [ngModel]="cell.goodAnswer === true"
-                        (ngModelChange)="setGoodAnswer($event)"></app-choice-setting>
+    <div class="answer-choice" role="radiogroup" aria-labelledby="cell-answer-label">
+      <span class="answer-choice__title" id="cell-answer-label">{{ 'cell.answer' | t }}</span>
+      <div class="answer-choice__options">
+        <span class="answer-choice__option answer-choice__option--good">
+          <input class="answer-choice__input" type="radio" id="cell-answer-good" name="cell-answer"
+                 [checked]="cell.goodAnswer === true"
+                 (change)="setGoodAnswer(true)">
+          <label class="answer-choice__label" for="cell-answer-good">
+            <i class="bi bi-check-lg" aria-hidden="true"></i> {{ 'editor.goodAnswer' | t }}
+          </label>
+        </span>
+        <span class="answer-choice__option answer-choice__option--wrong">
+          <input class="answer-choice__input" type="radio" id="cell-answer-wrong" name="cell-answer"
+                 [checked]="cell.goodAnswer !== true"
+                 (change)="setGoodAnswer(false)">
+          <label class="answer-choice__label" for="cell-answer-wrong">
+            <i class="bi bi-x-lg" aria-hidden="true"></i> {{ 'editor.wrongAnswer' | t }}
+          </label>
+        </span>
+      </div>
+    </div>
 
     <!-- Image -->
     <section class="inspector__section" aria-labelledby="cell-image-title">
@@ -31,8 +47,15 @@
           {{ 'cell.imageMissing' | t: {name: cell.imageName} }}
         </p>
       }
+      @if (imageUnsupported) {
+        <p class="inspector__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          {{ 'media.unsupported' | t: {name: cell.imageName, formats: imageFormats} }}
+        </p>
+      }
+      <p class="gp-muted gp-text-sm mb-0">{{ 'media.formats' | t: {formats: imageFormats} }}</p>
       <div class="inspector__actions">
-        <app-file-picker [label]="'editor.choose.image' | t" accept="image/*"
+        <app-file-picker [label]="'editor.choose.image' | t" [accept]="imageAccept"
                          [fileName]="cell.imageName || ''"
                          [disabled]="busy !== null"
                          (fileSelected)="getImageFile($event)"></app-file-picker>
@@ -59,8 +82,15 @@
           {{ 'cell.soundMissing' | t: {name: cell.soundName} }}
         </p>
       }
+      @if (soundUnsupported) {
+        <p class="inspector__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          {{ 'media.unsupported' | t: {name: cell.soundName, formats: soundFormats} }}
+        </p>
+      }
+      <p class="gp-muted gp-text-sm mb-0">{{ 'media.formats' | t: {formats: soundFormats} }}</p>
       <div class="inspector__actions">
-        <app-file-picker [label]="'editor.choose.sound' | t" accept="audio/*"
+        <app-file-picker [label]="'editor.choose.sound' | t" [accept]="soundAccept"
                          [fileName]="cell.soundName || ''"
                          [disabled]="busy !== null"
                          (fileSelected)="getSoundFile($event)"></app-file-picker>

@@ -262,7 +262,27 @@
   color: var(--gp-text-muted);
   font-weight: 700;
 }
+.cell__warning {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: var(--gp-warning-subtle);
+  color: var(--gp-warning);
+  font-size: 0.65rem;
+}
+.cell__thumbnail {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  object-fit: contain;
+}
 .cell__name {
+  flex: 0 0 auto;
   max-width: 100%;
   overflow: hidden;
   font-size: var(--gp-text-xs);

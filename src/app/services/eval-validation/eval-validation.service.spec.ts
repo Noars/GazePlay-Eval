@@ -86,6 +86,20 @@ describe('EvalValidationService', () => {
     expect(fields).toContain('Combien de temps de fixation');
   });
 
+  it('média présent dans un format refusé par Learning → unsupportedMedia, ok=false', async () => {
+    const stimuli = {...fullStimuli, "Liste des stimuli": {'0': {imageName: 'papillon.svg', soundName: '', goodAnswer: true}}};
+    const zip = await makeZip({
+      'E/evalData.json': JSON.stringify([stimuli]),
+      'E/images/papillon.svg': new Blob(['<svg/>']),
+    });
+
+    const report = await service.validateZip(zip);
+
+    expect(report.ok).toBe(false);
+    expect(report.missingMedia).toStrictEqual([]);
+    expect(report.unsupportedMedia).toStrictEqual([{screenIndex: 0, type: 'image', fileName: 'papillon.svg'}]);
+  });
+
   it('média référencé absent → signalé dans missingMedia', async () => {
     const zip = await makeZip({
       'E/evalData.json': JSON.stringify([{ ...fullInstruction, "Nom du fichier": 'manquant.mp4' }])

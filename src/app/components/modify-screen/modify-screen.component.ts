@@ -28,6 +28,8 @@ import {ConfigStimuliComponent} from '../config-stimuli/config-stimuli.component
 import {AutoSaveService} from '../../services/auto-save/auto-save.service';
 import {FlashService} from '../../services/flash-message/flash.service';
 import {MediaLibraryService, MediaType} from '../../core/media/media-library.service';
+import {MediaValidationService} from '../../core/media/media-validation.service';
+import {isSupportedMediaName, mediaAccept, mediaFormatsLabel} from '../../core/media/media-formats';
 import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import {GlobalTransitionScreenComponent} from '../global-transition-screen/global-transition-screen.component';
 import {ChoiceOption, ChoiceSettingComponent} from '../../shared/ui/choice-setting/choice-setting.component';
@@ -100,6 +102,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   private readonly saveService = inject(SaveService);
   private readonly autoSaveService = inject(AutoSaveService);
   private readonly media = inject(MediaLibraryService);
+  private readonly validation = inject(MediaValidationService);
   private readonly flashService = inject(FlashService);
   private readonly confirmService = inject(ConfirmService);
   private readonly i18n = inject(I18nService);
@@ -156,7 +159,13 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   gridMaxHeight: number = 0;
   multiSelectMode: boolean = false;
   visualizationMode: boolean = false;
-  cellImageUrls: { [key: number]: string } = {};
+  /** URL d'affichage de chaque image (une par fichier, révoquées à la sortie de l'éditeur). */
+  private readonly cellImageUrlByFile = new WeakMap<Blob, string>();
+  private readonly createdCellImageUrls = new Set<string>();
+  /** Cases dont l'image a déjà été cherchée dans IndexedDB (pour ne pas la chercher en boucle). */
+  private readonly resolvedImageCells = new WeakSet<object>();
+  readonly mediaAcceptFor = mediaAccept;
+  readonly mediaFormatsFor = mediaFormatsLabel;
   /** Index de la case dont le son est en cours de lecture en mode visualisation, ou null. */
   playingSoundCell: number | null = null;
   private currentCellAudio: HTMLAudioElement | null = null;
@@ -180,7 +189,8 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.clearCellImageUrls();
+    this.createdCellImageUrls.forEach(url => URL.revokeObjectURL(url));
+    this.createdCellImageUrls.clear();
     this.stopCellSound();
     this.setInstructionPreview('');
     this.setStimuliPreview('');
@@ -237,7 +247,6 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.undoHistory = [];
     this.activeCellIndex = null;
     this.stimuliOffcanvasReady = false;
-    this.clearCellImageUrls();
     switch (type){
       case transitionScreenConstModel : {
         let newTransitionScreen: transitionScreenModel = structuredClone(defaultTransitionScreenModel);
@@ -297,6 +306,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     if (file && this.screenToModify.type === instructionScreenConstModel) {
       const previousRef = this.screenToModify.values[8] || this.screenToModify.values[4];
       const mediaType = this.getInstructionMediaType();
+      if (!await this.isAccepted(file, mediaType)) return;
       let id: string;
       try {
         id = await this.storeOrReplace(file, mediaType, previousRef);
@@ -331,6 +341,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     const file = event instanceof File ? event : (event.target as HTMLInputElement)?.files?.[0];
     if (file && this.screenToModify.type === stimuliScreenConstModel) {
       const previousRef = this.screenToModify.values[13] || this.screenToModify.values[10];
+      if (!await this.isAccepted(file, 'sound')) return;
       let id: string;
       try {
         id = await this.storeOrReplace(file, 'sound', previousRef);
@@ -358,6 +369,18 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     } else {
       this.haveStimuliSoundFile = false;
     }
+  }
+
+  /** Contrôle le fichier choisi ; s'il est refusé, le message s'affiche et l'écran ne change pas. */
+  private async isAccepted(file: File, type: MediaType): Promise<boolean> {
+    const rejection = await this.validation.rejectionMessage(file, type);
+    if (rejection) this.flashService.show('error', rejection);
+    return !rejection;
+  }
+
+  /** Média déjà présent (sauvegarde, import) dans un format non lu par GazePlay-Learning. */
+  isUnsupportedMedia(fileName: string | undefined, type: MediaType): boolean {
+    return !!fileName && !isSupportedMediaName(fileName, type);
   }
 
   /**
@@ -747,6 +770,7 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     parts.push(cell.imageName ? t('editor.cell.image', {name: cell.imageName}) : t('editor.cell.noImage'));
     if (cell.soundName) parts.push(t('editor.cell.sound', {name: cell.soundName}));
     parts.push(t(cell.goodAnswer === true ? 'editor.cell.good' : 'editor.cell.wrong'));
+    if (this.hasUnsupportedMedia(cell)) parts.push(t('editor.cell.unsupported'));
     const states: string[] = [];
     if (this.duplicateSourceIndex === index) states.push(t('editor.cell.toDuplicate'));
     if (this.swapSourceIndex === index) states.push(t('editor.cell.toSwap'));
@@ -789,51 +813,53 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
    * Bascule entre le mode gestion (édition de la grille) et le mode visualisation réel
    * qui affiche les images des stimuli telles qu'elles apparaîtront, sans les outils d'édition.
    */
-  async toggleVisualizationMode(): Promise<void> {
+  toggleVisualizationMode(): void {
     this.visualizationMode = !this.visualizationMode;
     if (this.visualizationMode) {
       this.resetGridModes();
-      await this.loadCellImages();
       this.announce(this.i18n.t('editor.announce.previewMode'));
     } else {
-      this.clearCellImageUrls();
       this.stopCellSound();
       this.announce(this.i18n.t('editor.announce.editMode'));
     }
   }
 
-  /** Résout et crée les URLs d'aperçu des images de chaque case visible de la grille. */
-  private async loadCellImages(): Promise<void> {
-    this.clearCellImageUrls();
-    if (this.screenToModify.type !== stimuliScreenConstModel) return;
-    const listScreen = this.screenToModify.values[12];
-    const total = Number(this.screenToModify.values[0]) * Number(this.screenToModify.values[1]);
-    for (let i = 0; i < total; i++) {
-      const cell = listScreen[i];
-      if (!cell || cell.hidden) continue;
-
-      let file: Blob | undefined = cell.imageFile instanceof Blob ? cell.imageFile : undefined;
-      if (!file && (cell.imageId || cell.imageName)) {
-        const match = await this.media.resolve(cell.imageId || cell.imageName, 'image');
-        if (match) {
-          cell.imageFile = match.file;
-          cell.imageId = match.id;
-          file = match.file;
-        }
+  /**
+   * URL de l'image d'une case, pour les deux modes de la grille. Elle suit tout changement de la
+   * case (nouveau fichier, duplication, échange, annulation), car elle dépend du fichier lui-même.
+   * Un fichier pas encore chargé (reprise d'une sauvegarde) est cherché une seule fois.
+   */
+  cellImageUrl(cell: any): string | null {
+    if (!cell || cell.hidden || !cell.imageName) return null;
+    if (cell.imageFile instanceof Blob) {
+      let url = this.cellImageUrlByFile.get(cell.imageFile);
+      if (!url) {
+        url = URL.createObjectURL(cell.imageFile);
+        this.cellImageUrlByFile.set(cell.imageFile, url);
+        this.createdCellImageUrls.add(url);
       }
+      return url;
+    }
+    if (!this.resolvedImageCells.has(cell)) {
+      this.resolvedImageCells.add(cell);
+      void this.resolveCellImage(cell);
+    }
+    return null;
+  }
 
-      if (file instanceof Blob) {
-        this.cellImageUrls[i] = URL.createObjectURL(file);
-      }
+  private async resolveCellImage(cell: any): Promise<void> {
+    const name = cell.imageName;
+    const match = await this.media.resolve(cell.imageId || name, 'image');
+    // La case a pu changer d'image pendant la recherche.
+    if (match && cell.imageName === name && !(cell.imageFile instanceof Blob)) {
+      cell.imageFile = match.file;
+      cell.imageId = match.id;
     }
   }
 
-  /** Révoque toutes les URLs d'aperçu des images de cases et vide la table. */
-  private clearCellImageUrls(): void {
-    for (const key of Object.keys(this.cellImageUrls)) {
-      URL.revokeObjectURL(this.cellImageUrls[Number(key)]);
-    }
-    this.cellImageUrls = {};
+  hasUnsupportedMedia(cell: any): boolean {
+    return !!cell && !cell.hidden
+      && (this.isUnsupportedMedia(cell.imageName, 'image') || this.isUnsupportedMedia(cell.soundName, 'sound'));
   }
 
   /**
@@ -1303,9 +1329,6 @@ export class ModifyScreenComponent implements OnInit, OnDestroy {
     this.stimuliOffcanvasReady = false;
     this.resetGridModes();
     this.announce(this.i18n.t('editor.announce.undone'));
-    if (this.visualizationMode) {
-      void this.loadCellImages();
-    }
   }
 
   /**

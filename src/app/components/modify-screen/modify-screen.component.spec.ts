@@ -9,6 +9,7 @@ import { ConfigStimuliComponent } from '../config-stimuli/config-stimuli.compone
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MediaCleanupService } from '../../core/media/media-cleanup.service';
 import { emptyReferences } from '../../core/media/media-references';
+import { MediaValidationService } from '../../core/media/media-validation.service';
 import { ConfirmService } from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import type { Mocked } from 'vitest';
 import { createSpyObj } from '../../testing/spy-obj';
@@ -30,6 +31,7 @@ describe('ModifyScreenComponent', () => {
   let flashSpy: Mocked<FlashService>;
   let cleanupSpy: Mocked<MediaCleanupService>;
   let confirmSpy: Mocked<ConfirmService>;
+  let validationSpy: Mocked<MediaValidationService>;
 
   function makeTransition(): any {
     return { name: 'TS', type: 'transition', values: [false, 0, false, false, 0] };
@@ -74,6 +76,8 @@ describe('ModifyScreenComponent', () => {
     cleanupSpy.collectAllReferences.mockImplementation(() => emptyReferences());
     confirmSpy = createSpyObj('ConfirmService', ['confirm']);
     confirmSpy.confirm.mockReturnValue(Promise.resolve(true));
+    validationSpy = createSpyObj('MediaValidationService', ['rejectionMessage']);
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve(null));
 
     saveSpy.getEvalName.mockReturnValue('TestProject');
     idbSpy.getFile.mockReturnValue(Promise.reject(new Error('not found')));
@@ -97,7 +101,8 @@ describe('ModifyScreenComponent', () => {
         { provide: IndexedDBService, useValue: idbSpy },
         { provide: FlashService, useValue: flashSpy },
         { provide: MediaCleanupService, useValue: cleanupSpy },
-        { provide: ConfirmService, useValue: confirmSpy }
+        { provide: ConfirmService, useValue: confirmSpy },
+        { provide: MediaValidationService, useValue: validationSpy }
       ]
     })
     .overrideComponent(ModifyScreenComponent, {
@@ -407,7 +412,57 @@ describe('ModifyScreenComponent', () => {
     expect(idbSpy.addFile).not.toHaveBeenCalled();
   });
 
+  it('getInstructionFile — fichier refusé → message, rien d\'enregistré, média actuel conservé', async () => {
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve('refusé'));
+    createComponent(makeInstruction('Video', 'avant.mp4', 'TestProject/avant.mp4'));
+    await fixture.whenStable();
+
+    await component.getInstructionFile(new File(['x'], 'film.webm'));
+
+    expect(validationSpy.rejectionMessage).toHaveBeenCalledWith(expect.any(File), 'video');
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('error', 'refusé');
+    expect(idbSpy.addFile).not.toHaveBeenCalled();
+    expect(component.screenToModify.values[4]).toBe('avant.mp4');
+  });
+
+  it('instruction — sélecteur limité au type de média, média incompatible signalé', async () => {
+    const screen = makeInstruction('Video', 'film.webm', 'TestProject/film.webm');
+    screen.values[2] = true;
+    createComponent(screen);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('input[type="file"]')?.getAttribute('accept')).toBe('.mp4,.m4v');
+    expect(el.querySelector('.gp-callout--warning')?.textContent).toContain('film.webm');
+  });
+
   // ─── getStimuliSoundFile ──────────────────────────────────────────────────────
+
+  it('getStimuliSoundFile — fichier refusé → message, rien d\'enregistré, son actuel conservé', async () => {
+    validationSpy.rejectionMessage.mockReturnValue(Promise.resolve('refusé'));
+    createComponent(makeStimuli('avant.mp3', 'TestProject/avant.mp3'));
+    await fixture.whenStable();
+
+    await component.getStimuliSoundFile(new File(['x'], 'son.ogg'));
+
+    expect(validationSpy.rejectionMessage).toHaveBeenCalledWith(expect.any(File), 'sound');
+    expect(flashSpy.show).toHaveBeenCalledExactlyOnceWith('error', 'refusé');
+    expect(idbSpy.addFile).not.toHaveBeenCalled();
+    expect(component.screenToModify.values[10]).toBe('avant.mp3');
+  });
+
+  it('son de l\'écran — sélecteur limité aux formats acceptés, son incompatible signalé', async () => {
+    const screen = makeStimuli('son.ogg', 'TestProject/son.ogg');
+    screen.values[9] = true;
+    createComponent(screen);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('input[type="file"]')?.getAttribute('accept')).toBe('.mp3,.wav,.aif,.aiff');
+    expect(el.querySelector('.gp-callout--warning')?.textContent).toContain('son.ogg');
+  });
 
   it('getStimuliSoundFile — son sélectionné → addFile + valeurs mises à jour + haveStimuliSoundFile true', async () => {
     createComponent(makeStimuli());
@@ -1572,51 +1627,111 @@ describe('ModifyScreenComponent', () => {
 
   // ─── toggleVisualizationMode (mode visualisation réel) ──────────────────────
 
-  it('toggleVisualizationMode — active le mode, sort des modes d\'édition et charge les images des cases', async () => {
+  it('toggleVisualizationMode — active le mode, sort des modes d\'édition et affiche l\'image', async () => {
     const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
-    idbSpy.getFile.mockReturnValue(Promise.resolve({
-      id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
-    } as any));
-    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png', imageFile: mockFile }) }));
     await fixture.whenStable();
     component.duplicateMode = true;
     component.multiSelectMode = true;
     component.selectedCells.add(0);
 
-    await component.toggleVisualizationMode();
+    component.toggleVisualizationMode();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
 
     expect(component.visualizationMode).toBe(true);
     expect(component.duplicateMode).toBe(false);
     expect(component.multiSelectMode).toBe(false);
     expect(component.selectedCells.size).toBe(0);
-    expect(component.cellImageUrls[0]).toBe('blob:fake-url');
+    expect(fixture.nativeElement.querySelector('img.cell__image')).not.toBeNull();
   });
 
-  it('toggleVisualizationMode — second appel désactive le mode et révoque les URLs d\'images', async () => {
+  // ─── Miniatures de la grille ─────────────────────────────────────────────────
+
+  it('mode édition → miniature décorative de l\'image, nom toujours affiché', async () => {
+    const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png', imageFile: mockFile }) }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const thumbnail: HTMLImageElement = fixture.nativeElement.querySelector('img.cell__thumbnail');
+    expect(thumbnail.getAttribute('alt')).toBe('');
+    expect(fixture.nativeElement.querySelector('.cell__name').textContent).toContain('a.png');
+  });
+
+  it('cellImageUrl — fichier pas encore chargé → cherché une seule fois, puis affiché', async () => {
     const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
     idbSpy.getFile.mockReturnValue(Promise.resolve({
       id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date()
     } as any));
-    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageId: 'TestProject/a.png' }) }));
+    const target = cell({ imageName: 'a.png', imageId: 'TestProject/a.png' });
+    createComponent(makeStimuliGrid(1, 1, { 0: target }));
+    await fixture.whenStable();
+    idbSpy.getFile.mockClear();
+
+    expect(component.cellImageUrl(target)).toBe('blob:fake-url');
+    expect(component.cellImageUrl(target)).toBe('blob:fake-url');
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(idbSpy.getFile).not.toHaveBeenCalled();
+  });
+
+  it('cellImageUrl — fichier introuvable → aucune nouvelle recherche, nom affiché', async () => {
+    const target = cell({ imageName: 'perdu.png', imageId: 'TestProject/perdu.png' });
+    createComponent(makeStimuliGrid(1, 1, { 0: target }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const calls = idbSpy.getFile.mock.calls.length;
+
+    expect(component.cellImageUrl(target)).toBeNull();
+    expect(idbSpy.getFile.mock.calls.length).toBe(calls);
+    expect(fixture.nativeElement.querySelector('img.cell__thumbnail')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.cell__name').textContent).toContain('perdu.png');
+  });
+
+  it('cellImageUrl — l\'image change pendant la recherche → le résultat tardif est ignoré', async () => {
+    const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
+    let resolveFile!: (value: any) => void;
+    idbSpy.getFile.mockReturnValue(new Promise(resolve => resolveFile = resolve));
+    const target = cell({ imageName: 'a.png', imageId: 'TestProject/a.png' });
+    component = TestBed.createComponent(ModifyScreenComponent).componentInstance;
+
+    component.cellImageUrl(target);
+    target.imageName = '';
+    resolveFile({ id: 'TestProject/a.png', file: mockFile, type: 'image', lastEdit: new Date() });
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(target.imageFile).toBeUndefined();
+  });
+
+  it('cellImageUrl — cases masquées ou sans image → aucune URL', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell({ hidden: true, imageName: 'a.png' }), 1: cell({ imageName: '' }) }));
     await fixture.whenStable();
 
-    await component.toggleVisualizationMode();
-    expect(component.cellImageUrls[0]).toBe('blob:fake-url');
+    expect(component.cellImageUrl(component.screenToModify.values[12][0])).toBeNull();
+    expect(component.cellImageUrl(component.screenToModify.values[12][1])).toBeNull();
+    expect(component.cellImageUrl(undefined)).toBeNull();
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+  });
 
-    await component.toggleVisualizationMode();
+  it('sortie de l\'éditeur → les URLs des miniatures sont révoquées', async () => {
+    const mockFile = new File(['img'], 'a.png', { type: 'image/png' });
+    createComponent(makeStimuliGrid(1, 1, { 0: cell({ imageName: 'a.png', imageFile: mockFile }) }));
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(component.visualizationMode).toBe(false);
-    expect(component.cellImageUrls[0]).toBeUndefined();
+    fixture.destroy();
+
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
   });
 
-  it('toggleVisualizationMode — cases masquées ou sans image → aucune URL générée', async () => {
-    createComponent(makeStimuliGrid(1, 2, { 0: cell({ hidden: true }), 1: cell({ imageName: '' }) }));
+  it('case avec un média incompatible → signalée à l\'œil et au lecteur d\'écran', async () => {
+    createComponent(makeStimuliGrid(1, 2, { 0: cell({ imageName: 'papillon.svg' }), 1: cell({ imageName: 'ok.png' }) }));
     await fixture.whenStable();
+    fixture.detectChanges();
 
-    await component.toggleVisualizationMode();
-
-    expect(Object.keys(component.cellImageUrls).length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('.cell__warning').length).toBe(1);
+    expect(component.cellLabel(0)).toContain('format non lu par GazePlay-Learning');
+    expect(component.cellLabel(1)).not.toContain('format non lu par GazePlay-Learning');
   });
 
   it('openStimuliData — en mode visualisation → ne fait rien', async () => {

@@ -216,8 +216,8 @@
         </ul>
 
         <figure class="guide-figure">
-          <img src="assets/guide/images/en/instruction-editor.png" width="1000" height="946" loading="lazy"
-               alt="Instruction screen editor: on the left, the Instruction settings card; on the right, the Content card with the Choose an image button showing the file name, the Remove the image button and a preview of a bird.">
+          <img src="assets/guide/images/en/instruction-editor.png" width="1220" height="730" loading="lazy"
+               alt="Instruction screen editor: on the left, the Instruction settings card; on the right, the Content card with the Choose an image button showing the file name, the Remove the image button, the accepted formats and a preview of a bird.">
           <figcaption>
             Editing an instruction screen with an image.
             <a class="guide-figure__zoom" href="assets/guide/images/en/instruction-editor.png" target="_blank" rel="noopener">View full size (new tab)</a>
@@ -233,6 +233,18 @@
           </div>
         </div>
 
+        <div class="gp-callout">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Accepted formats</strong>
+            <p>Only files that GazePlay-Learning can read are accepted: images in <strong>PNG, JPG, JPEG, GIF, BMP</strong>;
+              sounds in <strong>MP3, WAV (16-bit), AIF, AIFF</strong>; videos in <strong>MP4, M4V</strong>. Any other file is
+              refused with a message, and the file already in place is kept. If an imported assessment contains incompatible
+              files, they are kept and flagged with a yellow triangle in the grid: replace them to be able to export the
+              <code>.zip</code>. The <code>.gpSave</code> remains available.</p>
+          </div>
+        </div>
+
         <p>For a video or a sound, if the file lasts longer than the delay before the next screen, the message
           <strong>The media lasts longer than the screen</strong> appears when you finish: choose
           <strong>Adjust the delay</strong> or <strong>Finish anyway</strong> (the end of the media will not be seen).</p>
@@ -242,10 +254,11 @@
           centre, and on the right the panel of the selected cell.</p>
 
         <figure class="guide-figure">
-          <img src="assets/guide/images/en/stimuli-editor.png" width="967" height="761" loading="lazy"
-               alt="Stimulus screen editor. In the centre, a grid of 2 rows and 4 columns with its toolbar: Duplicate, Swap, Multiple selection, Delete, Undo and the zoom buttons. Cell 1 is selected. On the right, the Cell 1 panel with the Answer choice set to Correct answer, the image of a robin, the Crop and Remove the image buttons, the Sound part, and the Clear the cell and Done buttons.">
+          <img src="assets/guide/images/en/stimuli-editor.png" width="868" height="946" loading="lazy"
+               alt="Stimulus screen editor. In the centre, a grid of 2 rows and 4 columns with its toolbar: Duplicate, Swap, Multiple selection, Delete, Undo and the zoom buttons. The cells show a thumbnail of their image and the name of their files. Cell 1 is selected. On the right, the Cell 1 panel with the Correct answer and Wrong answer buttons, Correct answer being chosen, the image of a robin, the accepted formats, the Crop and Remove the image buttons, the Sound part, the Clear the cell and Done buttons, and the buttons to add a cell next to this one.">
           <figcaption>
-            The grid and the panel of cell 1. A green tick marks a correct answer, a red cross a wrong answer.
+            The grid and the panel of cell 1. Each cell shows a thumbnail of its image and the name of its files. A green
+            tick marks a correct answer, a red cross a wrong answer.
             <a class="guide-figure__zoom" href="assets/guide/images/en/stimuli-editor.png" target="_blank" rel="noopener">View full size (new tab)</a>
           </figcaption>
         </figure>
@@ -314,6 +327,9 @@
           <li><strong>Points to check</strong>: possible oversights, for example an assessment without a name or without
             screens, an instruction screen with no text or no file, a grid with no image or sound, or a screen sound
             enabled without a file. These points do not prevent export.</li>
+          <li><strong>.zip export blocked</strong>: at least one file is in a format GazePlay-Learning cannot read. Each
+            file is listed with its screen; replace them at step 4 to be able to export. The <code>.gpSave</code> remains
+            available.</li>
           <li><strong>Export the .zip</strong>: the file to open in GazePlay-Learning (screens and media).</li>
           <li><strong>Download the .gpSave</strong>: a backup to keep on your computer and import back into
             GazePlay-Eval to edit the assessment later.</li>
@@ -562,8 +578,8 @@
         </ul>
 
         <figure class="guide-figure">
-          <img src="assets/guide/images/fr/instruction-editor.png" width="1000" height="946" loading="lazy"
-               alt="Éditeur d'un écran d'instruction : à gauche, la carte Réglages de la consigne ; à droite, la carte Contenu avec le bouton Choisir une image qui affiche le nom du fichier, le bouton Retirer l'image et l'aperçu d'un oiseau.">
+          <img src="assets/guide/images/fr/instruction-editor.png" width="1220" height="734" loading="lazy"
+               alt="Éditeur d'un écran d'instruction : à gauche, la carte Réglages de la consigne ; à droite, la carte Contenu avec le bouton Choisir une image qui affiche le nom du fichier, le bouton Retirer l'image, les formats acceptés et l'aperçu d'un oiseau.">
           <figcaption>
             Modification d'un écran d'instruction avec une image.
             <a class="guide-figure__zoom" href="assets/guide/images/fr/instruction-editor.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
@@ -579,6 +595,18 @@
           </div>
         </div>
 
+        <div class="gp-callout">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <div class="gp-callout__body">
+            <strong class="gp-callout__title">Formats acceptés</strong>
+            <p>Seuls les fichiers que GazePlay-Learning sait lire sont acceptés : images en <strong>PNG, JPG, JPEG, GIF, BMP</strong> ;
+              sons en <strong>MP3, WAV (16 bits), AIF, AIFF</strong> ; vidéos en <strong>MP4, M4V</strong>. Tout autre fichier est
+              refusé avec un message, et le fichier déjà en place est conservé. Si une évaluation importée contient des
+              fichiers incompatibles, ils sont conservés et signalés par un triangle jaune dans la grille : remplacez-les pour
+              pouvoir exporter le <code>.zip</code>. Le <code>.gpSave</code> reste disponible.</p>
+          </div>
+        </div>
+
         <p>Pour une vidéo ou un son, si le fichier dure plus longtemps que le délai avant l'écran suivant, le message
           <strong>Le média dure plus longtemps que l'écran</strong> apparaît quand vous terminez : choisissez
           <strong>Ajuster le délai</strong> ou <strong>Terminer quand même</strong> (la fin du média ne sera pas vue).</p>
@@ -588,10 +616,11 @@
           au centre et, à droite, le panneau de la case sélectionnée.</p>
 
         <figure class="guide-figure">
-          <img src="assets/guide/images/fr/stimuli-editor.png" width="967" height="797" loading="lazy"
-               alt="Éditeur d'un écran de stimuli. Au centre, une grille de 2 lignes et 4 colonnes avec sa barre d'outils : Dupliquer, Échanger, Sélection multiple, Supprimer, Annuler et les boutons de zoom. La case 1 est sélectionnée. À droite, le panneau Case 1 avec le choix Réponse sur Bonne réponse, l'image d'un rouge-gorge, les boutons Recadrer et Retirer l'image, la partie Son, et les boutons Vider la case et Terminer.">
+          <img src="assets/guide/images/fr/stimuli-editor.png" width="868" height="954" loading="lazy"
+               alt="Éditeur d'un écran de stimuli. Au centre, une grille de 2 lignes et 4 colonnes avec sa barre d'outils : Dupliquer, Échanger, Sélection multiple, Supprimer, Annuler et les boutons de zoom. Les cases montrent une miniature de leur image et le nom de leurs fichiers. La case 1 est sélectionnée. À droite, le panneau Case 1 avec les boutons Bonne réponse et Mauvaise réponse, Bonne réponse étant choisi, l'image d'un rouge-gorge, les formats acceptés, les boutons Recadrer et Retirer l'image, la partie Son, les boutons Vider la case et Terminer, et les boutons pour ajouter une case à côté de celle-ci.">
           <figcaption>
-            La grille et le panneau de la case 1. Une coche verte signale une bonne réponse, une croix rouge une mauvaise réponse.
+            La grille et le panneau de la case 1. Chaque case montre une miniature de son image et le nom de ses fichiers.
+            Une coche verte signale une bonne réponse, une croix rouge une mauvaise réponse.
             <a class="guide-figure__zoom" href="assets/guide/images/fr/stimuli-editor.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
           </figcaption>
         </figure>
@@ -660,6 +689,9 @@
           <li><strong>Points à vérifier</strong> : des oublis possibles, par exemple une évaluation sans nom ou sans
             écran, un écran d'instruction sans texte ou sans fichier, une grille sans image ni son, ou un son d'écran
             activé sans fichier. Ces points n'empêchent pas l'export.</li>
+          <li><strong>Export .zip bloqué</strong> : au moins un fichier est dans un format que GazePlay-Learning ne lit
+            pas. Chaque fichier est listé avec son écran ; remplacez-les à l'étape 4 pour pouvoir exporter. Le
+            <code>.gpSave</code> reste disponible.</li>
           <li><strong>Exporter le .zip</strong> : le fichier à ouvrir dans GazePlay-Learning (écrans et médias).</li>
           <li><strong>Télécharger le .gpSave</strong> : une sauvegarde à conserver sur votre ordinateur et à réimporter
             dans GazePlay-Eval pour modifier l'évaluation plus tard.</li>
