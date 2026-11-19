@@ -53,7 +53,7 @@ describe('SauvegardeComponent', () => {
     loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
     loadServiceSpy.getSlot.mockReturnValue(null);
 
-    autoSaveServiceSpy = createSpyObj('AutoSaveService', ['tryResume']);
+    autoSaveServiceSpy = createSpyObj('AutoSaveService', ['tryResume', 'clearUnsupportedMediaNotice']);
     flashMessageServiceSpy = createSpyObj('FlashService', ['show']);
     routerSpy = createSpyObj('Router', ['navigate']);
     downloadServiceSpy = createSpyObj('DownloadService', ['generateSlotZip']);

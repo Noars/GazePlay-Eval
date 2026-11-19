@@ -34,7 +34,8 @@ describe('AutoSaveService', () => {
     saveServiceSpy.loadIntoWorkspace.mockImplementation((save: any) => Object.assign(saveServiceSpy.dataAuto, save));
     saveServiceSpy.activeSlotIndex = null;
 
-    flashServiceSpy = createSpyObj('FlashService', ['show']);
+    flashServiceSpy = createSpyObj('FlashService', ['show', 'showPersistent', 'remove']);
+    flashServiceSpy.showPersistent.mockReturnValue(7);
     loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
     cleanupSpy = createSpyObj('MediaCleanupService', ['cleanupProject']);
     cleanupSpy.cleanupProject.mockReturnValue(Promise.resolve(0));
@@ -260,5 +261,61 @@ describe('AutoSaveService', () => {
     window.dispatchEvent(new Event('pagehide'));
 
     expect(saveServiceSpy.saveToSlot).not.toHaveBeenCalled();
+  });
+
+  describe('alerte des fichiers non lus par GazePlay-Learning', () => {
+    const withUnsupported = () => ({
+      ...saveModelDefault, nomEval: 'Ancienne', step: 3,
+      listScreens: [{
+        name: 'Grille', type: 'stimuli',
+        values: [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, {
+          0: {imageName: 'papillon.svg'}, 1: {imageName: 'papillon.svg'}, 2: {imageName: 'ok.png'},
+        }, ''],
+      }],
+    } as any);
+
+    it('reprise (chargement, import, rechargement) → alerte persistante listant les fichiers', () => {
+      loadServiceSpy.getSlot.mockReturnValue(withUnsupported());
+
+      service.tryResume(true);
+
+      expect(flashServiceSpy.showPersistent).toHaveBeenCalledTimes(1);
+      const [type, message] = flashServiceSpy.showPersistent.mock.calls[0];
+      expect(type).toBe('warning');
+      expect(message).toContain('(2) : papillon.svg.');
+      expect(flashServiceSpy.show).not.toHaveBeenCalledWith('warning', expect.anything(), expect.anything());
+    });
+
+    it("chaque reprise réaffiche l'alerte, en remplaçant la précédente", () => {
+      loadServiceSpy.getSlot.mockReturnValue(withUnsupported());
+
+      service.tryResume(true);
+      service.tryResume(false);
+
+      expect(flashServiceSpy.showPersistent).toHaveBeenCalledTimes(2);
+      expect(flashServiceSpy.remove).toHaveBeenCalledExactlyOnceWith(7);
+    });
+
+    it("évaluation sans fichier incompatible → aucune alerte, celle de l'évaluation précédente est retirée", () => {
+      loadServiceSpy.getSlot.mockReturnValue(withUnsupported());
+      service.tryResume(true);
+      loadServiceSpy.getSlot.mockReturnValue({...saveModelDefault, nomEval: 'Saine', step: 3, listScreens: []});
+
+      service.tryResume(true);
+
+      expect(flashServiceSpy.showPersistent).toHaveBeenCalledTimes(1);
+      expect(flashServiceSpy.remove).toHaveBeenCalledWith(7);
+    });
+
+    it("clearUnsupportedMediaNotice (nouvelle évaluation) → alerte retirée, sans effet s'il n'y en a pas", () => {
+      service.clearUnsupportedMediaNotice();
+      expect(flashServiceSpy.remove).not.toHaveBeenCalled();
+
+      loadServiceSpy.getSlot.mockReturnValue(withUnsupported());
+      service.tryResume(true);
+      service.clearUnsupportedMediaNotice();
+
+      expect(flashServiceSpy.remove).toHaveBeenCalledExactlyOnceWith(7);
+    });
   });
 });

@@ -30,7 +30,7 @@ describe('HomeComponent', () => {
     saveServiceSpy = createSpyObj('SaveService', ['newSaveDataAuto']);
     overwriteGuardSpy = createSpyObj('OverwriteGuardService', ['check']);
     overwriteGuardSpy.check.mockReturnValue(Promise.resolve(true));
-    autoSaveSpy = createSpyObj('AutoSaveService', ['tryResume']);
+    autoSaveSpy = createSpyObj('AutoSaveService', ['tryResume', 'clearUnsupportedMediaNotice']);
     loadServiceSpy = createSpyObj('LoadService', ['getSlot']);
     loadServiceSpy.getSlot.mockReturnValue(null);
     importFlowSpy = createSpyObj('ImportFlowService', ['start']);
@@ -64,6 +64,7 @@ describe('HomeComponent', () => {
 
     expect(overwriteGuardSpy.check).toHaveBeenCalledWith(0);
     expect(saveServiceSpy.newSaveDataAuto).toHaveBeenCalled();
+    expect(autoSaveSpy.clearUnsupportedMediaNotice).toHaveBeenCalled(); // alerte de l'évaluation précédente retirée
     expect(router.navigate).toHaveBeenCalledWith(['/info-eval']);
   });
 

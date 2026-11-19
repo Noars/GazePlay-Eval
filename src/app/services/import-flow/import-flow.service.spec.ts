@@ -111,30 +111,18 @@ describe('ImportFlowService', () => {
     expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
   });
 
-  it('import avec des fichiers incompatibles → évaluation importée, fichiers listés dans une alerte', async () => {
+  it("import → l'alerte des fichiers non lus est laissée à la reprise (affichée une seule fois, persistante)", async () => {
     dialogReturns({mode: 'consult', zipFile, slotIndex: null});
     saveServiceSpy.dataAuto.listScreens = [{
       name: 'Grille', type: 'stimuli',
-      values: [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, {
-        0: {imageName: 'papillon.svg'}, 1: {imageName: 'papillon.svg'}, 2: {imageName: 'ok.png'},
-      }, ''],
+      values: [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, {0: {imageName: 'papillon.svg'}}, ''],
     } as any];
 
     expect(await service.start()).toBe(true);
 
     expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
-    const warning = flashSpy.show.mock.calls.find(([type]) => type === 'warning');
-    expect(warning?.[1]).toContain('(2) : papillon.svg.');
-    expect(warning?.[2]).toBeGreaterThan(0);
-    expect(autoSaveSpy.tryResume).toHaveBeenCalledWith(true);
-  });
-
-  it('import sans fichier incompatible → aucune alerte', async () => {
-    dialogReturns({mode: 'consult', zipFile, slotIndex: null});
-
-    await service.start();
-
     expect(flashSpy.show).not.toHaveBeenCalledWith('warning', expect.anything(), expect.anything());
+    expect(autoSaveSpy.tryResume).toHaveBeenCalledWith(true);
   });
 
   it('mode sauvegarde → emplacement cible refusé → pas d\'import', async () => {

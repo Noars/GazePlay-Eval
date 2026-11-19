@@ -30,23 +30,50 @@ export class FlashService {
    * @param type le type de notification (info, warning, success, error).
    * @param message le contenu de la notification.
    * @param duration la durée d'affichage en ms ; par défaut celle des préférences.
+   * @returns l'identifiant de la notification, ou `null` si elle n'est pas affichée.
    */
-  show(type: Flash['type'] = 'info', message: string, duration?: number): void {
+  show(type: Flash['type'] = 'info', message: string, duration?: number): number | null {
     let d = duration ?? this.getDefaultDuration() * 1000;
     if (type === 'error') {
       d = Math.max(d, this.minimumErrorDuration);
     }
     if (d <= 0) {
-      return;
+      return null;
     }
+    const id = this.add(type, message, false);
+    setTimeout(() => this.remove(id), d);
+    return id;
+  }
+
+  /**
+   * Affiche une notification qui reste jusqu'à sa fermeture par l'utilisateur (ou par
+   * `remove`), quelle que soit la durée choisie dans les préférences.
+   * @returns l'identifiant de la notification.
+   */
+  showPersistent(type: Flash['type'], message: string): number {
+    return this.add(type, message, true);
+  }
+
+  /**
+   * Ajoute une notification. Un message identique déjà affiché est remplacé (évite
+   * l'empilement, par exemple de « modifications enregistrées » à chaque étape) ; au-delà
+   * de `maxVisible`, les plus anciennes notifications temporaires sont retirées, jamais
+   * les persistantes ni la nouvelle.
+   */
+  private add(type: Flash['type'], message: string, persistent: boolean): number {
     const id = this.counter++;
     this.flashs.update(f => {
-      // Un message identique déjà affiché est remplacé (évite l'empilement, par exemple
-      // de « modifications enregistrées » à chaque étape), et la pile est limitée.
-      const others = f.filter(flash => !(flash.message === message && flash.type === type));
-      return [...others, {id, message, type}].slice(-this.maxVisible);
+      const next = [...f.filter(flash => !(flash.message === message && flash.type === type)), {id, message, type, persistent}];
+      let excess = next.length - this.maxVisible;
+      return next.filter(flash => {
+        if (excess > 0 && !flash.persistent && flash.id !== id) {
+          excess--;
+          return false;
+        }
+        return true;
+      });
     });
-    setTimeout(() => this.remove(id), d);
+    return id;
   }
 
   /**

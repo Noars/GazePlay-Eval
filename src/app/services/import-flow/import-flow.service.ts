@@ -12,10 +12,6 @@ import {AutoSaveService} from '../auto-save/auto-save.service';
 import {FlashService} from '../flash-message/flash.service';
 import {I18nService} from '../../core/i18n/i18n.service';
 import {SlotReservation} from '../../core/tab/tab-session.service';
-import {findUnsupportedMedia} from '../../core/media/media-formats';
-
-/** Durée d'affichage de l'alerte après import : la liste des fichiers prend du temps à lire. */
-const UNSUPPORTED_WARNING_DURATION = 12000;
 
 /** Résultat renvoyé par la fenêtre d'import. */
 export interface ImportDialogResult {
@@ -108,13 +104,8 @@ export class ImportFlowService {
     }
 
     this.flashService.show('success', this.i18n.t('import.success', {name: this.saveService.getEvalName()}));
-    // Les fichiers incompatibles sont gardés : l'évaluation reste modifiable, seul le .zip est bloqué.
-    const unsupported = findUnsupportedMedia(this.saveService.dataAuto?.listScreens);
-    if (unsupported.length > 0) {
-      const names = [...new Set(unsupported.map(media => media.fileName))].join(', ');
-      this.flashService.show('warning', this.i18n.t('import.unsupported', {count: unsupported.length, names}), UNSUPPORTED_WARNING_DURATION);
-    }
     await this.router.navigate(['/home']);
+    // La reprise affiche l'alerte persistante des fichiers non lus par GazePlay-Learning.
     this.autoSaveService.tryResume(true);
     return true;
   }

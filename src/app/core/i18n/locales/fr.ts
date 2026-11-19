@@ -705,7 +705,7 @@ export const FR = {
   'import.missing.slot': 'Choisissez un emplacement de sauvegarde.',
   'import.error': 'Le fichier n\'a pas pu être importé. Vérifiez qu\'il s\'agit bien d\'un fichier .gpSave ou .zip exporté par GazePlay Eval.',
   'import.success': 'L\'évaluation « {name} » a été importée.',
-  'import.unsupported': 'Fichiers non lus par GazePlay-Learning ({count}) : {names}. Remplacez-les avant d\'exporter le .zip.',
+  'media.unsupportedInEval': 'Fichiers non lus par GazePlay-Learning ({count}) : {names}. Remplacez-les avant d\'exporter le .zip.',
   'overwrite.title': 'Remplacer une évaluation ?',
   'overwrite.body': 'L\'évaluation « {name} » va être remplacée par cette action. Elle a été modifiée pour la dernière fois le {date}.',
   'overwrite.tip.before': 'Conseil : téléchargez-la d\'abord au format ',

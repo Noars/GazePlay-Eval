@@ -704,7 +704,7 @@ export const EN: Record<TranslationKey, string> = {
   'import.missing.slot': 'Choose a save slot.',
   'import.error': 'The file could not be imported. Check that it is a .gpSave or .zip file exported by GazePlay Eval.',
   'import.success': 'The assessment “{name}” has been imported.',
-  'import.unsupported': 'Files not read by GazePlay-Learning ({count}): {names}. Replace them before exporting the .zip.',
+  'media.unsupportedInEval': 'Files not read by GazePlay-Learning ({count}): {names}. Replace them before exporting the .zip.',
   'overwrite.title': 'Replace an assessment?',
   'overwrite.body': 'The assessment “{name}” will be replaced by this action. It was last modified on {date}.',
   'overwrite.tip.before': 'Tip: download it first in ',

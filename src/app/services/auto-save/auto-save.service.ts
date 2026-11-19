@@ -8,6 +8,7 @@ import {LoadService} from '../load/load.service';
 import {ROUTE_TO_STEP, STEP_TO_ROUTE} from '../../shared/stepRoute.model';
 import {MediaCleanupService} from '../../core/media/media-cleanup.service';
 import {I18nService} from '../../core/i18n/i18n.service';
+import {findUnsupportedMedia} from '../../core/media/media-formats';
 
 /**
  * Sauvegarde automatique de l'évaluation en cours (slot 0, et emplacement nommé actif).
@@ -32,6 +33,8 @@ export class AutoSaveService implements OnDestroy {
   private subscription?: Subscription;
   private isResuming = false; // vrai pendant la restauration d'une session
   private readonly onPageHide = () => this.saveCurrentStep(false);
+  /** Alerte des fichiers non lus par GazePlay-Learning affichée pour l'évaluation chargée. */
+  private unsupportedNoticeId: number | null = null;
 
   init(): void {
     if (this.subscription) return;
@@ -106,6 +109,8 @@ export class AutoSaveService implements OnDestroy {
    * (ou au début du parcours si `resumeFromStart`).
    *
    * Ne fait rien s'il n'y a pas de sauvegarde ; affiche une erreur si l'étape est invalide.
+   * Utilisée à chaque chargement ou reprise d'une évaluation (import, emplacement, accueil,
+   * rechargement) : l'alerte des fichiers non lus par GazePlay-Learning y est réaffichée.
    */
   tryResume(resumeFromStart: boolean): void {
     const save = this.loadService.getSlot(0);
@@ -122,11 +127,34 @@ export class AutoSaveService implements OnDestroy {
     if (!route) return;
 
     this.saveService.loadIntoWorkspace(save);
+    this.showUnsupportedMediaNotice();
 
     this.isResuming = true;
     this.router.navigate([route]).finally(() => {
       this.isResuming = false;
     });
+  }
+
+  /**
+   * Affiche l'alerte listant les fichiers de l'évaluation chargée que GazePlay-Learning ne
+   * lit pas. Elle reste affichée jusqu'à sa fermeture par l'utilisateur (retour d'un
+   * utilisateur : une alerte temporaire passait inaperçue) ; celle d'une évaluation
+   * précédente est retirée. Les fichiers sont gardés : seul l'export `.zip` est bloqué.
+   */
+  showUnsupportedMediaNotice(): void {
+    this.clearUnsupportedMediaNotice();
+    const unsupported = findUnsupportedMedia(this.saveService.dataAuto?.listScreens);
+    if (unsupported.length === 0) return;
+    const names = [...new Set(unsupported.map(media => media.fileName))].join(', ');
+    this.unsupportedNoticeId = this.flashService.showPersistent('warning',
+      this.i18n.t('media.unsupportedInEval', {count: unsupported.length, names}));
+  }
+
+  /** Retire l'alerte des fichiers non lus (nouvelle évaluation, autre évaluation chargée). */
+  clearUnsupportedMediaNotice(): void {
+    if (this.unsupportedNoticeId === null) return;
+    this.flashService.remove(this.unsupportedNoticeId);
+    this.unsupportedNoticeId = null;
   }
 }
 

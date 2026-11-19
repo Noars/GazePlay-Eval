@@ -46,6 +46,7 @@ export class HomeComponent implements OnInit {
     return this.newEvalAction.run(async () => {
       if (!await this.overwriteGuard.check(0)) return;
       this.saveService.newSaveDataAuto();
+      this.autoSaveService.clearUnsupportedMediaNotice();
       this.router.navigate(['/info-eval']);
     });
   }

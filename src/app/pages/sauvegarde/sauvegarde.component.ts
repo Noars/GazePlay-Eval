@@ -227,6 +227,7 @@ export class SauvegardeComponent implements OnInit {
     return this.slotAction.run(async () => {
       if (!await this.overwriteGuard.check(0)) return;
       this.saveService.newSaveDataAuto();
+      this.autoSaveService.clearUnsupportedMediaNotice();
       this.router.navigate(['/info-eval']);
     });
   }

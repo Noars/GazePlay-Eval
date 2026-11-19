@@ -115,4 +115,30 @@ describe('FlashService', () => {
     service.show('info', 'C');
     expect(service.flashs().map(f => f.message)).toStrictEqual(['A', 'B', 'C']);
   });
+
+  it("showPersistent → reste affiché sans limite de durée, même si les messages sont désactivés, jusqu'à sa fermeture", () => {
+    vi.useFakeTimers();
+    void preferences.update({messageDuration: 0});
+    const id = service.showPersistent('warning', 'Fichiers non lus');
+
+    vi.advanceTimersByTime(24 * 60 * 60 * 1000);
+    expect(service.flashs().map(f => f.message)).toStrictEqual(['Fichiers non lus']);
+    expect(service.flashs()[0].persistent).toBe(true);
+
+    service.remove(id);
+    vi.advanceTimersByTime(300);
+    expect(service.flashs().length).toBe(0);
+  });
+
+  it("une alerte persistante n'est pas évincée par les notifications suivantes (limite de 3)", () => {
+    service.showPersistent('warning', 'Persistante');
+    ['A', 'B', 'C', 'D'].forEach(m => service.show('info', m));
+
+    expect(service.flashs().map(f => f.message)).toStrictEqual(['Persistante', 'C', 'D']);
+  });
+
+  it("show → renvoie l'identifiant, ou null si le message n'est pas affiché", () => {
+    expect(service.show('info', 'Visible', 1000)).toStrictEqual(expect.any(Number));
+    expect(service.show('info', 'Masqué', 0)).toBeNull();
+  });
 });
