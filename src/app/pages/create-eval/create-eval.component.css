@@ -96,14 +96,17 @@
   max-width: 100%;
   font-weight: 700;
 }
-.screen-item__warning {
+.screen-item__title {
   display: flex;
   align-items: center;
   gap: var(--gp-space-1);
-  font-size: var(--gp-text-xs);
+  max-width: 100%;
+  min-width: 0;
 }
-.screen-item__warning .bi {
+.screen-item__warning {
+  flex-shrink: 0;
   color: var(--gp-warning);
+  font-size: var(--gp-text-sm);
 }
 .screen-item__meta {
   max-width: 100%;

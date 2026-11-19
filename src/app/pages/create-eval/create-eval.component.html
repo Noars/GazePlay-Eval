@@ -60,16 +60,18 @@
                         [attr.aria-current]="screen === selectedScreen ? 'true' : null"
                         (click)="selectScreen(screen, i)"
                         (dblclick)="editScreen(screen, i)">
-                  <span class="screen-item__name gp-truncate">{{ screen.name || ('createEval.unnamed' | t) }}</span>
+                  <span class="screen-item__title">
+                    @if (unsupportedMediaNames(screen).length > 0) {
+                      <i class="bi bi-exclamation-triangle-fill screen-item__warning" aria-hidden="true" [title]="'createEval.screenUnsupported' | t"></i>
+                    }
+                    <span class="screen-item__name gp-truncate">{{ screen.name || ('createEval.unnamed' | t) }}</span>
+                  </span>
                   <span class="screen-item__meta">
                     <i class="bi" [class]="typeIcon(screen.type)" aria-hidden="true"></i>
                     {{ typeLabel(screen.type) }} · {{ screenSummary(screen) }}
                   </span>
                   @if (unsupportedMediaNames(screen).length > 0) {
-                    <span class="screen-item__warning">
-                      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-                      {{ 'createEval.screenUnsupported' | t }}
-                    </span>
+                    <span class="visually-hidden">, {{ 'createEval.screenUnsupported' | t }}</span>
                   }
                 </button>
               }

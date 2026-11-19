@@ -332,6 +332,9 @@ describe('CreateEvalComponent', () => {
 
     expect(el.querySelector('#preview-unsupported')?.textContent).toContain('papillon.svg, miaou.m4a');
     expect(el.querySelector('.screen-item__warning')).not.toBeNull();
+    // Triangle seul dans la liste (colonne étroite) ; texte complet pour les lecteurs d'écran et en info-bulle.
+    expect(el.querySelector('#screen-select-0')?.textContent).toContain('Fichiers non lus par GazePlay-Learning');
+    expect(el.querySelector('.screen-item__warning')?.getAttribute('title')).toBe('Fichiers non lus par GazePlay-Learning');
   });
 
   it('aperçu — écran sans fichier incompatible → ni triangle ni avertissement', () => {

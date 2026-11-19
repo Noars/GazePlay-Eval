@@ -25,6 +25,7 @@
         <app-guide-toc title="On this page" page="/guide" [items]="[
           {id: 'interface', label: 'Getting to know the interface'},
           {id: 'first-steps', label: 'Creating your first assessment in 5 steps'},
+          {id: 'glossary', label: 'The glossary'},
           {id: 'guide-pages', label: 'Guide pages'}
         ]"></app-guide-toc>
       </div>
@@ -34,7 +35,7 @@
         <div class="guide-section-body">
           <figure class="guide-figure">
             <img src="assets/guide/images/en/home-page.png" width="1280" height="760" loading="lazy"
-                 alt="Home page of GazePlay-Eval. At the top, the header with the Help, theme and language buttons. On the left, the menu with Home, Guide, Options, My saves, Load and Import a file. In the centre, the New assessment and Read the guide buttons, the Assessment in progress card and shortcuts to the saves.">
+                 alt="Home page of GazePlay-Eval. At the top, the header with the Help, theme and language buttons. On the left, the menu with Home, Guide, Glossary, Options, My saves, Load and Import a file. In the centre, the New assessment and Read the guide buttons, the Assessment in progress card and shortcuts to the saves.">
             <figcaption>
               The home page, with the header (top), the menu (left) and the assessment in progress (right).
               <a class="guide-figure__zoom" href="assets/guide/images/en/home-page.png" target="_blank" rel="noopener">View full size (new tab)</a>
@@ -109,6 +110,30 @@
         </div>
       </section>
 
+      <section class="guide-section-card" id="glossary" aria-labelledby="glossary-title">
+        <h2 class="guide-section-title" id="glossary-title">The glossary</h2>
+        <div class="guide-section-body">
+          <p>Not sure what <em>stimulus</em>, <em>fixation duration</em> or <code>.gpSave</code> means? The
+            <a routerLink="/lexique">Glossary</a> page, in the menu between Guide and Options, explains the terms used
+            in the application.</p>
+          <figure class="guide-figure">
+            <img src="assets/guide/images/en/lexique-page.png" width="1280" height="760" loading="lazy"
+                 alt="Glossary page. A Search for a term field, the number of terms and buttons for each letter, then the terms of the letter A in cards, each with its explanation, See also links and a Learn more in the guide link.">
+            <figcaption>
+              The glossary: search field, access by letter and explained terms.
+              <a class="guide-figure__zoom" href="assets/guide/images/en/lexique-page.png" target="_blank" rel="noopener">View full size (new tab)</a>
+            </figcaption>
+          </figure>
+          <ul class="guide-list">
+            <li><strong>Search for a term</strong>: the cursor is already in this field when the page opens. The search
+              covers the terms and their explanations, ignoring accents and capital letters.</li>
+            <li><strong>Letters</strong>: go straight to the terms beginning with a letter.</li>
+            <li><strong>See also</strong> leads to related terms, and <strong>Learn more in the guide</strong> to the
+              guide section that covers the subject.</li>
+          </ul>
+        </div>
+      </section>
+
       <section class="guide-section-card" id="guide-pages" aria-labelledby="guide-pages-title">
         <h2 class="guide-section-title" id="guide-pages-title">Guide pages</h2>
         <div class="guide-section-body">
@@ -172,6 +197,7 @@
         <app-guide-toc title="Sur cette page" page="/guide" [items]="[
           {id: 'interface', label: 'Découvrir l\'interface'},
           {id: 'first-steps', label: 'Créer une première évaluation en 5 étapes'},
+          {id: 'glossary', label: 'Le lexique'},
           {id: 'guide-pages', label: 'Les pages du guide'}
         ]"></app-guide-toc>
       </div>
@@ -181,7 +207,7 @@
         <div class="guide-section-body">
           <figure class="guide-figure">
             <img src="assets/guide/images/fr/home-page.png" width="1280" height="760" loading="lazy"
-                 alt="Page d'accueil de GazePlay-Eval. En haut, l'en-tête avec les boutons Aide, thème et langue. À gauche, le menu avec Accueil, Guide, Options, Mes sauvegardes, Charger et Importer un fichier. Au centre, les boutons Nouvelle évaluation et Lire le guide, la carte Évaluation en cours et les raccourcis vers les sauvegardes.">
+                 alt="Page d'accueil de GazePlay-Eval. En haut, l'en-tête avec les boutons Aide, thème et langue. À gauche, le menu avec Accueil, Guide, Lexique, Options, Mes sauvegardes, Charger et Importer un fichier. Au centre, les boutons Nouvelle évaluation et Lire le guide, la carte Évaluation en cours et les raccourcis vers les sauvegardes.">
             <figcaption>
               La page d'accueil, avec l'en-tête (en haut), le menu (à gauche) et l'évaluation en cours (à droite).
               <a class="guide-figure__zoom" href="assets/guide/images/fr/home-page.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
@@ -255,6 +281,30 @@
                 (voir <a routerLink="/guide/sauvegardes">Sauvegarde et chargement</a>).</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="guide-section-card" id="glossary" aria-labelledby="glossary-title">
+        <h2 class="guide-section-title" id="glossary-title">Le lexique</h2>
+        <div class="guide-section-body">
+          <p>Un doute sur ce qu'est un <em>stimulus</em>, une <em>durée de fixation</em> ou un fichier
+            <code>.gpSave</code> ? La page <a routerLink="/lexique">Lexique</a>, dans le menu entre Guide et Options,
+            explique les termes employés dans l'application.</p>
+          <figure class="guide-figure">
+            <img src="assets/guide/images/fr/lexique-page.png" width="1280" height="760" loading="lazy"
+                 alt="Page Lexique. Un champ Rechercher un terme, le nombre de termes et un bouton par lettre, puis les termes de la lettre B en cartes, chacun avec son explication, des liens Voir aussi et un lien En savoir plus dans le guide.">
+            <figcaption>
+              Le lexique : recherche, accès par lettre et termes expliqués.
+              <a class="guide-figure__zoom" href="assets/guide/images/fr/lexique-page.png" target="_blank" rel="noopener">Voir en grand (nouvel onglet)</a>
+            </figcaption>
+          </figure>
+          <ul class="guide-list">
+            <li><strong>Rechercher un terme</strong> : le curseur est déjà dans ce champ à l'ouverture de la page. La
+              recherche porte sur les termes et leurs explications, sans tenir compte des accents ni des majuscules.</li>
+            <li><strong>Lettres</strong> : accès direct aux termes qui commencent par une lettre.</li>
+            <li><strong>Voir aussi</strong> mène aux termes proches, et <strong>En savoir plus dans le guide</strong> à la
+              section du guide qui traite le sujet.</li>
+          </ul>
         </div>
       </section>
 

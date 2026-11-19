@@ -70,7 +70,9 @@
           <li>Go to step 5, <strong>Download and export</strong> (button <strong>Next: export</strong> at step 4).</li>
           <li>Check the <strong>Summary</strong> and any <strong>Points to check</strong>.</li>
           <li>Click <strong>Export the .zip</strong> to get the file for GazePlay-Learning, and/or
-            <strong>Download the .gpSave</strong> to keep a backup. The file is saved where your browser stores its downloads.</li>
+            <strong>Download the .gpSave</strong> to keep a backup. The file is saved where your browser stores its downloads.
+            If the assessment contains files that GazePlay-Learning cannot read, a confirmation is asked before exporting
+            the <code>.zip</code>.</li>
         </ol>
         <p>An assessment already stored in a slot can also be downloaded as <code>.gpSave</code> from
           <a routerLink="/sauvegarde">My saves</a>, without opening it.</p>
@@ -92,7 +94,7 @@
         <ol class="guide-steps">
           <li><strong>1. File to import</strong>: drag a file onto the area, or click <strong>Browse…</strong>. The
             <code>.gpSave</code> and <code>.zip</code> files exported by GazePlay-Eval are accepted. Files in a format
-            GazePlay-Learning cannot read are kept and listed in a message after the import.</li>
+            GazePlay-Learning cannot read are kept and listed in an alert after the import.</li>
           <li><strong>2. What do you want to do?</strong>
             <ul class="guide-list">
               <li><strong>Open</strong>: opens the assessment without storing it in a slot.</li>
@@ -135,6 +137,9 @@
         <p>A message confirms the import (“The assessment “…” has been imported.”) and the assessment opens at step 1,
           <strong>Assessment information</strong>. It is now the assessment in progress, saved automatically like any
           other.</p>
+        <p>If it contains files that GazePlay-Learning cannot read, an alert lists them. It stays on screen until you
+          close it with its cross, and appears again each time the assessment is opened or resumed, as long as these
+          files have not been replaced.</p>
         <ul class="guide-list">
           <li>With <strong>Open</strong>, it is not in a slot: save it from <a routerLink="/sauvegarde">My saves</a> if
             you want to keep it, because the next new or opened assessment will replace it.</li>
@@ -223,7 +228,8 @@
           <li>Vérifiez le <strong>Récapitulatif</strong> et les éventuels <strong>Points à vérifier</strong>.</li>
           <li>Cliquez sur <strong>Exporter le .zip</strong> pour obtenir le fichier destiné à GazePlay-Learning, et/ou
             sur <strong>Télécharger le .gpSave</strong> pour garder une sauvegarde. Le fichier est enregistré là où votre
-            navigateur range ses téléchargements.</li>
+            navigateur range ses téléchargements. Si l'évaluation contient des fichiers que GazePlay-Learning ne lit pas,
+            une confirmation est demandée avant l'export du <code>.zip</code>.</li>
         </ol>
         <p>Une évaluation déjà rangée dans un emplacement peut aussi être téléchargée en <code>.gpSave</code> depuis
           <a routerLink="/sauvegarde">Mes sauvegardes</a>, sans l'ouvrir.</p>
@@ -246,7 +252,7 @@
           <li><strong>1. Fichier à importer</strong> : glissez un fichier dans la zone, ou cliquez sur
             <strong>Parcourir…</strong>. Les fichiers <code>.gpSave</code> et <code>.zip</code> exportés par
             GazePlay-Eval sont acceptés. Les fichiers dans un format que GazePlay-Learning ne lit pas sont conservés et
-            listés dans un message après l'import.</li>
+            listés dans une alerte après l'import.</li>
           <li><strong>2. Que voulez-vous faire ?</strong>
             <ul class="guide-list">
               <li><strong>Ouvrir</strong> : ouvre l'évaluation sans l'enregistrer dans un emplacement.</li>
@@ -290,6 +296,9 @@
         <p>Un message confirme l'importation (« L'évaluation « … » a été importée. ») et l'évaluation s'ouvre à
           l'étape 1, <strong>Informations de l'évaluation</strong>. C'est désormais l'évaluation en cours, enregistrée
           automatiquement comme les autres.</p>
+        <p>Si elle contient des fichiers que GazePlay-Learning ne lit pas, une alerte les liste. Elle reste affichée
+          jusqu'à ce que vous la fermiez avec sa croix, et réapparaît à chaque ouverture ou reprise de l'évaluation tant
+          que ces fichiers n'ont pas été remplacés.</p>
         <ul class="guide-list">
           <li>Avec <strong>Ouvrir</strong>, elle n'est dans aucun emplacement : rangez-la depuis
             <a routerLink="/sauvegarde">Mes sauvegardes</a> si vous voulez la garder, car la prochaine évaluation créée ou
