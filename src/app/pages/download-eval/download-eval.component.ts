@@ -12,6 +12,7 @@ import {
 import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
 import {findUnsupportedMedia, UnsupportedMedia} from '../../core/media/media-formats';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 
 /** Point de vigilance affiché avant l'export (non bloquant). */
 export interface ExportCheck {
@@ -24,8 +25,9 @@ export interface ExportCheck {
  *
  * - « Télécharger » produit un `.gpSave` (sauvegarde réimportable dans GazePlay Eval) ;
  * - « Exporter » produit le `.zip` lu par GazePlay-Learning.
- * Les vérifications sont indicatives, sauf les médias dans un format que Learning refuse : ils
- * bloquent le `.zip`, qu'il ne pourrait pas ouvrir. Le `.gpSave` reste toujours possible.
+ * Les vérifications sont indicatives. Les médias dans un format que Learning ne lit pas sont
+ * listés et l'export du `.zip` demande alors une confirmation (Learning a ses propres contrôles) ;
+ * le `.gpSave` n'est pas concerné.
  */
 @Component({
   selector: 'app-download-eval',
@@ -36,11 +38,14 @@ export interface ExportCheck {
 })
 export class DownloadEvalComponent implements OnInit {
   private readonly i18n = inject(I18nService);
+  private readonly confirmService = inject(ConfirmService);
+  /** Vrai pendant la fenêtre de confirmation (un second clic n'en ouvre pas une autre). */
+  private confirming = false;
 
   /** Action en cours (affiche un indicateur et désactive les boutons). */
   busy: 'export' | 'download' | null = null;
   checks: ExportCheck[] = [];
-  /** Médias qui bloquent l'export `.zip`. */
+  /** Médias non lus par GazePlay-Learning : l'export `.zip` demande une confirmation. */
   unsupportedMedia: UnsupportedMedia[] = [];
 
   constructor(private saveService: SaveService,
@@ -59,7 +64,7 @@ export class DownloadEvalComponent implements OnInit {
     const label = this.i18n.t('download.check.label', {
       name: media.screenName || this.i18n.t('download.check.fallbackName', {n: media.screenIndex + 1}),
     });
-    return this.i18n.t('download.blocked.item', {label, name: media.fileName});
+    return this.i18n.t('download.unsupported.item', {label, name: media.fileName});
   }
 
   get evalName(): string {
@@ -88,7 +93,8 @@ export class DownloadEvalComponent implements OnInit {
   }
 
   async goExport(): Promise<void> {
-    if (this.busy || this.unsupportedMedia.length > 0) return;
+    if (this.busy || this.confirming) return;
+    if (this.unsupportedMedia.length > 0 && !await this.confirmUnsupportedExport()) return;
     this.busy = 'export';
     try {
       await this.downloadService.generateEvalZip(this.saveService);
@@ -98,6 +104,29 @@ export class DownloadEvalComponent implements OnInit {
       this.flashService.show('error', this.i18n.t('download.export.error'));
     } finally {
       this.busy = null;
+    }
+  }
+
+  /**
+   * Demande confirmation avant d'exporter un `.zip` contenant des fichiers que GazePlay-Learning
+   * ne lit pas (ils peuvent y être refusés ou ne pas s'afficher).
+   * @returns `true` si l'utilisateur confirme l'export.
+   */
+  private async confirmUnsupportedExport(): Promise<boolean> {
+    this.confirming = true;
+    try {
+      const names = [...new Set(this.unsupportedMedia.map(media => media.fileName))].join(', ');
+      return await this.confirmService.confirm({
+        title: this.i18n.t('download.unsupported.confirm.title'),
+        message: [
+          this.i18n.t('download.unsupported.confirm.message1', {count: this.unsupportedMedia.length, names}),
+          this.i18n.t('download.unsupported.confirm.message2'),
+        ],
+        confirmLabel: this.i18n.t('download.unsupported.confirm.confirm'),
+        tone: 'warning',
+      });
+    } finally {
+      this.confirming = false;
     }
   }
 

@@ -139,7 +139,7 @@ export class AutoSaveService implements OnDestroy {
    * Affiche l'alerte listant les fichiers de l'évaluation chargée que GazePlay-Learning ne
    * lit pas. Elle reste affichée jusqu'à sa fermeture par l'utilisateur (retour d'un
    * utilisateur : une alerte temporaire passait inaperçue) ; celle d'une évaluation
-   * précédente est retirée. Les fichiers sont gardés : seul l'export `.zip` est bloqué.
+   * précédente est retirée. Les fichiers sont gardés : l'export `.zip` demande une confirmation.
    */
   showUnsupportedMediaNotice(): void {
     this.clearUnsupportedMediaNotice();

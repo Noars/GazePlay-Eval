@@ -2,7 +2,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   gap: var(--gp-space-5);
-  align-items: start;
+  /* Récapitulatif et colonne des actions de même hauteur. */
+  align-items: stretch;
 }
 
 @media (max-width: 899.98px) {

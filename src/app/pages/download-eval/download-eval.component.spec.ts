@@ -4,6 +4,7 @@ import {DownloadEvalComponent} from './download-eval.component';
 import {SaveService} from '../../services/save/save.service';
 import {DownloadService} from '../../services/download/download.service';
 import {FlashService} from '../../services/flash-message/flash.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import type {Mocked} from 'vitest';
 import {createSpyObj} from '../../testing/spy-obj';
 
@@ -14,6 +15,7 @@ describe('DownloadEvalComponent', () => {
   let saveSpy: Mocked<SaveService>;
   let routerSpy: Mocked<Router>;
   let flashSpy: Mocked<FlashService>;
+  let confirmSpy: Mocked<ConfirmService>;
 
   function stimuliScreen(cells: Record<number, any>, values: Record<number, any> = {}) {
     const v: any[] = [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, cells, ''];
@@ -32,6 +34,8 @@ describe('DownloadEvalComponent', () => {
     saveSpy.getEvalName.mockReturnValue('Couleurs');
     routerSpy = createSpyObj('Router', ['navigate']);
     flashSpy = createSpyObj('FlashService', ['show']);
+    confirmSpy = createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(true));
 
     downloadSpy.generateEvalZip.mockReturnValue(Promise.resolve());
     downloadSpy.generateSlotZip.mockReturnValue(Promise.resolve(true));
@@ -44,6 +48,7 @@ describe('DownloadEvalComponent', () => {
         {provide: SaveService, useValue: saveSpy},
         {provide: Router, useValue: routerSpy},
         {provide: FlashService, useValue: flashSpy},
+        {provide: ConfirmService, useValue: confirmSpy},
       ]
     }).compileComponents();
 
@@ -112,23 +117,70 @@ describe('DownloadEvalComponent', () => {
     fixture.detectChanges();
   }
 
-  it('média incompatible → .zip bloqué avec la liste des fichiers, .gpSave disponible', async () => {
+  it('média incompatible → fichiers listés en avertissement, boutons .zip et .gpSave disponibles', () => {
     withUnsupportedImage();
 
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('#export-blocked')?.textContent).toContain('« Grille » : papillon.svg');
+    expect(el.querySelector('#export-unsupported')?.textContent).toContain('« Grille » : papillon.svg');
+    expect(el.querySelector('#export-unsupported')?.classList).toContain('gp-callout--warning');
     const exportButton = el.querySelector<HTMLButtonElement>('.gp-btn--primary.gp-btn--block')!;
     const backupButton = el.querySelector<HTMLButtonElement>('.gp-btn--secondary.gp-btn--block')!;
-    expect(exportButton.disabled).toBe(true);
-    expect(exportButton.getAttribute('aria-describedby')).toBe('export-blocked');
+    expect(exportButton.disabled).toBe(false);
+    expect(exportButton.getAttribute('aria-describedby')).toBe('export-unsupported');
     expect(backupButton.disabled).toBe(false);
     expect(el.querySelector('.gp-callout--success')).toBeNull();
+  });
+
+  it('média incompatible → export .zip après confirmation, fichiers cités dans la question', async () => {
+    withUnsupportedImage();
 
     await component.goExport();
+
+    expect(confirmSpy.confirm).toHaveBeenCalledTimes(1);
+    const data = confirmSpy.confirm.mock.calls[0][0];
+    expect(data.tone).toBe('warning');
+    expect((data.message as string[]).join(' ')).toContain('papillon.svg');
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('média incompatible → confirmation refusée : aucun export, boutons réactivés', async () => {
+    withUnsupportedImage();
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(false));
+
+    await component.goExport();
+
     expect(downloadSpy.generateEvalZip).not.toHaveBeenCalled();
+    expect(component.busy).toBeNull();
+  });
+
+  it('média incompatible → double clic : une seule fenêtre de confirmation', async () => {
+    withUnsupportedImage();
+    let answer!: (value: boolean) => void;
+    confirmSpy.confirm.mockReturnValue(new Promise<boolean>(resolve => answer = resolve));
+
+    const first = component.goExport();
+    await component.goExport();
+    answer(true);
+    await first;
+
+    expect(confirmSpy.confirm).toHaveBeenCalledTimes(1);
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('média incompatible → le .gpSave se télécharge sans confirmation', async () => {
+    withUnsupportedImage();
 
     await component.goDownload();
+
+    expect(confirmSpy.confirm).not.toHaveBeenCalled();
     expect(downloadSpy.generateSlotZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('sans média incompatible → export .zip direct, sans confirmation', async () => {
+    await component.goExport();
+
+    expect(confirmSpy.confirm).not.toHaveBeenCalled();
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
   });
 
   it('écran sans nom → le fichier incompatible est rattaché au numéro de l\'écran', () => {
