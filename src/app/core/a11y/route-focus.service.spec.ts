@@ -56,6 +56,20 @@ describe('RouteFocusService', () => {
     });
   }
 
+  it('page désignant un élément (data-route-focus) → focus sur cet élément plutôt que sur le titre', async () => {
+    const input = document.createElement('input');
+    input.setAttribute('data-route-focus', '');
+    input.setAttribute('aria-label', 'Rechercher');
+    main.appendChild(input);
+    service.start();
+
+    document.body.dispatchEvent(new Event('click', {bubbles: true}));
+    await navigate('/lexique');
+
+    expect(document.activeElement).toBe(input);
+    expect(input.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('page sans h1 → focus sur la zone de contenu principale', async () => {
     heading.remove();
     service.start();

@@ -23,6 +23,7 @@ import {GuideSauvegardeComponent} from '../pages/guide/guide-sauvegarde/guide-sa
 import {GuideImportComponent} from '../pages/guide/guide-import/guide-import.component';
 import {GuideOptionsComponent} from '../pages/guide/guide-options/guide-options.component';
 import {GuideDepannageComponent} from '../pages/guide/guide-depannage/guide-depannage.component';
+import {LexiqueComponent} from '../pages/lexique/lexique.component';
 import {NavbarComponent} from '../components/navbar/navbar.component';
 import {MenuComponent} from '../components/menu/menu.component';
 import {ProgressBarComponent} from '../components/progress-bar/progress-bar.component';
@@ -114,6 +115,7 @@ describe('Accessibilité (contrôles automatisés)', () => {
     ['Guide import', GuideImportComponent],
     ['Guide options', GuideOptionsComponent],
     ['Guide dépannage', GuideDepannageComponent],
+    ['Lexique', LexiqueComponent],
   ];
 
   for (const [label, component] of pages) {

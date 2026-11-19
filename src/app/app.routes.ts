@@ -16,6 +16,7 @@ import {GuideImportComponent} from './pages/guide/guide-import/guide-import.comp
 import {GuideSauvegardeComponent} from './pages/guide/guide-sauvegarde/guide-sauvegarde.component';
 import {GuideOptionsComponent} from './pages/guide/guide-options/guide-options.component';
 import {GuideDepannageComponent} from './pages/guide/guide-depannage/guide-depannage.component';
+import {LexiqueComponent} from './pages/lexique/lexique.component';
 
 /**
  * Routes de l'application (routage par hash : `/#/home`).
@@ -43,6 +44,7 @@ export const routes: Routes = [
       {path: 'depannage', component: GuideDepannageComponent, title: 'title.guideHelp'},
     ]
   },
+  {path: 'lexique', component: LexiqueComponent, title: 'title.glossary'},
   {path: 'no-page', component: NoPage, title: 'title.notFound'},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   // Toute adresse inconnue mène à la page « introuvable » plutôt qu'à une page blanche.

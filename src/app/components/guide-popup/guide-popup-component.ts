@@ -122,6 +122,10 @@ export class GuidePopupComponent implements OnChanges, OnDestroy {
         {title: 'helpPanel.load.slot.title', body: 'helpPanel.load.slot.body'},
       ],
     },
+    lexique: {
+      title: 'helpPanel.glossary.title',
+      intro: 'helpPanel.glossary.intro',
+    },
     option: {
       title: 'helpPanel.options.title',
       intro: 'helpPanel.options.intro',

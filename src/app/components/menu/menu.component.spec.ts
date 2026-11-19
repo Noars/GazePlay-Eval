@@ -45,7 +45,8 @@ describe('MenuComponent', () => {
     const links = Array.from(nav.querySelectorAll('a')) as HTMLAnchorElement[];
 
     expect(nav.getAttribute('aria-label')).toBe('Navigation principale');
-    expect(links.map(a => a.textContent?.trim())).toStrictEqual(['Accueil', 'Guide', 'Options', 'Mes sauvegardes', 'Charger']);
+    expect(links.map(a => a.textContent?.trim())).toStrictEqual(['Accueil', 'Guide', 'Lexique', 'Options', 'Mes sauvegardes', 'Charger']);
+    expect(links[2].getAttribute('href')).toBe('/lexique'); // entre le guide et les options
     links.forEach(link => expect(link.getAttribute('href')).toBeTruthy());
     expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
   });

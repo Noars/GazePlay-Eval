@@ -39,6 +39,7 @@ export class MenuComponent {
   readonly navigationItems: NavItem[] = [
     {label: 'nav.home', icon: 'bi-house', route: '/home', exact: true},
     {label: 'nav.guide', icon: 'bi-book', route: '/guide'},
+    {label: 'nav.glossary', icon: 'bi-journal-text', route: '/lexique'},
     {label: 'nav.options', icon: 'bi-sliders', route: '/option'},
   ];
 

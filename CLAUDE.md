@@ -15,7 +15,7 @@ Pile : Angular 21 (standalone, `@if`/`@for`, signals, zone.js, routage par hash)
 - État : `SaveService.dataAuto` (mutable, modifié directement par les étapes) ; `AutoSaveService` sauvegarde à chaque étape du parcours, en quittant une étape pour une page hors parcours (menu, en-tête) et à la fermeture/au rechargement de l'onglet (`pagehide`).
 
 ## Conventions
-- Interface bilingue (français par défaut, anglais) : aucun texte affiché en dur, passer par le pipe `t` ou `I18nService.t` et ajouter la clé dans `fr.ts` **et** `en.ts` (le compilateur et `i18n.spec.ts` vérifient la parité). Les guides ont un bloc par langue. Ne jamais traduire les valeurs enregistrées/exportées.
+- Interface bilingue (français par défaut, anglais) : aucun texte affiché en dur, passer par le pipe `t` ou `I18nService.t` et ajouter la clé dans `fr.ts` **et** `en.ts` (le compilateur et `i18n.spec.ts` vérifient la parité). Les guides ont un bloc par langue ; le lexique (`/lexique`, entre Guide et Options dans le menu) a ses termes dans `pages/lexique/lexique-entries.ts`, une version par langue (parité et liens vérifiés par `lexique.component.spec.ts`). Ne jamais traduire les valeurs enregistrées/exportées.
 - Composants standalone ; nouveaux fichiers de style en `.scss`. Certains composants gardent un `.css` (contenu réécrit) : n'y utiliser **que du CSS plat** (pas d'imbrication Sass).
 - Réutiliser les classes `.gp-*` et les composants `shared/ui` plutôt que de nouveaux styles locaux.
 - `.editorconfig` : 2 espaces, quotes simples en TS. Pas de linter/formateur.

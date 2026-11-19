@@ -1,0 +1,109 @@
+.lexique-tools {
+  margin-bottom: var(--gp-space-5);
+}
+
+.lexique-search {
+  position: relative;
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    left: var(--gp-space-3);
+    color: var(--gp-text-muted);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  &__input {
+    padding-left: calc(var(--gp-space-3) * 2 + 1em);
+  }
+}
+
+.lexique-count {
+  margin: var(--gp-space-2) 0 0;
+}
+
+.lexique-letters {
+  margin-top: var(--gp-space-3);
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gp-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0 var(--gp-space-2);
+    border: 1px solid var(--gp-primary-subtle-border);
+    border-radius: var(--gp-radius-sm);
+    background: var(--gp-primary-subtle);
+    color: var(--gp-primary-text);
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.lexique-empty {
+  margin-bottom: var(--gp-space-5);
+}
+
+.lexique-group {
+  margin-bottom: var(--gp-space-5);
+  scroll-margin-top: calc(var(--gp-header-height, 0px) + var(--gp-space-4));
+
+  &__letter {
+    margin: 0 0 var(--gp-space-3);
+    padding-bottom: var(--gp-space-2);
+    border-bottom: 2px solid var(--gp-border);
+    color: var(--gp-primary-text);
+    font-size: var(--gp-text-xl);
+    scroll-margin-top: calc(var(--gp-header-height, 0px) + var(--gp-space-4));
+  }
+
+  &__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: var(--gp-space-3);
+  }
+}
+
+.lexique-term {
+  min-width: 0;
+
+  &__name {
+    margin: 0 0 var(--gp-space-2);
+    font-size: var(--gp-text-lg);
+    overflow-wrap: anywhere;
+    scroll-margin-top: calc(var(--gp-header-height, 0px) + var(--gp-space-4));
+  }
+
+  &__definition {
+    margin: 0;
+  }
+
+  &__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gp-space-1);
+    margin-top: var(--gp-space-3);
+    padding-top: var(--gp-space-2);
+    border-top: 1px solid var(--gp-border);
+    font-size: var(--gp-text-sm);
+  }
+
+  &__label {
+    margin-right: var(--gp-space-1);
+    color: var(--gp-text-muted);
+  }
+}
