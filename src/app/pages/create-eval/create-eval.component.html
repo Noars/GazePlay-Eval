@@ -65,6 +65,12 @@
                     <i class="bi" [class]="typeIcon(screen.type)" aria-hidden="true"></i>
                     {{ typeLabel(screen.type) }} · {{ screenSummary(screen) }}
                   </span>
+                  @if (unsupportedMediaNames(screen).length > 0) {
+                    <span class="screen-item__warning">
+                      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                      {{ 'createEval.screenUnsupported' | t }}
+                    </span>
+                  }
                 </button>
               }
 
@@ -133,6 +139,14 @@
           </div>
 
           <div class="gp-card__body preview__body">
+            @if (unsupportedMediaNames(selectedScreen); as names) {
+              @if (names.length > 0) {
+                <div class="gp-callout gp-callout--warning preview__warning" id="preview-unsupported">
+                  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                  <p class="gp-callout__body mb-0">{{ 'createEval.preview.unsupported' | t: {names: names.join(', ')} }}</p>
+                </div>
+              }
+            }
             <div class="preview__stage">
               @if (selectedScreen.type === stimuliScreenConstModel) {
                 <div class="stimuli-preview"
@@ -149,6 +163,9 @@
                               [class.is-good]="selectedScreen.values[12][i].goodAnswer === true">
                           <i class="bi" [class.bi-check-lg]="selectedScreen.values[12][i].goodAnswer === true" [class.bi-x-lg]="selectedScreen.values[12][i].goodAnswer !== true"></i>
                         </span>
+                        @if (isUnsupportedCellImage(selectedScreen.values[12][i]) || isUnsupportedCellSound(selectedScreen.values[12][i])) {
+                          <span class="stimuli-preview__warning" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        }
                         @if (cellImageUrls[i]) {
                           <img class="stimuli-preview__image" [src]="cellImageUrls[i]" alt="">
                         } @else if (selectedScreen.values[12][i].imageName) {
@@ -166,12 +183,22 @@
                     <div class="gp-btn-group">
                       @for (n of getStimuliCells(); track $index; let i = $index) {
                         @if (selectedScreen.values[12][i]?.soundName && !selectedScreen.values[12][i]?.hidden) {
+                          @if (isUnsupportedCellSound(selectedScreen.values[12][i])) {
+                            <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" disabled
+                                    [id]="'preview-sound-' + i"
+                                    [title]="'editor.cell.unsupported' | t">
+                              <i class="bi bi-exclamation-triangle-fill sound-list__warning" aria-hidden="true"></i>
+                              {{ 'createEval.preview.cell' | t: {n: i + 1} }}<span class="visually-hidden"> : {{ selectedScreen.values[12][i].soundName }}, {{ 'editor.cell.unsupported' | t }}</span>
+                            </button>
+                          } @else {
                           <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm"
+                                  [id]="'preview-sound-' + i"
                                   [attr.aria-pressed]="playingSoundCell === i"
                                   (click)="toggleCellSound(i)">
                             <i class="bi" [class.bi-volume-up]="playingSoundCell !== i" [class.bi-pause-fill]="playingSoundCell === i" aria-hidden="true"></i>
                             {{ 'createEval.preview.cell' | t: {n: i + 1} }}<span class="visually-hidden"> : {{ selectedScreen.values[12][i].soundName }}</span>
                           </button>
+                          }
                         }
                       }
                     </div>
@@ -196,13 +223,17 @@
                       <span class="gp-muted">{{ 'createEval.preview.noImage' | t }}</span>
                     }
                   } @else if (instructionPreviewType === 'Video') {
-                    @if (instructionPreviewUrl) {
+                    @if (isUnsupportedInstructionMedia()) {
+                      <span class="gp-muted">{{ 'createEval.preview.unsupportedMedia' | t: {name: selectedScreen.values[4]} }}</span>
+                    } @else if (instructionPreviewUrl) {
                       <video [src]="instructionPreviewUrl" controls class="instruction-preview__media" [attr.aria-label]="'createEval.preview.videoLabel' | t: {name: selectedScreen.values[4]}"></video>
                     } @else {
                       <span class="gp-muted">{{ 'createEval.preview.noVideo' | t }}</span>
                     }
                   } @else if (instructionPreviewType === 'Son') {
-                    @if (instructionPreviewUrl) {
+                    @if (isUnsupportedInstructionMedia()) {
+                      <span class="gp-muted">{{ 'createEval.preview.unsupportedMedia' | t: {name: selectedScreen.values[4]} }}</span>
+                    } @else if (instructionPreviewUrl) {
                       <button type="button"
                               class="gp-btn gp-btn--secondary gp-btn--lg"
                               [attr.aria-pressed]="instructionSoundPlaying"

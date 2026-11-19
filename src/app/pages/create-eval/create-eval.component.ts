@@ -23,6 +23,7 @@ import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.comp
 import {FlashService} from '../../services/flash-message/flash.service';
 import {I18nService, TranslationKey} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {findUnsupportedMedia, isSupportedMediaName} from '../../core/media/media-formats';
 import {INSTRUCTION_MEDIA_OPTIONS} from '../../components/global-instruction-screen/global-instruction-screen.component';
 
 type ScreenType = typeof transitionScreenConstModel | typeof instructionScreenConstModel | typeof stimuliScreenConstModel;
@@ -331,6 +332,30 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     return Array.from({length: rows * cols}, () => null);
   }
 
+  /** Noms (sans doublon) des fichiers de l'écran que GazePlay-Learning ne lit pas. */
+  unsupportedMediaNames(screen: screenTypeModel | null): string[] {
+    if (!screen) return [];
+    return [...new Set(findUnsupportedMedia([screen]).map(media => media.fileName))];
+  }
+
+  /** Image de case déjà présente (sauvegarde, import) dans un format non lu par GazePlay-Learning. */
+  isUnsupportedCellImage(cell: any): boolean {
+    return !!cell?.imageName && !isSupportedMediaName(cell.imageName, 'image');
+  }
+
+  /** Son de case dans un format non lu par GazePlay-Learning : il n'est pas lu dans l'aperçu. */
+  isUnsupportedCellSound(cell: any): boolean {
+    return !!cell?.soundName && !isSupportedMediaName(cell.soundName, 'sound');
+  }
+
+  /** Média de l'écran d'instruction sélectionné dans un format non lu par GazePlay-Learning. */
+  isUnsupportedInstructionMedia(): boolean {
+    const screen = this.selectedScreen;
+    if (screen?.type !== instructionScreenConstModel || !screen.values[2] || screen.values[3] === 'Texte') return false;
+    const name = screen.values[4];
+    return !!name && !isSupportedMediaName(name, instructionMediaKind(screen.values[3]));
+  }
+
   /** Vrai si au moins une case visible de l'écran sélectionné a un son. */
   hasSounds(): boolean {
     if (this.selectedScreen?.type !== stimuliScreenConstModel) return false;
@@ -374,7 +399,9 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     const name = screen.values[4];
     if (!name) return;
 
-    const expectedType = type === 'Video' ? 'video' : type === 'Son' ? 'sound' : 'image';
+    const expectedType = instructionMediaKind(type);
+    // Son ou vidéo non lus par GazePlay-Learning : pas de lecture dans l'aperçu (seul l'avertissement s'affiche).
+    if (expectedType !== 'image' && !isSupportedMediaName(name, expectedType)) return;
     let file: Blob | undefined = screen.values[5] instanceof Blob ? screen.values[5] : undefined;
     if (!file) {
       file = (await this.media.resolve(screen.values[8] || name, expectedType))?.file;
@@ -474,7 +501,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
     const screen = this.selectedScreen;
     if (!screen || screen.type !== stimuliScreenConstModel) return;
     const cell = screen.values[12][cellIndex];
-    if (!cell || !cell.soundName) return;
+    if (!cell || !cell.soundName || this.isUnsupportedCellSound(cell)) return;
 
     let file: Blob | undefined = cell.soundFile instanceof Blob ? cell.soundFile : undefined;
     if (!file && (cell.soundId || cell.soundName)) {
@@ -513,7 +540,7 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
       return;
     }
     this.stopSound();
-    if (!this.instructionPreviewUrl) return;
+    if (!this.instructionPreviewUrl || this.isUnsupportedInstructionMedia()) return;
 
     const audio = new Audio(this.instructionPreviewUrl);
     audio.onended = () => this.stopSound();
@@ -632,4 +659,9 @@ export class CreateEvalComponent implements OnInit, OnDestroy {
       }
     }
   }
+}
+
+/** Type de média d'un écran d'instruction d'après sa valeur exportée (`values[3]`). */
+function instructionMediaKind(type: string): 'image' | 'video' | 'sound' {
+  return type === 'Video' ? 'video' : type === 'Son' ? 'sound' : 'image';
 }

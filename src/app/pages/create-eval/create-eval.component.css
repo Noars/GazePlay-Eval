@@ -96,6 +96,15 @@
   max-width: 100%;
   font-weight: 700;
 }
+.screen-item__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-1);
+  font-size: var(--gp-text-xs);
+}
+.screen-item__warning .bi {
+  color: var(--gp-warning);
+}
 .screen-item__meta {
   max-width: 100%;
   overflow: hidden;
@@ -262,6 +271,25 @@
 }
 .stimuli-preview__badge.is-good {
   background: var(--gp-success);
+}
+.stimuli-preview__warning {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--gp-warning-subtle);
+  color: var(--gp-warning);
+  font-size: 0.65rem;
+}
+.sound-list__warning {
+  color: var(--gp-warning);
+}
+.preview__warning {
+  margin: var(--gp-space-4) var(--gp-space-4) var(--gp-space-3);
 }
 
 .sound-list {

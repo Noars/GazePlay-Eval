@@ -297,6 +297,89 @@ describe('CreateEvalComponent', () => {
     expect(saveServiceSpy.saveDataAuto).toHaveBeenCalled();
   });
 
+  // ─── Fichiers non lus par GazePlay-Learning ──────────────────────────────
+
+  /** Grille de 3 cases : image .svg, son .m4a, case valide. */
+  function unsupportedStimuliScreen(): screenTypeModel {
+    return {
+      name: 'Incompatible', type: 'stimuli',
+      values: [1, 3, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, {
+        0: {imageName: 'papillon.svg', imageId: 'TestEval/papillon.svg', soundName: '', soundId: '', goodAnswer: true, hidden: false},
+        1: {imageName: '', imageId: '', soundName: 'miaou.m4a', soundId: 'TestEval/miaou.m4a', goodAnswer: false, hidden: false},
+        2: {imageName: 'chat.png', imageId: 'TestEval/chat.png', soundName: 'bip.mp3', soundId: 'TestEval/bip.mp3', goodAnswer: false, hidden: false},
+      }, ''],
+    };
+  }
+
+  function showScreen(screen: screenTypeModel): HTMLElement {
+    component.listScreens = [screen];
+    component.selectScreen(screen, 0);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('aperçu — triangle jaune sur les cases dont un fichier est incompatible, comme dans l\'éditeur', () => {
+    const el = showScreen(unsupportedStimuliScreen());
+    const cells = el.querySelectorAll('.stimuli-preview__cell');
+
+    expect(cells[0].querySelector('.stimuli-preview__warning')).not.toBeNull(); // image .svg
+    expect(cells[1].querySelector('.stimuli-preview__warning')).not.toBeNull(); // son .m4a
+    expect(cells[2].querySelector('.stimuli-preview__warning')).toBeNull();
+  });
+
+  it('aperçu — avertissement listant les fichiers, et écran signalé dans la liste', () => {
+    const el = showScreen(unsupportedStimuliScreen());
+
+    expect(el.querySelector('#preview-unsupported')?.textContent).toContain('papillon.svg, miaou.m4a');
+    expect(el.querySelector('.screen-item__warning')).not.toBeNull();
+  });
+
+  it('aperçu — écran sans fichier incompatible → ni triangle ni avertissement', () => {
+    const el = showScreen(stimuliScreen());
+
+    expect(el.querySelector('.stimuli-preview__warning')).toBeNull();
+    expect(el.querySelector('#preview-unsupported')).toBeNull();
+    expect(el.querySelector('.screen-item__warning')).toBeNull();
+  });
+
+  it('aperçu — son de case incompatible : bouton désactivé et aucune lecture', async () => {
+    const el = showScreen(unsupportedStimuliScreen());
+    const button = el.querySelector('#preview-sound-1') as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('format non lu par GazePlay-Learning');
+    expect((el.querySelector('#preview-sound-2') as HTMLButtonElement).disabled).toBe(false);
+
+    await component.toggleCellSound(1);
+    expect(mediaSpy.resolve).not.toHaveBeenCalledWith('TestEval/miaou.m4a', 'sound');
+    expect(component.playingSoundCell).toBeNull();
+  });
+
+  it('aperçu — son de consigne incompatible : pas de bouton de lecture, message affiché, fichier non chargé', async () => {
+    const screen: screenTypeModel = {
+      name: 'Consigne', type: 'instruction',
+      values: [true, 10, true, 'Son', 'consigne.m4a', undefined, false, 1, 'TestEval/consigne.m4a'],
+    };
+    mediaSpy.resolve.mockClear();
+    const el = showScreen(screen);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(mediaSpy.resolve).not.toHaveBeenCalled();
+    expect(component.instructionPreviewUrl).toBe('');
+    expect(component.isUnsupportedInstructionMedia()).toBe(true);
+    expect(el.querySelector('.instruction-preview')?.textContent).toContain('il n\'est pas lu dans l\'aperçu');
+    expect(el.querySelector('.instruction-preview button')).toBeNull();
+  });
+
+  it('aperçu — son de consigne accepté → pas considéré comme incompatible', () => {
+    component.selectedScreen = {
+      name: 'Consigne', type: 'instruction',
+      values: [true, 10, true, 'Son', 'consigne.mp3', undefined, false, 1, 'TestEval/consigne.mp3'],
+    };
+    expect(component.isUnsupportedInstructionMedia()).toBe(false);
+  });
+
   // ─── Navigation ───────────────────────────────────────────────────────────
 
   it('backToSetupEval → sauvegarde puis /setup-eval', () => {
