@@ -61,11 +61,11 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeTrue();
+    expect(report.ok).toBe(true);
     expect(report.screenCount).toBe(2);
-    expect(report.missingFields).toEqual([]);
-    expect(report.missingMedia).toEqual([]);
-    expect(report.unusedMedia).toEqual([]);
+    expect(report.missingFields).toStrictEqual([]);
+    expect(report.missingMedia).toStrictEqual([]);
+    expect(report.unusedMedia).toStrictEqual([]);
   });
 
   it('champ de fin d’écran manquant → signalé dans missingFields (le bug Delphine)', async () => {
@@ -80,10 +80,24 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeFalse();
+    expect(report.ok).toBe(false);
     const fields = report.missingFields.map(f => f.field);
     expect(fields).toContain('Mettre un temps de fixation');
     expect(fields).toContain('Combien de temps de fixation');
+  });
+
+  it('média présent dans un format refusé par Learning → unsupportedMedia, ok=false', async () => {
+    const stimuli = {...fullStimuli, "Liste des stimuli": {'0': {imageName: 'papillon.svg', soundName: '', goodAnswer: true}}};
+    const zip = await makeZip({
+      'E/evalData.json': JSON.stringify([stimuli]),
+      'E/images/papillon.svg': new Blob(['<svg/>']),
+    });
+
+    const report = await service.validateZip(zip);
+
+    expect(report.ok).toBe(false);
+    expect(report.missingMedia).toStrictEqual([]);
+    expect(report.unsupportedMedia).toStrictEqual([{screenIndex: 0, type: 'image', fileName: 'papillon.svg'}]);
   });
 
   it('média référencé absent → signalé dans missingMedia', async () => {
@@ -93,10 +107,10 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeFalse();
+    expect(report.ok).toBe(false);
     expect(report.missingMedia.length).toBe(1);
-    expect(report.missingMedia[0]).toEqual(
-      jasmine.objectContaining({ type: 'video', fileName: 'manquant.mp4', screenIndex: 0 })
+    expect(report.missingMedia[0]).toStrictEqual(
+      expect.objectContaining({ type: 'video', fileName: 'manquant.mp4', screenIndex: 0 })
     );
   });
 
@@ -107,8 +121,8 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeFalse();
-    expect(report.missingMedia.map(m => m.fileName).sort()).toEqual(['ding.mp3', 'img.png']);
+    expect(report.ok).toBe(false);
+    expect(report.missingMedia.map(m => m.fileName).sort()).toStrictEqual(['ding.mp3', 'img.png']);
   });
 
   it('média présent mais non référencé → listé dans unusedMedia', async () => {
@@ -120,8 +134,8 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeTrue();
-    expect(report.unusedMedia).toEqual(['Eval/images/orphelin.png']);
+    expect(report.ok).toBe(true);
+    expect(report.unusedMedia).toStrictEqual(['Eval/images/orphelin.png']);
   });
 
   it('écran d’instruction Texte → aucun média requis', async () => {
@@ -139,14 +153,14 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeTrue();
-    expect(report.referencedMedia).toEqual([]);
+    expect(report.ok).toBe(true);
+    expect(report.referencedMedia).toStrictEqual([]);
   });
 
   it('archive illisible → erreur, ok=false', async () => {
     const report = await service.validateZip(new File([new Blob(['ceci n’est pas un zip'])], 'x.zip'));
 
-    expect(report.ok).toBeFalse();
+    expect(report.ok).toBe(false);
     expect(report.errors.length).toBeGreaterThan(0);
   });
 
@@ -155,7 +169,7 @@ describe('EvalValidationService', () => {
 
     const report = await service.validateZip(zip);
 
-    expect(report.ok).toBeFalse();
-    expect(report.errors.some(e => e.includes('evalData.json'))).toBeTrue();
+    expect(report.ok).toBe(false);
+    expect(report.errors.some(e => e.includes('evalData.json'))).toBe(true);
   });
 });

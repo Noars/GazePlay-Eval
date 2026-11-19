@@ -1,0 +1,60 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  font-weight: 400;
+}
+
+.help-tip__button {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gp-primary-text);
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover,
+  &[aria-expanded="true"] {
+    background: var(--gp-primary-subtle);
+  }
+}
+
+.help-tip__content {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 50%;
+  z-index: 50;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(20rem, 80vw);
+  padding: var(--gp-space-3);
+  border: 1px solid var(--gp-border-strong);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface);
+  color: var(--gp-text);
+  box-shadow: var(--gp-shadow-md);
+  font-size: var(--gp-text-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  text-transform: none;
+  white-space: pre-line;
+}
+
+@media (max-width: 575.98px) {
+  .help-tip__content {
+    position: fixed;
+    top: auto;
+    bottom: var(--gp-space-4);
+    left: var(--gp-space-3);
+    right: var(--gp-space-3);
+    transform: none;
+    max-width: none;
+    width: auto;
+  }
+}

@@ -1,171 +1,59 @@
-<div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
-  <div class="card w-100" style="max-width: 800px;">
-    <div class="card-header">
-      <h3 class="mb-0 fw-semibold">Personnalisation des paramètres globaux des écrans</h3>
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <span class="gp-page-header__eyebrow">{{ 'setup.manual.eyebrow' | t }}</span>
+      <h1 class="gp-page-header__title">{{ 'setup.manual.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'setup.manual.lead' | t }}</p>
     </div>
-    <div class="card-body">
-      <div class="alert alert-info">
-        Lors de cette étape, vous serez amené.e.s à créer des écrans qui se succéderont : écrans d'instructions, écrans de stimuli et écrans de transition <br>
-        Sur cette page, nous vous proposons de renseignez les caractéristiques globales de chacun de ces types d'écrans, afin que vous ne soyez pas obligé.e.s de les entrer manuellement à chaque nouvelle création d'écrans <br>
-        Vous pourrez toutefois procéder à des modifications par la suite !
-      </div>
-      <div class="accordion mt-4" id="globalParams">
+  </header>
 
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button fw-semibold"
-                    [class.collapsed]="openAccordion !== 'transition'"
-                    type="button"
-                    (click) = "toggleAccordion('transition')">
-              Paramètres globaux des écrans de transition
-            </button>
-          </h2>
-          <div class="accordion-collapse collapse"
-               [class.show]="openAccordion === 'transition'">
+  @for (section of sections; track section.id) {
+    <section class="gp-disclosure">
+      <h2 class="gp-disclosure__heading">
+        <button type="button"
+                class="gp-disclosure__trigger"
+                [id]="'global-' + section.id + '-trigger'"
+                [attr.aria-expanded]="openAccordion === section.id"
+                [attr.aria-controls]="'global-' + section.id + '-panel'"
+                (click)="toggleAccordion(section.id)">
+          <span class="gp-disclosure__icon" aria-hidden="true"><i class="bi" [class]="section.icon"></i></span>
+          <span>
+            {{ section.title | t }}
+            <span class="gp-disclosure__summary">{{ section.summary | t }}</span>
+          </span>
+          <i class="bi bi-chevron-down gp-disclosure__chevron" aria-hidden="true"></i>
+        </button>
+      </h2>
+      <div class="gp-disclosure__panel"
+           role="region"
+           [id]="'global-' + section.id + '-panel'"
+           [attr.aria-labelledby]="'global-' + section.id + '-trigger'"
+           [hidden]="openAccordion !== section.id">
+        @switch (section.id) {
+          @case ('transition') {
             <app-global-transition-screen [globalTransitionScreenInfos]="globalTransitionScreenInfos"></app-global-transition-screen>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button fw-semibold"
-                    [class.collapsed]="openAccordion !== 'instruction'"
-                    type="button"
-                    (click) = "toggleAccordion('instruction')">
-              Paramètres globaux des écrans d'instruction
-            </button>
-          </h2>
-          <div class="accordion-collapse collapse"
-               [class.show]="openAccordion === 'instruction'">
+          }
+          @case ('instruction') {
             <app-global-instruction-screen [globalInstructionScreenInfos]="globalInstructionScreenInfos"></app-global-instruction-screen>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button class="accordion-button fw-semibold"
-                    [class.collapsed]="openAccordion !== 'stimuli'"
-                    type="button"
-                    (click) = "toggleAccordion('stimuli')">
-              Paramètres globaux des écrans de stimuli
-            </button>
-          </h2>
-          <div class="accordion-collapse collapse"
-               [class.show]="openAccordion === 'stimuli'">
-            <div class="accordion-body">
-
-              <div class="param-section-title">Taille de la grille</div>
-              <div class="param-row">
-                <span class="param-label">Nombre de lignes</span>
-                <div class="param-control">
-                  <input type="number" id="nbRows" class="form-control" min="1" step="1" aria-describedby="nbRowsInfo" [(ngModel)]="globalStimuliScreenInfos[0]">
-                  <span id="nbRowsInfo" class="form-text">Min. 1</span>
-                </div>
-              </div>
-              <div class="param-row">
-                <span class="param-label">Nombre de colonnes</span>
-                <div class="param-control">
-                  <input type="number" id="nbCols" class="form-control" min="1" step="1" aria-describedby="nbColsInfo" [(ngModel)]="globalStimuliScreenInfos[1]">
-                  <span id="nbColsInfo" class="form-text">Min. 1</span>
-                </div>
-              </div>
-
-              <div class="param-section-title">Temps maximum par écran</div>
-              <div class="param-row">
-                <span class="param-label">Mettre un temps maximum par écran ?</span>
-                <div class="param-control">
-                  <div class="form-check mb-0">
-                    <input type="radio" name="timeScreen" class="form-check-input" id="timeScreenYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[2]">
-                    <label class="form-check-label" for="timeScreenYes">Oui</label>
-                  </div>
-                  <div class="form-check mb-0">
-                    <input type="radio" name="timeScreen" class="form-check-input" id="timeScreenNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[2]">
-                    <label class="form-check-label" for="timeScreenNo">Non</label>
-                  </div>
-                </div>
-              </div>
-              @if (globalStimuliScreenInfos[2]) {
-                <div class="param-row">
-                  <span class="param-label">Combien de temps ?</span>
-                  <div class="param-control">
-                    <div class="input-group w-auto">
-                      <input type="number" id="maxTimeScreen" class="form-control" min="0.1" step="0.1" aria-describedby="maxTimeScreenInfo" [(ngModel)]="globalStimuliScreenInfos[3]">
-                      <span class="input-group-text">secondes</span>
-                    </div>
-                  </div>
-                </div>
-              }
-
-              <div class="param-section-title">Durée de fixation pour validation</div>
-              <div class="param-row">
-                <span class="param-label">Quelle durée ?</span>
-                <div class="param-control">
-                  <div class="input-group w-auto">
-                    <input type="number" id="nbFixationLength" class="form-control" min="0.1" step="0.1" aria-describedby="nbFixationLengthInfo" [(ngModel)]="globalStimuliScreenInfos[4]">
-                    <span class="input-group-text">secondes</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="param-section-title">Nombre de stimuli à valider pour passage à l'écran suivant</div>
-              <div class="param-row">
-<span class="param-label">
-  Maximum : {{ (Number(globalStimuliScreenInfos[0]) || 0) * (Number(globalStimuliScreenInfos[1]) || 0) }} (lignes × colonnes)
-</span>                <div class="param-control">
-                  <input type="number" id="nbStimuli" class="form-control" min="1"
-                         [max]="Number(globalStimuliScreenInfos[0]) * Number(globalStimuliScreenInfos[1])"
-                         step="1" aria-describedby="nbStimuliInfo" [(ngModel)]="globalStimuliScreenInfos[5]">
-                </div>
-              </div>
-
-              <div class="param-section-title">Emplacement stimuli</div>
-              <div class="param-row">
-                <span class="param-label">Placer les stimuli aléatoirement ?</span>
-                <div class="param-control">
-                  <div class="form-check mb-0">
-                    <input type="radio" name="randomStimuli" class="form-check-input" id="randomStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[7]">
-                    <label class="form-check-label" for="randomStimuliYes">Oui</label>
-                  </div>
-                  <div class="form-check mb-0">
-                    <input type="radio" name="randomStimuli" class="form-check-input" id="randomStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[7]">
-                    <label class="form-check-label" for="randomStimuliNo">Non</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="param-section-title">Quand un stimuli est validé</div>
-              <div class="param-row">
-                <span class="param-label">Cacher le stimuli après sélection ?</span>
-                <div class="param-control">
-                  <div class="form-check mb-0">
-                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliYes" [value]="true" [(ngModel)]="globalStimuliScreenInfos[6]">
-                    <label class="form-check-label" for="disableStimuliYes">Oui</label>
-                  </div>
-                  <div class="form-check mb-0">
-                    <input type="radio" name="disableStimuli" class="form-check-input" id="disableStimuliNo" [value]="false" [(ngModel)]="globalStimuliScreenInfos[6]">
-                    <label class="form-check-label" for="disableStimuliNo">Non</label>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
+          }
+          @case ('stimuli') {
+            <app-global-stimuli-screen [globalStimuliScreenInfos]="globalStimuliScreenInfos"></app-global-stimuli-screen>
+          }
+        }
       </div>
+    </section>
+  }
 
-      <div class="d-flex justify-content-center align-items-start mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="startCreateEvalManual()">
-          Commencer la création manuelle de l'évaluation
-          <i class="bi bi-play-fill"></i>
-        </button>
-      </div>
-      <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="backToEvalChoice()">
-          ← Retour
-        </button>
-      </div>
-
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="backToEvalChoice()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'setup.changeMode' | t }}
+    </button>
+    <div class="gp-actions__end">
+      <button type="button" class="gp-btn gp-btn--primary" (click)="startCreateEvalManual()">
+        {{ 'setup.manual.next' | t }}
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
     </div>
-  </div>
+  </nav>
 </div>

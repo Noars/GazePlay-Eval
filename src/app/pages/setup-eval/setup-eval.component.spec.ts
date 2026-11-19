@@ -5,6 +5,8 @@ import { SaveService } from '../../services/save/save.service';
 import { EvalManualComponent } from '../../components/eval-manual/eval-manual.component';
 import { EvalAutomaticComponent } from '../../components/eval-automatic/eval-automatic.component';
 import { Component } from '@angular/core';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 @Component({ selector: 'app-eval-manual',   template: '', standalone: true }) class EvalManualStub {}
 @Component({ selector: 'app-eval-automatic', template: '', standalone: true }) class EvalAutomaticStub {}
@@ -12,13 +14,13 @@ import { Component } from '@angular/core';
 describe('SetupEvalComponent', () => {
   let component: SetupEvalComponent;
   let fixture: ComponentFixture<SetupEvalComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let saveServiceSpy: Mocked<SaveService>;
 
   beforeEach(async () => {
-    routerSpy      = jasmine.createSpyObj('Router', ['navigate']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['getEvalName']);
-    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    routerSpy      = createSpyObj('Router', ['navigate']);
+    saveServiceSpy = createSpyObj('SaveService', ['getEvalName']);
+    routerSpy.navigate.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [SetupEvalComponent],
@@ -64,6 +66,6 @@ describe('SetupEvalComponent', () => {
 
   it('backToInfoParticipant → navigue vers /info-participant', () => {
     component.backToInfoParticipant();
-    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/info-participant']);
+    expect(routerSpy.navigate).toHaveBeenCalledExactlyOnceWith(['/info-participant']);
   });
 });

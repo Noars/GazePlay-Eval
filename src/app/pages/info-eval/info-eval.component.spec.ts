@@ -6,16 +6,18 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { formatTypeModel } from '../../shared/saveModel';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 describe('InfoEvalComponent', () => {
   let component: InfoEvalComponent;
   let fixture: ComponentFixture<InfoEvalComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
-  let saveServiceSpy: jasmine.SpyObj<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let saveServiceSpy: Mocked<SaveService>;
 
   beforeEach(async () => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    saveServiceSpy = jasmine.createSpyObj('SaveService', ['saveDataAuto'], {
+    routerSpy = createSpyObj('Router', ['navigate']);
+    saveServiceSpy = createSpyObj('SaveService', ['saveDataAuto'], {
       dataAuto: {
         nomEval: 'EvalTest',
         format: 'Csv&Xlsx' as formatTypeModel,
@@ -70,7 +72,7 @@ describe('InfoEvalComponent', () => {
   });
 
   it('devrait sauvegarder et naviguer vers /info-participant quand goToInfoParticipant() est appelé', () => {
-    spyOn(component, 'saveData').and.callThrough();
+    vi.spyOn(component, 'saveData');
 
     component.goToInfoParticipant();
 
@@ -79,11 +81,33 @@ describe('InfoEvalComponent', () => {
   });
 
   it('devrait réagir correctement au clic sur le bouton "Suivant"', () => {
-    spyOn(component, 'goToInfoParticipant');
-    const button = fixture.nativeElement.querySelector('button');
+    vi.spyOn(component, 'goToInfoParticipant').mockImplementation(() => undefined);
+    const button = fixture.nativeElement.querySelector('button[type="submit"]');
     button.click();
     fixture.detectChanges();
 
     expect(component.goToInfoParticipant).toHaveBeenCalled();
+  });
+
+  it("nom contenant un caractère interdit → erreur affichée et pas de navigation", () => {
+    component.onNameChange('Classe 3/4');
+    component.goToInfoParticipant();
+    fixture.detectChanges();
+
+    expect(component.nameError).toContain('/');
+    expect(fixture.nativeElement.querySelector('#evalName').getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.querySelector('#evalNameError')).not.toBeNull();
+  });
+
+  it("onNameChange / onFormatChange → répercutés immédiatement dans l'évaluation de travail", () => {
+    component.onNameChange('Couleurs');
+    component.onFormatChange('Xlsx');
+    expect(component['saveService'].dataAuto.nomEval).toBe('Couleurs');
+    expect(component['saveService'].dataAuto.format).toBe('Xlsx');
+  });
+
+  it("propose les trois formats avec leurs valeurs historiques", () => {
+    const values = Array.from(fixture.nativeElement.querySelectorAll('input[name="resultType"]') as NodeListOf<HTMLInputElement>).map(i => i.value);
+    expect(values).toStrictEqual(['Csv&Xlsx', 'Csv', 'Xlsx']);
   });
 });

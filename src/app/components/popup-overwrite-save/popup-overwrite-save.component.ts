@@ -2,6 +2,7 @@ import {Component, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {DatePipe} from '@angular/common';
 import {saveModel} from '../../shared/saveModel';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 /**
  * Popup d'avertissement affiché lorsqu'une action est sur le point d'écraser
@@ -18,7 +19,7 @@ import {saveModel} from '../../shared/saveModel';
   templateUrl: './popup-overwrite-save.component.html',
   styleUrl: './popup-overwrite-save.component.css',
   standalone: true,
-  imports: [DatePipe]
+  imports: [DatePipe, TranslatePipe]
 })
 export class PopupOverwriteSaveComponent {
 

@@ -1,25 +1,44 @@
-<main class="mt-5">
-  <app-navbar></app-navbar>
-  @if (currentStepIndex >= 0){
-    <app-progress-bar [steps]="steps" [currentStepIndex]="currentStepIndex"></app-progress-bar>
+<div class="gp-app">
+  <a class="gp-skip-link" href="#main-content" (click)="skipToContent($event)">{{ 'app.skipLink' | t }}</a>
+
+  <app-navbar (menuRequested)="openMenu()"></app-navbar>
+
+  @if (storageNotices.upgradeBlocked()) {
+    <div class="gp-callout gp-callout--warning app-banner" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <div class="gp-callout__body">
+        <strong class="gp-callout__title">{{ 'app.upgradeBlocked.title' | t }}</strong>
+        {{ 'app.upgradeBlocked.body' | t }}
+      </div>
+    </div>
   }
-  <router-outlet></router-outlet>
-</main>
-<footer class="bg-body-tertiary text-center text-muted py-4 shadow-sm">
-  <div class="container d-flex flex-column align-items-center">
-    <a href="https://github.com/Noars/GazePlay-Eval" target="_blank" class="text-muted mb-2">
-      <i class="bi bi-github fs-4"></i>
-    </a>
-    <div class="fw-semibold">
-      © 2026 GazePlayEval
+
+  <div class="gp-shell">
+    <aside class="gp-shell__sidebar">
+      <app-menu mode="sidebar"></app-menu>
+    </aside>
+
+    <div class="gp-shell__content">
+      @if (currentStepIndex >= 0) {
+        <app-progress-bar [steps]="steps()" [currentStepIndex]="currentStepIndex"></app-progress-bar>
+      }
+
+      <main id="main-content" class="gp-shell__main" tabindex="-1">
+        <router-outlet></router-outlet>
+      </main>
+
+      <footer class="gp-footer">
+        <span>{{ 'app.footer.privacy' | t }}</span>
+        <a href="https://github.com/Noars/GazePlay-Eval" target="_blank" rel="noopener noreferrer">
+          <i class="bi bi-github" aria-hidden="true"></i>
+          {{ 'app.footer.source' | t }}<span class="visually-hidden">{{ 'common.newTab' | t }}</span>
+        </a>
+      </footer>
     </div>
   </div>
-</footer>
+</div>
 
-<!-- Pour les flash-messages -->
+<app-menu #drawerMenu mode="drawer"></app-menu>
+
+<!-- Notifications (zone annoncée aux lecteurs d'écran) -->
 <app-flash></app-flash>
-
-<!-- Bouton d'aide contextuel (présent sur toutes les pages) -->
-@if (showGuideButton){
-  <app-icon-guide-popup></app-icon-guide-popup>
-}

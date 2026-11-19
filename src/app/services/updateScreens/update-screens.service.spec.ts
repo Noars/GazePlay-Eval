@@ -21,7 +21,7 @@ describe('UpdateScreensService', () => {
     const updated = service.updateTransitionScreen(screen, 'TestTransition', newValues);
 
     expect(updated.name).toBe('TestTransition');
-    expect(updated.values).toEqual(['nomTest',1, 2, 3, 4]);
+    expect(updated.values).toStrictEqual(['nomTest',1, 2, 3, 4]);
   });
 
   it('updateInstructionScreen met à jour le nom et les valeurs', () => {
@@ -50,12 +50,12 @@ describe('UpdateScreensService', () => {
     expect(updated.name).toBe('TestStimuli');
     expect(updated.values[0]).toBe(2);
     expect(updated.values[1]).toBe(3);
-    expect(updated.values[2]).toBeTrue();
+    expect(updated.values[2]).toBe(true);
     expect(updated.values[3]).toBe(10);
     expect(updated.values[4]).toBe(1.5);
     expect(updated.values[6]).toBe(4);
-    expect(updated.values[7]).toBeFalse();
-    expect(updated.values[8]).toBeTrue();
+    expect(updated.values[7]).toBe(false);
+    expect(updated.values[8]).toBe(true);
   });
 
   it('updateStimuliScreen retourne le même objet screen modifié', () => {
@@ -73,8 +73,8 @@ describe('UpdateScreensService', () => {
 
     const updated = service.updateTransitionScreen(screen, 'T', []);
 
-    expect(updated.values).toEqual([false, 0, false, false, 0]);
-    expect(updated.values.some(v => v === undefined)).toBeFalse();
+    expect(updated.values).toStrictEqual([false, 0, false, false, 0]);
+    expect(updated.values.some(v => v === undefined)).toBe(false);
   });
 
   it('updateInstructionScreen — global undefined → conserve les valeurs par défaut', () => {
@@ -84,8 +84,8 @@ describe('UpdateScreensService', () => {
 
     const updated = service.updateInstructionScreen(screen, 'I', undefined);
 
-    expect(updated.values).toEqual([false, 1, false, 'Image', '', '', false, 1]);
-    expect(updated.values.some(v => v === undefined)).toBeFalse();
+    expect(updated.values).toStrictEqual([false, 1, false, 'Image', '', '', false, 1]);
+    expect(updated.values.some(v => v === undefined)).toBe(false);
   });
 
   it('updateScreen — préserve une valeur globale légitime false / 0 (pas de retour au défaut)', () => {
@@ -93,6 +93,6 @@ describe('UpdateScreensService', () => {
 
     const updated = service.updateTransitionScreen(screen, 'T', [false, 0, false, false, 0]);
 
-    expect(updated.values).toEqual([false, 0, false, false, 0]);
+    expect(updated.values).toStrictEqual([false, 0, false, false, 0]);
   });
 });

@@ -5,7 +5,11 @@
   "projects": {
     "GazePlay-Eval": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -26,13 +30,11 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css"
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "src/styles.scss"
             ],
-            "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ]
+            "inlineStyleLanguage": "scss"
           },
           "configurations": {
             "production": {
@@ -74,21 +76,18 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "buildTarget": "::development",
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+            "runner": "vitest",
+            "runnerConfig": "vitest-base.config.ts",
+            "setupFiles": [
+              "src/app/testing/global-test-setup.spec.ts"
             ],
-            "styles": [
-              "src/styles.css"
+            "exclude": [
+              "src/app/testing/global-test-setup.spec.ts",
+              "src/app/core/tab/testing/fake-tabs.spec.ts"
             ]
           }
         }

@@ -1,31 +1,49 @@
-import {Component} from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
-import {ThemeService} from '../../services/theme/theme.service';
-import {MenuComponent} from '../menu/menu.component';
-import {Router} from '@angular/router';
+import {Component, EventEmitter, inject, Output} from '@angular/core';
+import {Router, RouterLink} from '@angular/router';
+import {UserPreferencesService} from '../../core/preferences/user-preferences.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {SaveService} from '../../services/save/save.service';
+import {IconGuidePopupComponent} from '../icon-guide-popup/icon-guide-popup-component';
+import {LanguageMenuComponent} from '../language-menu/language-menu.component';
 
+/**
+ * En-tête de l'application : accès au menu (petits écrans), marque, aide contextuelle,
+ * bascule de thème et choix de la langue (liste déroulante). Les options restent accessibles
+ * depuis le menu.
+ */
 @Component({
   selector: 'app-navbar',
-  imports: [MenuComponent, NgOptimizedImage],
+  imports: [RouterLink, IconGuidePopupComponent, LanguageMenuComponent, TranslatePipe],
   templateUrl: './navbar.component.html',
-  standalone: true,
-  styleUrl: './navbar.component.css'
+  styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
+  private readonly router = inject(Router);
+  private readonly preferences = inject(UserPreferencesService);
+  private readonly saveService = inject(SaveService);
 
-  constructor(private router: Router,
-              private themeService: ThemeService) {
+  /** Demande d'ouverture de la navigation en tiroir. */
+  @Output() menuRequested = new EventEmitter<void>();
+
+  changeTheme(): void {
+    void this.preferences.toggleTheme();
   }
 
-  changeTheme(){
-    this.themeService.toggleTheme();
+  /** Icône du thème actuel : lune en thème sombre, soleil en thème clair. */
+  getTheme(): 'sun' | 'moon' {
+    return this.preferences.resolvedTheme() === 'dark' ? 'moon' : 'sun';
   }
 
-  getTheme(){
-    return this.themeService.getTheme() === 'dark' ? 'sun' : 'moon';
+  isDark(): boolean {
+    return this.preferences.resolvedTheme() === 'dark';
   }
 
-  goToHome(): void {
-    this.router.navigate(['/home']);
+  getEvalName(): string {
+    return this.saveService.getEvalName();
+  }
+
+  /** Le bouton d'aide contextuelle est masqué dans les pages du guide. */
+  showGuideButton(): boolean {
+    return !this.router.url.includes('/guide');
   }
 }

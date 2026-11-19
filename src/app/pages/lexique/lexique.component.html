@@ -1,0 +1,89 @@
+<div class="gp-page">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <h1 class="gp-page-header__title">{{ 'glossary.title' | t }}</h1>
+      <p class="gp-page-header__lead">{{ 'glossary.lead' | t }}</p>
+    </div>
+  </header>
+
+  <div class="gp-card lexique-tools">
+    <div class="gp-card__body">
+      <label class="form-label" for="lexique-search">{{ 'glossary.search.label' | t }}</label>
+      <div class="lexique-search">
+        <i class="bi bi-search lexique-search__icon" aria-hidden="true"></i>
+        <input type="search"
+               id="lexique-search"
+               data-route-focus
+               class="form-control lexique-search__input"
+               autocomplete="off"
+               aria-describedby="lexique-count"
+               [placeholder]="'glossary.search.placeholder' | t"
+               [value]="query()"
+               (input)="onSearch($any($event.target).value)">
+      </div>
+      <p class="gp-text-sm gp-muted lexique-count" id="lexique-count" aria-live="polite">
+        {{ (count() > 1 ? 'glossary.count.other' : 'glossary.count.one') | t: {count: count()} }}
+      </p>
+
+      @if (groups().length > 0) {
+        <nav class="lexique-letters" [attr.aria-label]="'glossary.letters' | t">
+          <ul class="lexique-letters__list">
+            @for (group of groups(); track group.letter) {
+              <li>
+                <a class="lexique-letters__link" [href]="hrefFor('letter-' + group.letter)" (click)="goTo($event, 'letter-' + group.letter)">{{ group.letter }}</a>
+              </li>
+            }
+          </ul>
+        </nav>
+      }
+    </div>
+  </div>
+
+  @if (groups().length === 0) {
+    <div class="gp-empty lexique-empty">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <p class="gp-empty__title mb-0">{{ 'glossary.empty.title' | t: {query: query().trim()} }}</p>
+      <p>{{ 'glossary.empty.body' | t }}</p>
+      <button type="button" class="gp-btn gp-btn--secondary gp-btn--sm" (click)="clearSearch()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+        {{ 'glossary.search.clear' | t }}
+      </button>
+    </div>
+  }
+
+  @for (group of groups(); track group.letter) {
+    <section class="lexique-group" [attr.aria-labelledby]="'letter-' + group.letter">
+      <h2 class="lexique-group__letter" [id]="'letter-' + group.letter">{{ group.letter }}</h2>
+      <div class="lexique-group__items">
+        @for (item of group.items; track item.id) {
+          <article class="gp-card lexique-term" [attr.aria-labelledby]="'term-' + item.id">
+            <div class="gp-card__body">
+              <h3 class="lexique-term__name" [id]="'term-' + item.id">{{ item.term }}</h3>
+              <p class="lexique-term__definition">{{ item.definition }}</p>
+              @if (item.related.length > 0 || item.guide) {
+                <div class="lexique-term__links">
+                  @if (item.related.length > 0) {
+                    <p class="mb-0">
+                      <span class="lexique-term__label">{{ 'glossary.seeAlso' | t }}</span>
+                      @for (related of item.related; track related.id; let last = $last) {
+                        <a [href]="hrefFor('term-' + related.id)" (click)="goTo($event, 'term-' + related.id)">{{ related.term }}</a>@if (!last) {<span aria-hidden="true">, </span>}
+                      }
+                    </p>
+                  }
+                  @if (item.guide) {
+                    <p class="mb-0">
+                      <a [href]="guideHref(item.guide)">
+                        <i class="bi bi-book" aria-hidden="true"></i>
+                        {{ 'glossary.guideLink' | t }}<span class="visually-hidden"> : {{ item.term }}</span>
+                      </a>
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</div>

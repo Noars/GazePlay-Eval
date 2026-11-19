@@ -1,0 +1,110 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--gp-space-6);
+  align-items: center;
+  padding-block: var(--gp-space-4) var(--gp-space-6);
+
+  @media (max-width: 899.98px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gp-space-5);
+  }
+}
+
+.hero__title {
+  margin-bottom: var(--gp-space-3);
+  font-size: clamp(2rem, 1.5rem + 2.2vw, 3rem);
+  line-height: 1.12;
+}
+
+.hero__lead {
+  max-width: 60ch;
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-lg);
+}
+
+.hero__actions {
+  margin-top: var(--gp-space-5);
+
+  @media (max-width: 479.98px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.resume-card {
+  border-color: var(--gp-primary-subtle-border);
+  box-shadow: var(--gp-shadow-md);
+}
+
+.resume-card__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-2);
+  margin-bottom: var(--gp-space-2);
+  color: var(--gp-primary-text);
+  font-size: var(--gp-text-sm);
+  font-weight: 700;
+}
+
+.resume-card__title {
+  margin-bottom: var(--gp-space-3);
+  font-size: var(--gp-text-xl);
+}
+
+.resume-card__meta {
+  margin-bottom: var(--gp-space-4);
+}
+
+.home-section {
+  margin-top: var(--gp-space-6);
+}
+
+.home-section__title {
+  font-size: var(--gp-text-xl);
+}
+
+.prepare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--gp-space-4) var(--gp-space-6);
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.prepare__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: var(--gp-space-3);
+    align-items: flex-start;
+  }
+
+  .bi {
+    color: var(--gp-primary-text);
+    margin-top: 0.2em;
+  }
+}
+
+.prepare__privacy {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--gp-space-2);
+  margin: 0;
+  padding-top: var(--gp-space-4);
+  border-top: 1px solid var(--gp-border);
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+
+  .bi {
+    color: var(--gp-success);
+  }
+}

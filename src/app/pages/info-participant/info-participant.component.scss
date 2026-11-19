@@ -1,0 +1,87 @@
+.field-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.field-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-2);
+  padding: var(--gp-space-2);
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius-md);
+  background: var(--gp-surface);
+
+  &__handle {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    color: var(--gp-text-muted);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &__input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--gp-space-1);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 479.98px) {
+    flex-wrap: wrap;
+
+    &__input {
+      flex-basis: calc(100% - 2.5rem);
+    }
+
+    &__actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// Aperçu pendant le glisser-déposer (CDK)
+.cdk-drag-preview {
+  box-shadow: var(--gp-shadow-lg);
+  border-color: var(--gp-primary);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.cdk-drag-animating,
+.field-list.cdk-drop-list-dragging .field-item:not(.cdk-drag-placeholder) {
+  transition: transform 200ms ease;
+}
+
+.add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gp-space-3);
+  margin-top: var(--gp-space-4);
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gp-space-1);
+}
+
+.suggestion {
+  border: 1px dashed var(--gp-border-strong);
+}

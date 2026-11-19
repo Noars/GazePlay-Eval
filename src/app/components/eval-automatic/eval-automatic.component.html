@@ -1,24 +1,29 @@
-<div class="d-flex justify-content-center align-items-start bg-light-subtle p-4">
-  <div class="card shadow-lg w-100" style="max-width: 600px;">
-    <div class="card-header text-center">
-      <h3 class="mb-0 fw-semibold">Paramètres globaux évaluation automatique</h3>
+<div class="gp-page gp-page--narrow">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <span class="gp-page-header__eyebrow">{{ 'setup.auto.eyebrow' | t }}</span>
+      <h1 class="gp-page-header__title">{{ 'setup.auto.title' | t }}</h1>
     </div>
-    <div class="card-body">
-      <div class="d-flex justify-content-center align-items-center gap-4">
-        <label class="fw-semibold mb-0">
-          //TODO
-        </label>
-      </div>
-      <div class="d-flex justify-content-center align-items-start mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="startCreateEvalAuto()">
-          Commencer la création automatique de l'évaluation
-        </button>
-      </div>
-      <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-primary fw-semibold" (click)="backToEvalChoice()">
-          ← Retour
-        </button>
-      </div>
+  </header>
+
+  <div class="gp-callout gp-callout--warning">
+    <i class="bi bi-cone-striped" aria-hidden="true"></i>
+    <div class="gp-callout__body">
+      <strong class="gp-callout__title">{{ 'setup.auto.wip.title' | t }}</strong>
+      <p>{{ 'setup.auto.wip.body' | t }}</p>
     </div>
   </div>
+
+  <nav class="gp-actions" [attr.aria-label]="'steps.nav' | t">
+    <button type="button" class="gp-btn gp-btn--ghost" (click)="backToEvalChoice()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'setup.changeMode' | t }}
+    </button>
+    <div class="gp-actions__end">
+      <button type="button" class="gp-btn gp-btn--primary" (click)="startCreateEvalAuto()">
+        {{ 'setup.auto.continue' | t }}
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </nav>
 </div>

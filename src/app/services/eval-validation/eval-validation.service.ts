@@ -8,6 +8,7 @@ import {
   instructionScreenConstKey,
   stimuliScreenConstKey
 } from '../../shared/screenModel';
+import {isSupportedMediaName} from '../../core/media/media-formats';
 
 export type MediaType = 'image' | 'sound' | 'video';
 
@@ -31,6 +32,8 @@ export interface EvalZipReport {
   screenCount: number;
   missingFields: MissingField[];
   missingMedia: MissingMedia[];
+  /** Médias présents ou non, dans un format que GazePlay-Learning refuse. */
+  unsupportedMedia: MissingMedia[];
   referencedMedia: { type: MediaType; fileName: string }[];
   unusedMedia: string[];
   errors: string[];
@@ -41,7 +44,8 @@ export interface EvalZipReport {
  *   1. chaque écran de `evalData.json` possède bien tous ses champs (aucun `undefined`
  *      supprimé par `JSON.stringify`) ;
  *   2. chaque média référencé (vidéo d'instruction, son global, image/son de stimulus)
- *      est effectivement présent dans l'archive (`images/`, `videos/`, `audio/`).
+ *      est effectivement présent dans l'archive (`images/`, `videos/`, `audio/`), et dans un
+ *      format accepté.
  *
  * Aucune dépendance à l'IndexedDB ni au modèle interne : on lit uniquement l'archive,
  * exactement comme le ferait Learning.
@@ -58,7 +62,8 @@ export class EvalValidationService {
   /**
    * Valide une archive d'évaluation.
    * @param zipFile l'archive exportée (.zip ou .gpSave).
-   * @returns un rapport détaillé ; `ok` est vrai si aucun champ ni média ne manque.
+   * @returns un rapport détaillé ; `ok` est vrai si aucun champ ni média ne manque et si tous
+   *          les médias sont dans un format accepté.
    */
   async validateZip(zipFile: File | Blob): Promise<EvalZipReport> {
     const report: EvalZipReport = {
@@ -66,6 +71,7 @@ export class EvalValidationService {
       screenCount: 0,
       missingFields: [],
       missingMedia: [],
+      unsupportedMedia: [],
       referencedMedia: [],
       unusedMedia: [],
       errors: []
@@ -91,6 +97,9 @@ export class EvalValidationService {
 
       for (const ref of this.collectMediaRefs(screen)) {
         report.referencedMedia.push(ref);
+        if (!isSupportedMediaName(ref.fileName, ref.type)) {
+          report.unsupportedMedia.push({ screenIndex: index, type: ref.type, fileName: ref.fileName });
+        }
         const key = `${ref.type}|${ref.fileName}`;
         if (presentMedia.has(key)) {
           usedKeys.add(key);
@@ -104,7 +113,7 @@ export class EvalValidationService {
       if (!usedKeys.has(key)) report.unusedMedia.push(path);
     }
 
-    report.ok = report.missingFields.length === 0 && report.missingMedia.length === 0;
+    report.ok = report.missingFields.length === 0 && report.missingMedia.length === 0 && report.unsupportedMedia.length === 0;
     return report;
   }
 

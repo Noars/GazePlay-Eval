@@ -1,135 +1,100 @@
-<div class="d-flex justify-content-center align-items-center bg-light-subtle p-5">
-  <div class="card shadow-lg w-100" style="max-width: 1100px;">
-    <div class="card-header text-center py-4">
-      <h2 class="card-title text-center mb-0">Mes évaluations</h2>
+<div class="gp-page">
+  <header class="gp-page-header">
+    <div class="gp-page-header__text">
+      <h1 class="gp-page-header__title">{{ 'saves.title' | t }}</h1>
+      <p class="gp-page-header__lead">
+        {{ 'saves.lead.before' | t }}<code>.gpSave</code>{{ 'saves.lead.after' | t }}
+      </p>
     </div>
-    <div class="card-body px-5 py-5" style="text-align: -webkit-center;">
+    <button type="button" class="gp-btn gp-btn--primary" (click)="newEval()">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+      {{ 'saves.new' | t }}
+    </button>
+  </header>
 
-      <!-- Slots -->
-      <div class="row g-5 justify-content-center mb-2 w-100">
-        @for (slot of slots; track slot.index) {
-          <div class="col-md-4">
-
-            @if (slot.data === null) {
-              @let slotAuto = getSlotAuto();
-              @if (slotAuto != null) {
-                <!-- Slot vide + avec saveAuto -->
-                <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
-                  <img class="icon-light slot-empty-icon" src="assets/icons/folder/folder-dark.png" alt="">
-                  <img class="icon-dark slot-empty-icon" src="assets/icons/folder/folder.png" alt="">
-                  <span class="fst-italic text-muted fs-5">Emplacement disponible</span>
-                </div>
-                <div class="d-flex justify-content-center slot-actions">
-                  <button class="btn btn-success fw-semibold w-75" (click)="saveToSlot(slot, slotAuto)">
-                    <img class="icon-light me-1" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark me-1" src="assets/icons/save/save.png" width="16" height="16" alt="">
-                    Sauvegarder
-                  </button>
-                </div>
-
-              } @else {
-                <!-- Slot vide + sans saveAuto -->
-                <div class="slot-card slot-empty d-flex align-items-center justify-content-center">
-                  <img class="icon-light slot-empty-icon" src="assets/icons/folder/folder-dark.png" alt="">
-                  <img class="icon-dark slot-empty-icon" src="assets/icons/folder/folder.png" alt="">
-                  <span class="fst-italic text-muted fs-5">Vide</span>
-                </div>
-                <div class="d-flex justify-content-center slot-actions">
-                  <button class="btn btn-success fw-semibold w-75" disabled>
-                    <img class="icon-light me-1" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark me-1" src="assets/icons/save/save.png" width="16" height="16" alt="">
-                    Sauvegarder
-                  </button>
-                </div>
-              }
-
-            } @else {
-              <!-- Slot rempli -->
-              <div class="card shadow-lg slot-card d-flex align-items-center justify-content-center"
-                   [class.slot-filled]="selectedSlot !== slot.index"
-                   [class.slot-card-selected]="selectedSlot === slot.index"
-                   [class.slot-active]="saveService.activeSlotIndex === slot.index"
-                   (click)="selectSlot(slot.index)">
-                @if (saveService.activeSlotIndex === slot.index) {
-                  <div class="slot-active-badge" [matTooltip]="tooltipCurrentEval" matTooltipClass="custom-tooltip-class" matTooltipPosition="right">EN COURS</div>
-                }
-                <img class="icon-light slot-filled-icon" src="assets/icons/folder/folder-dark.png" alt="">
-                <img class="icon-dark slot-filled-icon" src="assets/icons/folder/folder.png" alt="">
-                <span class="fw-semibold fs-5">{{ slot.data.nomEval || 'Sans nom' }}</span>
-                <span class="slot-meta">Modifié le {{ slot.data.createdAt | date:'dd/MM/yyyy' }}</span>
-              </div>
-
-              @if (selectedSlot === slot.index) {
-                <div class="d-flex justify-content-center slot-actions gap-2">
-                  <button class="btn btn-warning fw-semibold d-flex align-items-center justify-content-center"
-                          matTooltip="Écraser avec l'évaluation en cours"
-                          matTooltipClass="custom-tooltip-class"
-                          matTooltipPosition="above"
-                          (click)="saveToSlot(slot)">
-                    <img class="icon-light" src="assets/icons/save/save-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark" src="assets/icons/save/save.png" width="16" height="16" alt="">
-                  </button>
-                  <button class="btn btn-primary fw-semibold d-flex align-items-center justify-content-center"
-                          matTooltip="Modifier"
-                          matTooltipClass="custom-tooltip-class"
-                          matTooltipPosition="above"
-                          (click)="editSlot(slot.index)">
-                    <img class="icon-light" src="assets/icons/edit-pen/edit-pen-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark" src="assets/icons/edit-pen/edit-pen.png" width="16" height="16" alt="">
-                  </button>
-                  <button class="btn btn-primary fw-semibold d-flex align-items-center justify-content-center"
-                          matTooltip="Télécharger"
-                          matTooltipClass="custom-tooltip-class"
-                          matTooltipPosition="above"
-                          (click)="downloadSlot(slot)">
-                    <img class="icon-light" src="assets/icons/download/download-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark" src="assets/icons/download/download.png" width="16" height="16" alt="">
-                  </button>
-                </div>
-                <div class="d-flex justify-content-center slot-delete">
-                  <button class="btn btn-danger fw-semibold w-75" (click)="openDeletePopup(slot)">
-                    <img class="icon-light me-1" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
-                    <img class="icon-dark me-1" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
-                    Supprimer
-                  </button>
-                </div>
-              } @else {
-                <div class="slot-actions-placeholder"></div>
-                <div class="slot-delete-placeholder"></div>
-              }
-            }
-
-          </div>
-        }
-      </div>
-
-      <!-- Boutons bas de page -->
-      <div class="d-flex justify-content-between w-100 mt-5 pt-3"
-           style="border-top: 1px solid var(--bs-border-color);">
-        <button class="btn btn-primary fw-semibold px-4" (click)="router.navigate(['/home'])">
-          <i class="bi bi-arrow-left me-2"></i>Retour
-        </button>
-
-        @if(this.evalInProgress) {
-          <button class="btn btn-danger fw-semibold px-4" (click)="deleteAutoSave()">
-            <img class="icon-light me-2" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
-            <img class="icon-dark me-2" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
-            Supprimer les modifications en cours
-          </button>
+  <!-- Évaluation en cours -->
+  <section class="gp-card current" aria-labelledby="current-title">
+    <div class="gp-card__body current__body">
+      <div class="current__text">
+        <h2 class="gp-card__title" id="current-title">{{ 'saves.current' | t }}</h2>
+        @if (autoSave) {
+          <p class="mb-1"><strong>{{ autoSave.nomEval || ('home.unnamed' | t) }}</strong>{{ 'saves.modifiedOn' | t: {date: (autoSave.createdAt | date:('saves.dateTimeFormat' | t)) ?? ''} }}</p>
+          @if (hasUnsavedEval) {
+            <p class="current__warning mb-0">
+              <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+              {{ 'saves.unsaved' | t }}
+            </p>
+          } @else if (saveService.activeSlotIndex) {
+            <p class="gp-muted mb-0">{{ 'saves.autoSavedIn' | t: {n: saveService.activeSlotIndex} }}</p>
+          }
         } @else {
-          <button class="btn btn-danger fw-semibold px-4" disabled>
-            <img class="icon-light me-2" src="assets/icons/delete/delete-dark.png" width="16" height="16" alt="">
-            <img class="icon-dark me-2" src="assets/icons/delete/delete.png" width="16" height="16" alt="">
-            Pas de nouvelles modifications
-          </button>
+          <p class="gp-muted mb-0">{{ 'saves.noCurrent' | t }}</p>
         }
-        <button class="btn btn-success fw-semibold px-4" (click)="newEval()">
-          <img class="icon-light me-2" src="assets/icons/plus/plus-dark.png" width="16" height="16" alt="">
-          <img class="icon-dark me-2" src="assets/icons/plus/plus.png" width="16" height="16" alt="">
-          Nouvelle évaluation
-        </button>
       </div>
-
+      <button type="button" class="gp-btn gp-btn--danger-outline" [disabled]="!evalInProgress" (click)="deleteAutoSave()">
+        <i class="bi bi-x-circle" aria-hidden="true"></i>
+        {{ (evalInProgress ? 'saves.discard' : 'saves.noChanges') | t }}
+      </button>
     </div>
-  </div>
+  </section>
+
+  <h2 class="slots-title">{{ 'saves.slots' | t }}</h2>
+  <ul class="slots">
+    @for (slot of slots; track slot.index) {
+      <li class="slot gp-card" [class.slot--empty]="slot.data === null" [class.slot--active]="slot.data && saveService.activeSlotIndex === slot.index">
+        <div class="slot__head">
+          <span class="slot__number" aria-hidden="true">{{ slot.index }}</span>
+          <div class="slot__title-wrap">
+            <h3 class="slot__title gp-truncate">
+              <span class="visually-hidden">{{ 'saves.slotPrefix' | t: {n: slot.index} }}</span>
+              {{ slot.data ? (slot.data.nomEval || ('saves.unnamed' | t)) : ('saves.freeSlot' | t) }}
+            </h3>
+            @if (slot.data) {
+              <p class="slot__meta">
+                {{ 'saves.slotMeta' | t: {date: (slot.data.createdAt | date:('saves.dateFormat' | t)) ?? '', count: slot.data.listScreens.length || 0} }}
+              </p>
+            } @else {
+              <p class="slot__meta">{{ 'saves.slotEmpty' | t }}</p>
+            }
+          </div>
+          @if (slot.data && saveService.activeSlotIndex === slot.index) {
+            <span class="gp-badge gp-badge--primary" [title]="'saves.inProgress.tooltip' | t">{{ 'saves.inProgress' | t }}</span>
+          }
+        </div>
+
+        <div class="slot__actions">
+          @if (slot.data === null) {
+            <button type="button" class="gp-btn gp-btn--secondary gp-btn--block" [disabled]="!autoSave" (click)="saveToSlot(slot, autoSave!)">
+              <i class="bi bi-floppy" aria-hidden="true"></i>
+              {{ 'saves.saveHere' | t }}
+            </button>
+          } @else {
+            <button type="button" class="gp-btn gp-btn--primary" (click)="editSlot(slot.index)">
+              <i class="bi bi-pencil" aria-hidden="true"></i>
+              {{ 'saves.open' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+            </button>
+            <button type="button" class="gp-btn gp-btn--secondary" (click)="downloadSlot(slot)">
+              <i class="bi bi-download" aria-hidden="true"></i>
+              {{ 'saves.download' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+            </button>
+            <button type="button" class="gp-btn gp-btn--block" [disabled]="!autoSave" (click)="saveToSlot(slot)">
+              <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+              {{ 'saves.replace' | t }}
+            </button>
+            <button type="button" class="gp-btn gp-btn--danger-outline" (click)="openDeletePopup(slot)">
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+              {{ 'saves.delete' | t }}<span class="visually-hidden"> {{ slot.data.nomEval }}</span>
+            </button>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  <nav class="gp-actions" [attr.aria-label]="'saves.back' | t">
+    <button type="button" class="gp-btn" (click)="router.navigate(['/home'])">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      {{ 'common.backHome' | t }}
+    </button>
+  </nav>
 </div>

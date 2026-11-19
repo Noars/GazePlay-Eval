@@ -1,21 +1,25 @@
 import {Component} from '@angular/core';
-import { FlashService } from '../../services/flash-message/flash.service';
+import {NgTemplateOutlet} from '@angular/common';
+import {FlashService} from '../../services/flash-message/flash.service';
+import {TranslationKey} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
+/**
+ * Zone d'affichage des notifications temporaires (bas de l'écran).
+ */
 @Component({
   selector: 'app-flash',
+  imports: [NgTemplateOutlet, TranslatePipe],
   templateUrl: './flash.component.html',
-  styleUrl: './flash.component.css'
+  styleUrl: './flash.component.scss'
 })
 export class FlashComponent {
   constructor(public flashService: FlashService) {
   }
 
   /**
-   * Renvoie le nom normalisé du type du flash-message. Cette méthode n'est actuellement pas très
-   * pertinente car les types sont déjà normalisés, mais elle peut servir en cas d'ajout d'autres types,
-   * pour plus de lisibilité.
+   * Renvoie la variante visuelle correspondant au type de notification.
    * @param type le type du flash-message
-   * @return le nom normalisé du type
    */
   mapType(type: string): string {
     const map: Record<string, string> = {
@@ -28,9 +32,8 @@ export class FlashComponent {
   }
 
   /**
-   * Renvoie la description Bootstrap de l'icône en fonction du type de message
+   * Renvoie l'icône Bootstrap Icons correspondant au type de notification.
    * @param type le type du flash-message
-   * @return un icône utilisable par Boostrap
    */
   mapIcon(type: string): string {
     const map: Record<string, string> = {
@@ -40,5 +43,16 @@ export class FlashComponent {
       warning: 'bi-exclamation-triangle'
     };
     return map[type] ?? 'bi-info-circle';
+  }
+
+  /** Préfixe (clé de traduction) lu par les lecteurs d'écran : la couleur seule ne suffit pas à indiquer le type. */
+  mapLabel(type: string): TranslationKey {
+    const map: Record<string, TranslationKey> = {
+      success: 'flash.label.success',
+      error:   'flash.label.error',
+      info:    'flash.label.info',
+      warning: 'flash.label.warning'
+    };
+    return map[type] ?? 'flash.label.info';
   }
 }

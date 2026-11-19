@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { LoadService } from '../../services/load/load.service';
 import { SaveService } from '../../services/save/save.service';
 import { AutoSaveService } from '../../services/auto-save/auto-save.service';
@@ -7,7 +7,9 @@ import { saveModel } from '../../shared/saveModel';
 import { CommonModule } from '@angular/common';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {OverwriteGuardService} from '../../services/overwrite-guard/overwrite-guard.service';
-import {MatTooltip} from '@angular/material/tooltip';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
+import {ExclusiveAction} from '../../shared/exclusive-action';
 
 
 @Component({
@@ -15,12 +17,14 @@ import {MatTooltip} from '@angular/material/tooltip';
   templateUrl: './load-save.component.html',
   styleUrl: './load-save.component.css',
   standalone: true,
-  imports: [CommonModule, MatTooltip]
+  imports: [CommonModule, RouterLink, TranslatePipe]
 })
 export class LoadSaveComponent implements OnInit {
 
   slots: { index: number; data: saveModel | null }[] = [];
-  tooltipCurrentEval: string = "Vous êtes actuellement en train de modifier cette évaluation. Vos modifications sont sauvegardées dans cet emplacement."
+  private readonly i18n = inject(I18nService);
+  /** Un chargement à la fois (un double clic ne le relance pas). */
+  private readonly slotAction = new ExclusiveAction();
 
   constructor(
     private router: Router,
@@ -42,38 +46,47 @@ export class LoadSaveComponent implements OnInit {
 
   /**
    * Charge la sauvegarde d'un slot nommé (1, 2 ou 3) dans le slot de travail (slot 0).
-   * Avertit l'utilisateur si le slot 0 contient une sauvegarde différente qui serait écrasée.
+   * L'évaluation en cours est d'abord protégée : reportée dans son emplacement si elle est liée,
+   * sinon la fenêtre de confirmation s'affiche si elle serait perdue.
    * @param slotIndex index du slot à charger : 1, 2 ou 3
    */
-  async loadSlot(slotIndex: number): Promise<void> {
-    const save = this.loadService.getSlot(slotIndex as FormatTypeConfig);
-    if (!save) return;
+  loadSlot(slotIndex: number): Promise<void> {
+    return this.slotAction.run(() => this.openSlot(slotIndex as FormatTypeConfig));
+  }
 
-    if (!await this.overwriteGuard.check(0, save.nomEval)) return;
+  private async openSlot(index: FormatTypeConfig): Promise<void> {
+    if (!this.loadService.getSlot(index)) return;
+
+    // Emplacement ouvert dans un autre onglet : copie non liée proposée (ou annulation).
+    const opening = await this.overwriteGuard.reserveForOpening(index);
+    if (!opening) return;
+    const reservation = opening.mode === 'link' ? opening.reservation : null;
+
+    if (!await this.overwriteGuard.check(0)) {
+      reservation?.release();
+      return;
+    }
+    // relu après la vérification : l'évaluation en cours vient peut-être d'y être reportée
+    const save = this.loadService.getSlot(index);
+    if (!save) {
+      reservation?.release();
+      return;
+    }
 
     const step = save.step >= 0 ? save.step : 3; // fallback sur create-eval si le step n'a pas été enregistré
-    this.saveService.dataAuto = {
-      nomEval: save.nomEval,
-      format: save.format,
-      infoParticipant: save.infoParticipant,
-      globalParamsTransitionScreen: save.globalParamsTransitionScreen,
-      globalParamsInstructionScreen: save.globalParamsInstructionScreen,
-      globalParamsStimuliScreen: save.globalParamsStimuliScreen,
-      listScreens: save.listScreens,
-      step: step
-    };
-    this.saveService.activeSlotIndex = slotIndex as FormatTypeConfig;
+    this.saveService.loadIntoWorkspace(save, step);
+    this.saveService.setActiveSlot(reservation ? index : null, reservation);
     this.saveService.saveToSlot(0, this.saveService.dataAuto);
     this.autoSaveService.tryResume(true);
   }
 
   /**
-   * Formate une date ISO en date lisible au format français (jj/mm/aaaa).
+   * Formate une date ISO en date lisible dans la langue de l'interface (jj/mm/aaaa en français).
    * @param dateStr date au format ISO 8601
-   * @returns date formatée en français
+   * @returns date formatée
    */
   formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('fr-FR');
+    return new Date(dateStr).toLocaleDateString(this.i18n.language() === 'en' ? 'en-GB' : 'fr-FR');
   }
 
   /**

@@ -1,15 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EvalAutomaticComponent } from './eval-automatic.component';
 import { Router } from '@angular/router';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 describe('EvalAutomaticComponent', () => {
   let component: EvalAutomaticComponent;
   let fixture: ComponentFixture<EvalAutomaticComponent>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let routerSpy: Mocked<Router>;
 
   beforeEach(async () => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    routerSpy = createSpyObj('Router', ['navigate']);
+    routerSpy.navigate.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [EvalAutomaticComponent],
@@ -27,13 +29,13 @@ describe('EvalAutomaticComponent', () => {
 
   it('startCreateEvalAuto → navigue vers /create-eval', () => {
     component.startCreateEvalAuto();
-    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/create-eval']);
+    expect(routerSpy.navigate).toHaveBeenCalledExactlyOnceWith(['/create-eval']);
   });
 
   it('backToEvalChoice → émet selectedModeChange avec null', () => {
-    spyOn(component.selectedModeChange, 'emit');
+    vi.spyOn(component.selectedModeChange, 'emit').mockImplementation(() => undefined);
     component.backToEvalChoice();
-    expect(component.selectedModeChange.emit).toHaveBeenCalledOnceWith(null);
+    expect(component.selectedModeChange.emit).toHaveBeenCalledExactlyOnceWith(null);
   });
 
   it('selectedMode est null par défaut', () => {

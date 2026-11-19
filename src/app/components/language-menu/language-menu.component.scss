@@ -1,0 +1,102 @@
+:host {
+  position: relative;
+  display: inline-flex;
+}
+
+.language-menu__trigger {
+  gap: var(--gp-space-1);
+  font-weight: 700;
+  letter-spacing: max(var(--gp-letter-spacing), 0.02em);
+}
+
+.language-menu__chevron {
+  font-size: 0.75em;
+  transition: transform 0.15s ease;
+}
+
+.language-menu__trigger[aria-expanded='true'] .language-menu__chevron {
+  transform: rotate(180deg);
+}
+
+.language-menu__list {
+  position: absolute;
+  top: calc(100% + var(--gp-space-1));
+  right: 0;
+  z-index: 1010;
+  min-width: 11rem;
+  margin: 0;
+  padding: var(--gp-space-1);
+  list-style: none;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-border-strong);
+  border-radius: var(--gp-radius-md);
+  box-shadow: var(--gp-shadow-lg);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.language-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--gp-space-2);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--gp-space-2) var(--gp-space-3);
+  border: 0;
+  border-radius: var(--gp-radius-sm);
+  background: transparent;
+  color: var(--gp-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gp-surface-2);
+  }
+
+  &[aria-checked='true'] {
+    background: var(--gp-primary-subtle);
+    color: var(--gp-primary-text);
+    font-weight: 700;
+  }
+}
+
+.language-menu__item-code {
+  min-width: 1.75rem;
+  color: var(--gp-text-muted);
+  font-size: var(--gp-text-sm);
+  font-weight: 700;
+}
+
+.language-menu__item-name {
+  flex: 1;
+}
+
+// La coche n'est visible que sur la langue en cours (indice non colorimétrique).
+.language-menu__check {
+  visibility: hidden;
+}
+
+.language-menu__item[aria-checked='true'] .language-menu__check {
+  visibility: visible;
+}
+
+// Sous 480 px, l'icône et le chevron disparaissent : le code de langue suffit.
+@media (max-width: 479.98px) {
+  .language-menu__trigger {
+    min-width: 2.75rem;
+    padding-inline: var(--gp-space-2);
+
+    .bi {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-menu__chevron {
+    transition: none;
+  }
+}

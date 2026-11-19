@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PopupImportSaveComponent } from './popup-import-save.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import type { Mocked } from 'vitest';
+import { createSpyObj } from '../../testing/spy-obj';
 
 const SLOTS_DATA = {
   slots: [
@@ -13,10 +15,10 @@ const SLOTS_DATA = {
 describe('PopupImportSaveComponent', () => {
   let component: PopupImportSaveComponent;
   let fixture: ComponentFixture<PopupImportSaveComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<PopupImportSaveComponent>>;
+  let dialogRefSpy: Mocked<MatDialogRef<PopupImportSaveComponent>>;
 
   beforeEach(async () => {
-    dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+    dialogRefSpy = createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
       imports: [PopupImportSaveComponent],
@@ -41,7 +43,7 @@ describe('PopupImportSaveComponent', () => {
     expect(component.mode).toBeNull();
     expect(component.zipFile).toBeNull();
     expect(component.zipFileName).toBe('');
-    expect(component.isDragging).toBeFalse();
+    expect(component.isDragging).toBe(false);
     expect(component.selectedSlot).toBeNull();
   });
 
@@ -73,24 +75,24 @@ describe('PopupImportSaveComponent', () => {
   // ─── onDragOver ───────────────────────────────────────────────────────────
 
   it('onDragOver → isDragging passe à true et preventDefault appelé', () => {
-    const event = { preventDefault: jasmine.createSpy() } as unknown as DragEvent;
+    const event = { preventDefault: vi.fn() } as unknown as DragEvent;
 
     component.onDragOver(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
-    expect(component.isDragging).toBeTrue();
+    expect(component.isDragging).toBe(true);
   });
 
   // ─── onDragLeave ──────────────────────────────────────────────────────────
 
   it('onDragLeave → isDragging passe à false et preventDefault appelé', () => {
     component.isDragging = true;
-    const event = { preventDefault: jasmine.createSpy() } as unknown as DragEvent;
+    const event = { preventDefault: vi.fn() } as unknown as DragEvent;
 
     component.onDragLeave(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
-    expect(component.isDragging).toBeFalse();
+    expect(component.isDragging).toBe(false);
   });
 
   // ─── onDrop ───────────────────────────────────────────────────────────────
@@ -98,21 +100,21 @@ describe('PopupImportSaveComponent', () => {
   it('onDrop — fichier déposé → isDragging false et zipFile défini', () => {
     const file = new File(['zip'], 'dropped.zip', { type: 'application/zip' });
     const event = {
-      preventDefault: jasmine.createSpy(),
+      preventDefault: vi.fn(),
       dataTransfer: { files: [file] }
     } as unknown as DragEvent;
 
     component.onDrop(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
-    expect(component.isDragging).toBeFalse();
+    expect(component.isDragging).toBe(false);
     expect(component.zipFile).toBe(file);
     expect(component.zipFileName).toBe('dropped.zip');
   });
 
   it('onDrop — pas de fichier dans dataTransfer → zipFile reste null', () => {
     const event = {
-      preventDefault: jasmine.createSpy(),
+      preventDefault: vi.fn(),
       dataTransfer: { files: [] }
     } as unknown as DragEvent;
 
@@ -123,7 +125,7 @@ describe('PopupImportSaveComponent', () => {
 
   it('onDrop — dataTransfer null → zipFile reste null', () => {
     const event = {
-      preventDefault: jasmine.createSpy(),
+      preventDefault: vi.fn(),
       dataTransfer: null
     } as unknown as DragEvent;
 
@@ -137,40 +139,40 @@ describe('PopupImportSaveComponent', () => {
   it('canConfirm — mode null → false', () => {
     component.mode = null;
     component.zipFile = new File([''], 'f.zip');
-    expect(component.canConfirm()).toBeFalse();
+    expect(component.canConfirm()).toBe(false);
   });
 
   it('canConfirm — zipFile null → false', () => {
     component.mode = 'consult';
     component.zipFile = null;
-    expect(component.canConfirm()).toBeFalse();
+    expect(component.canConfirm()).toBe(false);
   });
 
   it('canConfirm — mode consult avec fichier → true', () => {
     component.mode = 'consult';
     component.zipFile = new File([''], 'f.zip');
-    expect(component.canConfirm()).toBeTrue();
+    expect(component.canConfirm()).toBe(true);
   });
 
   it('canConfirm — mode save avec fichier mais sans slot → false', () => {
     component.mode = 'save';
     component.zipFile = new File([''], 'f.zip');
     component.selectedSlot = null;
-    expect(component.canConfirm()).toBeFalse();
+    expect(component.canConfirm()).toBe(false);
   });
 
   it('canConfirm — mode save avec fichier et slot → true', () => {
     component.mode = 'save';
     component.zipFile = new File([''], 'f.zip');
     component.selectedSlot = 1;
-    expect(component.canConfirm()).toBeTrue();
+    expect(component.canConfirm()).toBe(true);
   });
 
   // ─── cancel ───────────────────────────────────────────────────────────────
 
   it('cancel → dialogRef.close(null)', () => {
     component.cancel();
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith(null);
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith(null);
   });
 
   // ─── confirm ──────────────────────────────────────────────────────────────
@@ -189,7 +191,7 @@ describe('PopupImportSaveComponent', () => {
 
     component.confirm();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith({
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith({
       zipFile: file,
       slotIndex: null,
       mode: 'consult'
@@ -204,7 +206,7 @@ describe('PopupImportSaveComponent', () => {
 
     component.confirm();
 
-    expect(dialogRefSpy.close).toHaveBeenCalledOnceWith({
+    expect(dialogRefSpy.close).toHaveBeenCalledExactlyOnceWith({
       zipFile: file,
       slotIndex: 2,
       mode: 'save'

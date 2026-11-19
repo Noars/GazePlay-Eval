@@ -3,4 +3,5 @@ export interface Flash {
   message: string;
   type: 'success' | 'error' | 'info' | 'warning'; // le type influe sur la couleur et l'icône du flash-message
   fadingOut?: boolean;
+  persistent?: boolean; // reste affiché jusqu'à sa fermeture par l'utilisateur
 }

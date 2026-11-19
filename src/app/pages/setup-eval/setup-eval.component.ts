@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import {Router} from '@angular/router';
-import { NgOptimizedImage } from '@angular/common';
 import {EvalManualComponent} from '../../components/eval-manual/eval-manual.component';
 import {EvalAutomaticComponent} from '../../components/eval-automatic/eval-automatic.component';
 import {evalModeModel} from '../../shared/screenModel';
+import {TranslatePipe} from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-setup-eval',
-  imports: [NgOptimizedImage, EvalManualComponent, EvalAutomaticComponent],
+  imports: [EvalManualComponent, EvalAutomaticComponent, TranslatePipe],
   templateUrl: './setup-eval.component.html',
   standalone: true,
   styleUrl: './setup-eval.component.css'

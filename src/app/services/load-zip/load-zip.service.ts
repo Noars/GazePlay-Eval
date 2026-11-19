@@ -9,6 +9,15 @@ import {
 } from '../../shared/screenModel';
 import {FormatTypeConfig} from '../../shared/dataBaseConfig';
 import {IndexedDBService} from '../indexedDB/indexed-db.service';
+import {saveModelDefault} from '../../shared/saveModel';
+
+/** Archive qui ne contient pas d'évaluation lisible (rien n'est importé). */
+export class InvalidEvaluationArchiveError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidEvaluationArchiveError';
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class LoadZipService {
@@ -23,13 +32,18 @@ export class LoadZipService {
    * Reconstruit les écrans depuis evalData.json, les métadonnées depuis evalInfo.json,
    * et stocke tous les fichiers médias (images, audio, vidéos) dans l'IDB.
    *
+   * L'archive est entièrement validée avant toute écriture : sans `evalData.json` lisible
+   * (tableau d'écrans de types connus), l'import échoue sans rien modifier, au lieu de
+   * produire une évaluation vide présentée comme importée.
+   *
    * @param zipFile Fichier ZIP exporté par l'application
+   * @throws InvalidEvaluationArchiveError si l'archive ne contient pas d'évaluation lisible
    */
   async loadZip(zipFile: File): Promise<void> {
 
     const zip = await JSZip.loadAsync(zipFile);
 
-    let evalData: any[] = [];
+    let evalData: unknown = undefined;
     let evalInfo: any = {};
     const mediaEntries: { path: string; zipEntry: JSZip.JSZipObject }[] = [];
     const jsonPromises: Promise<void>[] = [];
@@ -57,7 +71,8 @@ export class LoadZipService {
             try {
               evalData = JSON.parse(content);
             } catch (e) {
-              console.warn('evalData.json ignoré (contenu invalide) :', relativePath, e);
+              console.warn('evalData.json illisible :', relativePath, e);
+              evalData = null;
             }
           })
         );
@@ -70,12 +85,23 @@ export class LoadZipService {
 
     await Promise.all(jsonPromises);
 
+    if (!Array.isArray(evalData)) {
+      throw new InvalidEvaluationArchiveError(evalData === undefined
+        ? 'Archive sans evalData.json'
+        : "evalData.json illisible (tableau d'écrans attendu)");
+    }
+    if (!evalInfo || typeof evalInfo !== 'object' || Array.isArray(evalInfo)) {
+      evalInfo = {};
+    }
+
     const evalName: string = evalInfo["Nom de l'évaluation"] ?? 'GazePlayEvalDefaultName';
 
-    // Stockage des médias dans l'IDB
-    await this.storeMediaInIDB(mediaEntries, evalName);
-
+    // Reconstruit (et valide) les écrans AVANT d'écrire le moindre média.
     const listScreens = this.rebuildScreens(evalData, evalName);
+
+    // Stockage des médias dans l'IDB, puis report des identifiants qui ont dû changer.
+    const renamedIds = await this.storeMediaInIDB(mediaEntries, evalName);
+    this.applyRenamedIds(listScreens, renamedIds);
 
     const globalTransition  = this.parseGlobalTransitionParams(evalInfo['globalParamsTransitionScreen'])
                               ?? this.saveService.dataAuto.globalParamsTransitionScreen;
@@ -86,10 +112,11 @@ export class LoadZipService {
 
     const step = this.saveService.dataAuto.step;
 
+    // Champs absents d'un fichier incomplet : valeurs par défaut plutôt que `undefined`.
     this.saveService.saveDataAuto(
       evalName,
-      evalInfo["Format choisi"],
-      evalInfo["Informations participant"],
+      evalInfo["Format choisi"] ?? saveModelDefault.format,
+      Array.isArray(evalInfo["Informations participant"]) ? evalInfo["Informations participant"] : [],
       globalTransition,
       globalInstruction,
       globalStimuli,
@@ -102,11 +129,19 @@ export class LoadZipService {
    * Extrait les fichiers médias du ZIP et les stocke dans l'IDB.
    * La clé IDB est `{evalName}/{fileName}`.
    * Le type est déduit du dossier : images/ → image, audio/ → sound, videos/ → video.
+   *
+   * Si cette clé est déjà prise par un média **différent** (évaluation homonyme déjà
+   * enregistrée, ou ancienne version de la même évaluation encore utilisée ailleurs), il
+   * n'est jamais remplacé : le média importé reçoit une clé libre `{evalName}/{nom}-N.{ext}`
+   * (même convention que `MediaLibraryService.storeAsNew`). Un média identique est réutilisé.
+   *
+   * @returns les clés qui diffèrent de `{evalName}/{fileName}`, indexées par cette clé.
    */
   private async storeMediaInIDB(
     mediaEntries: { path: string; zipEntry: JSZip.JSZipObject }[],
     evalName: string
-  ): Promise<void> {
+  ): Promise<Map<string, string>> {
+    const renamed = new Map<string, string>();
     for (const { path, zipEntry } of mediaEntries) {
       const fileName = path.split('/').pop();
       if (!fileName) continue;
@@ -117,11 +152,56 @@ export class LoadZipService {
 
       const blob = await zipEntry.async('blob');
       const idbId = `${evalName}/${fileName}`;
+      const storedId = await this.storeWithoutOverwriting(idbId, blob, type);
+      if (storedId !== idbId) renamed.set(idbId, storedId);
+    }
+    return renamed;
+  }
 
+  /** Enregistre un média sous `id`, ou sous la première variante libre (ou au contenu identique). */
+  private async storeWithoutOverwriting(id: string, blob: Blob, type: 'image' | 'sound' | 'video'): Promise<string> {
+    const slash = id.lastIndexOf('/');
+    const prefix = id.slice(0, slash + 1);
+    const name = id.slice(slash + 1);
+    const dot = name.lastIndexOf('.');
+    const base = dot > 0 ? name.slice(0, dot) : name;
+    const extension = dot > 0 ? name.slice(dot) : '';
+
+    for (let attempt = 0; attempt < 1000; attempt++) {
+      const candidate = attempt === 0 ? id : `${prefix}${base}-${attempt}${extension}`;
       try {
-        await this.idbService.addFile(idbId, blob, type);
+        await this.idbService.addFile(candidate, blob, type);
+        return candidate;
       } catch {
-        await this.idbService.updateFile(idbId, blob, type);
+        // clé déjà prise : même contenu → réutilisé, sinon variante suivante
+      }
+      let existing: Blob | null;
+      try {
+        existing = (await this.idbService.getFile(candidate)).file;
+      } catch {
+        // ajout refusé alors que la clé semble libre : écriture directe, comme auparavant
+        await this.idbService.updateFile(candidate, blob, type);
+        return candidate;
+      }
+      if (await sameContent(existing, blob)) return candidate;
+    }
+    throw new Error(`Impossible d'enregistrer « ${name} » : trop de médias portent ce nom.`);
+  }
+
+  /** Remplace, dans les écrans importés, les clés IDB des médias enregistrés sous une autre clé. */
+  private applyRenamedIds(screens: screenTypeModel[], renamed: Map<string, string>): void {
+    if (renamed.size === 0) return;
+    const remap = (id: unknown) => typeof id === 'string' ? renamed.get(id) ?? id : id;
+    for (const screen of screens) {
+      if (screen.type === instructionScreenConstModel) {
+        screen.values[8] = remap(screen.values[8]);
+      } else if (screen.type === stimuliScreenConstModel) {
+        screen.values[13] = remap(screen.values[13]);
+        for (const cell of Object.values(screen.values[12] ?? {}) as any[]) {
+          if (!cell || typeof cell !== 'object') continue;
+          cell.imageId = remap(cell.imageId);
+          cell.soundId = remap(cell.soundId);
+        }
       }
     }
   }
@@ -193,7 +273,8 @@ export class LoadZipService {
 
         case instructionScreenConstModel: {
           const fileName: string = item["Lien du fichier"] ?? item["Nom du fichier"] ?? '';
-          const idbId = fileName ? `${evalName}/${fileName}` : '';
+          // Pour une consigne « Texte », [4] contient le texte : aucun média à référencer.
+          const idbId = fileName && item["Type de media"] !== 'Texte' ? `${evalName}/${fileName}` : '';
           return {
             name: item['Name'] ?? 'Ecran ' + (index + 1),
             type: instructionScreenConstModel,
@@ -218,6 +299,7 @@ export class LoadZipService {
           const stimuliList = item["Liste des stimuli"] ?? {};
           for (const key in stimuliList) {
             const cell = stimuliList[key];
+            if (!cell || typeof cell !== 'object') continue;
             if (cell.imageName) cell.imageId = `${evalName}/${cell.imageName}`;
             if (cell.soundName) cell.soundId  = `${evalName}/${cell.soundName}`;
           }
@@ -261,4 +343,16 @@ export class LoadZipService {
     await this.loadZip(zipFile);
     this.saveService.saveToSlot(slotIndex, this.saveService.dataAuto);
   }
+}
+
+/** Vrai si les deux fichiers ont exactement le même contenu. */
+async function sameContent(a: Blob | null | undefined, b: Blob): Promise<boolean> {
+  if (!(a instanceof Blob) || a.size !== b.size) return false;
+  const [left, right] = await Promise.all([a.arrayBuffer(), b.arrayBuffer()]);
+  const x = new Uint8Array(left);
+  const y = new Uint8Array(right);
+  for (let i = 0; i < x.length; i++) {
+    if (x[i] !== y[i]) return false;
+  }
+  return true;
 }

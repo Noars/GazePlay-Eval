@@ -1,14 +1,18 @@
 import {RouterLink} from '@angular/router';
-import {Component, Input, OnChanges} from '@angular/core';
+import {GuideTocComponent} from '../guide-toc/guide-toc.component';
+import {Component, inject, Input, OnChanges} from '@angular/core';
+import {I18nService} from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-guide-creation',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, GuideTocComponent],
   templateUrl: './guide-creation.component.html',
   styleUrl: '../guide.component.css'
 })
 export class GuideCreationComponent implements OnChanges {
+  /** Langue affichée : choisit la version du texte du guide. */
+  protected readonly language = inject(I18nService).language;
 
   @Input() sectionId: string = '';
 

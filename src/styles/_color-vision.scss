@@ -1,0 +1,105 @@
+// =============================================================================
+// Mode daltonisme : indices complémentaires de la couleur
+// -----------------------------------------------------------------------------
+// Activé par la préférence `colorBlindMode` (attribut `data-color-blind="true"`
+// posé sur <html> par `core/preferences/preferences-dom.ts`).
+//
+// Les jetons de `_tokens.scss` rendent les états distinguables ; ce fichier
+// garantit en plus que la couleur n'est jamais le seul porteur d'information
+// (WCAG 1.4.1) : symboles, motifs de bordure et soulignements. Les composants
+// dont les états sont propres (grille de l'éditeur, étapes, notifications)
+// ajoutent leurs indices dans leur propre feuille via
+// `:host-context([data-color-blind="true"])`.
+//
+// Les symboles ajoutés en CSS utilisent `content: "…" / ""` : le texte de
+// remplacement vide évite qu'ils soient lus par les lecteurs d'écran (l'état est
+// déjà annoncé par le texte du composant). La première déclaration sert de repli
+// aux navigateurs qui ne connaissent pas cette syntaxe.
+// =============================================================================
+
+@use 'selectors' as *;
+
+$cvd: '[data-color-blind="true"]';
+
+@mixin symbol($char) {
+  content: $char;
+  content: $char / "";
+}
+
+#{$cvd} {
+  // --- Éléments interactifs ≠ texte informatif -----------------------------------
+  // Les liens de texte ne se distinguent du texte courant que par leur couleur :
+  // on les souligne (mêmes exclusions que le mode contraste renforcé).
+  #{$text-link} {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  // --- Encadrés : bande latérale dont le motif dépend de la gravité ----------------
+  // réussite/information = trait plein, avertissement = tirets, erreur = double trait.
+  .gp-callout {
+    border-left-width: 5px;
+    border-left-color: var(--gp-callout-icon);
+  }
+
+  .gp-callout--warning {
+    border-left-style: dashed;
+  }
+
+  .gp-callout--danger {
+    border-left-style: double;
+    border-left-width: 7px;
+  }
+
+  // --- Badges d'état : symbole avant le texte ------------------------------------
+  .gp-badge--success::before { @include symbol("✓"); }
+  .gp-badge--warning::before { @include symbol("!"); }
+  .gp-badge--danger::before { @include symbol("✕"); }
+
+  .gp-badge--success,
+  .gp-badge--warning,
+  .gp-badge--danger {
+    &::before {
+      font-weight: 800;
+    }
+  }
+
+  // --- Sélection : coche visible en plus de la couleur ---------------------------
+  .gp-segmented__input:checked + .gp-segmented__label {
+    box-shadow: var(--gp-shadow-sm), inset 0 0 0 2px var(--gp-primary);
+
+    &::before {
+      @include symbol("✓");
+      font-weight: 800;
+    }
+  }
+
+  .gp-choice__input:checked + .gp-choice__body {
+    box-shadow: inset 0 0 0 2px var(--gp-primary);
+
+    .gp-choice__title::after {
+      @include symbol("✓");
+      margin-left: auto;
+      color: var(--gp-primary-text);
+      font-weight: 800;
+    }
+  }
+
+  // --- Désactivation : bordure en tirets (l'opacité seule est peu perceptible) ----
+  .gp-btn:disabled,
+  .gp-btn[aria-disabled="true"],
+  .form-control:disabled,
+  .form-select:disabled {
+    border-style: dashed;
+    border-color: var(--gp-border-strong);
+  }
+
+  // --- Champ en erreur : bordure épaissie, pas seulement rouge --------------------
+  .form-control,
+  .form-select {
+    &[aria-invalid="true"],
+    &.is-invalid {
+      border-width: 2px;
+    }
+  }
+}

@@ -25,9 +25,9 @@ describe('IconGuidePopupComponent', () => {
     fixture.detectChanges();
 
     component.openGuide();
-    expect(component.isGuideOpen).toBeTrue();
+    expect(component.isGuideOpen).toBe(true);
 
     component.closeGuide();
-    expect(component.isGuideOpen).toBeFalse();
+    expect(component.isGuideOpen).toBe(false);
   });
 });

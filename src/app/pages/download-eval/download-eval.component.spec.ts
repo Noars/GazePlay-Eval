@@ -1,35 +1,58 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DownloadEvalComponent } from './download-eval.component';
-import { SaveService } from '../../services/save/save.service';
-import { DownloadService } from '../../services/download/download.service';
-import { Router } from '@angular/router';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
+import {DownloadEvalComponent} from './download-eval.component';
+import {SaveService} from '../../services/save/save.service';
+import {DownloadService} from '../../services/download/download.service';
+import {FlashService} from '../../services/flash-message/flash.service';
+import {ConfirmService} from '../../shared/ui/confirm-dialog/confirm-dialog.component';
+import type {Mocked} from 'vitest';
+import {createSpyObj} from '../../testing/spy-obj';
 
 describe('DownloadEvalComponent', () => {
   let component: DownloadEvalComponent;
   let fixture: ComponentFixture<DownloadEvalComponent>;
-  let downloadSpy: jasmine.SpyObj<DownloadService>;
-  let saveSpy: jasmine.SpyObj<SaveService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let downloadSpy: Mocked<DownloadService>;
+  let saveSpy: Mocked<SaveService>;
+  let routerSpy: Mocked<Router>;
+  let flashSpy: Mocked<FlashService>;
+  let confirmSpy: Mocked<ConfirmService>;
+
+  function stimuliScreen(cells: Record<number, any>, values: Record<number, any> = {}) {
+    const v: any[] = [1, 1, false, 10, 1, 'Tout', 1, false, false, false, '', undefined, cells, ''];
+    Object.entries(values).forEach(([i, value]) => v[Number(i)] = value);
+    return {name: 'Grille', type: 'stimuli', values: v} as any;
+  }
 
   beforeEach(async () => {
-    downloadSpy = jasmine.createSpyObj('DownloadService', ['generateEvalZip', 'generateSlotZip']);
-    saveSpy    = jasmine.createSpyObj('SaveService',  ['getEvalName']);
-    routerSpy  = jasmine.createSpyObj('Router', ['navigate']);
+    downloadSpy = createSpyObj('DownloadService', ['generateEvalZip', 'generateSlotZip']);
+    saveSpy = createSpyObj('SaveService', ['getEvalName']);
+    saveSpy.dataAuto = {
+      nomEval: 'Couleurs', format: 'Csv&Xlsx', infoParticipant: ['Nom', ' '],
+      globalParamsTransitionScreen: [], globalParamsInstructionScreen: [], globalParamsStimuliScreen: [],
+      listScreens: [], step: 4,
+    };
+    saveSpy.getEvalName.mockReturnValue('Couleurs');
+    routerSpy = createSpyObj('Router', ['navigate']);
+    flashSpy = createSpyObj('FlashService', ['show']);
+    confirmSpy = createSpyObj('ConfirmService', ['confirm']);
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(true));
 
-    downloadSpy.generateEvalZip.and.returnValue(Promise.resolve());
-    downloadSpy.generateSlotZip.and.returnValue(Promise.resolve());
-    routerSpy.navigate.and.returnValue(Promise.resolve(true));
+    downloadSpy.generateEvalZip.mockReturnValue(Promise.resolve());
+    downloadSpy.generateSlotZip.mockReturnValue(Promise.resolve(true));
+    routerSpy.navigate.mockReturnValue(Promise.resolve(true));
 
     await TestBed.configureTestingModule({
       imports: [DownloadEvalComponent],
       providers: [
-        { provide: DownloadService, useValue: downloadSpy },
-        { provide: SaveService,     useValue: saveSpy },
-        { provide: Router,          useValue: routerSpy }
+        {provide: DownloadService, useValue: downloadSpy},
+        {provide: SaveService, useValue: saveSpy},
+        {provide: Router, useValue: routerSpy},
+        {provide: FlashService, useValue: flashSpy},
+        {provide: ConfirmService, useValue: confirmSpy},
       ]
     }).compileComponents();
 
-    fixture   = TestBed.createComponent(DownloadEvalComponent);
+    fixture = TestBed.createComponent(DownloadEvalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -38,20 +61,173 @@ describe('DownloadEvalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('goDownload → appelle generateSlotZip avec le saveService', () => {
-    component.goDownload();
-    expect(downloadSpy.generateSlotZip).toHaveBeenCalledOnceWith(
-      jasmine.objectContaining({ createdAt: jasmine.any(String), version: 1 })
-    );
+  it('récapitulatif → nom, format lisible et champs participant non vides', () => {
+    expect(component.evalName).toBe('Couleurs');
+    expect(component.format).toBe('CSV et XLSX');
+    expect(component.participantFields).toStrictEqual(['Nom']);
   });
 
-  it('goExport → appelle generateEvalZip avec le saveService', () => {
-    component.goExport();
-    expect(downloadSpy.generateEvalZip).toHaveBeenCalledOnceWith(saveSpy as any);
+  it('goDownload → generateSlotZip avec createdAt et version, puis message de succès', async () => {
+    await component.goDownload();
+    expect(downloadSpy.generateSlotZip).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({nomEval: 'Couleurs', createdAt: expect.any(String), version: 1})
+    );
+    expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
+    expect(component.busy).toBeNull();
+  });
+
+  it('goDownload — échec signalé → message d\'erreur', async () => {
+    downloadSpy.generateSlotZip.mockReturnValue(Promise.resolve(false));
+    await component.goDownload();
+    expect(flashSpy.show).toHaveBeenCalledWith('error', expect.any(String));
+  });
+
+  it('goExport → generateEvalZip avec le SaveService', async () => {
+    await component.goExport();
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledExactlyOnceWith(saveSpy as any);
+    expect(flashSpy.show).toHaveBeenCalledWith('success', expect.any(String));
+  });
+
+  it('goExport — erreur → message d\'erreur et boutons réactivés', async () => {
+    downloadSpy.generateEvalZip.mockReturnValue(Promise.reject(new Error('média manquant')));
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await component.goExport();
+    expect(flashSpy.show).toHaveBeenCalledWith('error', expect.any(String));
+    expect(component.busy).toBeNull();
+  });
+
+  it('goExport — un export déjà en cours → second clic ignoré', async () => {
+    let resolveExport!: () => void;
+    downloadSpy.generateEvalZip.mockReturnValue(new Promise<void>(resolve => resolveExport = resolve));
+
+    const first = component.goExport();
+    await component.goExport();
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+
+    resolveExport();
+    await first;
+  });
+
+  // ─── Médias incompatibles ───────────────────────────────────────────────────
+
+  function withUnsupportedImage(): void {
+    saveSpy.dataAuto.listScreens = [stimuliScreen({0: {imageName: 'papillon.svg', soundName: '', hidden: false}})];
+    component.ngOnInit();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+  }
+
+  it('média incompatible → fichiers listés en avertissement, boutons .zip et .gpSave disponibles', () => {
+    withUnsupportedImage();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('#export-unsupported')?.textContent).toContain('« Grille » : papillon.svg');
+    expect(el.querySelector('#export-unsupported')?.classList).toContain('gp-callout--warning');
+    const exportButton = el.querySelector<HTMLButtonElement>('.gp-btn--primary.gp-btn--block')!;
+    const backupButton = el.querySelector<HTMLButtonElement>('.gp-btn--secondary.gp-btn--block')!;
+    expect(exportButton.disabled).toBe(false);
+    expect(exportButton.getAttribute('aria-describedby')).toBe('export-unsupported');
+    expect(backupButton.disabled).toBe(false);
+    expect(el.querySelector('.gp-callout--success')).toBeNull();
+  });
+
+  it('média incompatible → export .zip après confirmation, fichiers cités dans la question', async () => {
+    withUnsupportedImage();
+
+    await component.goExport();
+
+    expect(confirmSpy.confirm).toHaveBeenCalledTimes(1);
+    const data = confirmSpy.confirm.mock.calls[0][0];
+    expect(data.tone).toBe('warning');
+    expect((data.message as string[]).join(' ')).toContain('papillon.svg');
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('média incompatible → confirmation refusée : aucun export, boutons réactivés', async () => {
+    withUnsupportedImage();
+    confirmSpy.confirm.mockReturnValue(Promise.resolve(false));
+
+    await component.goExport();
+
+    expect(downloadSpy.generateEvalZip).not.toHaveBeenCalled();
+    expect(component.busy).toBeNull();
+  });
+
+  it('média incompatible → double clic : une seule fenêtre de confirmation', async () => {
+    withUnsupportedImage();
+    let answer!: (value: boolean) => void;
+    confirmSpy.confirm.mockReturnValue(new Promise<boolean>(resolve => answer = resolve));
+
+    const first = component.goExport();
+    await component.goExport();
+    answer(true);
+    await first;
+
+    expect(confirmSpy.confirm).toHaveBeenCalledTimes(1);
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('média incompatible → le .gpSave se télécharge sans confirmation', async () => {
+    withUnsupportedImage();
+
+    await component.goDownload();
+
+    expect(confirmSpy.confirm).not.toHaveBeenCalled();
+    expect(downloadSpy.generateSlotZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('sans média incompatible → export .zip direct, sans confirmation', async () => {
+    await component.goExport();
+
+    expect(confirmSpy.confirm).not.toHaveBeenCalled();
+    expect(downloadSpy.generateEvalZip).toHaveBeenCalledTimes(1);
+  });
+
+  it('écran sans nom → le fichier incompatible est rattaché au numéro de l\'écran', () => {
+    expect(component.unsupportedLabel({screenIndex: 2, screenName: '', type: 'image', fileName: 'a.svg'}))
+      .toBe('« Écran 3 » : a.svg');
   });
 
   it('backToCreateEval → navigue vers /create-eval', () => {
     component.backToCreateEval();
-    expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/create-eval']);
+    expect(routerSpy.navigate).toHaveBeenCalledExactlyOnceWith(['/create-eval']);
+  });
+
+  // ─── Vérifications avant export ─────────────────────────────────────────────
+
+  it('computeChecks — aucune écran → avertissement', () => {
+    expect(component.computeChecks([]).map(c => c.message)).toContain('L\'évaluation ne contient aucun écran.');
+  });
+
+  it('computeChecks — instruction avec média activé mais sans fichier → avertissement', () => {
+    const checks = component.computeChecks([
+      {name: 'Consigne', type: 'instruction', values: [true, 1, true, 'Image', '', undefined, false, 1, '']} as any,
+    ]);
+    expect(checks.length).toBe(1);
+    expect(checks[0].message).toContain('Consigne');
+  });
+
+  it('computeChecks — grille sans aucun média, son activé sans fichier → deux avertissements', () => {
+    const checks = component.computeChecks([
+      stimuliScreen({0: {imageName: '', soundName: '', hidden: false}}, {9: true}),
+    ]);
+    expect(checks.length).toBe(2);
+  });
+
+  it('computeChecks — écrans complets → aucune remarque', () => {
+    const checks = component.computeChecks([
+      stimuliScreen({0: {imageName: 'chat.png', soundName: '', hidden: false}}),
+      {name: 'Pause', type: 'transition', values: [true, 2, false, false, 0]} as any,
+    ]);
+    expect(checks).toStrictEqual([]);
+  });
+
+  it('screenCounts → compte les écrans par type', () => {
+    saveSpy.dataAuto.listScreens = [
+      stimuliScreen({}),
+      {name: 'Pause', type: 'transition', values: []} as any,
+      {name: 'Consigne', type: 'instruction', values: []} as any,
+    ];
+    expect(component.screenCounts).toStrictEqual({transition: 1, instruction: 1, stimuli: 1, total: 3});
   });
 });

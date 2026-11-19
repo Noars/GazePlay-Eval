@@ -22,63 +22,56 @@ describe('GuideCreationComponent', () => {
   });
 
   it('ne devrait pas scroller si sectionId est vide', () => {
-    const scrollSpy = spyOn(document, 'getElementById').and.returnValue(null);
+    const scrollSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
     component.sectionId = '';
     component.ngOnChanges();
 
     expect(scrollSpy).not.toHaveBeenCalled();
   });
 
-  // done() est utilisé pour marquer la fin des tests asynchrones
-  it('ne devrait pas scroller si l\'élément cible n\'existe pas', (done) => {
-    spyOn(document, 'getElementById').and.returnValue(null);
+  it('ne devrait pas scroller si l\'élément cible n\'existe pas', async () => {
+    vi.spyOn(document, 'getElementById').mockReturnValue(null);
     component.sectionId = 'section-inexistante';
     component.ngOnChanges();
 
-    setTimeout(() => {
-      expect(document.getElementById).toHaveBeenCalledWith('section-inexistante');
-      done();
-    }, 400);
+    await new Promise(resolve => setTimeout(resolve, 400));
+    expect(document.getElementById).toHaveBeenCalledWith('section-inexistante');
   });
 
-  it('devrait scroller dans le conteneur guide-popup-body si présent', (done) => {
+  it('devrait scroller dans le conteneur guide-popup-body si présent', async () => {
     const mockContainer = document.createElement('div');
     mockContainer.classList.add('guide-popup-body');
-    mockContainer.scrollTo = jasmine.createSpy('scrollTo');
+    mockContainer.scrollTo = vi.fn().mockName('scrollTo');
 
     const mockTarget = document.createElement('div');
     mockTarget.id = 'info-eval';
-    spyOn(mockTarget, 'closest').and.returnValue(mockContainer);
+    vi.spyOn(mockTarget, 'closest').mockReturnValue(mockContainer);
     document.body.appendChild(mockTarget);
 
-    spyOn(document, 'getElementById').and.returnValue(mockTarget);
+    vi.spyOn(document, 'getElementById').mockReturnValue(mockTarget);
 
     component.sectionId = 'info-eval';
     component.ngOnChanges();
 
-    setTimeout(() => {
-      expect(mockContainer.scrollTo).toHaveBeenCalled();
-      document.body.removeChild(mockTarget);
-      done();
-    }, 400);
+    await new Promise(resolve => setTimeout(resolve, 400));
+    expect(mockContainer.scrollTo).toHaveBeenCalled();
+    document.body.removeChild(mockTarget);
   });
 
-  it('devrait utiliser scrollIntoView si pas de conteneur guide-popup-body', (done) => {
+  it('devrait utiliser scrollIntoView si pas de conteneur guide-popup-body', async () => {
     const mockTarget = document.createElement('div');
     mockTarget.id = 'download-eval';
-    mockTarget.scrollIntoView = jasmine.createSpy('scrollIntoView');
-    spyOn(mockTarget, 'closest').and.returnValue(null);
+    mockTarget.scrollIntoView = vi.fn().mockName('scrollIntoView');
+    vi.spyOn(mockTarget, 'closest').mockReturnValue(null);
 
-    spyOn(document, 'getElementById').and.returnValue(mockTarget);
+    vi.spyOn(document, 'getElementById').mockReturnValue(mockTarget);
 
     component.sectionId = 'download-eval';
     component.ngOnChanges();
 
-    setTimeout(() => {
-      expect(mockTarget.scrollIntoView).toHaveBeenCalledWith(
-        jasmine.objectContaining({ behavior: 'smooth' })
-      );
-      done();
-    }, 400);
+    await new Promise(resolve => setTimeout(resolve, 400));
+    expect(mockTarget.scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ behavior: 'smooth' })
+    );
   });
 });
